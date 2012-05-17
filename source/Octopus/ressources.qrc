@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/buttons/toolbar">
+        <file>icons/import.png</file>
+        <file>icons/export.png</file>
+        <file>icons/pause.png</file>
+        <file>icons/play.png</file>
+        <file>icons/add.png</file>
+    </qresource>
+</RCC>
