@@ -12,12 +12,14 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    gui/exampletrack.cpp
+    gui/exampletrack.cpp \
+    gui/presentationarea.cpp
 
 HEADERS  += mainwindow.h \
-    gui/exampletrack.h
+    gui/exampletrack.h \
+    gui/presentationarea.h
 
 FORMS    += mainwindow.ui
 
 RESOURCES += \
-    ressources.qrc
+    resources.qrc

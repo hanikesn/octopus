@@ -18,11 +18,14 @@ signals:
     
 public slots:
 
+    void adjustVisibleRange(int position, int rangeMin, int rangeMax);
+
 private:
     static const QString NORMAL_STYLE;
 
     QLabel *actionArea;
-    
+    QLabel *customPlot;
+
 };
 
 #endif // EXAMPLETRACK_H
