@@ -13,7 +13,7 @@ PresentationArea::PresentationArea(QWidget *parent) :
 
 PresentationArea::~PresentationArea()
 {
-    delete trackLayout;
+
 }
 
 void PresentationArea::addTrack(ExampleTrack *et)

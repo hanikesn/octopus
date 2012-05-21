@@ -1,5 +1,5 @@
 #include "exampletrack.h"
-#include <QLabel>
+
 #include <QSizePolicy>
 #include <QStyleOption>
 #include <QPainter>
@@ -18,19 +18,19 @@ ExampleTrack::ExampleTrack(QWidget *parent) :
     setMaximumHeight(70);
     QHBoxLayout *layout = new QHBoxLayout(this);
 
-    customPlot = new QLabel();
-    customPlot->setStyleSheet(NORMAL_STYLE);
-    customPlot->setMinimumSize(2000, 70);
-    customPlot->setMaximumSize(3000, 70);
-    actionArea = new QLabel();
-    actionArea->setMaximumSize(60, 70);
-    actionArea->setMinimumSize(60, 70);
-    actionArea->setStyleSheet("background-color: #bcbcbc;"
+//    customPlot();
+    customPlot.setStyleSheet(NORMAL_STYLE);
+    customPlot.setMinimumSize(2000, 70);
+    customPlot.setMaximumSize(3000, 70);
+//    actionArea();
+    actionArea.setMaximumSize(60, 70);
+    actionArea.setMinimumSize(60, 70);
+    actionArea.setStyleSheet("background-color: #bcbcbc;"
                               "border-right: 1px solid #ff0000;");
 
 
-    layout->addWidget(actionArea);
-    layout->addWidget(customPlot);
+    layout->addWidget(&actionArea);
+    layout->addWidget(&customPlot);
 
 }
 

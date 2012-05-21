@@ -4,11 +4,10 @@
 #include <QMainWindow>
 #include <QVBoxLayout>
 #include <QAction>
+#include <mainwindow.h>
+#include"ui_mainwindow.h"
 
 
-namespace Ui {
-class MainWindow;
-}
 
 class PresentationArea;
 
@@ -31,7 +30,6 @@ private slots:
     void on_horizontalScrollBar_sliderMoved(int position);
 
 private:
-    Ui::MainWindow *ui;
     QVBoxLayout *trackLayout;
 
     // Actions for toolbar
@@ -42,6 +40,8 @@ private:
 
     // Area for the tracks
     PresentationArea *pa;
+
+    Ui::MainWindow ui;
 
     void setUpToolBar();
 

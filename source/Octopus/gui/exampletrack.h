@@ -2,7 +2,8 @@
 #define EXAMPLETRACK_H
 
 #include <QWidget>
-class QLabel;
+#include <QLabel>
+
 
 class ExampleTrack : public QWidget
 {
@@ -23,8 +24,8 @@ public slots:
 private:
     static const QString NORMAL_STYLE;
 
-    QLabel *actionArea;
-    QLabel *customPlot;
+    QLabel actionArea;
+    QLabel customPlot;
 
 };
 

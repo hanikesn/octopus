@@ -6,23 +6,23 @@
 #include "gui/presentationarea.h"
 
 MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    QMainWindow(parent)
 {
-    ui->setupUi(this);
+    ui.setupUi(this);
     setUpToolBar();
 
-    ui->timeLine->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0, stop: 0 #FFA000, stop: 1 #FF4500);");
-    ui->timeLine->setText("Timeline");
+    ui.timeLine->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0, stop: 0 #FFA000, stop: 1 #FF4500);"
+                                "padding-right: 3px;");
+    ui.timeLine->setText("Timeline");
 
-    pa = new PresentationArea();
-    ui->scrollArea->setWidget(pa);
+//    pa = new PresentationArea();
+//    ui->scrollArea->setWidget(pa);
 //    ui->scrollArea->setStyleSheet("border-top: 0px solid;");
 }
 
 MainWindow::~MainWindow()
 {
-    delete ui;
+
 }
 
 void MainWindow::onAddTrackAction()
@@ -30,8 +30,6 @@ void MainWindow::onAddTrackAction()
     ExampleTrack *et = new ExampleTrack();
     connect(this, SIGNAL(visibleRangeChanged(int,int,int)), et, SLOT(adjustVisibleRange(int,int,int)));
     pa->addTrack(et);
-
-//    trackLayout->addWidget(et);
 }
 
 void MainWindow::onImportAction()
@@ -55,13 +53,13 @@ void MainWindow::onPlayAction()
 void MainWindow::on_horizontalScrollBar_rangeChanged(int min, int max)
 {
 //    qDebug() << "Range changed(min, max):  (" << min << ", " << max << ")";
-    emit visibleRangeChanged(ui->horizontalScrollBar->sliderPosition(), min, max);
+    emit visibleRangeChanged(ui.horizontalScrollBar->sliderPosition(), min, max);
 }
 
 void MainWindow::on_horizontalScrollBar_sliderMoved(int position)
 {
 //    qDebug() << "Slider moved: " << position;
-    emit visibleRangeChanged(position, ui->horizontalScrollBar->minimum(), ui->horizontalScrollBar->maximum());
+    emit visibleRangeChanged(position, ui.horizontalScrollBar->minimum(), ui.horizontalScrollBar->maximum());
 }
 
 void MainWindow::setUpToolBar()
@@ -76,8 +74,8 @@ void MainWindow::setUpToolBar()
     connect(exportAction, SIGNAL(triggered()), this, SLOT(onExportAction()));
     connect(playAction, SIGNAL(triggered()), this, SLOT(onPlayAction()));
 
-    ui->mainToolBar->addAction(addTrackAction);
-    ui->mainToolBar->addAction(importAction);
-    ui->mainToolBar->addAction(exportAction);
-    ui->mainToolBar->addAction(playAction);
+    ui.mainToolBar->addAction(addTrackAction);
+    ui.mainToolBar->addAction(importAction);
+    ui.mainToolBar->addAction(exportAction);
+    ui.mainToolBar->addAction(playAction);
 }
