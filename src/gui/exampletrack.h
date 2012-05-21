@@ -3,6 +3,8 @@
 
 #include <QWidget>
 #include <QLabel>
+#include <QPainter>
+#include <QStyleOption>
 
 
 class ExampleTrack : public QWidget
@@ -11,10 +13,11 @@ class ExampleTrack : public QWidget
 public:
     explicit ExampleTrack(QWidget *parent = 0);
 
-    void paintEvent(QPaintEvent *);
+    /**
+      * Necessary for using stylesheets.
+      */
+    void paintEvent(QPaintEvent *qpe);
 
-    void resizeEvent(QResizeEvent * re);
-    
 signals:
     
 public slots:
@@ -23,6 +26,9 @@ public slots:
 
 private:
     static const QString NORMAL_STYLE;
+
+    QPainter p;
+    QStyleOption opt;
 
     QLabel actionArea;
     QLabel customPlot;

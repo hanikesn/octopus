@@ -2,8 +2,11 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QVBoxLayout>
 #include <QAction>
+#include <QWidget>
+#include <QPushButton>
+#include <QHBoxLayout>
+#include <QSpacerItem>
 #include <mainwindow.h>
 #include"ui_mainwindow.h"
 
@@ -32,18 +35,24 @@ private slots:
 private:
     QVBoxLayout *trackLayout;
 
-    // Actions for toolbar
-    QAction *addTrackAction;
-    QAction *importAction;
-    QAction *exportAction;
-    QAction *playAction;
+    // Buttons and layout for toolbar:
+    QWidget toolBarWidget;
+    QHBoxLayout layout;
+    QPushButton addTrackButton;
+    QPushButton importButton;
+    QPushButton exportButton;
+    QPushButton playButton;
+
+    // Spacer item to center the play button (in the bottomButtonBar)
+    QSpacerItem *spacerLeft;
+    QSpacerItem *spacerRight;
 
     // Area for the tracks
     PresentationArea *pa;
 
     Ui::MainWindow ui;
 
-    void setUpToolBar();
+    void setUpButtonBars();
 
 signals:
     void visibleRangeChanged(int, int, int);

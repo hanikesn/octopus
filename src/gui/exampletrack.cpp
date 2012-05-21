@@ -1,8 +1,6 @@
 #include "exampletrack.h"
 
 #include <QSizePolicy>
-#include <QStyleOption>
-#include <QPainter>
 #include <QDebug>
 #include <QHBoxLayout>
 
@@ -11,10 +9,10 @@ const QString ExampleTrack::NORMAL_STYLE = QString(
             "border 10px solid #ff0000");
 
 
+
 ExampleTrack::ExampleTrack(QWidget *parent) :
     QWidget(parent)
-{
-    //    this->setStyleSheet(NORMAL_STYLE);
+{    
     setMaximumHeight(70);
     QHBoxLayout *layout = new QHBoxLayout(this);
 
@@ -28,28 +26,14 @@ ExampleTrack::ExampleTrack(QWidget *parent) :
     actionArea.setStyleSheet("background-color: #bcbcbc;"
                               "border-right: 1px solid #ff0000;");
 
-
     layout->addWidget(&actionArea);
-    layout->addWidget(&customPlot);
-
+    layout->addWidget(&customPlot);    
 }
 
-void ExampleTrack::paintEvent(QPaintEvent *)
+void ExampleTrack::paintEvent(QPaintEvent *qpe)
 {
-    QStyleOption opt;
-    opt.init(this);
-    QPainter p(this);
+    opt.init(this);    
     style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
-
-    //    qDebug() << "paintEvent";
-
-}
-
-
-void ExampleTrack::resizeEvent(QResizeEvent *re)
-{
-    //    qDebug() << "Resisze Event";
-
 }
 
 void ExampleTrack::adjustVisibleRange(int position, int rangeMin, int rangeMax)

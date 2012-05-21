@@ -1,15 +1,15 @@
 #include "mainwindow.h"
-#include "ui_mainwindow.h"
-#include <QVBoxLayout>
+#include <QWidget>
 #include "gui/exampletrack.h"
-#include <QDebug>
 #include "gui/presentationarea.h"
+
+#include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
 {
     ui.setupUi(this);
-    setUpToolBar();
+    setUpButtonBars();
 
     ui.timeLine->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0, stop: 0 #FFA000, stop: 1 #FF4500);"
                                 "padding-right: 3px;"
@@ -63,20 +63,32 @@ void MainWindow::on_horizontalScrollBar_sliderMoved(int position)
     emit visibleRangeChanged(position, ui.horizontalScrollBar->minimum(), ui.horizontalScrollBar->maximum());
 }
 
-void MainWindow::setUpToolBar()
+void MainWindow::setUpButtonBars()
 {
-    addTrackAction = new QAction(QIcon(":/buttons/toolbar/add.png"), tr("Add Track"), this);
-    importAction = new QAction(QIcon(":/buttons/toolbar/import.png"), tr("Import"), this);
-    exportAction = new QAction(QIcon(":/buttons/toolbar/export.png"), tr("Export"), this);
-    playAction = new QAction(QIcon(":/buttons/toolbar/play.png"), tr("Play"), this);
+    addTrackButton.setIcon(QIcon(":/buttons/toolbar/icons/add.png"));
+    importButton.setIcon(QIcon(":/buttons/toolbar/icons/import.png"));
+    exportButton.setIcon(QIcon(":/buttons/toolbar/icons/export.png"));
+    playButton.setIcon(QIcon(":/buttons/toolbar/icons/play.png"));
 
-    connect(addTrackAction, SIGNAL(triggered()), this, SLOT(onAddTrackAction()));
-    connect(importAction, SIGNAL(triggered()), this, SLOT(onImportAction()));
-    connect(exportAction, SIGNAL(triggered()), this, SLOT(onExportAction()));
-    connect(playAction, SIGNAL(triggered()), this, SLOT(onPlayAction()));
+    // add buttons to the horizontal layout in the toolbar
+    layout.addWidget(&addTrackButton);
+    layout.addWidget(&importButton);
+    layout.addWidget(&exportButton);
 
-    ui.mainToolBar->addAction(addTrackAction);
-    ui.mainToolBar->addAction(importAction);
-    ui.mainToolBar->addAction(exportAction);
-    ui.mainToolBar->addAction(playAction);
+    // buttonBar at the bottom:
+    // set up spacers so they get as much space as possible (button between is then centered)
+    spacerLeft = new QSpacerItem (100, 1, QSizePolicy::MinimumExpanding, QSizePolicy::Maximum);
+    spacerRight = new QSpacerItem (100, 1, QSizePolicy::MinimumExpanding, QSizePolicy::Maximum);
+    ui.bottomButtonBar->addSpacerItem(spacerLeft);
+    ui.bottomButtonBar->addWidget(&playButton);
+    ui.bottomButtonBar->addSpacerItem(spacerRight);
+
+    toolBarWidget.setLayout(&layout);
+
+    connect(&addTrackButton, SIGNAL(clicked()), this, SLOT(onAddTrackAction()));
+    connect(&importButton, SIGNAL(clicked()), this, SLOT(onImportAction()));
+    connect(&exportButton, SIGNAL(clicked()), this, SLOT(onExportAction()));
+    connect(&playButton, SIGNAL(clicked()), this, SLOT(onPlayAction()));
+
+    ui.mainToolBar->addWidget(&toolBarWidget);
 }
