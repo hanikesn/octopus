@@ -12,11 +12,12 @@ MainWindow::MainWindow(QWidget *parent) :
     setUpToolBar();
 
     ui.timeLine->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0, stop: 0 #FFA000, stop: 1 #FF4500);"
-                                "padding-right: 3px;");
+                                "padding-right: 3px;"
+                                "padding-left: 10px;");
     ui.timeLine->setText("Timeline");
 
-//    pa = new PresentationArea();
-//    ui->scrollArea->setWidget(pa);
+    pa = new PresentationArea();
+    ui.scrollArea->setWidget(pa);
 //    ui->scrollArea->setStyleSheet("border-top: 0px solid;");
 }
 
