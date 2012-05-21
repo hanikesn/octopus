@@ -1,0 +1,5 @@
+# build stuff
+*-build-desktop*
+
+# Qt Creator files
+*.txt.user
