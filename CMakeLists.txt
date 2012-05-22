@@ -8,11 +8,13 @@ SET(Octopus_SOURCES
   src/mainwindow.cpp
   src/gui/exampletrack.cpp
   src/gui/presentationarea.cpp
+  src/gui/timeline.cpp
 )
 SET(Octopus_HEADERS
   src/mainwindow.h
   src/gui/exampletrack.h
   src/gui/presentationarea.h
+  src/gui/timeline.h
 )
 SET(Octopus_FORMS
   ui/mainwindow.ui

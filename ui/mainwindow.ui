@@ -63,9 +63,9 @@
          </spacer>
         </item>
         <item>
-         <widget class="QLabel" name="timeLine">
+         <widget class="TimeLine" name="timeLine">
           <property name="text">
-           <string>TextLabel</string>
+           <string/>
           </property>
          </widget>
         </item>
@@ -149,6 +149,13 @@
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>TimeLine</class>
+   <extends>QLabel</extends>
+   <header>gui/timeline.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

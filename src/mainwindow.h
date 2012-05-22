@@ -8,6 +8,9 @@
 #include <QHBoxLayout>
 #include <QSpacerItem>
 #include <mainwindow.h>
+#include "gui/presentationarea.h"
+#include "gui/timeline.h"
+
 #include"ui_mainwindow.h"
 
 
@@ -48,7 +51,7 @@ private:
     QSpacerItem *spacerRight;
 
     // Area for the tracks
-    PresentationArea *pa;
+    PresentationArea pa;
 
     Ui::MainWindow ui;
 

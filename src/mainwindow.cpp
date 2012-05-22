@@ -10,15 +10,8 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui.setupUi(this);
     setUpButtonBars();
-
-    ui.timeLine->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0, stop: 0 #FFA000, stop: 1 #FF4500);"
-                                "padding-right: 3px;"
-                                "padding-left: 10px;");
-    ui.timeLine->setText("Timeline");
-
-    pa = new PresentationArea();
-    ui.scrollArea->setWidget(pa);
-//    ui->scrollArea->setStyleSheet("border-top: 0px solid;");
+    ui.scrollArea->setWidget(&pa);
+    ui.timeLine->setText("TimeLine");
 }
 
 MainWindow::~MainWindow()
@@ -30,7 +23,8 @@ void MainWindow::onAddTrackAction()
 {    
     ExampleTrack *et = new ExampleTrack();
     connect(this, SIGNAL(visibleRangeChanged(int,int,int)), et, SLOT(adjustVisibleRange(int,int,int)));
-    pa->addTrack(et);
+    connect(this, SIGNAL(visibleRangeChanged(int,int,int)), ui.timeLine, SLOT(adjustVisibleRange(int,int,int)));
+    pa.addTrack(et);
 }
 
 void MainWindow::onImportAction()

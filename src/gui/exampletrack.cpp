@@ -32,7 +32,7 @@ ExampleTrack::ExampleTrack(QWidget *parent) :
 
 void ExampleTrack::paintEvent(QPaintEvent *qpe)
 {
-    opt.init(this);    
+    opt.init(this);
     style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
 }
 
