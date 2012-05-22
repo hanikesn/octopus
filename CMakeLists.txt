@@ -9,15 +9,18 @@ SET(Octopus_SOURCES
   src/gui/exampletrack.cpp
   src/gui/presentationarea.cpp
   src/gui/timeline.cpp
+  src/gui/qcustomplot.cpp
 )
 SET(Octopus_HEADERS
   src/mainwindow.h
   src/gui/exampletrack.h
   src/gui/presentationarea.h
   src/gui/timeline.h
+  src/gui/qcustomplot.h
 )
 SET(Octopus_FORMS
   ui/mainwindow.ui
+  ui/track.ui
 )
 SET(Octopus_RESOURCES
   rc/resources.qrc

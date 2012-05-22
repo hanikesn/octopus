@@ -5,34 +5,25 @@
 #include <QLabel>
 #include <QPainter>
 #include <QStyleOption>
+#include "ui_track.h"
 
-
+// TODO(Steffi): Rename
 class ExampleTrack : public QWidget
 {
     Q_OBJECT
 public:
     explicit ExampleTrack(QWidget *parent = 0);
 
-    /**
-      * Necessary for using stylesheets.
-      */
-    void paintEvent(QPaintEvent *qpe);
-
 signals:
     
 public slots:
-
-    void adjustVisibleRange(int position, int rangeMin, int rangeMax);
+    // TODO(Steffi): in qint64 ändern; position rausschmeißen
+    void setPlotRange(int position, int rangeMin, int rangeMax);
 
 private:
-    static const QString NORMAL_STYLE;
+    void addData();
 
-    QPainter p;
-    QStyleOption opt;
-
-    QLabel actionArea;
-    QLabel customPlot;
-
+    Ui::Track ui;
 };
 
 #endif // EXAMPLETRACK_H

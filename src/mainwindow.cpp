@@ -22,7 +22,7 @@ MainWindow::~MainWindow()
 void MainWindow::onAddTrackAction()
 {    
     ExampleTrack *et = new ExampleTrack();
-    connect(this, SIGNAL(visibleRangeChanged(int,int,int)), et, SLOT(adjustVisibleRange(int,int,int)));
+    connect(this, SIGNAL(visibleRangeChanged(int,int,int)), et, SLOT(setPlotRange(int,int,int)));
     connect(this, SIGNAL(visibleRangeChanged(int,int,int)), ui.timeLine, SLOT(adjustVisibleRange(int,int,int)));
     pa.addTrack(et);
 }
@@ -71,8 +71,8 @@ void MainWindow::setUpButtonBars()
 
     // buttonBar at the bottom:
     // set up spacers so they get as much space as possible (button between is then centered)
-    spacerLeft = new QSpacerItem (100, 1, QSizePolicy::MinimumExpanding, QSizePolicy::Maximum);
-    spacerRight = new QSpacerItem (100, 1, QSizePolicy::MinimumExpanding, QSizePolicy::Maximum);
+    spacerLeft = new QSpacerItem(100, 1, QSizePolicy::MinimumExpanding, QSizePolicy::Maximum);
+    spacerRight = new QSpacerItem(100, 1, QSizePolicy::MinimumExpanding, QSizePolicy::Maximum);
     ui.bottomButtonBar->addSpacerItem(spacerLeft);
     ui.bottomButtonBar->addWidget(&playButton);
     ui.bottomButtonBar->addSpacerItem(spacerRight);

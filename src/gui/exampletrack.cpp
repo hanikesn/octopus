@@ -1,44 +1,58 @@
 #include "exampletrack.h"
 
-#include <QSizePolicy>
+#include <cmath>
+
 #include <QDebug>
-#include <QHBoxLayout>
-
-const QString ExampleTrack::NORMAL_STYLE = QString(
-            "background-color: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0, stop: 0 #123456, stop: 1 #ffffff);"
-            "border 10px solid #ff0000");
-
-
 
 ExampleTrack::ExampleTrack(QWidget *parent) :
     QWidget(parent)
-{    
-    setMaximumHeight(70);
-    QHBoxLayout *layout = new QHBoxLayout(this);
+{
+    ui.setupUi(this);
+    ui.plot->xAxis->setRange(0, 30);
 
-//    customPlot();
-    customPlot.setStyleSheet(NORMAL_STYLE);
-    customPlot.setMinimumSize(2000, 70);
-    customPlot.setMaximumSize(3000, 70);
-//    actionArea();
-    actionArea.setMaximumSize(60, 70);
-    actionArea.setMinimumSize(60, 70);
-    actionArea.setStyleSheet("background-color: #bcbcbc;"
-                              "border-right: 1px solid #ff0000;");
-
-    layout->addWidget(&actionArea);
-    layout->addWidget(&customPlot);    
+    addData();
 }
 
-void ExampleTrack::paintEvent(QPaintEvent *qpe)
+void ExampleTrack::setPlotRange(int position, int rangeMin, int rangeMax)
 {
-    opt.init(this);
-    style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
-}
+    int rangeSize = ui.plot->xAxis->range().size();
+    ui.plot->xAxis->setRange(position, position + rangeSize);
+    ui.plot->replot();
 
-void ExampleTrack::adjustVisibleRange(int position, int rangeMin, int rangeMax)
-{
+    // TODO(Steffi): remove
     qDebug() << "pos: " << position << "   rangeMin:" << rangeMin << "   rangeMax: " << rangeMax;
+}
 
-    // TODO: Range auf QCustomPlot entsprechend setzen.
+void ExampleTrack::addData()
+{
+    ///////////////////////////////////////////////////////////////
+    /* copied from plot-examples: MainWindow::setupLineStyleDemo */
+    QPen pen;
+
+    QStringList lineNames;
+    lineNames << "lsNone" << "lsLine" << "lsStepLeft" << "lsStepRight"
+                 << "lsStepCenter" << "lsImpulse";
+
+    // add graphs with different line styles:
+    for (int i=QCPGraph::lsNone; i<=QCPGraph::lsImpulse; ++i)
+    {
+      ui.plot->addGraph();
+      pen.setColor(QColor(sin(i*1+1.2)*80+80, sin(i*0.3+0)*80+80, sin(i*0.3+1.5)*80+80));
+      ui.plot->graph()->setPen(pen);
+      ui.plot->graph()->setName(lineNames.at(i-QCPGraph::lsNone));
+      ui.plot->graph()->setLineStyle((QCPGraph::LineStyle)i);
+      ui.plot->graph()->setScatterStyle(QCPGraph::ssCircle);
+      ui.plot->graph()->setScatterSize(5);
+
+      // generate data:
+      QVector<double> x(500), y(500);
+      for (int j=0; j<500; ++j)
+      {
+        x[j] = j/10.0 * 5*3.14 + 0.01;
+        y[j] = 7*sin(x[j])/x[j] - (i-QCPGraph::lsNone)*5 + (QCPGraph::lsImpulse)*5 + 2;
+      }
+      ui.plot->graph()->setData(x, y);
+      ui.plot->graph()->rescaleValueAxis(true);
+    }
+    ///////////////////////////////////////////////////////////////
 }
