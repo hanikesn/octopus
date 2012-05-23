@@ -4,11 +4,24 @@
 
 #include <QDebug>
 
+const QString Track::ICON_AS_BUTTON = QString(
+            "border: 0;"
+            "margin: 0px;");
+
 Track::Track(QWidget *parent) :
     QWidget(parent)
 {
     ui.setupUi(this);
     ui.plot->xAxis->setRange(0, 30);
+
+    ui.delButton->setStyleSheet(ICON_AS_BUTTON);
+    connect(ui.delButton, SIGNAL(clicked()), this, SLOT(onDelete()));
+
+    ui.srcButton->setStyleSheet(ICON_AS_BUTTON);
+    connect(ui.srcButton, SIGNAL(clicked()), this, SLOT(onSources()));
+
+    ui.setButton->setStyleSheet(ICON_AS_BUTTON);
+    connect(ui.setButton, SIGNAL(clicked()), this, SLOT(onPlotSettings()));
 
     addData();
 }
@@ -55,4 +68,24 @@ void Track::addData()
       ui.plot->graph()->rescaleValueAxis(true);
     }
     ///////////////////////////////////////////////////////////////
+}
+
+void Track::onDelete()
+{
+    qDebug() << "Pretending to delete track.";
+    // TODO(Steffi): Implement
+
+    emit del(this);
+}
+
+void Track::onSources()
+{
+    qDebug() << "Pretending to show source dialog.";
+    // TODO(Steffi): Implement
+}
+
+void Track::onPlotSettings()
+{
+    qDebug() << "Pretending to show plot settings dialog.";
+    // TODO(Steffi): Implement
 }
