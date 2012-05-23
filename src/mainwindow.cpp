@@ -1,6 +1,6 @@
 #include "mainwindow.h"
 #include <QWidget>
-#include "gui/exampletrack.h"
+#include "gui/track.h"
 #include "gui/presentationarea.h"
 
 #include <QDebug>
@@ -21,10 +21,10 @@ MainWindow::~MainWindow()
 
 void MainWindow::onAddTrackAction()
 {    
-    ExampleTrack *et = new ExampleTrack();
-    connect(this, SIGNAL(visibleRangeChanged(int,int,int)), et, SLOT(setPlotRange(int,int,int)));
+    Track *t = new Track();
+    connect(this, SIGNAL(visibleRangeChanged(int,int,int)), t, SLOT(setPlotRange(int,int,int)));
     connect(this, SIGNAL(visibleRangeChanged(int,int,int)), ui.timeLine, SLOT(adjustVisibleRange(int,int,int)));
-    pa.addTrack(et);
+    pa.addTrack(t);
 }
 
 void MainWindow::onImportAction()

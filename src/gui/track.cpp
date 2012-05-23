@@ -1,10 +1,10 @@
-#include "exampletrack.h"
+#include "track.h"
 
 #include <cmath>
 
 #include <QDebug>
 
-ExampleTrack::ExampleTrack(QWidget *parent) :
+Track::Track(QWidget *parent) :
     QWidget(parent)
 {
     ui.setupUi(this);
@@ -13,7 +13,7 @@ ExampleTrack::ExampleTrack(QWidget *parent) :
     addData();
 }
 
-void ExampleTrack::setPlotRange(int position, int rangeMin, int rangeMax)
+void Track::setPlotRange(int position, int rangeMin, int rangeMax)
 {
     int rangeSize = ui.plot->xAxis->range().size();
     ui.plot->xAxis->setRange(position, position + rangeSize);
@@ -23,7 +23,7 @@ void ExampleTrack::setPlotRange(int position, int rangeMin, int rangeMax)
     qDebug() << "pos: " << position << "   rangeMin:" << rangeMin << "   rangeMax: " << rangeMax;
 }
 
-void ExampleTrack::addData()
+void Track::addData()
 {
     ///////////////////////////////////////////////////////////////
     /* copied from plot-examples: MainWindow::setupLineStyleDemo */

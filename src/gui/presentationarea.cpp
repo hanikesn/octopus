@@ -1,5 +1,5 @@
 #include "presentationarea.h"
-#include "exampletrack.h"
+#include "track.h"
 #include <QVBoxLayout>
 
 PresentationArea::PresentationArea(QWidget *parent) :
@@ -16,7 +16,7 @@ PresentationArea::~PresentationArea()
 
 }
 
-void PresentationArea::addTrack(ExampleTrack *et)
+void PresentationArea::addTrack(Track *t)
 {
-    trackLayout->addWidget(et);
+    trackLayout->addWidget(t);
 }
