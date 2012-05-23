@@ -72,27 +72,7 @@
        </layout>
       </item>
       <item>
-       <widget class="QScrollArea" name="scrollArea">
-        <property name="verticalScrollBarPolicy">
-         <enum>Qt::ScrollBarAlwaysOn</enum>
-        </property>
-        <property name="horizontalScrollBarPolicy">
-         <enum>Qt::ScrollBarAlwaysOff</enum>
-        </property>
-        <property name="widgetResizable">
-         <bool>true</bool>
-        </property>
-        <widget class="QWidget" name="scrollAreaWidgetContents_2">
-         <property name="geometry">
-          <rect>
-           <x>0</x>
-           <y>0</y>
-           <width>996</width>
-           <height>656</height>
-          </rect>
-         </property>
-        </widget>
-       </widget>
+       <widget class="MainView" name="mainView"/>
       </item>
      </layout>
     </item>
@@ -154,6 +134,11 @@
    <class>TimeLine</class>
    <extends>QLabel</extends>
    <header>gui/timeline.h</header>
+  </customwidget>
+  <customwidget>
+   <class>MainView</class>
+   <extends>QGraphicsView</extends>
+   <header>gui/mainview.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

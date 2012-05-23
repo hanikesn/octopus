@@ -2,6 +2,8 @@
 #include <QWidget>
 #include "gui/exampletrack.h"
 #include "gui/presentationarea.h"
+#include "gui/mainview.h"
+#include <QVBoxLayout>
 
 #include <QDebug>
 
@@ -10,8 +12,11 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui.setupUi(this);
     setUpButtonBars();
-    ui.scrollArea->setWidget(&pa);
+//    ui.scrollArea->setWidget(&pa);
     ui.timeLine->setText("TimeLine");
+
+    ui.mainView->setScene(&trackScene);
+
 }
 
 MainWindow::~MainWindow()

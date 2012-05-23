@@ -10,6 +10,7 @@
 #include <mainwindow.h>
 #include "gui/presentationarea.h"
 #include "gui/timeline.h"
+#include "gui/trackscene.h"
 
 #include"ui_mainwindow.h"
 
@@ -54,6 +55,8 @@ private:
     PresentationArea pa;
 
     Ui::MainWindow ui;
+
+    TrackScene trackScene;
 
     void setUpButtonBars();
 
