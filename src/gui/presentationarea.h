@@ -3,7 +3,7 @@
 
 #include <QWidget>
 
-class ExampleTrack;
+class Track;
 class QVBoxLayout;
 
 class PresentationArea : public QWidget
@@ -13,7 +13,7 @@ public:
     explicit PresentationArea(QWidget *parent = 0);
     ~PresentationArea();
 
-    void addTrack(ExampleTrack *et);
+    void addTrack(Track *t);
     
 signals:
     

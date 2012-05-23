@@ -6,7 +6,7 @@ FIND_PACKAGE(Qt4 REQUIRED)
 SET(Octopus_SOURCES
   src/main.cpp
   src/mainwindow.cpp
-  src/gui/exampletrack.cpp
+  src/gui/track.cpp
   src/gui/presentationarea.cpp
   src/gui/timeline.cpp
   src/gui/qcustomplot.cpp
@@ -15,7 +15,7 @@ SET(Octopus_SOURCES
 )
 SET(Octopus_HEADERS
   src/mainwindow.h
-  src/gui/exampletrack.h
+  src/gui/track.h
   src/gui/presentationarea.h
   src/gui/timeline.h
   src/gui/qcustomplot.h

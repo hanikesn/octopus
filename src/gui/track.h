@@ -1,5 +1,5 @@
-#ifndef EXAMPLETRACK_H
-#define EXAMPLETRACK_H
+#ifndef Track_H
+#define Track_H
 
 #include <QWidget>
 #include <QLabel>
@@ -8,14 +8,15 @@
 #include "ui_track.h"
 
 // TODO(Steffi): Rename
-class ExampleTrack : public QWidget
+class Track : public QWidget
 {
     Q_OBJECT
 public:
-    explicit ExampleTrack(QWidget *parent = 0);
+    explicit Track(QWidget *parent = 0);
 
 signals:
-    
+    void del(Track*);
+
 public slots:
     // TODO(Steffi): in qint64 ändern; position rausschmeißen
     void setPlotRange(int position, int rangeMin, int rangeMax);
@@ -24,6 +25,12 @@ private:
     void addData();
 
     Ui::Track ui;
+    static const QString ICON_AS_BUTTON;
+
+private slots:
+    void onDelete();
+    void onSources();
+    void onPlotSettings();
 };
 
-#endif // EXAMPLETRACK_H
+#endif // Track_H
