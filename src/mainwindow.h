@@ -1,19 +1,18 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QMainWindow>
-#include <QAction>
-#include <QWidget>
-#include <QPushButton>
-#include <QHBoxLayout>
-#include <QSpacerItem>
 #include <mainwindow.h>
+#include "ui_mainwindow.h"
 #include "gui/presentationarea.h"
 #include "gui/timeline.h"
 #include "gui/trackscene.h"
 
-#include"ui_mainwindow.h"
-
+#include <QAction>
+#include <QHBoxLayout>
+#include <QMainWindow>
+#include <QPushButton>
+#include <QSpacerItem>
+#include <QWidget>
 
 
 class PresentationArea;
@@ -27,11 +26,9 @@ public:
     ~MainWindow();
     
 private slots:
-    void onAddTrackAction();
     void onImportAction();
     void onExportAction();
     void onPlayAction();
-
 
 private:
     QVBoxLayout *trackLayout;

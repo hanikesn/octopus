@@ -1,13 +1,13 @@
 #ifndef Track_H
 #define Track_H
 
-#include <QWidget>
+#include "ui_track.h"
+
 #include <QLabel>
 #include <QPainter>
 #include <QStyleOption>
-#include "ui_track.h"
+#include <QWidget>
 
-// TODO(Steffi): Rename
 class Track : public QWidget
 {
     Q_OBJECT

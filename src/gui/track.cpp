@@ -31,8 +31,6 @@ void Track::setPlotRange(qint64 begin, qint64 end)
     int rangeSize = ui.plot->xAxis->range().size();
     ui.plot->xAxis->setRange(begin, begin + rangeSize);
     ui.plot->replot();
-
-    // TODO(Steffi): remove    
 }
 
 void Track::addData()

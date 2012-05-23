@@ -1,12 +1,12 @@
 #include "mainwindow.h"
-#include <QWidget>
-#include "gui/track.h"
+
 #include "gui/presentationarea.h"
 #include "gui/mainview.h"
 #include <QVBoxLayout>
 #include <QGraphicsProxyWidget>
 
 #include <QDebug>
+#include <QWidget>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
@@ -14,27 +14,18 @@ MainWindow::MainWindow(QWidget *parent) :
     ui.setupUi(this);
     setUpButtonBars();
 
-    ui.timeLine->setText("TimeLine");
     pa = new PresentationArea(&trackScene);
     pa->setPos(0, 0);
     ui.mainView->setAlignment(Qt::AlignTop | Qt::AlignLeft);
     ui.mainView->setScene(&trackScene);
 
-    connect(ui.mainView, SIGNAL(changedRange(qint64, qint64)), this, SIGNAL(changedRange(qint64, qint64)));
+    connect(ui.mainView, SIGNAL(changedRange(qint64, qint64)), pa, SIGNAL(onRangeChanged(qint64, qint64)));
+    ui.timeLine->setText("TimeLine");
+    connect(ui.mainView, SIGNAL(changedRange(qint64, qint64)), ui.timeLine, SLOT(adjustVisibleRange(qint64, qint64)));
 }
 
 MainWindow::~MainWindow()
 {
-
-}
-
-void MainWindow::onAddTrackAction()
-{    
-    Track *t = new Track();
-    connect(this, SIGNAL(changedRange(qint64, qint64)), t, SLOT(setPlotRange(qint64, qint64)));
-    connect(this, SIGNAL(changedRange(qint64, qint64)), ui.timeLine, SLOT(adjustVisibleRange(qint64, qint64)));
-    pa->addTrack(t);
-
 
 }
 
@@ -78,7 +69,7 @@ void MainWindow::setUpButtonBars()
 
     toolBarWidget.setLayout(&layout);
 
-    connect(&addTrackButton, SIGNAL(clicked()), this, SLOT(onAddTrackAction()));
+    connect(&addTrackButton, SIGNAL(clicked()), pa, SLOT(onAddTrack()));
     connect(&importButton, SIGNAL(clicked()), this, SLOT(onImportAction()));
     connect(&exportButton, SIGNAL(clicked()), this, SLOT(onExportAction()));
     connect(&playButton, SIGNAL(clicked()), this, SLOT(onPlayAction()));

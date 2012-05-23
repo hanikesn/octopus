@@ -8,10 +8,9 @@
 class Track;
 class QVBoxLayout;
 
-class PresentationArea : public QGraphicsItem
+class PresentationArea : public QObject, public QGraphicsItem
 {
-    // QGraphicsItem does not inherit from QObject --> no Q_OBJECT Macro possible!
-
+    Q_OBJECT
 public:
     explicit PresentationArea(QGraphicsScene *parent = 0);
     ~PresentationArea();
@@ -20,10 +19,15 @@ public:
 
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 
-    void addTrack(Track *t);
-
     void setHeight(qreal height);
     void setWidth(qreal width);
+
+signals:
+    
+public slots:
+    void onAddTrack();
+    void onDelete(Track *t);
+    void onRangeChanged(qint64 begin, qint64 end);
 
 private:
     qreal height;
@@ -31,7 +35,7 @@ private:
 
     QGraphicsScene *parent;
 
-    
+    QList<Track*> tracks;    
 };
 
 #endif // PRESENTATIONAREA_H
