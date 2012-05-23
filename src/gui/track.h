@@ -17,9 +17,8 @@ public:
 signals:
     void del(Track*);
 
-public slots:
-    // TODO(Steffi): in qint64 ändern; position rausschmeißen
-    void setPlotRange(int position, int rangeMin, int rangeMax);
+public slots:    
+    void setPlotRange(qint64 begin, qint64 end);
 
 private:
     void addData();

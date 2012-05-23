@@ -32,9 +32,6 @@ private slots:
     void onExportAction();
     void onPlayAction();
 
-    void on_horizontalScrollBar_rangeChanged(int min, int max);
-
-    void on_horizontalScrollBar_sliderMoved(int position);
 
 private:
     QVBoxLayout *trackLayout;
@@ -52,7 +49,7 @@ private:
     QSpacerItem *spacerRight;
 
     // Area for the tracks
-    PresentationArea pa;
+    PresentationArea *pa;
 
     Ui::MainWindow ui;
 
@@ -60,8 +57,8 @@ private:
 
     void setUpButtonBars();
 
-signals:
-    void visibleRangeChanged(int, int, int);
+signals:    
+    void changedRange(qint64 begin, qint64 end);
 
 };
 

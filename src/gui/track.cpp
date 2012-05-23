@@ -26,14 +26,13 @@ Track::Track(QWidget *parent) :
     addData();
 }
 
-void Track::setPlotRange(int position, int rangeMin, int rangeMax)
+void Track::setPlotRange(qint64 begin, qint64 end)
 {
     int rangeSize = ui.plot->xAxis->range().size();
-    ui.plot->xAxis->setRange(position, position + rangeSize);
+    ui.plot->xAxis->setRange(begin, begin + rangeSize);
     ui.plot->replot();
 
-    // TODO(Steffi): remove
-    qDebug() << "pos: " << position << "   rangeMin:" << rangeMin << "   rangeMax: " << rangeMax;
+    // TODO(Steffi): remove    
 }
 
 void Track::addData()

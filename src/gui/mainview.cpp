@@ -1,4 +1,5 @@
 #include "mainview.h"
+#include <QScrollBar>
 
 #include <QDebug>
 
@@ -15,5 +16,11 @@ MainView::~MainView()
 
 void MainView::scrollContentsBy(int dx, int dy)
 {
+    // scroll only vertically
+    if(dx == 0)
+        QGraphicsView::scrollContentsBy(dx, dy);
 
+    // TODO (domi): start und endwerte des angezeigten bereichs bestimmen
+
+    emit changedRange(horizontalScrollBar()->value(), 0);
 }

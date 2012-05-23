@@ -11,7 +11,7 @@ TimeLine::TimeLine(QWidget *parent):
                         "padding: 0;");
 }
 
-void TimeLine::adjustVisibleRange(int position, int rangeMin, int rangeMax)
+void TimeLine::adjustVisibleRange(qint64 begin, qint64 end)
 {
 
 }

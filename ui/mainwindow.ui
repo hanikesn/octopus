@@ -77,19 +77,6 @@
      </layout>
     </item>
     <item row="1" column="0">
-     <widget class="QScrollBar" name="horizontalScrollBar">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Ignored" vsizetype="Fixed">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="0">
      <layout class="QHBoxLayout" name="bottomButtonBar"/>
     </item>
    </layout>

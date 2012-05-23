@@ -2,25 +2,35 @@
 #define PRESENTATIONAREA_H
 
 #include <QWidget>
+#include <QGraphicsItem>
+#include <QGraphicsScene>
 
 class Track;
 class QVBoxLayout;
 
-class PresentationArea : public QWidget
+class PresentationArea : public QGraphicsItem
 {
-    Q_OBJECT
+    // QGraphicsItem does not inherit from QObject --> no Q_OBJECT Macro possible!
+
 public:
-    explicit PresentationArea(QWidget *parent = 0);
+    explicit PresentationArea(QGraphicsScene *parent = 0);
     ~PresentationArea();
 
+    QRectF boundingRect() const;
+
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+
     void addTrack(Track *t);
-    
-signals:
-    
-public slots:
+
+    void setHeight(qreal height);
+    void setWidth(qreal width);
 
 private:
-    QVBoxLayout *trackLayout;
+    qreal height;
+    qreal width;
+
+    QGraphicsScene *parent;
+
     
 };
 

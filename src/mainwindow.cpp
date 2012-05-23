@@ -4,6 +4,7 @@
 #include "gui/presentationarea.h"
 #include "gui/mainview.h"
 #include <QVBoxLayout>
+#include <QGraphicsProxyWidget>
 
 #include <QDebug>
 
@@ -12,11 +13,14 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui.setupUi(this);
     setUpButtonBars();
-//    ui.scrollArea->setWidget(&pa);
-    ui.timeLine->setText("TimeLine");
 
+    ui.timeLine->setText("TimeLine");
+    pa = new PresentationArea(&trackScene);
+    pa->setPos(0, 0);
+    ui.mainView->setAlignment(Qt::AlignTop | Qt::AlignLeft);
     ui.mainView->setScene(&trackScene);
 
+    connect(ui.mainView, SIGNAL(changedRange(qint64, qint64)), this, SIGNAL(changedRange(qint64, qint64)));
 }
 
 MainWindow::~MainWindow()
@@ -27,9 +31,11 @@ MainWindow::~MainWindow()
 void MainWindow::onAddTrackAction()
 {    
     Track *t = new Track();
-    connect(this, SIGNAL(visibleRangeChanged(int,int,int)), t, SLOT(setPlotRange(int,int,int)));
-    connect(this, SIGNAL(visibleRangeChanged(int,int,int)), ui.timeLine, SLOT(adjustVisibleRange(int,int,int)));
-    pa.addTrack(t);
+    connect(this, SIGNAL(changedRange(qint64, qint64)), t, SLOT(setPlotRange(qint64, qint64)));
+    connect(this, SIGNAL(changedRange(qint64, qint64)), ui.timeLine, SLOT(adjustVisibleRange(qint64, qint64)));
+    pa->addTrack(t);
+
+
 }
 
 void MainWindow::onImportAction()
@@ -48,18 +54,6 @@ void MainWindow::onPlayAction()
 {
     // TODO:
     qDebug() << "Play";
-}
-
-void MainWindow::on_horizontalScrollBar_rangeChanged(int min, int max)
-{
-//    qDebug() << "Range changed(min, max):  (" << min << ", " << max << ")";
-    emit visibleRangeChanged(ui.horizontalScrollBar->sliderPosition(), min, max);
-}
-
-void MainWindow::on_horizontalScrollBar_sliderMoved(int position)
-{
-//    qDebug() << "Slider moved: " << position;
-    emit visibleRangeChanged(position, ui.horizontalScrollBar->minimum(), ui.horizontalScrollBar->maximum());
 }
 
 void MainWindow::setUpButtonBars()
@@ -91,3 +85,6 @@ void MainWindow::setUpButtonBars()
 
     ui.mainToolBar->addWidget(&toolBarWidget);
 }
+
+
+

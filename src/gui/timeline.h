@@ -14,7 +14,7 @@ public:
 signals:
 
 public slots:
-    void adjustVisibleRange(int position, int rangeMin, int rangeMax);
+    void adjustVisibleRange(qint64 begin, qint64 end);
 
 private:
 

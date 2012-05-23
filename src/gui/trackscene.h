@@ -11,12 +11,6 @@ class TrackScene : public QGraphicsScene
 public:
     explicit TrackScene(QObject *parent = 0);
 
-signals:
-
-public slots:
-
-protected:
-    void drawBackground(QPainter *painter, const QRectF &rect);
 
 };
 

@@ -11,9 +11,8 @@ public:
 
     ~MainView();
 
-
-
 signals:
+    void changedRange(qint64 begin, qint64 end);
 
 public slots:
 
