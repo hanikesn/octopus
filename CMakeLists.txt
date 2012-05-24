@@ -12,6 +12,7 @@ SET(Octopus_SOURCES
   src/gui/qcustomplot.cpp
   src/gui/mainview.cpp
   src/gui/trackscene.cpp
+  src/gui/presentationitem.cpp
 )
 SET(Octopus_HEADERS
   src/mainwindow.h
@@ -21,6 +22,7 @@ SET(Octopus_HEADERS
   src/gui/qcustomplot.h
   src/gui/mainview.h
   src/gui/trackscene.h
+  src/gui/presentationitem.h
 )
 SET(Octopus_FORMS
   ui/mainwindow.ui

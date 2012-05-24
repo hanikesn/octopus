@@ -1,26 +1,20 @@
 #ifndef PRESENTATIONAREA_H
 #define PRESENTATIONAREA_H
 
-#include <QWidget>
-#include <QGraphicsItem>
-#include <QGraphicsScene>
+#include <QObject>
+
+#include "presentationitem.h"
 
 class Track;
 class QVBoxLayout;
+class QGraphicsScene;
 
-class PresentationArea : public QObject, public QGraphicsItem
+class PresentationArea : public QObject
 {
     Q_OBJECT
 public:
-    explicit PresentationArea(QGraphicsScene *parent = 0);
+    explicit PresentationArea(QGraphicsScene *scene);
     ~PresentationArea();
-
-    QRectF boundingRect() const;
-
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
-
-    void setHeight(qreal height);
-    void setWidth(qreal width);
 
 signals:
     
@@ -29,11 +23,9 @@ public slots:
     void onDelete(Track *t);
     void onRangeChanged(qint64 begin, qint64 end);
 
-private:
-    qreal height;
-    qreal width;
+private:    
 
-    QGraphicsScene *parent;
+    PresentationItem *pi;
 
     QList<Track*> tracks;    
 };

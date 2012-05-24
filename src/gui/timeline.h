@@ -2,8 +2,6 @@
 #define TIMELINE_H
 
 #include <QLabel>
-#include <QWidget>
-
 
 class TimeLine : public QLabel
 {

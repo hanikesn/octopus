@@ -1,12 +1,9 @@
 #include "mainwindow.h"
 
+#include <QDebug>
+
 #include "gui/presentationarea.h"
 #include "gui/mainview.h"
-#include <QVBoxLayout>
-#include <QGraphicsProxyWidget>
-
-#include <QDebug>
-#include <QWidget>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
@@ -15,7 +12,6 @@ MainWindow::MainWindow(QWidget *parent) :
     pa = new PresentationArea(&trackScene);
     setUpButtonBars();
 
-    pa->setPos(0, 0);
     ui.mainView->setAlignment(Qt::AlignTop | Qt::AlignLeft);
     ui.mainView->setScene(&trackScene);
 

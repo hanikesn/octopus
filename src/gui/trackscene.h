@@ -2,8 +2,6 @@
 #define TRACKSCENE_H
 
 #include <QGraphicsScene>
-#include <QPainter>
-#include <QRectF>
 
 class TrackScene : public QGraphicsScene
 {
