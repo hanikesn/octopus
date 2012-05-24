@@ -12,14 +12,14 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
 {
     ui.setupUi(this);
+    pa = new PresentationArea(&trackScene);
     setUpButtonBars();
 
-    pa = new PresentationArea(&trackScene);
     pa->setPos(0, 0);
     ui.mainView->setAlignment(Qt::AlignTop | Qt::AlignLeft);
     ui.mainView->setScene(&trackScene);
 
-    connect(ui.mainView, SIGNAL(changedRange(qint64, qint64)), pa, SIGNAL(onRangeChanged(qint64, qint64)));
+    connect(ui.mainView, SIGNAL(changedRange(qint64, qint64)), pa, SLOT(onRangeChanged(qint64, qint64)));
     ui.timeLine->setText("TimeLine");
     connect(ui.mainView, SIGNAL(changedRange(qint64, qint64)), ui.timeLine, SLOT(adjustVisibleRange(qint64, qint64)));
 }
