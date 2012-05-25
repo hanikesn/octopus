@@ -3,6 +3,7 @@
 
 #include <QGraphicsItem>
 #include <QGraphicsScene>
+#include <QGraphicsWidget>
 #include <QList>
 
 class Track;
@@ -26,7 +27,9 @@ public:
 private:
     QGraphicsScene *parent;
     QGraphicsProxyWidget *trackToAdd;
-    QList<QGraphicsProxyWidget*> tracks;
+    QList<QGraphicsProxyWidget*> tracks;    
+
+    void recalculatePositions();
 };
 
 #endif // PRESENTATIONITEM_H

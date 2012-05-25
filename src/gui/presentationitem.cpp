@@ -30,9 +30,8 @@ void PresentationItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *
 
 void PresentationItem::addTrack(Track *t)
 {
-    trackToAdd = parent->addWidget(t);
+    trackToAdd = parent->addWidget(t); 
 
-    // TODO(domi): setPos weglassen, stattdessen Vlayout benutzen?
     trackToAdd->setPos(0, childItems().size()*t->height());
     trackToAdd->setParentItem(this);
 
@@ -41,14 +40,24 @@ void PresentationItem::addTrack(Track *t)
 
 void PresentationItem::deleteTrack(Track *t)
 {
-
     QGraphicsProxyWidget *del;
-    foreach (del ,tracks){
+    foreach (del, tracks){
         if(del->widget() == t){
-            tracks.removeOne(del);
-            childItems().removeOne(del);
+            tracks.removeAll(del);
+            childItems().removeAll(del);
             parent->removeItem(del);
         }
     }
+    recalculatePositions();
+}
 
+void PresentationItem::recalculatePositions()
+{
+    // TODO(domi): TimeLine berücksichtigen.
+    QGraphicsProxyWidget *proxyTrack;
+    int height = 0;
+    foreach(proxyTrack, tracks){
+        proxyTrack->setPos(0, height);
+        height += proxyTrack->widget()->height();
+    }
 }
