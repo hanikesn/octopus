@@ -16,8 +16,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui.mainView->setScene(&trackScene);
 
     connect(ui.mainView, SIGNAL(changedRange(qint64, qint64)), pa, SLOT(onRangeChanged(qint64, qint64)));
-    ui.timeLine->setText("TimeLine");
-    connect(ui.mainView, SIGNAL(changedRange(qint64, qint64)), ui.timeLine, SLOT(adjustVisibleRange(qint64, qint64)));
+    connect(this, SIGNAL(verticalScroll(QRectF)), pa, SLOT(onVerticalScroll(QRectF)));
+    connect(ui.mainView, SIGNAL(verticalScroll()), this, SLOT(onVerticalScroll()));
+
 }
 
 MainWindow::~MainWindow()
@@ -75,3 +76,7 @@ void MainWindow::setUpButtonBars()
 
 
 
+void MainWindow::onVerticalScroll()
+{
+    emit verticalScroll(ui.mainView->mapToScene(ui.mainView->viewport()->geometry()).boundingRect());
+}

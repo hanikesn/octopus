@@ -13,6 +13,7 @@ public:
 
 signals:
     void changedRange(qint64 begin, qint64 end);
+    void verticalScroll();
 
 public slots:
 

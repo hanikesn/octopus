@@ -8,6 +8,8 @@
 class Track;
 class QVBoxLayout;
 class QGraphicsScene;
+class QGraphicsWidget;
+class TimeLine;
 
 class PresentationArea : public QObject
 {
@@ -17,15 +19,18 @@ public:
     ~PresentationArea();
 
 signals:
-    
+
 public slots:
     void onAddTrack();
     void onDelete(Track *t);
-    void onRangeChanged(qint64 begin, qint64 end);
+    void onRangeChanged(qint64 begin, qint64 end);    
+    void onVerticalScroll(QRectF visibleRectangle);
 
 private:    
 
     PresentationItem *pi;
+
+    TimeLine *timeLine;
 
     QList<Track*> tracks;    
 };

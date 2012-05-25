@@ -6,6 +6,8 @@
 #include <QGraphicsWidget>
 #include <QList>
 
+#include "gui/timeline.h"
+
 class Track;
 class QGraphicsProxyWidget;
 
@@ -13,7 +15,7 @@ class PresentationItem : public QGraphicsItem
 {
 
 public:
-    explicit PresentationItem(QGraphicsScene *parent = 0);
+    explicit PresentationItem(TimeLine *timeLine, QGraphicsScene *parent = 0);
     ~PresentationItem();
 
     QRectF boundingRect() const;
@@ -24,12 +26,17 @@ public:
 
     void deleteTrack(Track *t);
 
+    void repositionTimeLine(QRectF visibleRectangle);
+
 private:
     QGraphicsScene *parent;
     QGraphicsProxyWidget *trackToAdd;
     QList<QGraphicsProxyWidget*> tracks;    
 
+    TimeLine *timeLine;
+
     void recalculatePositions();
+
 };
 
 #endif // PRESENTATIONITEM_H

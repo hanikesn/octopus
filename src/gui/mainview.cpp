@@ -17,8 +17,10 @@ MainView::~MainView()
 void MainView::scrollContentsBy(int dx, int dy)
 {
     // scroll only vertically
-    if(dx == 0)
+    if(dx == 0){
         QGraphicsView::scrollContentsBy(dx, dy);
+        emit verticalScroll();
+    }
 
     // TODO (domi): start und endwerte des angezeigten bereichs bestimmen
 

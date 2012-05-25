@@ -4,7 +4,6 @@
 #include <mainwindow.h>
 #include "ui_mainwindow.h"
 #include "gui/presentationarea.h"
-#include "gui/timeline.h"
 #include "gui/trackscene.h"
 
 #include <QAction>
@@ -28,7 +27,8 @@ public:
 private slots:
     void onImportAction();
     void onExportAction();
-    void onPlayAction();
+    void onPlayAction();    
+    void onVerticalScroll();
 
 private:
     QVBoxLayout *trackLayout;
@@ -56,6 +56,7 @@ private:
 
 signals:    
     void changedRange(qint64 begin, qint64 end);
+    void verticalScroll(QRectF visibleRectangle);
 
 };
 

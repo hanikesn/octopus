@@ -1,18 +1,25 @@
 #ifndef TIMELINE_H
 #define TIMELINE_H
 
-#include <QLabel>
+#include <QGraphicsWidget>
 
-class TimeLine : public QLabel
+
+class QGraphicsItem;
+
+class TimeLine : public QGraphicsWidget
 {
     Q_OBJECT
 public:
-    explicit TimeLine(QWidget *parent = 0);
+    explicit TimeLine(QGraphicsItem * parent = 0, Qt::WindowFlags wFlags = 0);
+    void adjustVisibleRange(qint64 begin, qint64 end);
+
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+
+    QRectF boundingRect();
 
 signals:
 
-public slots:
-    void adjustVisibleRange(qint64 begin, qint64 end);
+public slots:    
 
 private:
 
