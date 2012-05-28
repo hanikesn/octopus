@@ -7,7 +7,7 @@
 #include "gui/trackscene.h"
 
 #include <QAction>
-#include <QHBoxLayout>
+#include <QVBoxLayout>
 #include <QMainWindow>
 #include <QPushButton>
 #include <QSpacerItem>
@@ -22,7 +22,7 @@ class MainWindow : public QMainWindow
     
 public:
     explicit MainWindow(QWidget *parent = 0);
-    ~MainWindow();
+    ~MainWindow();    
     
 private slots:
     void onImportAction();
@@ -35,7 +35,7 @@ private:
 
     // Buttons and layout for toolbar:
     QWidget toolBarWidget;
-    QHBoxLayout layout;
+    QVBoxLayout layout;
     QPushButton addTrackButton;
     QPushButton importButton;
     QPushButton exportButton;

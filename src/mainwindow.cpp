@@ -72,6 +72,7 @@ void MainWindow::setUpButtonBars()
     connect(&playButton, SIGNAL(clicked()), this, SLOT(onPlayAction()));
 
     ui.mainToolBar->addWidget(&toolBarWidget);
+    addToolBar(Qt::LeftToolBarArea, ui.mainToolBar);
 }
 
 
