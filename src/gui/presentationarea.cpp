@@ -7,7 +7,8 @@
 #include "timeline.h"
 #include "track.h"
 
-PresentationArea::PresentationArea(QGraphicsScene *scene)
+PresentationArea::PresentationArea(QGraphicsScene *scene):
+    currentViewSize(930, 1)
 {
     timeLine = new TimeLine(0, 0);
     pi = new PresentationItem(timeLine, scene);
@@ -24,7 +25,7 @@ void PresentationArea::onAddTrack()
     Track *t = new Track;
     tracks.append(t);
     connect(t, SIGNAL(del(Track*)), this, SLOT(onDelete(Track*)));
-    pi->addTrack(t);    
+    pi->addTrack(t);       
     t->resize(currentViewSize.width(), t->size().height());
 }
 
