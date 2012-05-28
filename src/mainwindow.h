@@ -22,7 +22,9 @@ class MainWindow : public QMainWindow
     
 public:
     explicit MainWindow(QWidget *parent = 0);
-    ~MainWindow();    
+    ~MainWindow();
+
+    void resizeEvent(QResizeEvent *event);
     
 private slots:
     void onImportAction();
@@ -57,6 +59,7 @@ private:
 signals:    
     void changedRange(qint64 begin, qint64 end);
     void verticalScroll(QRectF visibleRectangle);
+    void changedWindowSize(QSize size);
 
 };
 

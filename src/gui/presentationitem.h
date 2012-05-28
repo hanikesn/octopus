@@ -26,7 +26,10 @@ public:
 
     void deleteTrack(Track *t);
 
-    void repositionTimeLine(QRectF visibleRectangle);
+    /**
+      * Repositions the timeline to the top of the visible area.
+      */
+    void repositionTimeLine(QRectF visibleRectangle);    
 
 private:
     QGraphicsScene *parent;
@@ -35,6 +38,9 @@ private:
 
     TimeLine *timeLine;
 
+    /**
+      * Makes sure that no gaps exist between tracks (for example after deleting a track).
+      */
     void recalculatePositions();
 
 };

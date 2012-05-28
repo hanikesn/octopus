@@ -18,12 +18,19 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui.mainView, SIGNAL(changedRange(qint64, qint64)), pa, SLOT(onRangeChanged(qint64, qint64)));
     connect(this, SIGNAL(verticalScroll(QRectF)), pa, SLOT(onVerticalScroll(QRectF)));
     connect(ui.mainView, SIGNAL(verticalScroll()), this, SLOT(onVerticalScroll()));
-
+    connect(this, SIGNAL(changedWindowSize(QSize)), pa, SLOT(onChangedWindowSize(QSize)));
 }
 
 MainWindow::~MainWindow()
 {
+}
 
+void MainWindow::resizeEvent(QResizeEvent *event)
+{
+    /* One resizeEvent is fired right after initialisation of window.
+       We dont want to receive this --> wait for first "actual" resizeEvent.*/
+    if(event->oldSize().isValid())
+        emit changedWindowSize(ui.mainView->size());
 }
 
 void MainWindow::onImportAction()

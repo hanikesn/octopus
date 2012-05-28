@@ -21,7 +21,8 @@ void PresentationArea::onAddTrack()
     Track *t = new Track;
     tracks.append(t);
     connect(t, SIGNAL(del(Track*)), this, SLOT(onDelete(Track*)));
-    pi->addTrack(t);
+    pi->addTrack(t);    
+    t->resize(currentViewSize.width(), t->size().height());
 }
 
 void PresentationArea::onDelete(Track *t)
@@ -41,4 +42,13 @@ void PresentationArea::onRangeChanged(qint64 begin, qint64 end)
 void PresentationArea::onVerticalScroll(QRectF visibleRectangle)
 {
     pi->repositionTimeLine(visibleRectangle);
+}
+
+void PresentationArea::onChangedWindowSize(QSize size)
+{
+    currentViewSize = size;
+    foreach(Track *t, tracks) {
+        t->resize(size.width(), t->size().height());
+    }
+    timeLine->resize(size.width(), timeLine->size().height());
 }

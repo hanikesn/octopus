@@ -25,6 +25,7 @@ public slots:
     void onDelete(Track *t);
     void onRangeChanged(qint64 begin, qint64 end);    
     void onVerticalScroll(QRectF visibleRectangle);
+    void onChangedWindowSize(QSize size);
 
 private:    
 
@@ -33,6 +34,8 @@ private:
     TimeLine *timeLine;
 
     QList<Track*> tracks;    
+
+    QSize currentViewSize;
 };
 
 #endif // PRESENTATIONAREA_H

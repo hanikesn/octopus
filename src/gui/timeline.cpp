@@ -7,7 +7,7 @@
 TimeLine::TimeLine(QGraphicsItem * parent, Qt::WindowFlags wFlags):
     QGraphicsWidget(parent, wFlags)
 {
-    setGeometry(0, 0, 1000, 50);    
+    setGeometry(0, 0, 946, 50);
 }
 
 void TimeLine::adjustVisibleRange(qint64 begin, qint64 end)
@@ -39,5 +39,5 @@ void TimeLine::paint(QPainter *painter,
 
 
 QRectF TimeLine::boundingRect(){
-    return QRectF(0, 0, 1000, 50);
+    return QRectF(0, 0, geometry().width(), geometry().height());
 }
