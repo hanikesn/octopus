@@ -2,14 +2,17 @@
 
 #include <QGraphicsScene>
 #include <QGraphicsWidget>
-#include "timeline.h"
 
+#include "cursor.h"
+#include "timeline.h"
 #include "track.h"
 
 PresentationArea::PresentationArea(QGraphicsScene *scene)
 {
     timeLine = new TimeLine(0, 0);
     pi = new PresentationItem(timeLine, scene);
+    cursor = new Cursor(scene);
+    scene->addItem(cursor);
 }
 
 PresentationArea::~PresentationArea()
@@ -47,8 +50,12 @@ void PresentationArea::onVerticalScroll(QRectF visibleRectangle)
 void PresentationArea::onChangedWindowSize(QSize size)
 {
     currentViewSize = size;
+    // resize tracks:
     foreach(Track *t, tracks) {
         t->resize(size.width(), t->size().height());
     }
+
+    // resize timeLine and cursor
     timeLine->resize(size.width(), timeLine->size().height());
+    cursor->resize(cursor->size().width(), size.height());
 }

@@ -10,6 +10,7 @@ class QVBoxLayout;
 class QGraphicsScene;
 class QGraphicsWidget;
 class TimeLine;
+class Cursor;
 
 class PresentationArea : public QObject
 {
@@ -36,6 +37,8 @@ private:
     QList<Track*> tracks;    
 
     QSize currentViewSize;
+
+    Cursor *cursor;
 };
 
 #endif // PRESENTATIONAREA_H

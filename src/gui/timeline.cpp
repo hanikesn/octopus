@@ -1,6 +1,7 @@
 #include "timeline.h"
 
 #include <QPainter>
+#include <QGraphicsSceneMouseEvent>
 
 #include <QDebug>
 
@@ -40,4 +41,9 @@ void TimeLine::paint(QPainter *painter,
 
 QRectF TimeLine::boundingRect(){
     return QRectF(0, 0, geometry().width(), geometry().height());
+}
+
+void TimeLine::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
+{
+    qDebug() << "timeline clicked at: " << event->pos().x();
 }

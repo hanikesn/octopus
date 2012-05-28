@@ -23,10 +23,12 @@ QRectF PresentationItem::boundingRect() const
     if(this->childItems().isEmpty())
         return QRectF(0, 0, 100, 100);
     else
-        return QRectF(0, 0, this->childItems().at(0)->boundingRect().width(), childItems().size()*this->childItems().at(0)->boundingRect().height());
+        return QRectF(0, 0, this->childItems().at(0)->boundingRect().width(),
+                      childItems().size()*this->childItems().at(0)->boundingRect().height());
 }
 
-void PresentationItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+void PresentationItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
+                             QWidget *widget)
 {
 
 }
