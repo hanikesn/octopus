@@ -7,11 +7,12 @@
 
 PresentationItem::PresentationItem(TimeLine *timeLine, QGraphicsScene *parent) :
     QGraphicsItem(0, parent),
-    parent(parent)
-{    
+    parent(parent),
+    boundingRectangle(0, 0, timeLine->size().width(), timeLine->size().height())
+{        
     this->timeLine = timeLine;
     this->timeLine->setParentItem(this);
-    this->timeLine->setZValue(1);
+    this->timeLine->setZValue(1);    
 }
 
 PresentationItem::~PresentationItem()
@@ -20,11 +21,11 @@ PresentationItem::~PresentationItem()
 
 QRectF PresentationItem::boundingRect() const
 {
-    if(this->childItems().isEmpty())
+    if(childItems().isEmpty())
         return QRectF(0, 0, 100, 100);
-    else
-        return QRectF(0, 0, this->childItems().at(0)->boundingRect().width(),
-                      childItems().size()*this->childItems().at(0)->boundingRect().height());
+    else{
+        return boundingRectangle;
+    }
 }
 
 void PresentationItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
@@ -35,21 +36,24 @@ void PresentationItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *
 
 void PresentationItem::addTrack(Track *t)
 {
+    //TODO(domi): was passiert, wenn man am Anfang das Fenster kleiner zieht?
+    boundingRectangle.setHeight(boundingRectangle.height() + t->size().height());
+    if(t->size().width() > boundingRectangle.width())
+        boundingRectangle.setWidth(t->size().width());
+
     int yPos = timeLine->size().height() + 5; // + 5 for border
     trackToAdd = parent->addWidget(t);
     trackToAdd->setPos(0, yPos + (childItems().size()-1)*t->height());
     trackToAdd->setParentItem(this);
     tracks.append(trackToAdd);
 
-    QRectF parentSceneRect = parent->sceneRect();
-    parentSceneRect.setHeight(parentSceneRect.height() + t->height());
-    parent->setSceneRect(parentSceneRect);
-
-    qDebug() << "# Tracks: "<< tracks.size();
+    parent->setSceneRect(boundingRectangle);
 }
 
 void PresentationItem::deleteTrack(Track *t)
 {
+    boundingRectangle.setHeight(boundingRectangle.height() - t->size().height());
+
     QGraphicsProxyWidget *del;
     foreach (del, tracks){
         if(del->widget() == t){
@@ -58,11 +62,9 @@ void PresentationItem::deleteTrack(Track *t)
             parent->removeItem(del);
         }
     }
-    QRectF parentSceneRect = parent->sceneRect();
-    parentSceneRect.setHeight(parentSceneRect.height() - t->height());
-    parent->setSceneRect(parentSceneRect);
 
     recalculatePositions();
+    parent->setSceneRect(boundingRectangle);
 }
 
 void PresentationItem::recalculatePositions()

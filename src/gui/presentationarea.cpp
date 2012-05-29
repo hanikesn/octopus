@@ -12,7 +12,7 @@ PresentationArea::PresentationArea(QGraphicsScene *scene):
 {
     timeLine = new TimeLine(0, 0);
     pi = new PresentationItem(timeLine, scene);
-    cursor = new Cursor(scene);
+    cursor = new Cursor(scene);    
     scene->addItem(cursor);
 }
 
@@ -27,12 +27,16 @@ void PresentationArea::onAddTrack()
     connect(t, SIGNAL(del(Track*)), this, SLOT(onDelete(Track*)));
     pi->addTrack(t);       
     t->resize(currentViewSize.width(), t->size().height());
+
+    cursor->resize(1, pi->boundingRect().height());
 }
 
 void PresentationArea::onDelete(Track *t)
 {
     tracks.removeAll(t);
     pi->deleteTrack(t);
+
+    cursor->resize(1, pi->boundingRect().height());
 }
 
 void PresentationArea::onRangeChanged(qint64 begin, qint64 end)
@@ -45,18 +49,17 @@ void PresentationArea::onRangeChanged(qint64 begin, qint64 end)
 
 void PresentationArea::onVerticalScroll(QRectF visibleRectangle)
 {
-    pi->repositionTimeLine(visibleRectangle);
+    pi->repositionTimeLine(visibleRectangle);    
 }
 
 void PresentationArea::onChangedWindowSize(QSize size)
-{
+{    
     currentViewSize = size;
     // resize tracks:
     foreach(Track *t, tracks) {
         t->resize(size.width(), t->size().height());
     }
-
-    // resize timeLine and cursor
+    // resize timeLine
     timeLine->resize(size.width(), timeLine->size().height());
-    cursor->resize(cursor->size().width(), size.height());
+//    cursor->resize(cursor->size().width(), size.height());
 }

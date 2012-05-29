@@ -38,6 +38,8 @@ private:
 
     TimeLine *timeLine;
 
+    QRectF boundingRectangle;
+
     /**
       * Makes sure that no gaps exist between tracks (for example after deleting a track).
       */

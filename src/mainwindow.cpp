@@ -14,6 +14,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui.mainView->setAlignment(Qt::AlignTop | Qt::AlignLeft);
     ui.mainView->setScene(&trackScene);
+    ui.mainView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
 
     connect(ui.mainView, SIGNAL(changedRange(qint64, qint64)), pa, SLOT(onRangeChanged(qint64, qint64)));
     connect(this, SIGNAL(verticalScroll(QRectF)), pa, SLOT(onVerticalScroll(QRectF)));
@@ -23,6 +24,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
+    delete pa;
 }
 
 void MainWindow::resizeEvent(QResizeEvent *event)
@@ -85,6 +87,6 @@ void MainWindow::setUpButtonBars()
 
 
 void MainWindow::onVerticalScroll()
-{
+{    
     emit verticalScroll(ui.mainView->mapToScene(ui.mainView->viewport()->geometry()).boundingRect());
 }

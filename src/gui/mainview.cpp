@@ -20,9 +20,8 @@ void MainView::scrollContentsBy(int dx, int dy)
     if(dx == 0){
         QGraphicsView::scrollContentsBy(dx, dy);
         emit verticalScroll();
+    }else{
+        // TODO (domi): start und endwerte des angezeigten bereichs bestimmen
+        emit changedRange(horizontalScrollBar()->value(), 0);
     }
-
-    // TODO (domi): start und endwerte des angezeigten bereichs bestimmen
-
-    emit changedRange(horizontalScrollBar()->value(), 0);
 }
