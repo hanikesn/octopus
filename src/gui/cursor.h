@@ -25,6 +25,7 @@ private:
     QBrush brush;
     QPen pen;
 
+    static const int ACTIONAREAOFFSET;
 
 };
 

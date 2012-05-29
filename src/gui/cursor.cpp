@@ -5,12 +5,14 @@
 
 #include <QDebug>
 
+const int Cursor::ACTIONAREAOFFSET = 26;
+
 Cursor::Cursor(QGraphicsScene *parent) :
     pen(Qt::red),
     brush(Qt::red)
 {
-    currentPos = 0;
-    setGeometry(currentPos, 0, 1, 712);
+    currentPos = ACTIONAREAOFFSET;
+    setGeometry(currentPos, 0, 1, 50);
 }
 
 Cursor::~Cursor()
@@ -34,7 +36,8 @@ QRectF Cursor::boundingRect()
 
 void Cursor::setCursorPos(int pos)
 {
-    currentPos = pos;
+    if (pos < 0) return;
+    currentPos = ACTIONAREAOFFSET + pos;
 }
 
 
