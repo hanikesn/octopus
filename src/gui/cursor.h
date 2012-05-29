@@ -16,16 +16,11 @@ public:
 
     QRectF boundingRect();
 
-    void setCursorPos(int pos);
-
 private:
-    // current x-position of the cursor
-    int currentPos;
 
     QBrush brush;
     QPen pen;
 
-    static const int ACTIONAREAOFFSET;
 
 };
 

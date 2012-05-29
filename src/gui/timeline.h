@@ -17,8 +17,6 @@ public:
 
     QRectF boundingRect();
 
-    void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
-
 signals:
 
 public slots:    

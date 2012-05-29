@@ -2,6 +2,7 @@
 
 #include <QGraphicsProxyWidget>
 #include <QGraphicsItem>
+#include <QGraphicsSceneMouseEvent>
 
 #include "track.h"
 
@@ -12,7 +13,7 @@ PresentationItem::PresentationItem(TimeLine *timeLine, QGraphicsScene *parent) :
 {        
     this->timeLine = timeLine;
     this->timeLine->setParentItem(this);
-    this->timeLine->setZValue(1);    
+    this->timeLine->setZValue(1);
 }
 
 PresentationItem::~PresentationItem()
@@ -80,4 +81,25 @@ void PresentationItem::repositionTimeLine(QRectF visibleRectangle)
 {
     timeLine->setPos(0, visibleRectangle.y()-1);
 
+}
+
+void PresentationItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
+{
+    qDebug() << "PresentationItem::mousePressEvent: " << event->pos();
+}
+
+void PresentationItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
+{
+
+    emit cursorPosChanged(event->pos().x());
+}
+
+void PresentationItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
+{
+    qDebug() << "PresentationItem::mouseMoveEvent: " << event->lastPos()  << event->pos();
+}
+
+void PresentationItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
+{
+    qDebug() << "PresentationItem::mouseDoubleClickEvent: " << event->pos();
 }

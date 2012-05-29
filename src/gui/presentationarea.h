@@ -28,6 +28,9 @@ public slots:
     void onVerticalScroll(QRectF visibleRectangle);
     void onChangedWindowSize(QSize size);
 
+private slots:
+    void onCursorPosChanged(int pos);
+
 private:    
 
     PresentationItem *pi;
@@ -39,6 +42,8 @@ private:
     QSize currentViewSize;
 
     Cursor *cursor;
+
+    static const int ACTIONAREAOFFSET;
 };
 
 #endif // PRESENTATIONAREA_H
