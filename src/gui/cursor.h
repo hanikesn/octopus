@@ -16,8 +16,12 @@ public:
 
     QRectF boundingRect();
 
-private:
+    void setMinHeight(int mh);
 
+    int getMinHeight(){return minHeight;}
+
+private:
+    int minHeight;
     QBrush brush;
     QPen pen;
 

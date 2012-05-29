@@ -7,7 +7,7 @@
 #include "timeline.h"
 #include "track.h"
 
-const int PresentationArea::ACTIONAREAOFFSET = 26;
+const int PresentationArea::ACTIONAREAOFFSET = 52;
 
 PresentationArea::PresentationArea(QGraphicsScene *scene):
     currentViewSize(930, 1)
@@ -27,15 +27,16 @@ PresentationArea::~PresentationArea()
 
 void PresentationArea::onAddTrack()
 {
-    qDebug() << cursor->pos();
-
     Track *t = new Track;
     tracks.append(t);
     connect(t, SIGNAL(del(Track*)), this, SLOT(onDelete(Track*)));
     pi->addTrack(t);       
     t->resize(currentViewSize.width(), t->size().height());
 
-    cursor->resize(1, pi->boundingRect().height());
+    if(pi->boundingRect().height() > cursor->getMinHeight())
+        cursor->resize(1, pi->boundingRect().height());
+    else
+        cursor->resize(1, cursor->getMinHeight());
 }
 
 void PresentationArea::onDelete(Track *t)
@@ -43,7 +44,10 @@ void PresentationArea::onDelete(Track *t)
     tracks.removeAll(t);
     pi->deleteTrack(t);
 
-    cursor->resize(1, pi->boundingRect().height());
+    if(pi->boundingRect().height() > cursor->getMinHeight())
+        cursor->resize(1, pi->boundingRect().height());
+    else
+        cursor->resize(1, cursor->getMinHeight());
 }
 
 void PresentationArea::onRangeChanged(qint64 begin, qint64 end)
@@ -67,7 +71,8 @@ void PresentationArea::onChangedWindowSize(QSize size)
         t->resize(size.width(), t->size().height());
     }
     // resize timeLine
-    timeLine->resize(size.width(), timeLine->size().height());    
+    timeLine->resize(size.width(), timeLine->size().height());
+    cursor->setMinHeight(size.height());
 }
 
 void PresentationArea::onCursorPosChanged(int pos)

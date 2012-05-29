@@ -9,9 +9,10 @@
 
 Cursor::Cursor(QGraphicsScene *parent) :
     pen(Qt::red),
-    brush(Qt::red)
-{    
-    setGeometry(0, 0, 1, 50);
+    brush(Qt::red),
+    minHeight(712)
+{
+    setGeometry(0, 0, 1, minHeight);
 }
 
 Cursor::~Cursor()
@@ -31,6 +32,11 @@ void Cursor::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QW
 QRectF Cursor::boundingRect()
 {
     return QRectF(0, 0, geometry().width(), geometry().height());
+}
+
+void Cursor::setMinHeight(int mh)
+{
+    minHeight = mh;
 }
 
 
