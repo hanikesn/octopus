@@ -64,7 +64,7 @@ void PresentationArea::onVerticalScroll(QRectF visibleRectangle)
 }
 
 void PresentationArea::onChangedWindowSize(QSize size)
-{    
+{
     currentViewSize = size;
     // resize tracks:
     foreach(Track *t, tracks) {
@@ -72,7 +72,11 @@ void PresentationArea::onChangedWindowSize(QSize size)
     }
     // resize timeLine
     timeLine->resize(size.width(), timeLine->size().height());
+
+    // resize cursor
     cursor->setMinHeight(size.height());
+    if(size.height() > pi->boundingRect().height())
+        cursor->resize(1, size.height());
 }
 
 void PresentationArea::onCursorPosChanged(int pos)
