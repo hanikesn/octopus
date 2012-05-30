@@ -107,12 +107,11 @@ void PresentationItem::repositionTimeLine(QRectF visibleRectangle)
 
 void PresentationItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
-    if((event->button() == Qt::LeftButton) && (QApplication::keyboardModifiers() == Qt::ShiftModifier)){
-        qDebug() << "started selection";
+    if((event->button() == Qt::LeftButton) &&
+            (QApplication::keyboardModifiers() == Qt::ShiftModifier)){
         createSelection = true;
         selectionStart = event->pos().x();
     }
-    qDebug() << "PresentationItem::mousePressEvent: " << event->pos();
 }
 
 void PresentationItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
@@ -130,6 +129,7 @@ void PresentationItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
             diff = selectionStart - selectionEnd + 1;
             begin = selectionEnd;
         }
+
         selection->setHeight(boundingRectangle.height());
         selection->setWidth(diff);
         selection->setPos(begin, 0);
@@ -146,9 +146,7 @@ void PresentationItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
     if(QApplication::keyboardModifiers() != Qt::ShiftModifier){
         createSelection = false;
-        qDebug() << "ended selection";
     }
-    //    qDebug() << "PresentationItem::mouseMoveEvent: " << event->lastPos()  << event->pos();
 }
 
 void PresentationItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
