@@ -17,8 +17,6 @@ public:
 
     QRectF boundingRect();
 
-signals:
-
 public slots:    
 
 private:

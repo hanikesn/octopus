@@ -39,6 +39,10 @@ public:
 
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event);
 
+public slots:
+    void recalcBoundingRec();
+
+
 signals:
     void cursorPosChanged(int pos);
 
@@ -54,7 +58,7 @@ private:
     /**
       * Makes sure that no gaps exist between tracks (for example after deleting a track).
       */
-    void recalculatePositions();
+    void recalcPositions();
 
 };
 

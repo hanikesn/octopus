@@ -38,6 +38,6 @@ void TimeLine::paint(QPainter *painter,
 }
 
 
-QRectF TimeLine::boundingRect(){
+QRectF TimeLine::boundingRect(){    
     return QRectF(0, 0, geometry().width(), geometry().height());
 }

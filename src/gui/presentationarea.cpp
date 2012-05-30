@@ -18,6 +18,7 @@ PresentationArea::PresentationArea(QGraphicsScene *scene):
     scene->addItem(cursor);
     cursor->setPos(ACTIONAREAOFFSET, 0);
 
+    connect(timeLine, SIGNAL(geometryChanged()), pi, SLOT(recalcBoundingRec()));
     connect(pi, SIGNAL(cursorPosChanged(int)), this, SLOT(onCursorPosChanged(int)));
 }
 
@@ -31,12 +32,9 @@ void PresentationArea::onAddTrack()
     tracks.append(t);
     connect(t, SIGNAL(del(Track*)), this, SLOT(onDelete(Track*)));
     pi->addTrack(t);       
-    t->resize(currentViewSize.width(), t->size().height());
+    t->resize(currentViewSize.width(), t->size().height());   
 
-    if(pi->boundingRect().height() > cursor->getMinHeight())
-        cursor->resize(1, pi->boundingRect().height());
-    else
-        cursor->resize(1, cursor->getMinHeight());
+    resizeCursor();
 }
 
 void PresentationArea::onDelete(Track *t)
@@ -44,10 +42,7 @@ void PresentationArea::onDelete(Track *t)
     tracks.removeAll(t);
     pi->deleteTrack(t);
 
-    if(pi->boundingRect().height() > cursor->getMinHeight())
-        cursor->resize(1, pi->boundingRect().height());
-    else
-        cursor->resize(1, cursor->getMinHeight());
+    resizeCursor();
 }
 
 void PresentationArea::onRangeChanged(qint64 begin, qint64 end)
@@ -75,12 +70,19 @@ void PresentationArea::onChangedWindowSize(QSize size)
 
     // resize cursor
     cursor->setMinHeight(size.height());
-    if(size.height() > pi->boundingRect().height())
-        cursor->resize(1, size.height());
+    resizeCursor();
 }
 
 void PresentationArea::onCursorPosChanged(int pos)
 {
     if(pos < ACTIONAREAOFFSET) return;
     cursor->setPos(pos, 0);
+}
+
+void PresentationArea::resizeCursor()
+{
+    if(pi->boundingRect().height() > cursor->getMinHeight())
+        cursor->resize(1, pi->boundingRect().height());
+    else
+        cursor->resize(1, cursor->getMinHeight());
 }

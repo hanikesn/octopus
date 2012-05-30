@@ -44,6 +44,8 @@ private:
     Cursor *cursor;
 
     static const int ACTIONAREAOFFSET;
+
+    void resizeCursor();
 };
 
 #endif // PRESENTATIONAREA_H

@@ -14,6 +14,7 @@ PresentationItem::PresentationItem(TimeLine *timeLine, QGraphicsScene *parent) :
     this->timeLine = timeLine;
     this->timeLine->setParentItem(this);
     this->timeLine->setZValue(1);
+
 }
 
 PresentationItem::~PresentationItem()
@@ -25,6 +26,7 @@ QRectF PresentationItem::boundingRect() const
     if(childItems().isEmpty())
         return QRectF(0, 0, 100, 100);
     else{
+
         return boundingRectangle;
     }
 }
@@ -64,11 +66,11 @@ void PresentationItem::deleteTrack(Track *t)
         }
     }
 
-    recalculatePositions();
+    recalcPositions();
     parent->setSceneRect(boundingRectangle);
 }
 
-void PresentationItem::recalculatePositions()
+void PresentationItem::recalcPositions()
 {
     int yPos = timeLine->size().height() + 5; // + 5 for border
     foreach(QGraphicsProxyWidget *proxyTrack, tracks){
@@ -80,7 +82,6 @@ void PresentationItem::recalculatePositions()
 void PresentationItem::repositionTimeLine(QRectF visibleRectangle)
 {
     timeLine->setPos(0, visibleRectangle.y()-1);
-
 }
 
 void PresentationItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
@@ -101,5 +102,29 @@ void PresentationItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 
 void PresentationItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
 {
-    qDebug() << "PresentationItem::mouseDoubleClickEvent: " << event->pos();
+    qDebug() << "PresentationItem::mouseDoubleClickEvent: " << event->pos();    
+}
+
+void PresentationItem::recalcBoundingRec()
+{
+    // If there are no tracks height/width are the size of the timeLine
+    if(tracks.isEmpty()){
+        boundingRectangle.setHeight(timeLine->size().height());
+        boundingRectangle.setWidth(timeLine->size().width());
+        return;
+    }
+
+    int height = timeLine->size().height();
+    int width = timeLine->size().width();
+
+    if(tracks.at(0)->size().width() > width)
+        width = tracks.at(0)->size().width();
+
+    foreach(QGraphicsProxyWidget *track, tracks){
+        height += track->size().height();
+    }
+
+    boundingRectangle.setHeight(height);
+    boundingRectangle.setWidth(width);
+    parent->setSceneRect(boundingRectangle);
 }
