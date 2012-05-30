@@ -9,7 +9,7 @@ class Cursor : public QGraphicsWidget
 {
 
 public:
-    explicit Cursor(QGraphicsScene *parent = 0);
+    explicit Cursor(int offset, QGraphicsScene *parent = 0);
     ~Cursor();
 
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
@@ -22,6 +22,7 @@ public:
 
 private:
     int minHeight;
+    int offset;
     QBrush brush;
     QPen pen;
 
