@@ -6,16 +6,18 @@
 #include <QGraphicsWidget>
 #include <QList>
 
-#include "gui/timeline.h"
 
 class Track;
 class QGraphicsProxyWidget;
+class Selection;
+class Cursor;
+class TimeLine;
 
 class PresentationItem : public QObject, public QGraphicsItem
 {
     Q_OBJECT
 public:
-    explicit PresentationItem(TimeLine *timeLine, QGraphicsScene *parent = 0);
+    explicit PresentationItem(QGraphicsScene *parent = 0);
     ~PresentationItem();
 
     QRectF boundingRect() const;
@@ -25,11 +27,6 @@ public:
     void addTrack(Track *t);
 
     void deleteTrack(Track *t);
-
-    /**
-      * Repositions the timeline to the top of the visible area.
-      */
-    void repositionTimeLine(QRectF visibleRectangle);    
 
     void mousePressEvent(QGraphicsSceneMouseEvent *event);
 
@@ -42,9 +39,15 @@ public:
 public slots:
     void recalcBoundingRec();
 
+    void onRangeChanged(qint64 begin, qint64 end);
+
+    void onChangedWindowSize(QSize size);
+
+    void onVerticalScroll(QRectF visibleRectangle);
+
 
 signals:
-    void cursorPosChanged(int pos);
+
 
 private:
     QGraphicsScene *parent;
@@ -53,13 +56,29 @@ private:
 
     TimeLine *timeLine;
 
+    Cursor *cursor;
+
     QRectF boundingRectangle;
+
+    Selection *selection;
 
     /**
       * Makes sure that no gaps exist between tracks (for example after deleting a track).
       */
     void recalcPositions();
 
+    void cursorPosChanged(int pos);
+
+    /**
+      * Repositions the timeline to the top of the visible area.
+      */
+    void repositionTimeLine(QRectF visibleRectangle);
+
+    void resizeCursor();
+
+    bool createSelection;
+    int selectionStart, selectionEnd;
+    static const int ACTIONAREAOFFSET;
 };
 
 #endif // PRESENTATIONITEM_H

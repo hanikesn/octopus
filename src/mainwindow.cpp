@@ -17,7 +17,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui.mainView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
 
     connect(ui.mainView, SIGNAL(changedRange(qint64, qint64)), pa, SLOT(onRangeChanged(qint64, qint64)));
-    connect(this, SIGNAL(verticalScroll(QRectF)), pa, SLOT(onVerticalScroll(QRectF)));
+    connect(this, SIGNAL(verticalScroll(QRectF)), pa, SIGNAL(verticalScroll(QRectF)));
     connect(ui.mainView, SIGNAL(verticalScroll()), this, SLOT(onVerticalScroll()));
     connect(this, SIGNAL(changedWindowSize(QSize)), pa, SLOT(onChangedWindowSize(QSize)));
 }

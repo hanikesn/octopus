@@ -7,12 +7,14 @@
 
 
 
-Cursor::Cursor(QGraphicsScene *parent) :
+Cursor::Cursor(int offset, QGraphicsScene *parent) :
     pen(Qt::red),
     brush(Qt::red),
-    minHeight(712)
+    minHeight(712),
+    offset(offset)
 {
     setGeometry(0, 0, 1, minHeight);
+    setZValue(1.1);
 }
 
 Cursor::~Cursor()

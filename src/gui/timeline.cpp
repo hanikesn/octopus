@@ -37,7 +37,6 @@ void TimeLine::paint(QPainter *painter,
     painter->drawRoundedRect(frame, 10.0, 10.0);
 }
 
-
 QRectF TimeLine::boundingRect(){    
     return QRectF(0, 0, geometry().width(), geometry().height());
 }

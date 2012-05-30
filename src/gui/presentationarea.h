@@ -9,7 +9,6 @@ class Track;
 class QVBoxLayout;
 class QGraphicsScene;
 class QGraphicsWidget;
-class TimeLine;
 class Cursor;
 
 class PresentationArea : public QObject
@@ -20,32 +19,24 @@ public:
     ~PresentationArea();
 
 signals:
+    void rangeChanged(qint64 begin, qint64 end);
+    void changedWindowSize(QSize size);
+    void verticalScroll(QRectF visibleRectangle);
 
 public slots:
     void onAddTrack();
     void onDelete(Track *t);
     void onRangeChanged(qint64 begin, qint64 end);    
-    void onVerticalScroll(QRectF visibleRectangle);
     void onChangedWindowSize(QSize size);
 
-private slots:
-    void onCursorPosChanged(int pos);
-
 private:    
-
-    PresentationItem *pi;
-
-    TimeLine *timeLine;
+    PresentationItem *pi;    
 
     QList<Track*> tracks;    
 
     QSize currentViewSize;
 
-    Cursor *cursor;
-
     static const int ACTIONAREAOFFSET;
-
-    void resizeCursor();
 };
 
 #endif // PRESENTATIONAREA_H

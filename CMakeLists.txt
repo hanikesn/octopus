@@ -14,6 +14,7 @@ SET(Octopus_SOURCES
   src/gui/trackscene.cpp
   src/gui/presentationitem.cpp
   src/gui/cursor.cpp
+  src/gui/selection.cpp
 )
 SET(Octopus_HEADERS
   src/mainwindow.h
@@ -25,6 +26,7 @@ SET(Octopus_HEADERS
   src/gui/trackscene.h
   src/gui/presentationitem.h
   src/gui/cursor.h
+  src/gui/selection.h
 )
 SET(Octopus_FORMS
   ui/mainwindow.ui
