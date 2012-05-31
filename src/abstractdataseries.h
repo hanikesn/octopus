@@ -12,12 +12,12 @@ class AbstractDataSeries : public QObject
 {
     Q_OBJECT
 public:
-    AbstractDataSeries(const QString &deviceName, const QString &dataSeriesName, DataProperty::Properties properties);
+    AbstractDataSeries(const QString &deviceName, const QString &dataSeriesName, Data::Properties properties);
 
     QString device() const;
     QString name() const;
     QString fullName() const;
-    DataProperty::Properties properties() const;
+    Data::Properties properties() const;
 
     virtual void addData(qint64 timeStamp, const Value &value) = 0;
 
@@ -38,7 +38,7 @@ private:
     /**
      * Stores a combination of data property flags.
      */
-    DataProperty::Properties props;
+    Data::Properties props;
 };
 
 #endif // ABSTRACTDATASERIES_H

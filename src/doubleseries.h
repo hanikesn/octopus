@@ -10,7 +10,7 @@ class DoubleSeries : public AbstractDataSeries
 {
     Q_OBJECT
 public:
-    DoubleSeries(const QString &deviceName, const QString &name, DataProperty::Properties properties);
+    DoubleSeries(const QString &deviceName, const QString &name, Data::Properties properties);
     
     void addData(qint64 timeStamp, const Value &value);
 

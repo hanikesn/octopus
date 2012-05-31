@@ -10,7 +10,7 @@ class StringSeries : public AbstractDataSeries
 {
     Q_OBJECT
 public:
-    StringSeries(const QString& deviceName, const QString& dataSeriesName, DataProperty::Properties properties);
+    StringSeries(const QString& deviceName, const QString& dataSeriesName, Data::Properties properties);
 
     void addData(qint64 timeStamp, const Value &value);
 
