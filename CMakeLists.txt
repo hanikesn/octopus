@@ -6,6 +6,11 @@ FIND_PACKAGE(Qt4 REQUIRED)
 SET(Octopus_SOURCES
   src/main.cpp
   src/mainwindow.cpp
+  src/abstractdataseries.cpp
+  src/stringseries.cpp
+  src/doubleseries.cpp
+  src/dataprovider.cpp
+  src/value.cpp
   src/gui/track.cpp
   src/gui/presentationarea.cpp
   src/gui/timeline.cpp
@@ -18,6 +23,11 @@ SET(Octopus_SOURCES
 )
 SET(Octopus_HEADERS
   src/mainwindow.h
+  src/abstractdataseries.h
+  src/stringseries.h
+  src/doubleseries.h
+  src/dataprovider.h
+  src/value.h
   src/gui/track.h
   src/gui/presentationarea.h
   src/gui/timeline.h
