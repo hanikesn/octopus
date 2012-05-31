@@ -56,5 +56,3 @@ void Selection::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 {
     menu->popup(event->screenPos());
 }
-
-

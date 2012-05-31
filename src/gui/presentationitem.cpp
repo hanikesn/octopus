@@ -15,20 +15,21 @@ PresentationItem::PresentationItem(QGraphicsScene *parent) :
     QGraphicsItem(0, parent),
     parent(parent),
     boundingRectangle(0, 0, 0, 0),
-    createSelection(false)
-{        
-    // setup timeLine
+    createSelection(false),
+    minCoverHeight(712)
+{            
     timeLine = new TimeLine(ACTIONAREAOFFSET, this, 0);
     timeLine->setZValue(1.0);
 
-    // setup cursor
     cursor = new Cursor(ACTIONAREAOFFSET, parent);    
     cursor->setParentItem(this);
     cursor->setPos(ACTIONAREAOFFSET, 0);
     cursor->setZValue(1.1);
+    cursor->resize(1, minCoverHeight);
 
     selectedArea = new Selection(parent);
     selectedArea->setZValue(0.9);
+    selectedArea->setHeight(minCoverHeight);
 
     boundingRectangle.setWidth(timeLine->size().width());
     boundingRectangle.setHeight(timeLine->size().height());
@@ -68,12 +69,13 @@ void PresentationItem::addTrack(Track *t)
 
     parent->setSceneRect(boundingRectangle);
 
-    resizeCursor();
+    resizeCursorAndSelection();
 }
 
 void PresentationItem::deleteTrack(Track *t)
 {
     boundingRectangle.setHeight(boundingRectangle.height() - t->size().height());
+    parent->setSceneRect(boundingRectangle);
 
     QGraphicsProxyWidget *del;
     foreach (del, tracks){
@@ -85,8 +87,7 @@ void PresentationItem::deleteTrack(Track *t)
     }
 
     recalcPositions();
-    parent->setSceneRect(boundingRectangle);
-    resizeCursor();
+    resizeCursorAndSelection();
 }
 
 void PresentationItem::recalcPositions()
@@ -109,7 +110,9 @@ void PresentationItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
             (QApplication::keyboardModifiers() == Qt::ShiftModifier) && (event->pos().x() >= ACTIONAREAOFFSET)){
         createSelection = true;
         selectionStart = event->pos().x();
-        selectedArea->setHeight(boundingRectangle.height());
+        int selectionHeight = boundingRectangle.height() > minCoverHeight ?
+                    boundingRectangle.height() : minCoverHeight;
+        selectedArea->setHeight(selectionHeight);
         selectedArea->setVisible(true);
     }
 }
@@ -174,8 +177,8 @@ void PresentationItem::recalcBoundingRec()
 {
     // If there are no tracks height/width are the size of the timeLine
     if(tracks.isEmpty()){
-        boundingRectangle.setHeight(timeLine->size().height());
-        boundingRectangle.setWidth(timeLine->size().width());
+        boundingRectangle.setHeight(minCoverHeight);
+        boundingRectangle.setWidth(timeLine->size().width());        
         return;
     }
 
@@ -191,7 +194,7 @@ void PresentationItem::recalcBoundingRec()
 
     boundingRectangle.setHeight(height);
     boundingRectangle.setWidth(width);
-    parent->setSceneRect(boundingRectangle);
+    parent->setSceneRect(boundingRectangle);    
 }
 
 void PresentationItem::cursorPosChanged(int pos)
@@ -200,22 +203,22 @@ void PresentationItem::cursorPosChanged(int pos)
     cursor->setPos(pos, 0);
 }
 
-void PresentationItem::resizeCursor()
-{
-    if(boundingRectangle.height() > cursor->getMinHeight())
-        cursor->resize(1, boundingRectangle.height());
-    else
-        cursor->resize(1, cursor->getMinHeight());
-}
-
 void PresentationItem::onChangedWindowSize(QSize size)
 {
-    timeLine->resize(size.width(), timeLine->size().height());
+    minCoverHeight = size.height();
 
-    // resize cursor
-    cursor->setMinHeight(size.height());
+    // resize cursor, timeLine, selectedArea
+    if(boundingRectangle.height() > minCoverHeight){
+        cursor->resize(1, boundingRectangle.height());
+        selectedArea->setHeight(boundingRectangle.height());
+        timeLine->resize(size.width(), timeLine->size().height());
+    }else{
+        cursor->resize(1, minCoverHeight);
+        selectedArea->setHeight(minCoverHeight);
+        timeLine->resize(size.width(), timeLine->size().height());
+    }
+
     recalcBoundingRec();
-    resizeCursor();
 }
 
 void PresentationItem::onRangeChanged(qint64 begin, qint64 end)
@@ -226,4 +229,13 @@ void PresentationItem::onRangeChanged(qint64 begin, qint64 end)
 void PresentationItem::onVerticalScroll(QRectF visibleRectangle)
 {
     repositionTimeLine(visibleRectangle);
+}
+
+void PresentationItem::resizeCursorAndSelection()
+{
+    recalcBoundingRec();
+    if(boundingRectangle.height() > minCoverHeight){
+        cursor->resize(1, boundingRectangle.height());
+        selectedArea->setHeight(boundingRectangle.height());
+    }
 }
