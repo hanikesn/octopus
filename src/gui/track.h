@@ -15,7 +15,8 @@ class Track : public QWidget
 {
     Q_OBJECT
 public:
-    explicit Track(DataProvider *dataProvider, QWidget *parent = 0);
+    Track(const DataProvider *dataProvider, QWidget *parent = 0);
+    Track(const DataProvider *dataProvider, const QString &fullDataSeriesName, QWidget *parent = 0);
 
 signals:
     void del(Track*);
@@ -28,12 +29,14 @@ private:
     Ui::Track ui;
     static const QString ICON_AS_BUTTON;
 
-    DataProvider *dataProvider;
+    const DataProvider *dataProvider;
+    QList<AbstractDataSeries*> dataSeries;
 
     void setupButtons();
     void setupPlot();
 
     void addData();
+    void addSource(const QString &fullDataSeriesName);
 
 private slots:
     void onDelete();

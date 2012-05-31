@@ -10,7 +10,7 @@ const QString Track::ICON_AS_BUTTON = QString(
             "border: 0;"
             "margin: 0px;");
 
-Track::Track(DataProvider *dataProvider, QWidget *parent) :
+Track::Track(const DataProvider *dataProvider, QWidget *parent) :
     QWidget(parent),
     dataProvider(dataProvider)
 {
@@ -20,6 +20,18 @@ Track::Track(DataProvider *dataProvider, QWidget *parent) :
     setupPlot();
 
     addData();
+}
+
+Track::Track(const DataProvider *dataProvider, const QString &fullDataSeriesName, QWidget *parent) :
+    QWidget(parent),
+    dataProvider(dataProvider)
+{
+    ui.setupUi(this);
+
+    setupButtons();
+    setupPlot();
+
+    addSource(fullDataSeriesName);
 }
 
 void Track::setupButtons()
@@ -43,6 +55,7 @@ void Track::setupPlot()
 void Track::setPlotRange(qint64 begin, qint64 end)
 {
     int rangeSize = ui.plot->xAxis->range().size();
+    // TODO(Steffi): Fix!!
     ui.plot->xAxis->setRange(begin, begin + rangeSize);
     ui.plot->replot();
 }
@@ -81,6 +94,15 @@ void Track::addData()
     ///////////////////////////////////////////////////////////////
 }
 
+void Track::addSource(const QString &fullDataSeriesName)
+{
+    // TODO(Steffi)
+
+    // get data series from dataProvider
+    // get data from data series
+    // show data
+}
+
 void Track::onNewData(const AbstractDataSeries *series, qint64 timeStamp)
 {
 //    series->getData(timeStamp);
@@ -106,11 +128,10 @@ void Track::onSources()
     // parse list entries
     // show dialog
 
+    // save dialog result in string list
     QList<QString> selected;
     foreach (QString s, selected) {
-        // get selected series from dataProvider
-        // get data from data series
-        // show data
+        addSource(s);
     }
 }
 
