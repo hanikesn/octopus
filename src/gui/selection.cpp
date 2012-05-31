@@ -2,6 +2,9 @@
 
 #include <QGraphicsItem>
 #include <QPainter>
+#include <QGraphicsSceneContextMenuEvent>
+#include <QMenu>
+#include <QAction>
 
 Selection::Selection(QGraphicsScene *parent) :
     QGraphicsItem(0, parent),
@@ -10,11 +13,15 @@ Selection::Selection(QGraphicsScene *parent) :
     pen(Qt::lightGray),
     brush(Qt::lightGray)
 {
-    setZValue(0.9);
+    menu = new QMenu(0);
+    exportAction = new QAction(tr("Export Range"), this);
+    menu->addAction(exportAction);
+    connect(exportAction, SIGNAL(triggered()), this, SIGNAL(exportTriggered()));
 }
 
 Selection::~Selection()
 {
+    delete menu;
 }
 
 QRectF Selection::boundingRect() const
@@ -43,6 +50,11 @@ void Selection::setHeight(int h)
 void Selection::setWidth(int w)
 {
     width = w;
+}
+
+void Selection::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
+{
+    menu->popup(event->screenPos());
 }
 
 

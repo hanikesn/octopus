@@ -2,15 +2,17 @@
 #define TIMELINE_H
 
 #include <QGraphicsWidget>
+#include <QPen>
 
 
 class QGraphicsItem;
+
 
 class TimeLine : public QGraphicsWidget
 {
     Q_OBJECT
 public:
-    explicit TimeLine(QGraphicsItem * parent = 0, Qt::WindowFlags wFlags = 0);
+    explicit TimeLine(int offset, QGraphicsItem * parent = 0, Qt::WindowFlags wFlags = 0);
     void adjustVisibleRange(qint64 begin, qint64 end);
 
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
@@ -18,9 +20,26 @@ public:
     QRectF boundingRect();
 
 public slots:    
-
+    void setRange(qint64 start, qint64 end);
 private:
+    qint64 beginRange, endRange;
+    int offset;
 
+    // stuff to draw ticks:
+    double value;
+    int rangeOffset;
+    int currentPos;
+    int bottom;
+    int textBoxWidth;
+    int textBoxHeight;
+    int shortTickHeight;
+    int mediumTickHeight;
+    int largeTickHeight;
+
+    QPen pen;
+
+
+    void drawTicks(QPainter *painter);
 };
 
 #endif // TIMELINE_H

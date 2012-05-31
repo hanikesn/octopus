@@ -18,22 +18,22 @@ PresentationItem::PresentationItem(QGraphicsScene *parent) :
     createSelection(false)
 {        
     // setup timeLine
-    timeLine = new TimeLine(this, 0);
-    //    this->timeLine->setParentItem(this);
-    timeLine->setZValue(1);
+    timeLine = new TimeLine(ACTIONAREAOFFSET, this, 0);
+    timeLine->setZValue(1.0);
 
     // setup cursor
-    cursor = new Cursor(ACTIONAREAOFFSET, parent);
-
-    // TODO(domi): setParentItem() nutzen
-    //    cursor->setParentItem(this);
-    parent->addItem(cursor);
+    cursor = new Cursor(ACTIONAREAOFFSET, parent);    
+    cursor->setParentItem(this);
     cursor->setPos(ACTIONAREAOFFSET, 0);
+    cursor->setZValue(1.1);
 
-    selection = new Selection(parent);
+    selectedArea = new Selection(parent);
+    selectedArea->setZValue(0.9);
 
     boundingRectangle.setWidth(timeLine->size().width());
     boundingRectangle.setHeight(timeLine->size().height());
+
+    connect(selectedArea, SIGNAL(exportTriggered()), this, SIGNAL(exportTriggered()));
 }
 
 PresentationItem::~PresentationItem()
@@ -44,9 +44,8 @@ QRectF PresentationItem::boundingRect() const
 {
     if(childItems().isEmpty())
         return QRectF(0, 0, 100, 100);
-    else{
-        return boundingRectangle;
-    }
+    else
+        return boundingRectangle;    
 }
 
 void PresentationItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
@@ -56,15 +55,14 @@ void PresentationItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *
 }
 
 void PresentationItem::addTrack(Track *t)
-{
-    //TODO(domi): was passiert, wenn man am Anfang das Fenster kleiner zieht?
+{    
     boundingRectangle.setHeight(boundingRectangle.height() + t->size().height());
     if(t->size().width() > boundingRectangle.width())
         boundingRectangle.setWidth(t->size().width());
 
     int yPos = timeLine->size().height() + 5; // + 5 for border
     trackToAdd = parent->addWidget(t);
-    trackToAdd->setPos(0, yPos + (childItems().size()-1)*t->height());
+    trackToAdd->setPos(0, yPos + (tracks.size())*t->height());
     trackToAdd->setParentItem(this);
     tracks.append(trackToAdd);
 
@@ -108,44 +106,62 @@ void PresentationItem::repositionTimeLine(QRectF visibleRectangle)
 void PresentationItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
     if((event->button() == Qt::LeftButton) &&
-            (QApplication::keyboardModifiers() == Qt::ShiftModifier)){
+            (QApplication::keyboardModifiers() == Qt::ShiftModifier) && (event->pos().x() >= ACTIONAREAOFFSET)){
         createSelection = true;
         selectionStart = event->pos().x();
+        selectedArea->setHeight(boundingRectangle.height());
+        selectedArea->setVisible(true);
     }
 }
 
 void PresentationItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
-    if(createSelection){
-        selectionEnd = event->pos().x();
+    if(createSelection){        
         createSelection = false;
+        selectionEnd = event->pos().x() < ACTIONAREAOFFSET ? ACTIONAREAOFFSET : event->pos().x();
 
-        int diff = 0;
+        int width = 0;
         int begin = 0;
         if(selectionEnd > selectionStart){
-            diff = selectionEnd - selectionStart + 1;
+            width = selectionEnd - selectionStart + 1;
             begin = selectionStart;
         }else{
-            diff = selectionStart - selectionEnd + 1;
-            begin = selectionEnd;
+            width = selectionStart - selectionEnd + 1;
+            begin = selectionEnd;            
         }
 
-        selection->setHeight(boundingRectangle.height());
-        selection->setWidth(diff);
-        selection->setPos(begin, 0);
-        selection->setVisible(true);
+        selectedArea->setWidth(width);
+        selectedArea->setPos(begin, 0);
         cursor->setVisible(false);
+        emit selection(begin, begin + width - 1);
     }else{
-        selection->setVisible(false);
+        selectedArea->setVisible(false);
         cursor->setVisible(true);
         cursorPosChanged(event->pos().x());
+        // others need to know that there is no selection active any more
+        emit selection(-1, -1);
     }
 }
 
 void PresentationItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
-{
-    if(QApplication::keyboardModifiers() != Qt::ShiftModifier){
+{    
+    if((QApplication::keyboardModifiers() != Qt::ShiftModifier)){
         createSelection = false;
+    } else if(event->pos().x() >= ACTIONAREAOFFSET) {
+        selectionEnd = event->pos().x();
+        int width = 0;
+        int begin = 0;
+        if(selectionEnd > selectionStart){
+            width = selectionEnd - selectionStart + 1;
+            begin = selectionStart;
+        }else{
+            width = selectionStart - selectionEnd + 1;
+            begin = selectionEnd;
+        }
+
+        selectedArea->setWidth(width);
+        selectedArea->update(0, 0, selectedArea->getWidth(), selectedArea->getHeight());
+        selectedArea->setPos(begin, 0);
     }
 }
 

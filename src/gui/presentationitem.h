@@ -43,11 +43,12 @@ public slots:
 
     void onChangedWindowSize(QSize size);
 
-    void onVerticalScroll(QRectF visibleRectangle);
-
+    void onVerticalScroll(QRectF visibleRectangle);    
 
 signals:
+    void selection(qint64 start, qint64 end);
 
+    void exportTriggered();
 
 private:
     QGraphicsScene *parent;
@@ -60,7 +61,7 @@ private:
 
     QRectF boundingRectangle;
 
-    Selection *selection;
+    Selection *selectedArea ;
 
     /**
       * Makes sure that no gaps exist between tracks (for example after deleting a track).

@@ -17,9 +17,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui.mainView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
 
     connect(ui.mainView, SIGNAL(changedRange(qint64, qint64)), pa, SLOT(onRangeChanged(qint64, qint64)));
-    connect(this, SIGNAL(verticalScroll(QRectF)), pa, SIGNAL(verticalScroll(QRectF)));
     connect(ui.mainView, SIGNAL(verticalScroll()), this, SLOT(onVerticalScroll()));
+    connect(this, SIGNAL(verticalScroll(QRectF)), pa, SIGNAL(verticalScroll(QRectF)));
     connect(this, SIGNAL(changedWindowSize(QSize)), pa, SLOT(onChangedWindowSize(QSize)));
+    connect(pa, SIGNAL(exportRange(qint64,qint64)), this, SLOT(onExportRange(qint64,qint64)));
 }
 
 MainWindow::~MainWindow()
@@ -89,4 +90,9 @@ void MainWindow::setUpButtonBars()
 void MainWindow::onVerticalScroll()
 {    
     emit verticalScroll(ui.mainView->mapToScene(ui.mainView->viewport()->geometry()).boundingRect());
+}
+
+void MainWindow::onExportRange(qint64 begin, qint64 end)
+{
+    qDebug() << "MainWindow::onExportRange " << begin << ":" << end;
 }
