@@ -1,6 +1,7 @@
 #ifndef Track_H
 #define Track_H
 
+#include "dataprovider.h"
 #include "ui_track.h"
 
 #include <QLabel>
@@ -8,23 +9,28 @@
 #include <QStyleOption>
 #include <QWidget>
 
+class AbstractDataSeries;
+
 class Track : public QWidget
 {
     Q_OBJECT
 public:
-    explicit Track(QWidget *parent = 0);
+    explicit Track(DataProvider *dataProvider, QWidget *parent = 0);
 
 signals:
     void del(Track*);
 
-public slots:    
+public slots:
     void setPlotRange(qint64 begin, qint64 end);
+    void onNewData(const AbstractDataSeries *series, qint64 timeStamp);
 
 private:
-    void addData();
-
     Ui::Track ui;
     static const QString ICON_AS_BUTTON;
+
+    DataProvider *dataProvider;
+
+    void addData();
 
 private slots:
     void onDelete();

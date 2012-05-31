@@ -3,6 +3,7 @@
 
 #include <QObject>
 
+#include "dataprovider.h"
 #include "presentationitem.h"
 
 class Track;
@@ -15,7 +16,7 @@ class PresentationArea : public QObject
 {
     Q_OBJECT
 public:
-    explicit PresentationArea(QGraphicsScene *scene);
+    explicit PresentationArea(QGraphicsScene *scene, DataProvider *dataProvider);
     ~PresentationArea();
 
 signals:
@@ -35,9 +36,10 @@ private slots:
     void onExportTriggered();
 
 private:    
-    PresentationItem *pi;    
+    PresentationItem *pi;
 
-    QList<Track*> tracks;    
+    DataProvider *dataProvider;
+    QList<Track*> tracks;
 
     QSize currentViewSize;
 

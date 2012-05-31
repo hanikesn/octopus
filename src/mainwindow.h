@@ -1,7 +1,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <mainwindow.h>
+#include "dataprovider.h"
+#include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "gui/presentationarea.h"
 #include "gui/trackscene.h"
@@ -50,6 +51,8 @@ private:
 
     // Area for the tracks
     PresentationArea *pa;
+
+    DataProvider *dataProvider;
 
     Ui::MainWindow ui;
 

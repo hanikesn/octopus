@@ -2,6 +2,7 @@
 
 #include <QDebug>
 
+#include "dataprovider.h"
 #include "gui/presentationarea.h"
 #include "gui/mainview.h"
 
@@ -9,7 +10,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent)
 {
     ui.setupUi(this);
-    pa = new PresentationArea(&trackScene);
+    pa = new PresentationArea(&trackScene, dataProvider);
     setUpButtonBars();
 
     ui.mainView->setAlignment(Qt::AlignTop | Qt::AlignLeft);

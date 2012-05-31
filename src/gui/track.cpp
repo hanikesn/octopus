@@ -1,5 +1,7 @@
 #include "track.h"
 
+#include "abstractdataseries.h"
+
 #include <cmath>
 
 #include <QDebug>
@@ -8,8 +10,9 @@ const QString Track::ICON_AS_BUTTON = QString(
             "border: 0;"
             "margin: 0px;");
 
-Track::Track(QWidget *parent) :
-    QWidget(parent)
+Track::Track(DataProvider *dataProvider, QWidget *parent) :
+    QWidget(parent),
+    dataProvider(dataProvider)
 {
     ui.setupUi(this);
     ui.plot->xAxis->setRange(0, 30);
@@ -67,10 +70,17 @@ void Track::addData()
     ///////////////////////////////////////////////////////////////
 }
 
+void Track::onNewData(const AbstractDataSeries *series, qint64 timeStamp)
+{
+//    series->getData(timeStamp);
+
+    // TODO(Steffi)
+}
+
 void Track::onDelete()
 {
     qDebug() << "Pretending to delete track.";
-    // TODO(Steffi): Implement
+    // TODO(Steffi)
 
     emit del(this);
 }
@@ -78,11 +88,23 @@ void Track::onDelete()
 void Track::onSources()
 {
     qDebug() << "Pretending to show source dialog.";
-    // TODO(Steffi): Implement
+
+    // TODO(Steffi):
+
+    QList<QString> dataSeriesNames = dataProvider->getDataSeriesList();
+    // parse list entries
+    // show dialog
+
+    QList<QString> selected;
+    foreach (QString s, selected) {
+        // get selected series from dataProvider
+        // get data from data series
+        // show data
+    }
 }
 
 void Track::onPlotSettings()
 {
     qDebug() << "Pretending to show plot settings dialog.";
-    // TODO(Steffi): Implement
+    // TODO(Steffi)
 }
