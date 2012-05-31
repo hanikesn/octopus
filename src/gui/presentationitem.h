@@ -75,9 +75,7 @@ private:
       */
     void repositionTimeLine(QRectF visibleRectangle);
 
-    void resizeNonTrackItems(QSize size);
-
-    void trackAddedOrDeleted();
+    void resizeCursorAndSelection();
 
     bool createSelection;
     int selectionStart, selectionEnd;

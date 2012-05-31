@@ -20,8 +20,6 @@ private:
     int offset;
     QBrush brush;
     QPen pen;
-
-
 };
 
 #endif // CURSOR_H
