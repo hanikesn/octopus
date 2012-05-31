@@ -9,12 +9,16 @@
 const int PresentationArea::ACTIONAREAOFFSET = 52;
 
 PresentationArea::PresentationArea(QGraphicsScene *scene):
-    currentViewSize(930, 1)
+    currentViewSize(930, 1),
+    selectionBegin(-1),
+    selectionEnd(-1)
 {
     pi = new PresentationItem(scene);
     connect(this, SIGNAL(changedWindowSize(QSize)), pi, SLOT(onChangedWindowSize(QSize)));
     connect(this, SIGNAL(rangeChanged(qint64,qint64)), pi, SLOT(onRangeChanged(qint64,qint64)));
     connect(this, SIGNAL(verticalScroll(QRectF)), pi, SLOT(onVerticalScroll(QRectF)));
+    connect(pi, SIGNAL(selection(qint64,qint64)), this, SLOT(onSelection(qint64,qint64)));
+    connect(pi, SIGNAL(exportTriggered()), this, SLOT(onExportTriggered()));
 }
 
 PresentationArea::~PresentationArea()
@@ -53,4 +57,22 @@ void PresentationArea::onChangedWindowSize(QSize size)
     }
     // propagate event (resizes TimeLine and Cursor in PresentationItem)
     emit changedWindowSize(size);
+}
+
+void PresentationArea::onSelection(qint64 begin, qint64 end)
+{
+    if((begin != -1) && (end != -1)){
+        selectionBegin = begin;
+        selectionEnd = end;
+    }else{
+        // no more selection:
+        selectionBegin = -1;
+        selectionEnd = -1;
+    }
+}
+
+void PresentationArea::onExportTriggered()
+{
+    // propagate signal
+    emit exportRange(selectionBegin, selectionEnd);
 }

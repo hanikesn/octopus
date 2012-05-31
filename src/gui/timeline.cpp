@@ -40,3 +40,7 @@ void TimeLine::paint(QPainter *painter,
 QRectF TimeLine::boundingRect(){    
     return QRectF(0, 0, geometry().width(), geometry().height());
 }
+
+void TimeLine::setRange(qint64 start, qint64 end)
+{
+}

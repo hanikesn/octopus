@@ -27,11 +27,13 @@ PresentationItem::PresentationItem(QGraphicsScene *parent) :
     cursor->setPos(ACTIONAREAOFFSET, 0);
     cursor->setZValue(1.1);
 
-    selection = new Selection(parent);
-    selection->setZValue(0.9);
+    selectedArea = new Selection(parent);
+    selectedArea->setZValue(0.9);
 
     boundingRectangle.setWidth(timeLine->size().width());
     boundingRectangle.setHeight(timeLine->size().height());
+
+    connect(selectedArea, SIGNAL(exportTriggered()), this, SIGNAL(exportTriggered()));
 }
 
 PresentationItem::~PresentationItem()
@@ -126,15 +128,18 @@ void PresentationItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
             begin = selectionEnd;
         }
 
-        selection->setHeight(boundingRectangle.height());
-        selection->setWidth(diff);
-        selection->setPos(begin, 0);
-        selection->setVisible(true);
+        selectedArea->setHeight(boundingRectangle.height());
+        selectedArea->setWidth(diff);
+        selectedArea->setPos(begin, 0);
+        selectedArea->setVisible(true);
         cursor->setVisible(false);
+        emit selection(begin, begin + diff - 1);
     }else{
-        selection->setVisible(false);
+        selectedArea->setVisible(false);
         cursor->setVisible(true);
         cursorPosChanged(event->pos().x());
+        // others need to no that there is no selection active any more
+        emit selection(-1, -1);
     }
 }
 

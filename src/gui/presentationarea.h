@@ -22,6 +22,7 @@ signals:
     void rangeChanged(qint64 begin, qint64 end);
     void changedWindowSize(QSize size);
     void verticalScroll(QRectF visibleRectangle);
+    void exportRange(qint64 begin, qint64 end);
 
 public slots:
     void onAddTrack();
@@ -29,12 +30,18 @@ public slots:
     void onRangeChanged(qint64 begin, qint64 end);    
     void onChangedWindowSize(QSize size);
 
+private slots:
+    void onSelection(qint64 begin, qint64 end);
+    void onExportTriggered();
+
 private:    
     PresentationItem *pi;    
 
     QList<Track*> tracks;    
 
     QSize currentViewSize;
+
+    qint64 selectionBegin, selectionEnd;
 
     static const int ACTIONAREAOFFSET;
 };

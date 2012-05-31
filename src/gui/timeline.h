@@ -18,7 +18,7 @@ public:
     QRectF boundingRect();
 
 public slots:    
-
+    void setRange(qint64 start, qint64 end);
 private:
 
 };
