@@ -75,10 +75,15 @@ private:
       */
     void repositionTimeLine(QRectF visibleRectangle);
 
-    void resizeCursor();
+    void resizeNonTrackItems(QSize size);
+
+    void trackAddedOrDeleted();
 
     bool createSelection;
     int selectionStart, selectionEnd;
+
+    // minmal height to cover the full presentationArea
+    int minCoverHeight;
     static const int ACTIONAREAOFFSET;
 };
 

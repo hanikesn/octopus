@@ -10,6 +10,7 @@ Selection::Selection(QGraphicsScene *parent) :
     QGraphicsItem(0, parent),
     height(0),
     width(0),
+//    minHeight(712),
     pen(Qt::lightGray),
     brush(Qt::lightGray)
 {
@@ -56,5 +57,3 @@ void Selection::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 {
     menu->popup(event->screenPos());
 }
-
-
