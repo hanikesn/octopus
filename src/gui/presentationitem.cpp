@@ -106,47 +106,62 @@ void PresentationItem::repositionTimeLine(QRectF visibleRectangle)
 void PresentationItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
     if((event->button() == Qt::LeftButton) &&
-            (QApplication::keyboardModifiers() == Qt::ShiftModifier)){
+            (QApplication::keyboardModifiers() == Qt::ShiftModifier) && (event->pos().x() >= ACTIONAREAOFFSET)){
         createSelection = true;
         selectionStart = event->pos().x();
+        selectedArea->setHeight(boundingRectangle.height());
+        selectedArea->setVisible(true);
     }
 }
 
 void PresentationItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
-    if(createSelection){
-        selectionEnd = event->pos().x();
+    if(createSelection){        
         createSelection = false;
+        selectionEnd = event->pos().x() < ACTIONAREAOFFSET ? ACTIONAREAOFFSET : event->pos().x();
 
-        int diff = 0;
+        int width = 0;
         int begin = 0;
         if(selectionEnd > selectionStart){
-            diff = selectionEnd - selectionStart + 1;
+            width = selectionEnd - selectionStart + 1;
             begin = selectionStart;
         }else{
-            diff = selectionStart - selectionEnd + 1;
-            begin = selectionEnd;
+            width = selectionStart - selectionEnd + 1;
+            begin = selectionEnd;            
         }
 
-        selectedArea->setHeight(boundingRectangle.height());
-        selectedArea->setWidth(diff);
+        selectedArea->setWidth(width);
         selectedArea->setPos(begin, 0);
-        selectedArea->setVisible(true);
         cursor->setVisible(false);
-        emit selection(begin, begin + diff - 1);
+        emit selection(begin, begin + width - 1);
     }else{
         selectedArea->setVisible(false);
         cursor->setVisible(true);
         cursorPosChanged(event->pos().x());
-        // others need to no that there is no selection active any more
+        // others need to know that there is no selection active any more
         emit selection(-1, -1);
     }
 }
 
 void PresentationItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
-{
-    if(QApplication::keyboardModifiers() != Qt::ShiftModifier){
+{    
+    if((QApplication::keyboardModifiers() != Qt::ShiftModifier)){
         createSelection = false;
+    } else if(event->pos().x() >= ACTIONAREAOFFSET) {
+        selectionEnd = event->pos().x();
+        int width = 0;
+        int begin = 0;
+        if(selectionEnd > selectionStart){
+            width = selectionEnd - selectionStart + 1;
+            begin = selectionStart;
+        }else{
+            width = selectionStart - selectionEnd + 1;
+            begin = selectionEnd;
+        }
+
+        selectedArea->setWidth(width);
+        selectedArea->update(0, 0, selectedArea->getWidth(), selectedArea->getHeight());
+        selectedArea->setPos(begin, 0);
     }
 }
 
