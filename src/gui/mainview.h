@@ -19,8 +19,6 @@ public slots:
 
 protected:
     void scrollContentsBy(int dx, int dy);
-
-
 };
 
 #endif // MAINVIEW_H

@@ -86,8 +86,6 @@ void MainWindow::setUpButtonBars()
     addToolBar(Qt::LeftToolBarArea, ui.mainToolBar);
 }
 
-
-
 void MainWindow::onVerticalScroll()
 {    
     emit verticalScroll(ui.mainView->mapToScene(ui.mainView->viewport()->geometry()).boundingRect());

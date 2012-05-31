@@ -15,18 +15,29 @@ Track::Track(DataProvider *dataProvider, QWidget *parent) :
     dataProvider(dataProvider)
 {
     ui.setupUi(this);
-    ui.plot->xAxis->setRange(0, 30);
 
+    setupButtons();
+    setupPlot();
+
+    addData();
+}
+
+void Track::setupButtons()
+{
     ui.delButton->setStyleSheet(ICON_AS_BUTTON);
     connect(ui.delButton, SIGNAL(clicked()), this, SLOT(onDelete()));
 
+    // TODO(Steffi): srcButton-Label korrigieren
     ui.srcButton->setStyleSheet(ICON_AS_BUTTON);
     connect(ui.srcButton, SIGNAL(clicked()), this, SLOT(onSources()));
 
     ui.setButton->setStyleSheet(ICON_AS_BUTTON);
     connect(ui.setButton, SIGNAL(clicked()), this, SLOT(onPlotSettings()));
+}
 
-    addData();
+void Track::setupPlot()
+{
+    ui.plot->xAxis->setRange(0, 30);
 }
 
 void Track::setPlotRange(qint64 begin, qint64 end)

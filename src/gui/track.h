@@ -30,6 +30,9 @@ private:
 
     DataProvider *dataProvider;
 
+    void setupButtons();
+    void setupPlot();
+
     void addData();
 
 private slots:
