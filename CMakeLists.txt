@@ -23,6 +23,7 @@ SET(Octopus_SOURCES
 )
 SET(Octopus_HEADERS
   src/mainwindow.h
+  src/common.h
   src/abstractdataseries.h
   src/stringseries.h
   src/doubleseries.h

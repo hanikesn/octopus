@@ -2,6 +2,7 @@
 #define STRINGSERIES_H
 
 #include "abstractdataseries.h"
+#include "common.h"
 
 #include <QObject>
 
@@ -9,7 +10,7 @@ class StringSeries : public AbstractDataSeries
 {
     Q_OBJECT
 public:
-    StringSeries(const QString& deviceName, const QString& dataSeriesName, bool stateful);
+    StringSeries(const QString& deviceName, const QString& dataSeriesName, DataProperty::Properties properties);
 
     void addData(qint64 timeStamp, const Value &value);
 

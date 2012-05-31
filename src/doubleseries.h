@@ -2,6 +2,7 @@
 #define DOUBLESERIES_H
 
 #include "abstractdataseries.h"
+#include "common.h"
 
 #include <QObject>
 
@@ -9,7 +10,7 @@ class DoubleSeries : public AbstractDataSeries
 {
     Q_OBJECT
 public:
-    DoubleSeries(const QString &deviceName, const QString &dataSeriesName, bool stateful);
+    DoubleSeries(const QString &deviceName, const QString &name, DataProperty::Properties properties);
     
     void addData(qint64 timeStamp, const Value &value);
 
