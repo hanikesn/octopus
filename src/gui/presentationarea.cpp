@@ -8,7 +8,8 @@
 
 const int PresentationArea::ACTIONAREAOFFSET = 52;
 
-PresentationArea::PresentationArea(QGraphicsScene *scene):
+PresentationArea::PresentationArea(QGraphicsScene *scene, DataProvider *dataProvider):
+    dataProvider(dataProvider),
     currentViewSize(930, 1),
     selectionBegin(-1),
     selectionEnd(-1)
@@ -27,7 +28,7 @@ PresentationArea::~PresentationArea()
 
 void PresentationArea::onAddTrack()
 {
-    Track *t = new Track;
+    Track *t = new Track(dataProvider);
     tracks.append(t);
     connect(t, SIGNAL(del(Track*)), this, SLOT(onDelete(Track*)));
     pi->addTrack(t);       

@@ -1,6 +1,8 @@
 #ifndef ABSTRACTDATASERIES_H
 #define ABSTRACTDATASERIES_H
 
+#include "common.h"
+
 #include <QMap>
 #include <QObject>
 
@@ -10,12 +12,12 @@ class AbstractDataSeries : public QObject
 {
     Q_OBJECT
 public:
-    AbstractDataSeries(const QString &deviceName, const QString &dataSeriesName, bool stateful);
+    AbstractDataSeries(const QString &deviceName, const QString &dataSeriesName, DataProperty::Properties properties);
 
     QString device() const;
     QString name() const;
     QString fullName() const;
-    bool isStateful() const;
+    DataProperty::Properties properties() const;
 
     virtual void addData(qint64 timeStamp, const Value &value) = 0;
 
@@ -34,9 +36,9 @@ private:
     QString dataSeriesName;
 
     /**
-     * True if the recorded values refer to the state of the device, otherwise false.
+     * Stores a combination of data property flags.
      */
-    bool stateful;
+    DataProperty::Properties props;
 };
 
 #endif // ABSTRACTDATASERIES_H

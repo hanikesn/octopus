@@ -2,6 +2,7 @@
 #define DATAPROVIDER_H
 
 #include "abstractdataseries.h"
+#include "common.h"
 
 #include <QMap>
 #include <QObject>
@@ -28,7 +29,7 @@ signals:
     void unknownDataSeries();
 
 public slots:
-    void onNewDataSeries(const QString &deviceName, const QString &dataSeriesName, bool stateful);
+    void onNewDataSeries(const QString &deviceName, const QString &dataSeriesName, DataProperty::Properties properties);
 
     void onNewData(qint64 timestamp, const QString &fullDataSeriesName, const Value &value);
 

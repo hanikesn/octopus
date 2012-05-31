@@ -2,10 +2,10 @@
 
 #include "value.h"
 
-AbstractDataSeries::AbstractDataSeries(const QString &deviceName, const QString &name, bool stateful):
+AbstractDataSeries::AbstractDataSeries(const QString &deviceName, const QString &name, DataProperty::Properties properties):
     deviceName(deviceName),
     dataSeriesName(name),
-    stateful(stateful)
+    props(properties)
 {
 }
 
@@ -24,7 +24,7 @@ QString AbstractDataSeries::fullName() const
     return deviceName + "." + dataSeriesName;
 }
 
-bool AbstractDataSeries::isStateful() const
+DataProperty::Properties AbstractDataSeries::properties() const
 {
-    return stateful;
+    return props;
 }

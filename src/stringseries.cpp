@@ -2,8 +2,8 @@
 
 #include "value.h"
 
-StringSeries::StringSeries(const QString &deviceName, const QString &name, bool stateful) :
-    AbstractDataSeries(deviceName, name, stateful)
+StringSeries::StringSeries(const QString &deviceName, const QString &name, DataProperty::Properties properties) :
+    AbstractDataSeries(deviceName, name, properties)
 {
 }
 

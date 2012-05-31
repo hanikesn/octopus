@@ -1,5 +1,9 @@
 #include "dataprovider.h"
 
+#include "common.h"
+#include "doubleseries.h"
+#include "stringseries.h"
+
 DataProvider::DataProvider()
 {
 }
@@ -14,6 +18,18 @@ AbstractDataSeries* DataProvider::getDataSeries(const QString &fullName) const
     return dataSeries.value(fullName);
 }
 
+void DataProvider::onNewDataSeries(const QString &deviceName, const QString &dataSeriesName, DataProperty::Properties properties)
+{
+    AbstractDataSeries *series;
+    if (properties & DataProperty::INTERPOLATABLE) {
+        series = new DoubleSeries(deviceName, dataSeriesName, properties);
+    } else {
+        series = new StringSeries(deviceName, dataSeriesName, properties);
+    }
+
+    dataSeries.insert(deviceName + "." + dataSeriesName, series);
+}
+
 void DataProvider::onNewData(qint64 timestamp, const QString &fullDataSeriesName, const Value &value)
 {
     if (dataSeries.contains(fullDataSeriesName)) {
@@ -21,10 +37,4 @@ void DataProvider::onNewData(qint64 timestamp, const QString &fullDataSeriesName
     } else {
         emit unknownDataSeries();
     }
-}
-
-void DataProvider::onNewDataSeries(const QString &deviceName, const QString &dataSeriesName, bool stateful)
-{
-    // TODO(Steffi) : Need to know which type of data series to create!
-//    dataSeries.insert(deviceName + "." + dataSeriesName, new AbstractDataSeries(deviceName, dataSeriesName, stateful));
 }
