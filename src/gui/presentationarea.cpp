@@ -8,7 +8,7 @@
 
 const int PresentationArea::ACTIONAREAOFFSET = 52;
 
-PresentationArea::PresentationArea(QGraphicsScene *scene):
+PresentationArea::PresentationArea(QGraphicsScene *scene, DataProvider *dataProvider):
     dataProvider(dataProvider),
     currentViewSize(930, 1),
     selectionBegin(-1),
