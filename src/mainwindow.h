@@ -60,8 +60,7 @@ private:
 
     void setUpButtonBars();
 
-signals:    
-    void changedRange(qint64 begin, qint64 end);
+signals:
     void verticalScroll(QRectF visibleRectangle);
     void changedWindowSize(QSize size);
 

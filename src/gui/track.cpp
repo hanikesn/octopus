@@ -49,14 +49,12 @@ void Track::setupButtons()
 
 void Track::setupPlot()
 {
-    ui.plot->xAxis->setRange(0, 30);
+    setPlotRange(0, 30);
 }
 
 void Track::setPlotRange(qint64 begin, qint64 end)
 {
-    int rangeSize = ui.plot->xAxis->range().size();
-    // TODO(Steffi): Fix!!
-    ui.plot->xAxis->setRange(begin, begin + rangeSize);
+    ui.plot->xAxis->setRange(begin, end);
     ui.plot->replot();
 }
 
