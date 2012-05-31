@@ -1,11 +1,21 @@
 #include "timeline.h"
 
 #include <QPainter>
+#include <QPen>
 
 #include <QDebug>
 
-TimeLine::TimeLine(QGraphicsItem * parent, Qt::WindowFlags wFlags):
-    QGraphicsWidget(parent, wFlags)
+TimeLine::TimeLine(int offset, QGraphicsItem * parent, Qt::WindowFlags wFlags):
+    offset(offset),
+    QGraphicsWidget(parent, wFlags),
+    beginRange(0),
+    endRange(1000),
+    textBoxWidth(50),
+    textBoxHeight(10),
+    shortTickHeight(5),
+    mediumTickHeight(10),
+    largeTickHeight(15),
+    pen(Qt::black, 1, Qt::SolidLine)
 {
     setGeometry(0, 0, 946, 50);
 }
@@ -35,6 +45,10 @@ void TimeLine::paint(QPainter *painter,
     gradient.setStops(stops);
     painter->setBrush(QBrush(gradient));
     painter->drawRoundedRect(frame, 10.0, 10.0);
+    painter->setPen(pen);
+
+    // draw ticks:
+    drawTicks(painter);
 }
 
 QRectF TimeLine::boundingRect(){    
@@ -43,4 +57,35 @@ QRectF TimeLine::boundingRect(){
 
 void TimeLine::setRange(qint64 start, qint64 end)
 {
+    beginRange = start;
+    endRange = end;
+}
+
+void TimeLine::drawTicks(QPainter *painter)
+{
+    // range per pixel ("value" of a pixel)
+    value = (endRange - beginRange + 1) / (geometry().width() - offset);
+    qDebug() << "TimeLine::drawTicks()  range-per-pixel: " << value;
+    // if the range doesn't start at 0 we need to add a offset
+    rangeOffset = beginRange;
+    currentPos = 0;
+    bottom = geometry().height() - 10;
+
+    while(currentPos < geometry().width()){
+        if(currentPos % 50 == 0){
+            // large tick
+            painter->drawLine(currentPos + offset, bottom, currentPos + offset, bottom - largeTickHeight);
+            QRect rect = QRect(currentPos + offset - textBoxWidth/2, bottom, textBoxWidth, textBoxHeight);
+            int output = (int) (currentPos * value) + rangeOffset;
+            painter->drawText(rect, Qt::AlignCenter, QString::number(output));
+        }else if(currentPos % 25 == 0){
+            // medium tick
+            painter->drawLine(currentPos + offset, bottom, currentPos + offset, bottom - mediumTickHeight);
+        }else if(currentPos % 5 == 0){
+            // short tick
+            painter->drawLine(currentPos + offset, bottom, currentPos + offset, bottom - shortTickHeight);
+        }
+        // draw a tick every 5 pixels
+        currentPos += 5;
+    }
 }

@@ -18,7 +18,7 @@ PresentationItem::PresentationItem(QGraphicsScene *parent) :
     createSelection(false)
 {        
     // setup timeLine
-    timeLine = new TimeLine(this, 0);    
+    timeLine = new TimeLine(ACTIONAREAOFFSET, this, 0);
     timeLine->setZValue(1.0);
 
     // setup cursor

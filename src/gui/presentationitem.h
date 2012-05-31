@@ -61,7 +61,7 @@ private:
 
     QRectF boundingRectangle;
 
-    Selection *selectedArea;
+    Selection *selectedArea ;
 
     /**
       * Makes sure that no gaps exist between tracks (for example after deleting a track).
