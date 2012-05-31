@@ -3,7 +3,7 @@
 
 #include <QFlags>
 
-namespace DataProperty
+namespace Data
 {
     enum Property {
         INTERPOLATABLE  =1,
@@ -12,6 +12,6 @@ namespace DataProperty
     Q_DECLARE_FLAGS(Properties, Property)
 }
 
-Q_DECLARE_OPERATORS_FOR_FLAGS(DataProperty::Properties)
+Q_DECLARE_OPERATORS_FOR_FLAGS(Data::Properties)
 
 #endif // COMMON_H

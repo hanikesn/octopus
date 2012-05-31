@@ -2,7 +2,7 @@
 
 #include "value.h"
 
-DoubleSeries::DoubleSeries(const QString &deviceName, const QString &name, DataProperty::Properties properties) :
+DoubleSeries::DoubleSeries(const QString &deviceName, const QString &name, Data::Properties properties) :
     AbstractDataSeries(deviceName, name, properties)
 {
 }

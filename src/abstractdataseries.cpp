@@ -2,7 +2,7 @@
 
 #include "value.h"
 
-AbstractDataSeries::AbstractDataSeries(const QString &deviceName, const QString &name, DataProperty::Properties properties):
+AbstractDataSeries::AbstractDataSeries(const QString &deviceName, const QString &name, Data::Properties properties):
     deviceName(deviceName),
     dataSeriesName(name),
     props(properties)
@@ -24,7 +24,7 @@ QString AbstractDataSeries::fullName() const
     return deviceName + "." + dataSeriesName;
 }
 
-DataProperty::Properties AbstractDataSeries::properties() const
+Data::Properties AbstractDataSeries::properties() const
 {
     return props;
 }

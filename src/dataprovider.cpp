@@ -18,10 +18,10 @@ AbstractDataSeries* DataProvider::getDataSeries(const QString &fullName) const
     return dataSeries.value(fullName);
 }
 
-void DataProvider::onNewDataSeries(const QString &deviceName, const QString &dataSeriesName, DataProperty::Properties properties)
+void DataProvider::onNewDataSeries(const QString &deviceName, const QString &dataSeriesName, Data::Properties properties)
 {
     AbstractDataSeries *series;
-    if (properties & DataProperty::INTERPOLATABLE) {
+    if (properties & Data::INTERPOLATABLE) {
         series = new DoubleSeries(deviceName, dataSeriesName, properties);
     } else {
         series = new StringSeries(deviceName, dataSeriesName, properties);
