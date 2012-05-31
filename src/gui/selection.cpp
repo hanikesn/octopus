@@ -10,7 +10,6 @@ Selection::Selection(QGraphicsScene *parent) :
     pen(Qt::lightGray),
     brush(Qt::lightGray)
 {
-    setZValue(0.9);
 }
 
 Selection::~Selection()

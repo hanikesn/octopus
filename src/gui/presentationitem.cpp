@@ -18,19 +18,17 @@ PresentationItem::PresentationItem(QGraphicsScene *parent) :
     createSelection(false)
 {        
     // setup timeLine
-    timeLine = new TimeLine(this, 0);
-    //    this->timeLine->setParentItem(this);
-    timeLine->setZValue(1);
+    timeLine = new TimeLine(this, 0);    
+    timeLine->setZValue(1.0);
 
     // setup cursor
-    cursor = new Cursor(ACTIONAREAOFFSET, parent);
-
-    // TODO(domi): setParentItem() nutzen
-    //    cursor->setParentItem(this);
-    parent->addItem(cursor);
+    cursor = new Cursor(ACTIONAREAOFFSET, parent);    
+    cursor->setParentItem(this);
     cursor->setPos(ACTIONAREAOFFSET, 0);
+    cursor->setZValue(1.1);
 
     selection = new Selection(parent);
+    selection->setZValue(0.9);
 
     boundingRectangle.setWidth(timeLine->size().width());
     boundingRectangle.setHeight(timeLine->size().height());
@@ -44,9 +42,8 @@ QRectF PresentationItem::boundingRect() const
 {
     if(childItems().isEmpty())
         return QRectF(0, 0, 100, 100);
-    else{
-        return boundingRectangle;
-    }
+    else
+        return boundingRectangle;    
 }
 
 void PresentationItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
@@ -56,15 +53,14 @@ void PresentationItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *
 }
 
 void PresentationItem::addTrack(Track *t)
-{
-    //TODO(domi): was passiert, wenn man am Anfang das Fenster kleiner zieht?
+{    
     boundingRectangle.setHeight(boundingRectangle.height() + t->size().height());
     if(t->size().width() > boundingRectangle.width())
         boundingRectangle.setWidth(t->size().width());
 
     int yPos = timeLine->size().height() + 5; // + 5 for border
     trackToAdd = parent->addWidget(t);
-    trackToAdd->setPos(0, yPos + (childItems().size()-1)*t->height());
+    trackToAdd->setPos(0, yPos + (tracks.size())*t->height());
     trackToAdd->setParentItem(this);
     tracks.append(trackToAdd);
 
