@@ -38,14 +38,13 @@ void TimeLine::paint(QPainter *painter,
     // paint a background rect (with gradient)
     QLinearGradient gradient(frame.topLeft(), frame.topLeft() + QPointF(200,200));
     stops << QGradientStop(0.0, QColor(60, 60,  60));
-    stops << QGradientStop(frame.height()/2/frame.height(), QColor(150, 150, 150));
-
-    //stops << QGradientStop(((frame.height() + h)/2 )/frame.height(), QColor(157, 195,  55));
+    stops << QGradientStop(frame.height()/2/frame.height(), QColor(150, 150, 150));    
     stops << QGradientStop(1.0, QColor(215, 215, 215));
     gradient.setStops(stops);
+
     painter->setBrush(QBrush(gradient));
-    painter->drawRoundedRect(frame, 10.0, 10.0);
     painter->setPen(pen);
+    painter->drawRoundedRect(frame, 10.0, 10.0);
 
     // draw ticks:
     drawTicks(painter);
@@ -65,19 +64,24 @@ void TimeLine::drawTicks(QPainter *painter)
 {
     // range per pixel ("value" of a pixel)
     value = (endRange - beginRange + 1) / (geometry().width() - offset);
-    qDebug() << "TimeLine::drawTicks()  range-per-pixel: " << value;
+//    qDebug() << "TimeLine::drawTicks()  range-per-pixel: " << value;
     // if the range doesn't start at 0 we need to add a offset
     rangeOffset = beginRange;
     currentPos = 0;
     bottom = geometry().height() - 10;
-
+    double output  = 0.0;
     while(currentPos < geometry().width()){
+        output = (currentPos * value) + rangeOffset;
         if(currentPos % 50 == 0){
             // large tick
             painter->drawLine(currentPos + offset, bottom, currentPos + offset, bottom - largeTickHeight);
             QRect rect = QRect(currentPos + offset - textBoxWidth/2, bottom, textBoxWidth, textBoxHeight);
-            int output = (int) (currentPos * value) + rangeOffset;
-            painter->drawText(rect, Qt::AlignCenter, QString::number(output));
+            if(value < 0.02){
+                painter->drawText(rect, Qt::AlignCenter, QString("%1").arg(output, 0, 'f', 3));
+            }else{
+                painter->drawText(rect, Qt::AlignCenter, QString::number((int)output));
+            }
+
         }else if(currentPos % 25 == 0){
             // medium tick
             painter->drawLine(currentPos + offset, bottom, currentPos + offset, bottom - mediumTickHeight);
