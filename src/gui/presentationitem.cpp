@@ -28,7 +28,7 @@ PresentationItem::PresentationItem(QGraphicsScene *parent) :
     cursor->resize(1, minCoverHeight);
 
     selectedArea = new Selection(parent);
-    selectedArea->setZValue(0.9);
+    selectedArea->setZValue(1.0);
     selectedArea->setHeight(minCoverHeight);
 
     boundingRectangle.setWidth(timeLine->size().width());
@@ -133,21 +133,25 @@ void PresentationItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
             begin = selectionEnd;            
         }
 
-        selectedArea->setWidth(width);
+        selectedArea->setWidth(width);        
         selectedArea->setPos(begin, 0);
-        cursor->setVisible(false);
+        selectedArea->update(selectedArea->boundingRect());
+        cursor->setVisible(false);        
+
         emit selection(begin, begin + width - 1);
     }else{
         selectedArea->setVisible(false);
+        selectedArea->setWidth(0);
+        selectedArea->setHeight(0);
         cursor->setVisible(true);
         cursorPosChanged(event->pos().x());
         // others need to know that there is no selection active any more
-        emit selection(-1, -1);
+        emit selection(-1, -1);        
     }
 }
 
 void PresentationItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
-{    
+{
     if((QApplication::keyboardModifiers() != Qt::ShiftModifier)){
         createSelection = false;
     } else if(event->pos().x() >= ACTIONAREAOFFSET) {
@@ -163,7 +167,7 @@ void PresentationItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
         }
 
         selectedArea->setWidth(width);
-        selectedArea->update(0, 0, selectedArea->getWidth(), selectedArea->getHeight());
+        selectedArea->update(selectedArea->boundingRect());
         selectedArea->setPos(begin, 0);
     }
 }
