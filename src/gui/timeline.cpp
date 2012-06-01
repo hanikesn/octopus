@@ -1,4 +1,4 @@
-#include "timeline.h"
+#include "gui/timeline.h"
 
 #include <QPainter>
 #include <QPen>

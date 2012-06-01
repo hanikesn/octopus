@@ -1,4 +1,4 @@
-#include "cursor.h"
+#include "gui/cursor.h"
 
 #include <QPainter>
 #include <QGraphicsScene>

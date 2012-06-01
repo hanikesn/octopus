@@ -1,4 +1,4 @@
-#include "track.h"
+#include "gui/track.h"
 
 #include "abstractdataseries.h"
 
@@ -19,6 +19,7 @@ Track::Track(const DataProvider *dataProvider, QWidget *parent) :
     setupButtons();
     setupPlot();
 
+    // TODO(Steffi): Remove (dummy func)
     addData();
 }
 

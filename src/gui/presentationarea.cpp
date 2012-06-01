@@ -1,10 +1,10 @@
-#include "presentationarea.h"
+#include "gui/presentationarea.h"
 
 #include <QGraphicsScene>
 #include <QGraphicsWidget>
 
-#include "cursor.h"
-#include "track.h"
+#include "gui/cursor.h"
+#include "gui/track.h"
 
 const int PresentationArea::ACTIONAREAOFFSET = 52;
 

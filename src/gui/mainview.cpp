@@ -1,4 +1,4 @@
-#include "mainview.h"
+#include "gui/mainview.h"
 #include <QScrollBar>
 
 #include <QDebug>

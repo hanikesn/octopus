@@ -1,13 +1,13 @@
-#include "presentationitem.h"
+#include "gui/presentationitem.h"
 
 #include <QGraphicsProxyWidget>
 #include <QGraphicsItem>
 #include <QGraphicsSceneMouseEvent>
 
-#include "track.h"
-#include "selection.h"
-#include "cursor.h"
-#include "timeline.h"
+#include "gui/track.h"
+#include "gui/selection.h"
+#include "gui/cursor.h"
+#include "gui/timeline.h"
 
 const int PresentationItem::ACTIONAREAOFFSET = 52;
 

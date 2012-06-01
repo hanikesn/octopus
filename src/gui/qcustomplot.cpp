@@ -145,7 +145,7 @@
   frequency.
 */
 
-#include "qcustomplot.h"
+#include "gui/qcustomplot.h"
 #include <cmath>
 #include <limits>
 

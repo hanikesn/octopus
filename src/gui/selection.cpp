@@ -1,4 +1,4 @@
-#include "selection.h"
+#include "gui/selection.h"
 
 #include <QGraphicsItem>
 #include <QPainter>
