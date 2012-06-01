@@ -35,6 +35,7 @@ private:
     void setupButtons();
     void setupPlot();
 
+    // TODO(Steffi): Remove (dummy func)
     void addData();
     void addSource(const QString &fullDataSeriesName);
 
