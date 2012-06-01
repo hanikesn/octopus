@@ -47,6 +47,13 @@
       <item>
        <widget class="MainView" name="mainView"/>
       </item>
+      <item>
+       <widget class="QScrollBar" name="hScrollBar">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
     <item row="1" column="0">

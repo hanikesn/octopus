@@ -34,6 +34,7 @@ void DataProvider::onNewData(qint64 timestamp, const QString &fullDataSeriesName
 {
     if (dataSeries.contains(fullDataSeriesName)) {
         dataSeries.value(fullDataSeriesName)->addData(timestamp, value);
+        emit newMax(timestamp);
     } else {
         emit unknownDataSeries();
     }

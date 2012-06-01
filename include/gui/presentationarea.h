@@ -2,9 +2,11 @@
 #define PRESENTATIONAREA_H
 
 #include <QObject>
+#include <QScrollBar>
 
 #include "dataprovider.h"
 #include "presentationitem.h"
+
 
 class Track;
 class QVBoxLayout;
@@ -16,7 +18,7 @@ class PresentationArea : public QObject
 {
     Q_OBJECT
 public:
-    explicit PresentationArea(QGraphicsScene *scene, DataProvider *dataProvider);
+    explicit PresentationArea(QGraphicsScene *scene, DataProvider *dataProvider, QScrollBar *hScrollBar);
     ~PresentationArea();
 
 signals:
@@ -29,11 +31,12 @@ public slots:
     void onAddTrack();
     void onDelete(Track *t);
     void onRangeChanged(qint64 begin, qint64 end);    
-    void onChangedWindowSize(QSize size);
+    void onChangedWindowSize(QSize size);    
 
 private slots:
     void onSelection(qint64 begin, qint64 end);
     void onExportTriggered();
+    void onNewMax(qint64 timestamp);
 
 private:    
     PresentationItem *pi;
@@ -42,6 +45,8 @@ private:
     QList<Track*> tracks;
 
     QSize currentViewSize;
+
+    QScrollBar *hScrollBar;
 
     qint64 selectionBegin, selectionEnd;
 

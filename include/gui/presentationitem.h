@@ -34,7 +34,7 @@ public:
 
     void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
 
-    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event);
+    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event);    
 
 public slots:
     void recalcBoundingRec();

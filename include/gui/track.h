@@ -49,6 +49,7 @@ private slots:
     void onDelete();
     void onSources();
     void onPlotSettings();
+    void onNewMax(qint64 timestamp);
 };
 
 #endif // Track_H

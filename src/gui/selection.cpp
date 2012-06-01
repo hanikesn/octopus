@@ -6,6 +6,8 @@
 #include <QMenu>
 #include <QAction>
 
+#include <QDebug>
+
 Selection::Selection(QGraphicsScene *parent) :
     QGraphicsItem(0, parent),
     height(0),
@@ -44,15 +46,17 @@ void Selection::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
 
 void Selection::setHeight(int h)
 {
+    prepareGeometryChange();
     height = h;
 }
 
 void Selection::setWidth(int w)
 {
+    prepareGeometryChange();
     width = w;
 }
 
 void Selection::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
-{
+{ 
     menu->popup(event->screenPos());
 }
