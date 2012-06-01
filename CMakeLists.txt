@@ -1,10 +1,23 @@
 # See http://qt-project.org/quarterly/view/using_cmake_to_build_qt_projects
 cmake_minimum_required(VERSION 2.6)
-PROJECT(Octopus)
-FIND_PACKAGE(Qt4 REQUIRED)
+project(Octopus)
 
-SET(Octopus_SOURCES
-  src/main.cpp
+if(CMAKE_CXX_COMPILER MATCHES ".*clang")
+  set(CMAKE_COMPILER_IS_CLANGXX 1)
+endif()
+
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
+
+include(EnableCXX11)
+include(EnableWarnings)
+
+check_CXX11()
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX11_FLAG}")
+enable_Warnings()
+
+find_package(Qt4 REQUIRED)
+
+set(Octopus_SOURCES
   src/mainwindow.cpp
   src/abstractdataseries.cpp
   src/stringseries.cpp
@@ -21,7 +34,8 @@ SET(Octopus_SOURCES
   src/gui/cursor.cpp
   src/gui/selection.cpp
 )
-SET(Octopus_HEADERS
+
+set(Octopus_HEADERS
   include/mainwindow.h
   include/common.h
   include/abstractdataseries.h
@@ -39,24 +53,38 @@ SET(Octopus_HEADERS
   include/gui/cursor.h
   include/gui/selection.h
 )
-SET(Octopus_FORMS
+set(Octopus_FORMS
   ui/mainwindow.ui
   ui/track.ui
 )
-SET(Octopus_RESOURCES
+set(Octopus_RESOURCES
   rc/resources.qrc
 )
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-QT4_WRAP_CPP(Octopus_HEADERS_MOC ${Octopus_HEADERS})
-QT4_WRAP_UI(Octopus_FORMS_HEADERS ${Octopus_FORMS})
-QT4_ADD_RESOURCES(Octopus_RESOURCES_RCC ${Octopus_RESOURCES})
-INCLUDE(${QT_USE_FILE})
-ADD_DEFINITIONS(${QT_DEFINITIONS})
+qt4_wrap_cpp(Octopus_HEADERS_MOC ${Octopus_HEADERS})
+qt4_wrap_ui(Octopus_FORMS_HEADERS ${Octopus_FORMS})
+qt4_add_resources(Octopus_RESOURCES_RCC ${Octopus_RESOURCES})
+include(${QT_USE_FILE})
+add_definitions(${QT_DEFINITIONS})
 
-ADD_EXECUTABLE(Octopus ${Octopus_SOURCES} 
+add_executable(Octopus "src/main.cpp" ${Octopus_SOURCES} ${Octopus_HEADERS}
     ${Octopus_HEADERS_MOC}
     ${Octopus_FORMS_HEADERS} 
     ${Octopus_RESOURCES_RCC})
-TARGET_LINK_LIBRARIES(Octopus ${QT_LIBRARIES})
+target_link_libraries(Octopus ${QT_LIBRARIES})
+
+find_package(GTest)
+if(GTEST_FOUND)
+  enable_testing()
+  set(SampleTest_Sources test/sample.cpp)
+
+  include_directories(${GTEST_INCLUDE_DIRS})
+
+  add_executable(SampleTest ${SampleTest_Sources} ${Octopus_SOURCES} ${Octopus_HEADERS_MOC} ${Octopus_FORMS_HEADERS} ${Octopus_RESOURCES_RCC})
+  target_link_libraries(SampleTest ${GTEST_BOTH_LIBRARIES} ${QT_LIBRARIES})
+  add_test(AllTestsInSampleTest SampleTest)
+
+  add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND} DEPENDS SampleTest)
+endif()
