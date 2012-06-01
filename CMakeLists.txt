@@ -77,12 +77,22 @@ add_executable(Octopus "src/main.cpp" ${Octopus_SOURCES} ${Octopus_HEADERS}
 target_link_libraries(Octopus ${QT_LIBRARIES})
 
 enable_testing()
+
+# set(<BINARY_NAME> <TEST_FILE_PATHS>)
+# Man kann mehrere Tests in ein Binary linken. Dazu einfach weitere .cpp-Files mit Leerzeichen anschließen.
 set(SampleTest_Sources test/sample.cpp)
 
 include_directories(${gtest_SOURCE_DIR}/include)
 
+# add_executable(<BINARY_NAME> <FILES_NEEDED>)
+# Benötigte Dateien mit Leerzeichen trennen.
 add_executable(SampleTest ${SampleTest_Sources} ${Octopus_SOURCES} ${Octopus_HEADERS_MOC} ${Octopus_FORMS_HEADERS} ${Octopus_RESOURCES_RCC})
+
+# target_link_libraries(<BINARY_NAME> ...)
+# Jedes Binary muss separat mit den benötigten Libraries verlinkt werden.
 target_link_libraries(SampleTest gtest gtest_main ${QT_LIBRARIES})
+
+# add_test(<TEST_NAME> <BINARY>)
 add_test(AllTestsInSampleTest SampleTest)
 
 add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND} DEPENDS SampleTest)
