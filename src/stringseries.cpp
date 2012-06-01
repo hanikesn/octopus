@@ -7,6 +7,11 @@ StringSeries::StringSeries(const QString &deviceName, const QString &name, Data:
 {
 }
 
+void StringSeries::accept(DataSeriesVisitor *v)
+{
+    v->visit(this);
+}
+
 void StringSeries::addData(qint64 timeStamp, const Value& value)
 {
     if (value.getType() == Value::STRING) {

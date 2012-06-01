@@ -95,18 +95,33 @@ void Track::addData()
 
 void Track::addSource(const QString &fullDataSeriesName)
 {
-    // TODO(Steffi)
+    AbstractDataSeries *series = dataProvider->getDataSeries(fullDataSeriesName);
 
-    // get data series from dataProvider
-    // get data from data series
-    // show data
+    if (series) {
+        dataSeries.append(series);
+        // visit the data series to determine its type
+        series->accept(this);
+
+        // TODO(Steffi)
+    }
 }
 
-void Track::onNewData(const AbstractDataSeries *series, qint64 timeStamp)
-{
-//    series->getData(timeStamp);
+void Track::visit(DoubleSeries *s) {
+    qDebug() << "Visiting a double series! :)";
 
     // TODO(Steffi)
+
+    // setup correct graph
+    // connect newData signal
+}
+
+void Track::visit(StringSeries *s) {
+    qDebug() << "Visiting a string series! :)";
+
+    // TODO(Steffi)
+
+    // setup correct graph
+    // connect newData signal
 }
 
 void Track::onDelete()

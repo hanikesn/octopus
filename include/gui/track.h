@@ -3,6 +3,7 @@
 
 #include "dataprovider.h"
 #include "ui_track.h"
+#include "visitor.h"
 
 #include <QLabel>
 #include <QPainter>
@@ -11,19 +12,24 @@
 
 class AbstractDataSeries;
 
-class Track : public QWidget
+class Track : public QWidget, public DataSeriesVisitor
 {
     Q_OBJECT
 public:
     Track(const DataProvider *dataProvider, QWidget *parent = 0);
     Track(const DataProvider *dataProvider, const QString &fullDataSeriesName, QWidget *parent = 0);
 
+    /**
+     * Visitor pattern.
+     */
+    void visit(DoubleSeries *s);
+    void visit(StringSeries *s);
+
 signals:
     void del(Track*);
 
 public slots:
     void setPlotRange(qint64 begin, qint64 end);
-    void onNewData(const AbstractDataSeries *series, qint64 timeStamp);
 
 private:
     Ui::Track ui;

@@ -12,6 +12,11 @@ class StringSeries : public AbstractDataSeries
 public:
     StringSeries(const QString& deviceName, const QString& dataSeriesName, Data::Properties properties);
 
+    /**
+     * Visitor pattern.
+     */
+    void accept(DataSeriesVisitor *v);
+
     void addData(qint64 timeStamp, const Value &value);
 
     /**

@@ -44,6 +44,7 @@ set(Octopus_HEADERS
   include/doubleseries.h
   include/dataprovider.h
   include/value.h
+  include/visitor.h
   include/gui/track.h
   include/gui/presentationarea.h
   include/gui/timeline.h

@@ -2,17 +2,24 @@
 #define ABSTRACTDATASERIES_H
 
 #include "common.h"
+#include "visitor.h"
 
 #include <QMap>
 #include <QObject>
 
 class Value;
 
-class AbstractDataSeries : public QObject
+class AbstractDataSeries : public QObject, public Visitable
 {
     Q_OBJECT
 public:
+    virtual ~AbstractDataSeries() {}
     AbstractDataSeries(const QString &deviceName, const QString &dataSeriesName, Data::Properties properties);
+
+    /**
+     * Visitor pattern.
+     */
+    virtual void accept(DataSeriesVisitor *v) = 0;
 
     QString device() const;
     QString name() const;
