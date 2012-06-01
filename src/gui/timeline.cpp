@@ -22,7 +22,8 @@ TimeLine::TimeLine(int offset, QGraphicsItem * parent, Qt::WindowFlags wFlags):
 
 void TimeLine::adjustVisibleRange(qint64 begin, qint64 end)
 {
-
+    beginRange = 0;
+    endRange = 1000;
 }
 
 void TimeLine::paint(QPainter *painter,
@@ -52,12 +53,6 @@ void TimeLine::paint(QPainter *painter,
 
 QRectF TimeLine::boundingRect(){    
     return QRectF(0, 0, geometry().width(), geometry().height());
-}
-
-void TimeLine::setRange(qint64 start, qint64 end)
-{
-    beginRange = start;
-    endRange = end;
 }
 
 void TimeLine::drawTicks(QPainter *painter)

@@ -28,6 +28,8 @@ public:
 signals:
     void unknownDataSeries();
 
+    void newMax(qint64 maxTimestamp);
+
 public slots:
     void onNewDataSeries(const QString &deviceName, const QString &dataSeriesName, Data::Properties properties);
 

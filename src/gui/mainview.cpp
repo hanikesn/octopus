@@ -6,7 +6,6 @@
 MainView::MainView(QWidget *parent):
     QGraphicsView(parent)
 {
-
 }
 
 MainView::~MainView()
@@ -21,7 +20,7 @@ void MainView::scrollContentsBy(int dx, int dy)
         QGraphicsView::scrollContentsBy(dx, dy);
         emit verticalScroll();
     }else{
-        // TODO (domi): start und endwerte des angezeigten bereichs bestimmen
+        // TODO (domi): start und endwerte des angezeigten bereichs bestimmen        
         emit changedRange(horizontalScrollBar()->value(), 0);
     }
 }

@@ -16,6 +16,7 @@
 
 
 class PresentationArea;
+class HorizontalScrollBar;
 
 class MainWindow : public QMainWindow
 {
@@ -57,6 +58,8 @@ private:
     Ui::MainWindow ui;
 
     TrackScene trackScene;
+
+    HorizontalScrollBar *hScrollBar;
 
     void setUpButtonBars();
 
