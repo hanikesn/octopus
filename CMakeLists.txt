@@ -13,6 +13,7 @@ include(EnableWarnings)
 
 check_CXX11()
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX11_FLAG}")
+add_subdirectory(contrib)
 enable_Warnings()
 
 find_package(Qt4 REQUIRED)
@@ -75,16 +76,13 @@ add_executable(Octopus "src/main.cpp" ${Octopus_SOURCES} ${Octopus_HEADERS}
     ${Octopus_RESOURCES_RCC})
 target_link_libraries(Octopus ${QT_LIBRARIES})
 
-find_package(GTest)
-if(GTEST_FOUND)
-  enable_testing()
-  set(SampleTest_Sources test/sample.cpp)
+enable_testing()
+set(SampleTest_Sources test/sample.cpp)
 
-  include_directories(${GTEST_INCLUDE_DIRS})
+include_directories(${gtest_SOURCE_DIR}/include)
 
-  add_executable(SampleTest ${SampleTest_Sources} ${Octopus_SOURCES} ${Octopus_HEADERS_MOC} ${Octopus_FORMS_HEADERS} ${Octopus_RESOURCES_RCC})
-  target_link_libraries(SampleTest ${GTEST_BOTH_LIBRARIES} ${QT_LIBRARIES})
-  add_test(AllTestsInSampleTest SampleTest)
+add_executable(SampleTest ${SampleTest_Sources} ${Octopus_SOURCES} ${Octopus_HEADERS_MOC} ${Octopus_FORMS_HEADERS} ${Octopus_RESOURCES_RCC})
+target_link_libraries(SampleTest gtest gtest_main ${QT_LIBRARIES})
+add_test(AllTestsInSampleTest SampleTest)
 
-  add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND} DEPENDS SampleTest)
-endif()
+add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND} DEPENDS SampleTest)
