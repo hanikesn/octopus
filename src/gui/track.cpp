@@ -104,21 +104,19 @@ void Track::addSource(const QString &fullDataSeriesName)
     if (series) {
         // visit the data series to determine its type and add the according graph
         series->accept(this);
-
-        // TODO(Steffi)
     }
 }
 
 void Track::addGraph(const DoubleSeries &s) {
-    qDebug() << "Visiting an double series (interpolatable)! :)";
+    qDebug() << "Visiting a double series (interpolatable)! :)";
 
-    graphs.append(new InterpolatingGraph(s));
+    graphs.append(new InterpolatingGraph(ui.plot, s));
 }
 
 void Track::addGraph(const StringSeries &s) {
     qDebug() << "Visiting a string series (discrete)! :)";
 
-    graphs.append(new DiscreteGraph(s));
+    graphs.append(new DiscreteGraph(ui.plot, s));
 }
 
 void Track::onDelete()
