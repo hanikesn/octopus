@@ -26,6 +26,8 @@ public:
     void addGraph(const DoubleSeries &s);
     void addGraph(const StringSeries &s);
 
+    void setOffset(int pixel);
+
 signals:
     void del(Track*);
 
@@ -38,6 +40,8 @@ private:
 
     const DataProvider *dataProvider;
     QList<Graph*> graphs;
+
+    int offset;
 
     void setupButtons();
     void setupPlot();

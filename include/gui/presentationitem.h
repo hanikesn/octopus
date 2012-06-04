@@ -119,12 +119,10 @@ private:
     QList<QGraphicsProxyWidget*> tracks;    
 
     TimeLine *timeLine;
-
     Cursor *cursor;
-
-    QRectF boundingRectangle;
-
     Selection *selectedArea;
+
+    QRectF boundingRectangle;    
 
     QScrollBar *hScrollBar;
 

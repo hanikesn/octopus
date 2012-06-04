@@ -32,9 +32,9 @@ signals:
 
 private:
 
-    QBrush brush;
-    QPen pen;
     int height, width;
+    QPen pen;
+    QBrush brush;
 
     QMenu *menu;
     QAction *exportAction;

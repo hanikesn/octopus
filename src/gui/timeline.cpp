@@ -6,8 +6,8 @@
 #include <QDebug>
 
 TimeLine::TimeLine(int offset, QGraphicsItem * parent, Qt::WindowFlags wFlags):
-    offset(offset),
     QGraphicsWidget(parent, wFlags),
+    offset(offset),
     beginRange(0),
     endRange(30000000),
     textBoxWidth(50),

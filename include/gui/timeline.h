@@ -22,8 +22,8 @@ public:
 public slots:    
 
 private:
-    qint64 beginRange, endRange;
     int offset;
+    qint64 beginRange, endRange;    
 
     // stuff to draw ticks:
     double value;
@@ -35,11 +35,10 @@ private:
     int shortTickHeight;
     int mediumTickHeight;
     int largeTickHeight;
-
     QPen pen;
 
-
     void drawTicks(QPainter *painter);
+
 };
 
 #endif // TIMELINE_H
