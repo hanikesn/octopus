@@ -122,9 +122,6 @@ void Track::addGraph(const StringSeries &s) {
 
 void Track::onDelete()
 {
-    qDebug() << "Pretending to delete track.";
-    // TODO(Steffi)
-
     emit del(this);
 }
 
