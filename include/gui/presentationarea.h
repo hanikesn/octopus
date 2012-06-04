@@ -23,7 +23,6 @@ public:
     ~PresentationArea();
 
 signals:
-    void rangeChanged(qint64 begin, qint64 end);
     void changedWindowSize(QSize size);
     void verticalScroll(QRectF visibleRectangle);
     void exportRange(qint64 begin, qint64 end);    
