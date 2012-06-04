@@ -4,7 +4,8 @@
 #include "doubleseries.h"
 #include "stringseries.h"
 
-DataProvider::DataProvider()
+DataProvider::DataProvider() :
+    currentMax(0)
 {
 }
 
@@ -34,7 +35,11 @@ void DataProvider::onNewData(qint64 timestamp, const QString &fullDataSeriesName
 {
     if (dataSeries.contains(fullDataSeriesName)) {
         dataSeries.value(fullDataSeriesName)->addData(timestamp, value);
-        emit newMax(timestamp);
+
+        if (timestamp > currentMax) {
+            currentMax = timestamp;
+            emit newMax(timestamp);
+        }
     } else {
         emit unknownDataSeries();
     }
