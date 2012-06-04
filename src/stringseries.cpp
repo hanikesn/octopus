@@ -9,7 +9,7 @@ StringSeries::StringSeries(const QString &deviceName, const QString &name, Data:
 
 void StringSeries::accept(DataSeriesVisitor *v)
 {
-    v->visit(this);
+    v->addGraph(this);
 }
 
 void StringSeries::addData(qint64 timeStamp, const Value& value)

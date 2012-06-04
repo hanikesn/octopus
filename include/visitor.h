@@ -12,8 +12,8 @@ class DataSeriesVisitor {
 public:
     virtual ~DataSeriesVisitor() {}
 
-    virtual void visit(DoubleSeries *s) = 0;
-    virtual void visit(StringSeries *s) = 0;
+    virtual void addGraph(DoubleSeries *s) = 0;
+    virtual void addGraph(StringSeries *s) = 0;
 
 protected:
     DataSeriesVisitor() {}

@@ -22,8 +22,8 @@ public:
     /**
      * Visitor pattern.
      */
-    void visit(DoubleSeries *s);
-    void visit(StringSeries *s);
+    void addGraph(DoubleSeries *s);
+    void addGraph(StringSeries *s);
 
 signals:
     void del(Track*);

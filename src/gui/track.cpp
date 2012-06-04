@@ -108,7 +108,7 @@ void Track::addSource(const QString &fullDataSeriesName)
     }
 }
 
-void Track::visit(DoubleSeries *s) {
+void Track::addGraph(DoubleSeries *s) {
     qDebug() << "Visiting a double series! :)";
 
     // TODO(Steffi)
@@ -117,7 +117,7 @@ void Track::visit(DoubleSeries *s) {
     // connect newData signal
 }
 
-void Track::visit(StringSeries *s) {
+void Track::addGraph(StringSeries *s) {
     qDebug() << "Visiting a string series! :)";
 
     // TODO(Steffi)
