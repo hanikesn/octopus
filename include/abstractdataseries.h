@@ -29,6 +29,7 @@ public:
     virtual void addData(qint64 timeStamp, const Value &value) = 0;
 
 signals:
+    void newData(qint64 timestamp);
     void illegalValueType();
 
 private:

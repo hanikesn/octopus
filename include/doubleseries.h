@@ -22,7 +22,7 @@ public:
     /**
      * Convenience function.
      */
-    QList<double> getData(qint64 timeStamp) const;
+    QList<double> getData(qint64 timestamp) const;
 
     /**
      * @return A sorted list of the data for all timestamps t for which begin <= t <= end.
