@@ -25,6 +25,9 @@ set(Octopus_SOURCES
   src/doubleseries.cpp
   src/dataprovider.cpp
   src/value.cpp
+  src/gui/graph.cpp
+  src/gui/discretegraph.cpp
+  src/gui/interpolatinggraph.cpp
   src/gui/track.cpp
   src/gui/presentationarea.cpp
   src/gui/timeline.cpp
@@ -45,6 +48,9 @@ set(Octopus_HEADERS
   include/dataprovider.h
   include/value.h
   include/visitor.h
+  include/gui/graph.h
+  include/gui/discretegraph.h
+  include/gui/interpolatinggraph.h
   include/gui/track.h
   include/gui/presentationarea.h
   include/gui/timeline.h

@@ -9,7 +9,7 @@ DoubleSeries::DoubleSeries(const QString &deviceName, const QString &name, Data:
 
 void DoubleSeries::accept(DataSeriesVisitor *v)
 {
-    v->addGraph(this);
+    v->addGraph(*this);
 }
 
 void DoubleSeries::addData(qint64 timeStamp, const Value& value)
