@@ -67,7 +67,6 @@ void PresentationItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *
     Q_UNUSED(painter)
     Q_UNUSED(option)
     Q_UNUSED(widget)
-
 }
 
 void PresentationItem::addTrack(Track *t)

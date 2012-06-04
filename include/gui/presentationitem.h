@@ -75,13 +75,6 @@ public slots:
     void recalcBoundingRec();
 
     /**
-      * Updates timeLine to the visible range
-      * @param begin Begin of the visible range
-      * @param end End of the visible range
-      */
-    void onRangeChanged(qint64 begin, qint64 end);
-
-    /**
       * Resizes cursor, timeLine and selection to new size.
       * Tracks won't get more height instead they are adjusted in their width.
       * TimeLine and selection are only resized in their height, not their width.
@@ -105,6 +98,13 @@ public slots:
 
 private slots:
     void horizontalScroll(int);
+
+    /**
+      * Updates timeLine to the visible range
+      * @param begin Begin of the visible range
+      * @param end End of the visible range
+      */
+    void onRangeChanged(qint64 begin, qint64 end);
 
 signals:
     void selection(qint64 begin, qint64 end);
