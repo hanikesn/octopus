@@ -17,8 +17,8 @@ class Track : public QWidget, public DataSeriesVisitor
 {
     Q_OBJECT
 public:
-    Track(const DataProvider *dataProvider, QWidget *parent = 0);
-    Track(const DataProvider *dataProvider, const QString &fullDataSeriesName, QWidget *parent = 0);
+    Track(const DataProvider &dataProvider, QWidget *parent = 0);
+    Track(const DataProvider &dataProvider, const QString &fullDataSeriesName, QWidget *parent = 0);
 
     /**
      * Visitor pattern.
@@ -38,7 +38,7 @@ private:
     Ui::Track ui;
     static const QString ICON_AS_BUTTON;
 
-    const DataProvider *dataProvider;
+    const DataProvider &dataProvider;
     QList<Graph*> graphs;
 
     int offset;

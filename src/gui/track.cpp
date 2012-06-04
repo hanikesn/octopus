@@ -12,7 +12,7 @@ const QString Track::ICON_AS_BUTTON = QString(
             "border: 0;"
             "margin: 0px;");
 
-Track::Track(const DataProvider *dataProvider, QWidget *parent) :
+Track::Track(const DataProvider &dataProvider, QWidget *parent) :
     QWidget(parent),
     dataProvider(dataProvider),
     offset(52)
@@ -28,7 +28,7 @@ Track::Track(const DataProvider *dataProvider, QWidget *parent) :
 //    connect(dataProvider, SIGNAL(newMax(qint64)), this, SLOT(onNewMax(qint64)));
 }
 
-Track::Track(const DataProvider *dataProvider, const QString &fullDataSeriesName, QWidget *parent) :
+Track::Track(const DataProvider &dataProvider, const QString &fullDataSeriesName, QWidget *parent) :
     QWidget(parent),
     dataProvider(dataProvider)
 {
@@ -100,7 +100,7 @@ void Track::addData()
 
 void Track::addSource(const QString &fullDataSeriesName)
 {
-    AbstractDataSeries *series = dataProvider->getDataSeries(fullDataSeriesName);
+    AbstractDataSeries *series = dataProvider.getDataSeries(fullDataSeriesName);
 
     if (series) {
         // visit the data series to determine its type and add the according graph
@@ -131,7 +131,7 @@ void Track::onSources()
 
     // TODO(Steffi):
 
-    QList<QString> dataSeriesNames = dataProvider->getDataSeriesList();
+    QList<QString> dataSeriesNames = dataProvider.getDataSeriesList();
     // parse list entries
     // show dialog
 
