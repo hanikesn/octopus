@@ -73,6 +73,7 @@ void PresentationItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *
 void PresentationItem::addTrack(Track *t)
 {    
     t->setPlotRange(hScrollBar->value()*1000000, (hScrollBar->value()+30)*1000000);
+    t->setOffset(ACTIONAREAOFFSET);
 
     boundingRectangle.setHeight(boundingRectangle.height() + t->size().height());
     if(t->size().width() > boundingRectangle.width())

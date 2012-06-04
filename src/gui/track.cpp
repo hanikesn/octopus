@@ -14,7 +14,8 @@ const QString Track::ICON_AS_BUTTON = QString(
 
 Track::Track(const DataProvider *dataProvider, QWidget *parent) :
     QWidget(parent),
-    dataProvider(dataProvider)
+    dataProvider(dataProvider),
+    offset(52)
 {
     ui.setupUi(this);
 
@@ -155,4 +156,9 @@ void Track::onPlotSettings()
 void Track::onNewMax(qint64 timestamp)
 {
     // TODO(Steffi) qcp anpassen
+}
+
+void Track::setOffset(int pixel)
+{
+    offset = pixel;
 }
