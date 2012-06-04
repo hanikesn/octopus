@@ -18,7 +18,7 @@ class PresentationArea : public QObject
 {
     Q_OBJECT
 public:
-    explicit PresentationArea(QGraphicsScene *scene, DataProvider *dataProvider,
+    explicit PresentationArea(QGraphicsScene *scene, const DataProvider &dataProvider,
                               QScrollBar *hScrollBar);
     ~PresentationArea();
 
@@ -62,7 +62,7 @@ private slots:
 private:    
     PresentationItem *pi;
 
-    DataProvider *dataProvider;
+    const DataProvider &dataProvider;
     QList<Track*> tracks;
 
     QSize currentViewSize;

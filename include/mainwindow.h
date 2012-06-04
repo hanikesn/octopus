@@ -53,7 +53,7 @@ private:
     // Area for the tracks
     PresentationArea *pa;
 
-    DataProvider *dataProvider;
+    DataProvider dataProvider;
 
     Ui::MainWindow ui;
 

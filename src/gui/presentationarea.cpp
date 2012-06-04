@@ -7,7 +7,7 @@
 #include "gui/cursor.h"
 #include "gui/track.h"
 
-PresentationArea::PresentationArea(QGraphicsScene *scene, DataProvider *dataProvider,
+PresentationArea::PresentationArea(QGraphicsScene *scene, const DataProvider &dataProvider,
                                    QScrollBar *hScrollBar):
     dataProvider(dataProvider),
     currentViewSize(949, 1),
