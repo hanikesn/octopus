@@ -17,12 +17,12 @@ public:
      */
     void accept(DataSeriesVisitor *v);
 
-    void addData(qint64 timeStamp, const Value &value);
+    void addData(qint64 timestamp, const Value &value);
 
     /**
      * Convenience function.
      */
-    QList<QString> getData(qint64 timeStamp) const;
+    QList<QString> getData(qint64 timestamp) const;
 
     /**
      * @return A sorted list of the data for all timestamps t for which begin <= t <= end.

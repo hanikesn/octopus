@@ -37,6 +37,8 @@ public slots:
 
 private:
     QMap<QString, AbstractDataSeries*> dataSeries;
+
+    qint64 currentMax;
 };
 
 #endif // DATAPROVIDER_H

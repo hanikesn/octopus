@@ -1,6 +1,8 @@
 #include "gui/track.h"
 
 #include "abstractdataseries.h"
+#include "gui/discretegraph.h"
+#include "gui/interpolatinggraph.h"
 
 #include <cmath>
 
@@ -100,30 +102,23 @@ void Track::addSource(const QString &fullDataSeriesName)
     AbstractDataSeries *series = dataProvider->getDataSeries(fullDataSeriesName);
 
     if (series) {
-        dataSeries.append(series);
-        // visit the data series to determine its type
+        // visit the data series to determine its type and add the according graph
         series->accept(this);
 
         // TODO(Steffi)
     }
 }
 
-void Track::visit(DoubleSeries *s) {
-    qDebug() << "Visiting a double series! :)";
+void Track::addGraph(const DoubleSeries &s) {
+    qDebug() << "Visiting an double series (interpolatable)! :)";
 
-    // TODO(Steffi)
-
-    // setup correct graph
-    // connect newData signal
+    graphs.append(new InterpolatingGraph(s));
 }
 
-void Track::visit(StringSeries *s) {
-    qDebug() << "Visiting a string series! :)";
+void Track::addGraph(const StringSeries &s) {
+    qDebug() << "Visiting a string series (discrete)! :)";
 
-    // TODO(Steffi)
-
-    // setup correct graph
-    // connect newData signal
+    graphs.append(new DiscreteGraph(s));
 }
 
 void Track::onDelete()

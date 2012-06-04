@@ -9,21 +9,22 @@ StringSeries::StringSeries(const QString &deviceName, const QString &name, Data:
 
 void StringSeries::accept(DataSeriesVisitor *v)
 {
-    v->visit(this);
+    v->addGraph(*this);
 }
 
-void StringSeries::addData(qint64 timeStamp, const Value& value)
+void StringSeries::addData(qint64 timestamp, const Value& value)
 {
     if (value.getType() == Value::STRING) {
-        values.insert(timeStamp, value.asString());
+        values.insert(timestamp, value.asString());
+        emit newData(timestamp);
     } else {
         emit illegalValueType();
     }
 }
 
-QList<QString> StringSeries::getData(qint64 timeStamp) const
+QList<QString> StringSeries::getData(qint64 timestamp) const
 {
-    return getData(timeStamp, timeStamp);
+    return getData(timestamp, timestamp);
 }
 
 QList<QString> StringSeries::getData(qint64 begin, qint64 end) const

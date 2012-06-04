@@ -4,6 +4,7 @@
 #include "dataprovider.h"
 #include "ui_track.h"
 #include "visitor.h"
+#include "gui/graph.h"
 
 #include <QLabel>
 #include <QPainter>
@@ -22,8 +23,8 @@ public:
     /**
      * Visitor pattern.
      */
-    void visit(DoubleSeries *s);
-    void visit(StringSeries *s);
+    void addGraph(const DoubleSeries &s);
+    void addGraph(const StringSeries &s);
 
 signals:
     void del(Track*);
@@ -36,7 +37,7 @@ private:
     static const QString ICON_AS_BUTTON;
 
     const DataProvider *dataProvider;
-    QList<AbstractDataSeries*> dataSeries;
+    QList<Graph*> graphs;
 
     void setupButtons();
     void setupPlot();
