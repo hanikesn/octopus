@@ -9,7 +9,7 @@ TimeLine::TimeLine(int offset, QGraphicsItem * parent, Qt::WindowFlags wFlags):
     offset(offset),
     QGraphicsWidget(parent, wFlags),
     beginRange(0),
-    endRange(1000),
+    endRange(30000000),
     textBoxWidth(50),
     textBoxHeight(10),
     shortTickHeight(5),
@@ -22,8 +22,9 @@ TimeLine::TimeLine(int offset, QGraphicsItem * parent, Qt::WindowFlags wFlags):
 
 void TimeLine::adjustVisibleRange(qint64 begin, qint64 end)
 {
-    beginRange = 0;
-    endRange = 1000;
+    beginRange = begin;
+    endRange = end;
+    update(boundingRect());
 }
 
 void TimeLine::paint(QPainter *painter,
@@ -66,14 +67,14 @@ void TimeLine::drawTicks(QPainter *painter)
     bottom = geometry().height() - 10;
     double output  = 0.0;
     while(currentPos < geometry().width()){
-        output = (currentPos * value) + rangeOffset;
+        output = ((currentPos * value) + rangeOffset)/1000000;
         if(currentPos % 50 == 0){
             // large tick
             painter->drawLine(currentPos + offset, bottom, currentPos + offset, bottom - largeTickHeight);
             QRect rect = QRect(currentPos + offset - textBoxWidth/2, bottom, textBoxWidth, textBoxHeight);
             if(value < 0.02){
                 painter->drawText(rect, Qt::AlignCenter, QString("%1").arg(output, 0, 'f', 3));
-            }else{
+            }else{                
                 painter->drawText(rect, Qt::AlignCenter, QString::number((int)output));
             }
 
