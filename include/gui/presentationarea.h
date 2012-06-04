@@ -26,7 +26,7 @@ signals:
     void rangeChanged(qint64 begin, qint64 end);
     void changedWindowSize(QSize size);
     void verticalScroll(QRectF visibleRectangle);
-    void exportRange(qint64 begin, qint64 end);
+    void exportRange(qint64 begin, qint64 end);    
 
 public slots:
     void onAddTrack();
@@ -41,7 +41,7 @@ public slots:
 
 private slots:
     /**
-      * Saves the range of the current selection
+      * Transforms the position of the selection to timestamps and saves the it.
       * @param begin Begin of the selection
       * @param end End of the selection
       */
@@ -53,21 +53,12 @@ private slots:
     void onExportTriggered();
 
     /**
-      * Updates the timeLine, hScrollBar and the tracks to the new maximum timestamp.
-      * @param timestamp New maximum timestamp
-      */
-    void onNewMax(qint64 timestamp);
-
-    /**
       * Is called when the signal rangeChange(qint64, qint64) is emitted.
       * Updates the tracks to the new range.
       * @param begin Begin of the range.
       * @param end End of the range (usually 30s more than begin)
       */
     void onRangeChanged(qint64 begin, qint64 end);
-
-
-    void horizontalScroll(int pos);    
 
 private:    
     PresentationItem *pi;
@@ -77,19 +68,7 @@ private:
 
     QSize currentViewSize;
 
-    QScrollBar *hScrollBar;
-
-    qint64 selectionBegin, selectionEnd;    
-
-    bool autoScroll;
-    int lastSliderPos;
-
-    static const int ACTIONAREAOFFSET;
-
-    /**
-      * Determines how far the range should go back in time (in microseconds)
-      */
-    static const int TIMEFRAME;
+    qint64 selectionBegin, selectionEnd;            
 };
 
 #endif // PRESENTATIONAREA_H

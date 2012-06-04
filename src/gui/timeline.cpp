@@ -17,6 +17,7 @@ TimeLine::TimeLine(int offset, QGraphicsItem * parent, Qt::WindowFlags wFlags):
     largeTickHeight(15),
     pen(Qt::black, 1, Qt::SolidLine)
 {
+//    setGeometry(0, 0, 946, 50);
     setGeometry(0, 0, 946, 50);
 }
 
@@ -46,7 +47,7 @@ void TimeLine::paint(QPainter *painter,
 
     painter->setBrush(QBrush(gradient));
     painter->setPen(pen);
-    painter->drawRoundedRect(frame, 10.0, 10.0);
+    painter->drawRect(frame);
 
     // draw ticks:
     drawTicks(painter);
@@ -59,31 +60,37 @@ QRectF TimeLine::boundingRect(){
 void TimeLine::drawTicks(QPainter *painter)
 {
     // range per pixel ("value" of a pixel)
-    value = (endRange - beginRange + 1) / (geometry().width() - offset);
+    value = (double) (endRange - beginRange + 1) / (double) (geometry().width() - offset);
 //    qDebug() << "TimeLine::drawTicks()  range-per-pixel: " << value;
+
     // if the range doesn't start at 0 we need to add a offset
     rangeOffset = beginRange;
     currentPos = 0;
     bottom = geometry().height() - 10;
     double output  = 0.0;
-    while(currentPos < geometry().width()){
-        output = ((currentPos * value) + rangeOffset)/1000000;
+    while(currentPos < geometry().width()){        
         if(currentPos % 50 == 0){
+            output = ((currentPos * value) + rangeOffset)/1000000;
             // large tick
-            painter->drawLine(currentPos + offset, bottom, currentPos + offset, bottom - largeTickHeight);
-            QRect rect = QRect(currentPos + offset - textBoxWidth/2, bottom, textBoxWidth, textBoxHeight);
+            painter->drawLine(currentPos + offset, bottom, currentPos + offset,
+                              bottom - largeTickHeight);
+            QRect rect = QRect(currentPos + offset - textBoxWidth/2, bottom, textBoxWidth,
+                               textBoxHeight);
             if(value < 0.02){
                 painter->drawText(rect, Qt::AlignCenter, QString("%1").arg(output, 0, 'f', 3));
             }else{                
-                painter->drawText(rect, Qt::AlignCenter, QString::number((int)output));
+                painter->drawText(rect, Qt::AlignCenter, QString("%1").arg(output, 0, 'f', 1));
+//                painter->drawText(rect, Qt::AlignCenter, QString::number((int)output));
             }
 
         }else if(currentPos % 25 == 0){
             // medium tick
-            painter->drawLine(currentPos + offset, bottom, currentPos + offset, bottom - mediumTickHeight);
+            painter->drawLine(currentPos + offset, bottom, currentPos + offset,
+                              bottom - mediumTickHeight);
         }else if(currentPos % 5 == 0){
             // short tick
-            painter->drawLine(currentPos + offset, bottom, currentPos + offset, bottom - shortTickHeight);
+            painter->drawLine(currentPos + offset, bottom, currentPos + offset,
+                              bottom - shortTickHeight);
         }
         // draw a tick every 5 pixels
         currentPos += 5;

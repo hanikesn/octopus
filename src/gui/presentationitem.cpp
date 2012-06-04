@@ -3,6 +3,7 @@
 #include <QGraphicsProxyWidget>
 #include <QGraphicsItem>
 #include <QGraphicsSceneMouseEvent>
+#include <QScrollBar>
 
 #include "gui/track.h"
 #include "gui/selection.h"
@@ -10,13 +11,16 @@
 #include "gui/timeline.h"
 
 const int PresentationItem::ACTIONAREAOFFSET = 52;
+const int PresentationItem::TIMEFRAME = 30000000;
 
-PresentationItem::PresentationItem(QGraphicsScene *parent) :
+PresentationItem::PresentationItem(QScrollBar *hScrollBar, QGraphicsScene *parent) :
     QGraphicsItem(0, parent),
     parent(parent),
     boundingRectangle(0, 0, 0, 0),
     createSelection(false),
-    minCoverHeight(712)
+    minCoverHeight(712),
+    hScrollBar(hScrollBar),
+    autoScroll(true)
 {            
     timeLine = new TimeLine(ACTIONAREAOFFSET, this, 0);
     timeLine->setZValue(1.0);
@@ -34,7 +38,17 @@ PresentationItem::PresentationItem(QGraphicsScene *parent) :
     boundingRectangle.setWidth(timeLine->size().width());
     boundingRectangle.setHeight(timeLine->size().height());
 
+    hScrollBar->setSingleStep(1);
+    hScrollBar->setPageStep(30);
+    hScrollBar->setMinimum(0);
+    hScrollBar->setMaximum(0);
+
     connect(selectedArea, SIGNAL(exportTriggered()), this, SIGNAL(exportTriggered()));
+
+    connect(hScrollBar, SIGNAL(sliderMoved(int)), this, SLOT(horizontalScroll(int)));
+    connect(hScrollBar, SIGNAL(valueChanged(int)), this, SLOT(horizontalScroll(int)));
+
+    connect(this, SIGNAL(rangeChanged(qint64,qint64)), this, SLOT(onRangeChanged(qint64,qint64)));
 }
 
 PresentationItem::~PresentationItem()
@@ -57,6 +71,8 @@ void PresentationItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *
 
 void PresentationItem::addTrack(Track *t)
 {    
+    t->setPlotRange(hScrollBar->value()*1000000, (hScrollBar->value()+30)*1000000);
+
     boundingRectangle.setHeight(boundingRectangle.height() + t->size().height());
     if(t->size().width() > boundingRectangle.width())
         boundingRectangle.setWidth(t->size().width());
@@ -79,13 +95,11 @@ void PresentationItem::deleteTrack(Track *t)
 
     QGraphicsProxyWidget *del;
     foreach (del, tracks){
-        if(del->widget() == t){
-            tracks.removeAll(del);
-            childItems().removeAll(del);
-            parent->removeItem(del);
+        if(del->widget() == t){     
+            tracks.removeAll(del);            
+            parent->removeItem(del);                        
         }
-    }
-
+    }    
     recalcPositions();
     resizeCursorAndSelection();
 }
@@ -138,15 +152,25 @@ void PresentationItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
         selectedArea->update(selectedArea->boundingRect());
         cursor->setVisible(false);        
 
-        emit selection(begin, begin + width - 1);
+        qint64 lowRange = hScrollBar->value() * 1000000;
+        qint64 highRange = lowRange + TIMEFRAME;
+        double value = (highRange - lowRange + 1)/(boundingRectangle.width() - ACTIONAREAOFFSET);
+
+        // delta1 is the distance between the left side of the selection and the begin of the graph.
+        qint64 delta1 = (begin - ACTIONAREAOFFSET) * value;
+        lowRange += delta1;
+
+        // delta2 is the length of the selection
+        qint64 delta2 = width*value;
+        highRange = lowRange + delta2;
+
+        selectionStart = lowRange;
+        selectionEnd = highRange;
+
+        emit selection(selectionStart, selectionEnd);
     }else{
-        selectedArea->setVisible(false);
-        selectedArea->setWidth(0);
-        selectedArea->setHeight(0);
-        cursor->setVisible(true);
         cursorPosChanged(event->pos().x());
-        // others need to know that there is no selection active any more
-        emit selection(-1, -1);        
+        showCursor();
     }
 }
 
@@ -242,4 +266,37 @@ void PresentationItem::resizeCursorAndSelection()
         cursor->resize(1, boundingRectangle.height());
         selectedArea->setHeight(boundingRectangle.height());
     }
+}
+
+void PresentationItem::onNewMax(qint64 timestamp)
+{
+    int max = timestamp/1000000; // max in seconds
+    int min = 0;
+
+    hScrollBar->setMaximum(max - hScrollBar->pageStep());
+    hScrollBar->setMinimum(min);
+
+    if(autoScroll){
+        hScrollBar->setValue(hScrollBar->maximum());
+        qint64 lowerRange = timestamp <= TIMEFRAME ? 0 : timestamp - TIMEFRAME;
+        emit rangeChanged(lowerRange, timestamp);
+    }
+}
+
+void PresentationItem::horizontalScroll(int pos)
+{
+    qint64 lowerRange = pos*1000000;
+    emit rangeChanged(lowerRange, lowerRange + TIMEFRAME);
+    // remove selection:
+    showCursor();
+}
+
+void PresentationItem::showCursor()
+{
+    selectedArea->setVisible(false);
+    selectedArea->setWidth(0);
+    selectedArea->setHeight(0);
+    cursor->setVisible(true);
+    // others need to know that there is no selection active any more
+    emit selection(-1, -1);
 }
