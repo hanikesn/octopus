@@ -16,10 +16,10 @@ public:
 
     QRectF boundingRect();
 
-private:
-    int offset;
+private:    
+    QPen pen;    
     QBrush brush;
-    QPen pen;
+    int offset;
 };
 
 #endif // CURSOR_H

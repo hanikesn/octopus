@@ -16,11 +16,11 @@ const int PresentationItem::TIMEFRAME = 30000000;
 PresentationItem::PresentationItem(QScrollBar *hScrollBar, QGraphicsScene *parent) :
     QGraphicsItem(0, parent),
     parent(parent),
-    boundingRectangle(0, 0, 0, 0),
-    createSelection(false),
-    minCoverHeight(712),
+    boundingRectangle(0, 0, 0, 0),    
     hScrollBar(hScrollBar),
-    autoScroll(true)
+    autoScroll(true),
+    createSelection(false),
+    minCoverHeight(712)
 {            
     timeLine = new TimeLine(ACTIONAREAOFFSET, this, 0);
     timeLine->setZValue(1.0);
@@ -44,10 +44,8 @@ PresentationItem::PresentationItem(QScrollBar *hScrollBar, QGraphicsScene *paren
     hScrollBar->setMaximum(0);
 
     connect(selectedArea, SIGNAL(exportTriggered()), this, SIGNAL(exportTriggered()));
-
     connect(hScrollBar, SIGNAL(sliderMoved(int)), this, SLOT(horizontalScroll(int)));
     connect(hScrollBar, SIGNAL(valueChanged(int)), this, SLOT(horizontalScroll(int)));
-
     connect(this, SIGNAL(rangeChanged(qint64,qint64)), this, SLOT(onRangeChanged(qint64,qint64)));
 }
 
@@ -66,6 +64,9 @@ QRectF PresentationItem::boundingRect() const
 void PresentationItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
                              QWidget *widget)
 {
+    Q_UNUSED(painter)
+    Q_UNUSED(option)
+    Q_UNUSED(widget)
 
 }
 
@@ -198,6 +199,7 @@ void PresentationItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 
 void PresentationItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
 {
+    Q_UNUSED(event)
     // Nothing to do...
 }
 
