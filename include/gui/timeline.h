@@ -27,7 +27,7 @@ private:
 
     // stuff to draw ticks:
     double value;
-    int rangeOffset;
+    qint64 rangeOffset;
     int currentPos;
     int bottom;
     int textBoxWidth;
