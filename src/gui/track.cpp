@@ -82,15 +82,15 @@ void Track::addData()
       ui.plot->graph()->setPen(pen);
       ui.plot->graph()->setName(lineNames.at(i-QCPGraph::lsNone));
       ui.plot->graph()->setLineStyle((QCPGraph::LineStyle)i);
-      ui.plot->graph()->setScatterStyle(QCPGraph::ssCircle);
-      ui.plot->graph()->setScatterSize(5);
+      ui.plot->graph()->setScatterStyle(QCPGraph::ssDisc);
+      ui.plot->graph()->setScatterSize(4);
 
       // generate data:
       QVector<double> x(500), y(500);
       for (int j=0; j<500; ++j)
       {
-        x[j] = j/10.0 * 5*3.14 + 0.01;
-        y[j] = 7*sin(x[j])/x[j] - (i-QCPGraph::lsNone)*5 + (QCPGraph::lsImpulse)*5 + 2;
+        x[j] = (j/10.0 * 5*3.14 + 0.01)*1000000;
+        y[j] = 7*sin(j/10.0 * 5*3.14 + 0.01)/(j/10.0 * 5*3.14 + 0.01) - (i-QCPGraph::lsNone)*5 + (QCPGraph::lsImpulse)*5 + 2;
       }
       ui.plot->graph()->setData(x, y);
       ui.plot->graph()->rescaleValueAxis(true);
