@@ -25,7 +25,6 @@ set(Octopus_SOURCES
   src/doubleseries.cpp
   src/dataprovider.cpp
   src/value.cpp
-  src/gui/graph.cpp
   src/gui/discretegraph.cpp
   src/gui/interpolatinggraph.cpp
   src/gui/track.cpp
