@@ -37,7 +37,7 @@ private:
     static const QString ICON_AS_BUTTON;
 
     const DataProvider *dataProvider;
-    QList<Graph> graphs;
+    QList<Graph*> graphs;
 
     void setupButtons();
     void setupPlot();

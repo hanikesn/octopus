@@ -1,10 +1,17 @@
 #ifndef GRAPH_H
 #define GRAPH_H
 
-class Graph
+#include <QObject>
+#include <QtCore/QIntegerForSize>
+
+class Graph : public QObject
 {
+    Q_OBJECT
 public:
-    Graph();
+    virtual ~Graph() {}
+
+protected slots:
+    virtual void onNewData(qint64 timestamp) = 0;
 };
 
 #endif // GRAPH_H

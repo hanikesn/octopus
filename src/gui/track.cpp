@@ -110,25 +110,15 @@ void Track::addSource(const QString &fullDataSeriesName)
 }
 
 void Track::addGraph(const DoubleSeries &s) {
-    qDebug() << "Visiting a double series! :)";
+    qDebug() << "Visiting an double series (interpolatable)! :)";
 
-    // TODO(Steffi)
-
-    graphs.append(InterpolatingGraph(s));
-
-    // setup correct graph
-    // connect newData signal
+    graphs.append(new InterpolatingGraph(s));
 }
 
 void Track::addGraph(const StringSeries &s) {
-    qDebug() << "Visiting a string series! :)";
+    qDebug() << "Visiting a string series (discrete)! :)";
 
-    // TODO(Steffi)
-
-    graphs.append(DiscreteGraph(s));
-
-    // setup correct graph
-    // connect newData signal
+    graphs.append(new DiscreteGraph(s));
 }
 
 void Track::onDelete()
