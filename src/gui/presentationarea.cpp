@@ -82,3 +82,43 @@ void PresentationArea::onSelection(qint64 begin, qint64 end)
         selectionEnd = -1;
     }
 }
+
+void PresentationArea::save(boost::property_tree::ptree *pt)
+{
+    using boost::property_tree::ptree;
+    //TODO(domi): weiterreichen an PI
+    pi->save(pt);
+    ptree tracksTree;
+
+    int counter = 0;
+
+    foreach(Track *t, tracks){
+        ptree trackTree;
+        QString tmp = "track";
+        tmp += QString::number(counter);
+
+        t->save(&trackTree);
+
+        tracksTree.push_back(std::make_pair(tmp.toStdString(), trackTree));
+//        tracksTree.put_child(tmp.toStdString(), trackTree);
+
+
+
+
+
+
+
+/*      tracksTree.push_back(std::make_pair("", tmp.toStdString()));
+        tracksTree.put_child("tmp", trackTree);*/
+
+
+
+        counter++;
+    }
+    pt->put_child("tracks", tracksTree);
+}
+
+void PresentationArea::load(boost::property_tree::ptree *pt)
+{
+    //TODO(domi): weiterreichen an PI
+}

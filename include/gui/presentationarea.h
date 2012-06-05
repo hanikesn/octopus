@@ -5,7 +5,8 @@
 
 #include "dataprovider.h"
 #include "presentationitem.h"
-
+#include "boost/property_tree/ptree.hpp"
+#include "serializable.h"
 
 class Track;
 class QVBoxLayout;
@@ -14,13 +15,16 @@ class QGraphicsWidget;
 class Cursor;
 class QScrollBar;
 
-class PresentationArea : public QObject
+class PresentationArea : public QObject, public Serializable
 {
     Q_OBJECT
 public:
     explicit PresentationArea(QGraphicsScene *scene, const DataProvider &dataProvider,
                               QScrollBar *hScrollBar);
     ~PresentationArea();
+
+    void save(boost::property_tree::ptree *pt);
+    void load(boost::property_tree::ptree *pt);
 
 signals:
     void changedWindowSize(QSize size);

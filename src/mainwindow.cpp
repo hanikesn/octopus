@@ -1,18 +1,24 @@
 #include "mainwindow.h"
 
 #include <QDebug>
+#include <QFileDialog>
+#include <sstream>
 
 #include "dataprovider.h"
 #include "gui/presentationarea.h"
 #include "gui/mainview.h"
+#include "boost/property_tree/ptree.hpp"
+#include "boost/property_tree/json_parser.hpp"
 
 MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent)
+    QMainWindow(parent),
+    projectName("dummy")
 {    
     ui.setupUi(this);
 //    hScrollBar = new HorizontalScrollBar();
     pa = new PresentationArea(&trackScene, dataProvider, ui.hScrollBar);
-    setUpButtonBars();
+
+    saveAction = new QAction(tr("save"), this);
 
     ui.mainView->setAlignment(Qt::AlignTop | Qt::AlignLeft);
     ui.mainView->setScene(&trackScene);
@@ -24,6 +30,12 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, SIGNAL(verticalScroll(QRectF)), pa, SIGNAL(verticalScroll(QRectF)));
     connect(this, SIGNAL(changedWindowSize(QSize)), pa, SLOT(onChangedWindowSize(QSize)));
     connect(pa, SIGNAL(exportRange(qint64,qint64)), this, SLOT(onExportRange(qint64,qint64)));
+    connect(saveAction, SIGNAL(triggered()), this, SLOT(onSave()));
+
+
+    setUpButtonBars();
+    setUpMenu();
+
 }
 
 MainWindow::~MainWindow()
@@ -96,4 +108,36 @@ void MainWindow::onVerticalScroll()
 void MainWindow::onExportRange(qint64 begin, qint64 end)
 {
     qDebug() << "MainWindow::onExportRange " << begin << ":" << end;
+}
+
+void MainWindow::setUpMenu()
+{
+    menu.setTitle(tr("File"));
+    menu.addAction(saveAction);
+    ui.menuBar->addMenu(&menu);
+}
+
+void MainWindow::onSave()
+{
+    using boost::property_tree::ptree;
+
+    QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"));
+    if(fileName.isEmpty()) return;
+
+
+    //TODO(domi): set name of project
+
+    ptree pt;
+
+    pt.put("projectName", projectName.toStdString());
+    pa->save(&pt);
+
+    std::stringstream stream;
+
+    std::string fn = fileName.toLocal8Bit().constData();
+    qDebug() << fileName;
+    write_json(fn, pt);
+
+
+//    qDebug() << QString(stream.str());
 }
