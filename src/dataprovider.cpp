@@ -3,10 +3,25 @@
 #include "common.h"
 #include "doubleseries.h"
 #include "stringseries.h"
+#include "value.h"
 
 DataProvider::DataProvider() :
     currentMax(0)
 {
+    addData();
+}
+
+void DataProvider::addData()
+{
+    onNewDataSeries("Dummy", "Interpolatable", Data::INTERPOLATABLE);
+    onNewDataSeries("Dummy", "Discrete", Data::STATEFUL);
+
+    for (int j=0; j<500; ++j)
+    {
+      double d = j/15.0 * 5*3.14;
+      onNewData(d*1000000, "Dummy.Interpolatable", Value(7*sin(d)/d + 2));
+      onNewData(d*1000000, "Dummy.Discrete", Value("ping"));
+    }
 }
 
 QList<QString> DataProvider::getDataSeriesList() const

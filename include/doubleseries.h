@@ -20,14 +20,19 @@ public:
     void addData(qint64 timeStamp, const Value &value);
 
     /**
-     * Convenience function.
+     * @return The value for the given timestamp.
      */
-    QList<double> getData(qint64 timestamp) const;
+    double getData(qint64 timestamp) const;
 
     /**
-     * @return A sorted list of the data for all timestamps t for which begin <= t <= end.
+     * @return A map of all timestamps and the respective data.
      */
-    QList<double> getData(qint64 begin, qint64 end) const;
+    QMap<qint64, double> getData() const;
+
+    /**
+     * @return A map of timestamps and the respective data for all timestamps t for which begin <= t <= end.
+     */
+    QMap<qint64, double> getData(qint64 begin, qint64 end) const;
 
 private:
     /**
