@@ -15,6 +15,8 @@ private:
     const StringSeries &series;
     QCPGraph *graph;
 
+    void configureAppearance();
+
 protected slots:
     void onNewData(qint64 timestamp);
 };
