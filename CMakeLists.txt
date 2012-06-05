@@ -42,6 +42,7 @@ set(Octopus_HEADERS
   include/mainwindow.h
   include/common.h
   include/abstractdataseries.h
+  include/serializable.h
   include/stringseries.h
   include/doubleseries.h
   include/dataprovider.h
