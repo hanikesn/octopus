@@ -18,6 +18,10 @@ enable_Warnings()
 
 find_package(Qt4 REQUIRED)
 
+find_package(Boost REQUIRED)
+include_directories(${Boost_INCLUDE_DIR})
+add_definitions(-DBOOST_ALL_NO_LIB)
+
 set(Octopus_SOURCES
   src/mainwindow.cpp
   src/abstractdataseries.cpp

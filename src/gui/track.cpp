@@ -66,36 +66,48 @@ void Track::setPlotRange(qint64 begin, qint64 end)
 
 void Track::addData()
 {
-    ///////////////////////////////////////////////////////////////
-    /* copied from plot-examples: MainWindow::setupLineStyleDemo */
     QPen pen;
 
-    QStringList lineNames;
-    lineNames << "lsNone" << "lsLine" << "lsStepLeft" << "lsStepRight"
-                 << "lsStepCenter" << "lsImpulse";
+    // add interpolating graph
+    ui.plot->addGraph();
+    ui.plot->graph()->setName("Interpolating");
+    ui.plot->graph()->setLineStyle(QCPGraph::lsLine);
+    ui.plot->graph()->setScatterStyle(QCPGraph::ssDisc);
+    ui.plot->graph()->setScatterSize(4);
+    pen.setColor(QColor(sin(1+1.2)*80+80, sin(1*0.3+0)*80+80, sin(1*0.3+1.5)*80+80));
+    ui.plot->graph()->setPen(pen);
 
-    // add graphs with different line styles:
-    for (int i=QCPGraph::lsNone; i<=QCPGraph::lsImpulse; ++i)
+    // generate data:
+    QVector<double> x(5000), y(5000);
+    for (int j=0; j<5000; ++j)
     {
-      ui.plot->addGraph();
-      pen.setColor(QColor(sin(i*1+1.2)*80+80, sin(i*0.3+0)*80+80, sin(i*0.3+1.5)*80+80));
-      ui.plot->graph()->setPen(pen);
-      ui.plot->graph()->setName(lineNames.at(i-QCPGraph::lsNone));
-      ui.plot->graph()->setLineStyle((QCPGraph::LineStyle)i);
-      ui.plot->graph()->setScatterStyle(QCPGraph::ssDisc);
-      ui.plot->graph()->setScatterSize(4);
-
-      // generate data:
-      QVector<double> x(500), y(500);
-      for (int j=0; j<500; ++j)
-      {
-        x[j] = (j/10.0 * 5*3.14 + 0.01)*1000000;
-        y[j] = 7*sin(j/10.0 * 5*3.14 + 0.01)/(j/10.0 * 5*3.14 + 0.01) - (i-QCPGraph::lsNone)*5 + (QCPGraph::lsImpulse)*5 + 2;
-      }
-      ui.plot->graph()->setData(x, y);
-      ui.plot->graph()->rescaleValueAxis(true);
+      double d = j/15.0 * 5*3.14 + 0.01;
+      x[j] = d*1000000;
+      y[j] = 7*sin(d)/d + 2;
     }
-    ///////////////////////////////////////////////////////////////
+    ui.plot->graph()->setData(x, y);
+
+    // rescale yAxis
+    ui.plot->graph()->rescaleValueAxis(true);
+
+    // add discrete graph
+    ui.plot->addGraph();
+    ui.plot->graph()->setName("Discrete");
+    ui.plot->graph()->setLineStyle(QCPGraph::lsImpulse);
+    ui.plot->graph()->setScatterStyle(QCPGraph::ssTriangleInverted);
+    ui.plot->graph()->setScatterSize(4);
+    pen.setColor(QColor(sin(2+1.2)*80+80, sin(2*0.3+0)*80+80, sin(2*0.3+1.5)*80+80));
+    ui.plot->graph()->setPen(pen);
+
+    // generate data:
+    for (int j=0; j<5000; ++j)
+    {
+      x[j] = (j/10.0 * 5*3.14 + 0.01)*1000000;
+      y[j] = ui.plot->yAxis->range().size() * 0.4;
+    }
+    ui.plot->graph()->setData(x, y);
+
+    ui.plot->legend->setVisible(true);
 }
 
 void Track::addSource(const QString &fullDataSeriesName)
