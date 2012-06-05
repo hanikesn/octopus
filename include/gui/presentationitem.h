@@ -6,6 +6,8 @@
 #include <QGraphicsWidget>
 #include <QList>
 
+#include "boost/property_tree/ptree.hpp"
+#include "serializable.h"
 
 class Track;
 class QGraphicsProxyWidget;
@@ -14,7 +16,7 @@ class Cursor;
 class TimeLine;
 class QScrollBar;
 
-class PresentationItem : public QObject, public QGraphicsItem
+class PresentationItem : public QObject, public QGraphicsItem, public Serializable
 {
     Q_OBJECT
 public:
@@ -68,6 +70,10 @@ public:
       */
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event);    
 
+    void save(boost::property_tree::ptree *pt);
+
+    void load(boost::property_tree::ptree *pt);
+
 public slots:
     /**
       * Calculates the current size of the bounding rectangle.
@@ -100,7 +106,8 @@ private slots:
     void horizontalScroll(int);
 
     /**
-      * Updates timeLine to the visible range
+      * Updates timeLine to the visible range.
+      * Saves current visible range in visRangeLow and visRangeHigh
       * @param begin Begin of the visible range
       * @param end End of the visible range
       */
@@ -150,6 +157,7 @@ private:
 
     bool createSelection;
     int selectionStart, selectionEnd;
+    qint64 visRangeLow, visRangeHigh;
 
     // minmal height to cover the full presentationArea
     int minCoverHeight;

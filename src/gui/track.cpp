@@ -167,3 +167,22 @@ void Track::setOffset(int pixel)
 {
     offset = pixel;
 }
+
+void Track::save(boost::property_tree::ptree *pt)
+{
+    //TODO(domi): dummyseries entfernen und durch richtige ersetzen
+    using boost::property_tree::ptree;
+    ptree series;
+    series.push_back(std::make_pair("", "dataSeries1"));
+    series.push_back(std::make_pair("", "dataSeries2"));
+
+
+    pt->put_child("dataSeries", series);
+    //TODO(domi): track-sachen speichern.
+}
+
+void Track::load(boost::property_tree::ptree *pt)
+{
+    //TODO(domi): track-sachen speichern.
+}
+

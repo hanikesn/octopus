@@ -13,6 +13,8 @@
 #include <QPushButton>
 #include <QSpacerItem>
 #include <QWidget>
+#include <QMenu>
+#include <QAction>
 
 
 class PresentationArea;
@@ -32,6 +34,7 @@ private slots:
     void onImportAction();
     void onExportAction();
     void onPlayAction();    
+    void onSave();
     void onVerticalScroll();
     void onExportRange(qint64 begin, qint64 end);
 
@@ -44,7 +47,7 @@ private:
     QPushButton addTrackButton;
     QPushButton importButton;
     QPushButton exportButton;
-    QPushButton playButton;
+    QPushButton playButton;    
 
     // Spacer item to center the play button (in the bottomButtonBar)
     QSpacerItem *spacerLeft;
@@ -52,6 +55,10 @@ private:
 
     // Area for the tracks
     PresentationArea *pa;
+
+    // Menu
+    QMenu menu;
+    QAction *saveAction;
 
     DataProvider dataProvider;
 
@@ -61,7 +68,11 @@ private:
 
     HorizontalScrollBar *hScrollBar;
 
+    QString projectName;
+
     void setUpButtonBars();
+
+    void setUpMenu();
 
 signals:
     void verticalScroll(QRectF visibleRectangle);

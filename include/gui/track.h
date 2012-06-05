@@ -5,6 +5,8 @@
 #include "ui_track.h"
 #include "visitor.h"
 #include "gui/graph.h"
+#include "serializable.h"
+#include "boost/property_tree/ptree.hpp"
 
 #include <QLabel>
 #include <QPainter>
@@ -13,7 +15,7 @@
 
 class AbstractDataSeries;
 
-class Track : public QWidget, public DataSeriesVisitor
+class Track : public QWidget, public DataSeriesVisitor, public Serializable
 {
     Q_OBJECT
 public:
@@ -27,6 +29,9 @@ public:
     void addGraph(const StringSeries &s);
 
     void setOffset(int pixel);
+
+    void save(boost::property_tree::ptree *pt);
+    void load(boost::property_tree::ptree *pt);
 
 signals:
     void del(Track*);
