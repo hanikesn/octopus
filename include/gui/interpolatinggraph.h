@@ -11,11 +11,14 @@ class InterpolatingGraph : public Graph
 public:
     explicit InterpolatingGraph(QCustomPlot *plot, const DoubleSeries &d);
 
+    QString dataSeriesName();
+
 private:
     const DoubleSeries &series;
     QCPGraph *graph;
 
     void configureAppearance();
+    void initialize();
 
 protected slots:
     void onNewData(qint64 timestamp);

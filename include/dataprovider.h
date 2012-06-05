@@ -14,6 +14,9 @@ class DataProvider : public QObject
 public:
     DataProvider();
 
+    // TODO(Steffi): Remove (dummy func)
+    void addData();
+
     /**
      * @return The full name of each known data series.
      */

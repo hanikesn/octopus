@@ -2,6 +2,8 @@
 
 #include "value.h"
 
+#include <QDebug>
+
 DoubleSeries::DoubleSeries(const QString &deviceName, const QString &name, Data::Properties properties) :
     AbstractDataSeries(deviceName, name, properties)
 {
@@ -22,21 +24,27 @@ void DoubleSeries::addData(qint64 timestamp, const Value& value)
     }
 }
 
-QList<double> DoubleSeries::getData(qint64 timestamp) const
+double DoubleSeries::getData(qint64 timestamp) const
 {
-    return getData(timestamp, timestamp);
+    // TODO(Steffi): Check! Was ist der Rückgabewert, wenn es den Wert nicht gibt? Sollte !=0 sein!
+    return values.value(timestamp);
 }
 
-QList<double> DoubleSeries::getData(qint64 begin, qint64 end) const
+QMap<qint64, double> DoubleSeries::getData() const
 {
-    QList<double> data;
+    return values;
+}
+
+QMap<qint64, double> DoubleSeries::getData(qint64 begin, qint64 end) const
+{
+    QMap<qint64, double> selection;
 
     QMap<qint64, double>::const_iterator i = values.constBegin();
     while (i != values.constEnd()) {
         if (begin <= i.key() && i.key() <= end) {
-            data.append(i.value());
+            selection.insert(i.key(), i.value());
         }
     }
 
-    return data;
+    return selection;
 }

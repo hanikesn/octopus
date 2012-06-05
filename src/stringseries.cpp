@@ -22,21 +22,27 @@ void StringSeries::addData(qint64 timestamp, const Value& value)
     }
 }
 
-QList<QString> StringSeries::getData(qint64 timestamp) const
+QString StringSeries::getData(qint64 timestamp) const
 {
-    return getData(timestamp, timestamp);
+    // TODO(Steffi): Check! Was ist der Rückgabewert, wenn es den Wert nicht gibt? Sollte !=0 sein!
+    return values.value(timestamp);
 }
 
-QList<QString> StringSeries::getData(qint64 begin, qint64 end) const
+QMap<qint64, QString> StringSeries::getData() const
 {
-    QList<QString> data;
+    return values;
+}
+
+QMap<qint64, QString> StringSeries::getData(qint64 begin, qint64 end) const
+{
+    QMap<qint64, QString> selection;
 
     QMap<qint64, QString>::const_iterator i = values.constBegin();
     while (i != values.constEnd()) {
         if (begin <= i.key() && i.key() <= end) {
-            data.append(i.value());
+            selection.insert(i.key(), i.value());
         }
     }
 
-    return data;
+    return selection;
 }

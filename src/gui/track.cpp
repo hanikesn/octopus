@@ -23,7 +23,9 @@ Track::Track(const DataProvider &dataProvider, QWidget *parent) :
     setupPlot();
 
     // TODO(Steffi): Remove (dummy func)
-    addData();
+//    addData();
+    addSource("Dummy.Interpolatable");
+    addSource("Dummy.Discrete");
 
 //    connect(dataProvider, SIGNAL(newMax(qint64)), this, SLOT(onNewMax(qint64)));
 }
@@ -78,8 +80,8 @@ void Track::addData()
     ui.plot->graph()->setPen(pen);
 
     // generate data:
-    QVector<double> x(5000), y(5000);
-    for (int j=0; j<5000; ++j)
+    QVector<double> x(500), y(500);
+    for (int j=0; j<500; ++j)
     {
       double d = j/15.0 * 5*3.14 + 0.01;
       x[j] = d*1000000;
@@ -100,7 +102,7 @@ void Track::addData()
     ui.plot->graph()->setPen(pen);
 
     // generate data:
-    for (int j=0; j<5000; ++j)
+    for (int j=0; j<500; ++j)
     {
       x[j] = (j/10.0 * 5*3.14 + 0.01)*1000000;
       y[j] = ui.plot->yAxis->range().size() * 0.4;
@@ -121,14 +123,10 @@ void Track::addSource(const QString &fullDataSeriesName)
 }
 
 void Track::addGraph(const DoubleSeries &s) {
-    qDebug() << "Visiting a double series (interpolatable)! :)";
-
     graphs.append(new InterpolatingGraph(ui.plot, s));
 }
 
 void Track::addGraph(const StringSeries &s) {
-    qDebug() << "Visiting a string series (discrete)! :)";
-
     graphs.append(new DiscreteGraph(ui.plot, s));
 }
 

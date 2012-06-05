@@ -11,11 +11,14 @@ class DiscreteGraph : public Graph
 public:
     explicit DiscreteGraph(QCustomPlot *plot, const StringSeries &s);
 
+    QString dataSeriesName();
+
 private:
     const StringSeries &series;
     QCPGraph *graph;
 
     void configureAppearance();
+    void initialize();
 
 protected slots:
     void onNewData(qint64 timestamp);

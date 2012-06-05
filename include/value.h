@@ -12,7 +12,7 @@ public:
     explicit Value(double value);
     explicit Value(Value const& value);
     Value& operator=(const Value& other);
-    ~Value();
+    ~Value() {}
 
     Type getType() const;
 
