@@ -35,6 +35,7 @@ private slots:
     void onExportAction();
     void onPlayAction();    
     void onSave();
+    void onLoad();
     void onVerticalScroll();
     void onExportRange(qint64 begin, qint64 end);
 
@@ -59,6 +60,7 @@ private:
     // Menu
     QMenu menu;
     QAction *saveAction;
+    QAction *loadAction;
 
     DataProvider dataProvider;
 

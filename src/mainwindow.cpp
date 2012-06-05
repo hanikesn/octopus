@@ -10,15 +10,62 @@
 #include "boost/property_tree/ptree.hpp"
 #include "boost/property_tree/json_parser.hpp"
 
+namespace boost { namespace property_tree { namespace json_parser
+{
+    // Create necessary escape sequences from illegal characters
+    template<>
+    std::basic_string<char> create_escapes(const std::basic_string<char> &s)
+    {
+        std::basic_string<char> result;
+        std::basic_string<char>::const_iterator b = s.begin();
+        std::basic_string<char>::const_iterator e = s.end();
+        while (b != e)
+        {
+            // This assumes an ASCII superset. But so does everything in PTree.
+            // We escape everything outside ASCII, because this code can't
+            // handle high unicode characters.
+            if (*b == 0x20 || *b == 0x21 || (*b >= 0x23 && *b <= 0x2E) ||
+                (*b >= 0x30 && *b <= 0x5B) || (*b >= 0x5D && *b <= 0xFF)  //it fails here because char are signed
+                || (*b >= -0x80 && *b < 0 ) ) // this will pass UTF-8 signed chars
+                result += *b;
+            else if (*b == char('\b')) result += char('\\'), result += char('b');
+            else if (*b == char('\f')) result += char('\\'), result += char('f');
+            else if (*b == char('\n')) result += char('\\'), result += char('n');
+            else if (*b == char('\r')) result += char('\\'), result += char('r');
+            else if (*b == char('/')) result += char('\\'), result += char('/');
+            else if (*b == char('"'))  result += char('\\'), result += char('"');
+            else if (*b == char('\\')) result += char('\\'), result += char('\\');
+            else
+            {
+                const char *hexdigits = "0123456789ABCDEF";
+                typedef make_unsigned<char>::type UCh;
+                unsigned long u = (std::min)(static_cast<unsigned long>(
+                                                 static_cast<UCh>(*b)),
+                                             0xFFFFul);
+                int d1 = u / 4096; u -= d1 * 4096;
+                int d2 = u / 256; u -= d2 * 256;
+                int d3 = u / 16; u -= d3 * 16;
+                int d4 = u;
+                result += char('\\'); result += char('u');
+                result += char(hexdigits[d1]); result += char(hexdigits[d2]);
+                result += char(hexdigits[d3]); result += char(hexdigits[d4]);
+            }
+            ++b;
+        }
+        return result;
+    }
+} } }
+
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    projectName("dummy")
+    projectName(QString::fromUtf8("ü"))
 {    
     ui.setupUi(this);
-//    hScrollBar = new HorizontalScrollBar();
     pa = new PresentationArea(&trackScene, dataProvider, ui.hScrollBar);
 
-    saveAction = new QAction(tr("save"), this);
+    saveAction = new QAction(tr("Save"), this);
+    loadAction = new QAction(tr("Load..."), this);
 
     ui.mainView->setAlignment(Qt::AlignTop | Qt::AlignLeft);
     ui.mainView->setScene(&trackScene);
@@ -31,7 +78,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, SIGNAL(changedWindowSize(QSize)), pa, SLOT(onChangedWindowSize(QSize)));
     connect(pa, SIGNAL(exportRange(qint64,qint64)), this, SLOT(onExportRange(qint64,qint64)));
     connect(saveAction, SIGNAL(triggered()), this, SLOT(onSave()));
-
+    connect(loadAction, SIGNAL(triggered()), this, SLOT(onLoad()));
 
     setUpButtonBars();
     setUpMenu();
@@ -114,6 +161,7 @@ void MainWindow::setUpMenu()
 {
     menu.setTitle(tr("File"));
     menu.addAction(saveAction);
+    menu.addAction(loadAction);
     ui.menuBar->addMenu(&menu);
 }
 
@@ -128,16 +176,28 @@ void MainWindow::onSave()
     //TODO(domi): set name of project
 
     ptree pt;
+    //auto const& data = projectName.toUtf8();
+    pt.put("projectName", projectName);
 
-    pt.put("projectName", projectName.toStdString());
+
     pa->save(&pt);
-
-    std::stringstream stream;
-
     std::string fn = fileName.toLocal8Bit().constData();
-    qDebug() << fileName;
     write_json(fn, pt);
+}
 
+void MainWindow::onLoad()
+{
+    using boost::property_tree::ptree;
 
-//    qDebug() << QString(stream.str());
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Save File"));
+    qDebug() << "load file: " << fileName;
+
+    ptree pt;
+    std::string fn = fileName.toLocal8Bit().constData();
+    read_json(fn, pt);
+
+    QString projectname = pt.get<QString>("projectName");
+
+    qDebug() << projectname;
+
 }
