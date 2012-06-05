@@ -18,7 +18,7 @@ PresentationItem::PresentationItem(QScrollBar *hScrollBar, QGraphicsScene *paren
     parent(parent),
     boundingRectangle(0, 0, 0, 0),    
     hScrollBar(hScrollBar),
-    autoScroll(true),
+    autoScroll(false),
     createSelection(false),
     minCoverHeight(712)
 {            
