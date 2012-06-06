@@ -28,7 +28,7 @@ PresentationArea::PresentationArea(QGraphicsScene *scene, const DataProvider &da
 }
 
 PresentationArea::~PresentationArea()
-{
+{    
 }
 
 void PresentationArea::addTracks(const QList<QString> &fullDataSeriesNames)
@@ -57,7 +57,7 @@ void PresentationArea::add(Track *t)
 void PresentationArea::onDelete(Track *t)
 {
     tracks.removeAll(t);
-    pi->deleteTrack(t);
+    pi->deleteTrack(t);    
 }
 
 void PresentationArea::onRangeChanged(qint64 begin, qint64 end)
@@ -112,8 +112,6 @@ void PresentationArea::save(QVariantMap *qvm)
 
 void PresentationArea::load(QVariantMap *qvm)
 {
-    //TODO(domi): alte Tracks gelöscht?
-
     int counter = 0;
     Track *t;
     // get array of all tracks

@@ -179,9 +179,14 @@ void MainWindow::onLoad()
         return;
     }
 
+    // at this point loading was successful --> delete old presentationArea and create new one.
+    //TODO(domi): alte pa löschen und neu erstellen.
+
     projectName = result["projectName"].toString();
     setTitle(projectName);
-    pa->load(&result);
+
+    //TODO(domi): entkommentieren
+//    pa->load(&result);
 }
 
 void MainWindow::setTitle(QString pName)
