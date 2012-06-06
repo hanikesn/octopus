@@ -6,7 +6,6 @@
 #include <QGraphicsWidget>
 #include <QList>
 
-#include "boost/property_tree/ptree.hpp"
 #include "serializable.h"
 
 class Track;
@@ -70,9 +69,9 @@ public:
       */
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event);    
 
-    void save(boost::property_tree::ptree *pt);
+    void save(QVariantMap *qvm);
 
-    void load(boost::property_tree::ptree *pt);
+    void load(QVariantMap *qvm);
 
 public slots:
     /**

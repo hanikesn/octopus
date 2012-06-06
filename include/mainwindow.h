@@ -70,7 +70,7 @@ private:
 
     HorizontalScrollBar *hScrollBar;
 
-    QString projectName;
+    QString projectName, projectPath;
 
     void setUpButtonBars();
 

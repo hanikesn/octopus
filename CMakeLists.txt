@@ -20,6 +20,9 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX11_FLAG}")
 add_subdirectory(contrib)
 enable_Warnings()
 
+find_package(EIToolkit)
+include_directories(${EIToolkit_INCLUDE_DIR})
+
 find_package(Qt4 REQUIRED)
 
 find_package(Boost REQUIRED)
@@ -92,8 +95,9 @@ add_executable(Octopus "src/main.cpp" ${Octopus_SOURCES} ${Octopus_HEADERS}
     ${Octopus_HEADERS_MOC}
     ${Octopus_FORMS_HEADERS} 
     ${Octopus_RESOURCES_RCC})
-target_link_libraries(Octopus qjson ${QT_LIBRARIES})
+target_link_libraries(Octopus EIToolkit qjson ${QT_LIBRARIES})
 
+if(NOT WIN32)
 enable_testing()
 
 # set(<BINARY_NAME> <TEST_FILE_PATHS>)
@@ -114,3 +118,4 @@ target_link_libraries(SampleTest qjson gtest gtest_main ${QT_LIBRARIES})
 add_test(AllTestsInSampleTest SampleTest)
 
 add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND} DEPENDS SampleTest)
+endif()

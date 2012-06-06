@@ -7,59 +7,13 @@
 #include "dataprovider.h"
 #include "gui/presentationarea.h"
 #include "gui/mainview.h"
-#include "boost/property_tree/ptree.hpp"
-#include "boost/property_tree/json_parser.hpp"
-
-namespace boost { namespace property_tree { namespace json_parser
-{
-    // Create necessary escape sequences from illegal characters
-    template<>
-    std::basic_string<char> create_escapes(const std::basic_string<char> &s)
-    {
-        std::basic_string<char> result;
-        std::basic_string<char>::const_iterator b = s.begin();
-        std::basic_string<char>::const_iterator e = s.end();
-        while (b != e)
-        {
-            // This assumes an ASCII superset. But so does everything in PTree.
-            // We escape everything outside ASCII, because this code can't
-            // handle high unicode characters.
-            if (*b == 0x20 || *b == 0x21 || (*b >= 0x23 && *b <= 0x2E) ||
-                (*b >= 0x30 && *b <= 0x5B) || (*b >= 0x5D && *b <= 0xFF)  //it fails here because char are signed
-                || (*b >= -0x80 && *b < 0 ) ) // this will pass UTF-8 signed chars
-                result += *b;
-            else if (*b == char('\b')) result += char('\\'), result += char('b');
-            else if (*b == char('\f')) result += char('\\'), result += char('f');
-            else if (*b == char('\n')) result += char('\\'), result += char('n');
-            else if (*b == char('\r')) result += char('\\'), result += char('r');
-            else if (*b == char('/')) result += char('\\'), result += char('/');
-            else if (*b == char('"'))  result += char('\\'), result += char('"');
-            else if (*b == char('\\')) result += char('\\'), result += char('\\');
-            else
-            {
-                const char *hexdigits = "0123456789ABCDEF";
-                typedef make_unsigned<char>::type UCh;
-                unsigned long u = (std::min)(static_cast<unsigned long>(
-                                                 static_cast<UCh>(*b)),
-                                             0xFFFFul);
-                int d1 = u / 4096; u -= d1 * 4096;
-                int d2 = u / 256; u -= d2 * 256;
-                int d3 = u / 16; u -= d3 * 16;
-                int d4 = u;
-                result += char('\\'); result += char('u');
-                result += char(hexdigits[d1]); result += char(hexdigits[d2]);
-                result += char(hexdigits[d3]); result += char(hexdigits[d4]);
-            }
-            ++b;
-        }
-        return result;
-    }
-} } }
-
+#include "serializer.h"
+#include "parser.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    projectName(QString::fromUtf8("projectName"))
+    projectName(QString::fromUtf8("projectName")),
+    projectPath(QString::fromUtf8(""))
 {    
     ui.setupUi(this);
     pa = new PresentationArea(&trackScene, dataProvider, ui.hScrollBar);
@@ -168,40 +122,60 @@ void MainWindow::setUpMenu()
 
 void MainWindow::onSave()
 {
-    using boost::property_tree::ptree;
+    if(projectPath.isEmpty()){
+        QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
+                                                        QDir::currentPath(), "Octopus (*.oct)");
+        if(fileName.isEmpty()) return;
 
-    QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
-                                                    QDir::currentPath(), "Octopus (*.oct)");
-    if(fileName.isEmpty()) return;
+        if(fileName.endsWith(".oct") == false)
+            fileName += ".oct";
 
-    if(fileName.endsWith(".oct") == false)
-        fileName += ".oct";
+        projectPath = fileName;
+        projectName = QFileInfo(fileName).completeBaseName().remove(".oct");
+        setTitle(projectName);
+    }
+    QVariantMap pName;
+    pName.insert("projectName", projectName);
+    pa->save(&pName);
 
-    QFileInfo file(fileName);
-    projectName = file.completeBaseName().remove(".oct");
-    setTitle(projectName);
+    QJson::Serializer serializer;
+    serializer.setIndentMode(QJson::IndentMode::IndentFull);
+    QByteArray json = serializer.serialize(pName);
 
-    ptree pt;    
-    pt.put("projectName", projectName);
-
-    pa->save(&pt);
-    std::string fn = fileName.toLocal8Bit().constData();
-    write_json(fn, pt);
+    // open/create the file
+    QFile file(projectPath);
+    file.open(QIODevice::WriteOnly);
+    file.write(json);
 }
 
 void MainWindow::onLoad()
-{
-    using boost::property_tree::ptree;
-
+{    
+    //TODO(domi): laden
     QString fileName = QFileDialog::getOpenFileName(this, tr("Load File"),
                                                     QDir::currentPath(), "Octopus (*.oct)");
     if(fileName.isEmpty()) return;
+    QFile file(fileName);
+    file.open(QIODevice::ReadOnly);
+    QTextStream in(&file);
 
-    ptree pt;
-    std::string fn = fileName.toLocal8Bit().constData();
-    read_json(fn, pt);
+    QByteArray json = file.readAll();
 
-    setTitle(pt.get<QString>("projectName"));
+    QJson::Parser parser;
+    bool ok;
+    QVariantMap result = parser.parse(json, &ok).toMap();
+    if(!ok){
+        qDebug() << "Could not parse config file! Aborting...";
+        return;
+    }
+
+    // at this point loading was successful --> delete old presentationArea and create new one.
+    //TODO(domi): alte pa löschen und neu erstellen.
+
+    projectName = result["projectName"].toString();
+    setTitle(projectName);
+
+    //TODO(domi): entkommentieren
+//    pa->load(&result);
 }
 
 void MainWindow::setTitle(QString pName)
