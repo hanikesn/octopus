@@ -20,6 +20,8 @@ PresentationItem::PresentationItem(QScrollBar *hScrollBar, QGraphicsScene *paren
     hScrollBar(hScrollBar),
     autoScroll(false),
     createSelection(false),
+    visRangeLow(0),
+    visRangeHigh(TIMEFRAME),
     minCoverHeight(712)
 {            
     timeLine = new TimeLine(ACTIONAREAOFFSET, this, 0);
@@ -305,24 +307,27 @@ void PresentationItem::showCursor()
     emit selection(-1, -1);
 }
 
-void PresentationItem::save(boost::property_tree::ptree *pt)
+void PresentationItem::save(QVariantMap *qvm)
 {
-    using boost::property_tree::ptree;
-
-    pt->put<int>("cursorPos", cursor->pos().x());
-
-    ptree visibleArea;
-
-
-    visibleArea.push_back(std::make_pair("low", QString::number(visRangeLow).toStdString()));
-    visibleArea.push_back(std::make_pair("high", QString::number(visRangeHigh).toStdString()));
-    pt->put_child("visibleArea", visibleArea);
-
-
-    //TODO(domi): implementieren
+    qvm->insert("cursorPos", cursor->pos().toPoint().x());
+    QVariantMap visibleArea;
+    visibleArea.insert("low", visRangeLow);
+    visibleArea.insert("high", visRangeHigh);
+    qvm->insert("visibleArea", visibleArea);
 }
 
-void PresentationItem::load(boost::property_tree::ptree *pt)
+void PresentationItem::load(QVariantMap *qvm)
 {
     //TODO(domi): implementieren
+
+    cursor->setPos(qvm->find("cursorPos").value().toInt(), 0);
+
+    QVariantMap visibleArea = qvm->find("visibleArea").value().toMap();
+    visRangeHigh = visibleArea["high"].toLongLong();
+    visRangeLow = visibleArea["low"].toLongLong();
+
+
+
+    //TODO(domi): emit rangeChanged()...
+
 }

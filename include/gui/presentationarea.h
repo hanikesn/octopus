@@ -5,7 +5,6 @@
 
 #include "dataprovider.h"
 #include "presentationitem.h"
-#include "boost/property_tree/ptree.hpp"
 #include "serializable.h"
 
 class Track;
@@ -23,8 +22,8 @@ public:
                               QScrollBar *hScrollBar);
     ~PresentationArea();
 
-    void save(boost::property_tree::ptree *pt);
-    void load(boost::property_tree::ptree *pt);
+    void save(QVariantMap *qvm);
+    void load(QVariantMap *qvm);
 
 signals:
     void changedWindowSize(QSize size);

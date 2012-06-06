@@ -83,30 +83,39 @@ void PresentationArea::onSelection(qint64 begin, qint64 end)
     }
 }
 
-void PresentationArea::save(boost::property_tree::ptree *pt)
+void PresentationArea::save(QVariantMap *qvm)
 {
-    using boost::property_tree::ptree;
-    //TODO(domi): weiterreichen an PI
-    pi->save(pt);
-    ptree tracksTree;
-
-    int counter = 0;
-
+    pi->save(qvm);
+    // save tracks in array
+    QVariantList trackList;
     foreach(Track *t, tracks){
-        ptree trackTree;
-        QString tmp = "track";
-        tmp += QString::number(counter);
-
-        t->save(&trackTree);
-
-        tracksTree.push_back(std::make_pair("", trackTree));
-
-        counter++;
+        // each track stores its information in a map (a object in JSON)
+        QVariantMap track;
+        t->save(&track);
+        trackList << track;
     }
-    pt->put_child("tracks", tracksTree);
+    // add array of tracks to map
+    qvm->insert("tracks", trackList);
 }
 
-void PresentationArea::load(boost::property_tree::ptree *pt)
+void PresentationArea::load(QVariantMap *qvm)
 {
-    //TODO(domi): weiterreichen an PI
+    //TODO(domi): alte Tracks gelöscht?
+
+    int counter = 0;
+    Track *t;
+    // get array of all tracks
+    QVariantList trackList = qvm->find("tracks").value().toList();
+
+    foreach(QVariant track, trackList){
+        // add new track to presentationarea
+        onAddTrack();
+        t = tracks.at(tracks.size() - 1 - counter);
+        // 'load(QVariantMap)' needs a map --> put current track in a new map
+        QVariantMap trackMap;
+        trackMap.insert("track", track);
+        t->load(&trackMap);
+        counter++;
+    }
+    pi->load(qvm);
 }
