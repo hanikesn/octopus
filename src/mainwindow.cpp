@@ -145,10 +145,7 @@ void MainWindow::onSave()
     // open/create the file
     QFile file(projectPath);
     file.open(QIODevice::WriteOnly);
-    QTextStream out(&file);
-    out << json;
-    out.flush();
-    file.close();
+    file.write(json);
 }
 
 void MainWindow::onLoad()
@@ -161,15 +158,7 @@ void MainWindow::onLoad()
     file.open(QIODevice::ReadOnly);
     QTextStream in(&file);
 
-    QByteArray json;
-    QByteArray tmp;
-    in >> tmp;
-    while(!tmp.isEmpty()){
-        json.append(tmp);
-        in >> tmp;
-    }
-
-    file.close();
+    QByteArray json = file.readAll();
 
     QJson::Parser parser;
     bool ok;
