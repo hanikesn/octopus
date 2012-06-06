@@ -1,11 +1,16 @@
 #include "gui/discretegraph.h"
 
+const QCPRange RANGE(0.0, 1.0);
+const double IMPULSE_HEIGHT = RANGE.lower + 0.4 * RANGE.size();
+
 DiscreteGraph::DiscreteGraph(QCustomPlot *plot, const StringSeries &s) :
     series(s)
 {
     connect(&series, SIGNAL(newData(qint64)), this, SLOT(onNewData(qint64)));
 
-    graph = plot->addGraph();
+    graph = plot->addGraph(plot->xAxis, plot->yAxis2);
+    plot->yAxis2->setRange(RANGE);
+    plot->yAxis2->setVisible(false);
     configureAppearance();
     initialize();
 
@@ -28,7 +33,7 @@ void DiscreteGraph::initialize()
 {
     QMap<qint64, QString>::const_iterator i = series.getData().constBegin();
     while (i != series.getData().constEnd()) {
-        graph->addData(i.key(), 4.0);
+        graph->addData(i.key(), IMPULSE_HEIGHT);
         ++i;
     }
 }
@@ -37,7 +42,7 @@ void DiscreteGraph::onNewData(qint64 timestamp)
 {
     // TODO(Steffi) : Use data as labels for the graph
     QString data = series.getData(timestamp);
-    graph->addData(timestamp, 4.0);
+    graph->addData(timestamp, IMPULSE_HEIGHT);
 
     emit needsReplot();
 }
