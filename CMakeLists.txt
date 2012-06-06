@@ -91,6 +91,7 @@ add_executable(Octopus "src/main.cpp" ${Octopus_SOURCES} ${Octopus_HEADERS}
     ${Octopus_RESOURCES_RCC})
 target_link_libraries(Octopus qjson ${QT_LIBRARIES})
 
+if(NOT WIN32)
 enable_testing()
 
 # set(<BINARY_NAME> <TEST_FILE_PATHS>)
@@ -111,3 +112,4 @@ target_link_libraries(SampleTest qjson gtest gtest_main ${QT_LIBRARIES})
 add_test(AllTestsInSampleTest SampleTest)
 
 add_custom_target(check COMMAND ${CMAKE_CTEST_COMMAND} DEPENDS SampleTest)
+endif()
