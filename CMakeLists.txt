@@ -1,5 +1,9 @@
 # See http://qt-project.org/quarterly/view/using_cmake_to_build_qt_projects
 cmake_minimum_required(VERSION 2.6)
+
+add_subdirectory(qjson)
+include_directories("qjson/src/")
+
 project(Octopus)
 
 if(CMAKE_CXX_COMPILER MATCHES ".*clang")
@@ -85,7 +89,7 @@ add_executable(Octopus "src/main.cpp" ${Octopus_SOURCES} ${Octopus_HEADERS}
     ${Octopus_HEADERS_MOC}
     ${Octopus_FORMS_HEADERS} 
     ${Octopus_RESOURCES_RCC})
-target_link_libraries(Octopus ${QT_LIBRARIES})
+target_link_libraries(Octopus qjson ${QT_LIBRARIES})
 
 enable_testing()
 
@@ -101,7 +105,7 @@ add_executable(SampleTest ${SampleTest_Sources} ${Octopus_SOURCES} ${Octopus_HEA
 
 # target_link_libraries(<BINARY_NAME> ...)
 # Jedes Binary muss separat mit den benötigten Libraries verlinkt werden.
-target_link_libraries(SampleTest gtest gtest_main ${QT_LIBRARIES})
+target_link_libraries(SampleTest qjson gtest gtest_main ${QT_LIBRARIES})
 
 # add_test(<TEST_NAME> <BINARY>)
 add_test(AllTestsInSampleTest SampleTest)
