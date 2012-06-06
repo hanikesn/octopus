@@ -31,12 +31,23 @@ PresentationArea::~PresentationArea()
 {
 }
 
+void PresentationArea::addTracks(const QList<QString> &fullDataSeriesNames)
+{
+    foreach (QString name, fullDataSeriesNames) {
+        add(new Track(dataProvider, name));
+    }
+}
+
 void PresentationArea::onAddTrack()
 {
-    Track *t = new Track(dataProvider);
+    add(new Track(dataProvider));
+}
+
+void PresentationArea::add(Track *t)
+{
     tracks.append(t);
     connect(t, SIGNAL(del(Track*)), this, SLOT(onDelete(Track*)));
-    pi->addTrack(t);       
+    pi->addTrack(t);
     t->resize(currentViewSize.width(), t->size().height());
 
     //TODO(domi): entfernen, nur für debug-zwecke:

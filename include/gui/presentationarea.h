@@ -26,6 +26,8 @@ public:
     void save(boost::property_tree::ptree *pt);
     void load(boost::property_tree::ptree *pt);
 
+    void addTracks(const QList<QString>& fullDataSeriesNames);
+
 signals:
     void changedWindowSize(QSize size);
     void verticalScroll(QRectF visibleRectangle);
@@ -71,7 +73,9 @@ private:
 
     QSize currentViewSize;
 
-    qint64 selectionBegin, selectionEnd;            
+    qint64 selectionBegin, selectionEnd;
+
+    void add(Track *t);
 };
 
 #endif // PRESENTATIONAREA_H
