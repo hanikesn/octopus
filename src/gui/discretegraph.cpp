@@ -33,6 +33,7 @@ void DiscreteGraph::initialize()
 {
     QMap<qint64, QString>::const_iterator i = series.getData().constBegin();
     while (i != series.getData().constEnd()) {
+        // TODO(Steffi) : Use data as labels for the graph
         graph->addData(i.key(), IMPULSE_HEIGHT);
         ++i;
     }
