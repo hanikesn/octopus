@@ -5,6 +5,7 @@
 #include <QScrollBar>
 
 #include "gui/cursor.h"
+#include "gui/sourcedialog.h"
 #include "gui/track.h"
 
 PresentationArea::PresentationArea(QGraphicsScene *scene, const DataProvider &dataProvider,
@@ -38,9 +39,15 @@ void PresentationArea::addTracks(const QList<QString> &fullDataSeriesNames)
     }
 }
 
+void PresentationArea::addTrack(const QList<QString> &fullDataSeriesNames)
+{
+    add(new Track(dataProvider, fullDataSeriesNames));
+}
+
 void PresentationArea::onAddTrack()
 {
-    add(new Track(dataProvider));
+    // TODO(Steffi): Unterscheidung, ob einzeln oder alle in einen
+    addTracks(SourceDialog::getSources(dataProvider));
 }
 
 void PresentationArea::add(Track *t)

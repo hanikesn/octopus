@@ -5,8 +5,9 @@
 
 #include "dataprovider.h"
 #include "presentationitem.h"
-#include "boost/property_tree/ptree.hpp"
 #include "serializable.h"
+
+#include "boost/property_tree/ptree.hpp"
 
 class Track;
 class QVBoxLayout;
@@ -25,8 +26,6 @@ public:
 
     void save(boost::property_tree::ptree *pt);
     void load(boost::property_tree::ptree *pt);
-
-    void addTracks(const QList<QString>& fullDataSeriesNames);
 
 signals:
     void changedWindowSize(QSize size);
@@ -72,8 +71,10 @@ private:
     QList<Track*> tracks;
 
     QSize currentViewSize;
-
     qint64 selectionBegin, selectionEnd;
+
+    void addTracks(const QList<QString>& fullDataSeriesNames);
+    void addTrack(const QList<QString>& fullDataSeriesNames);
 
     void add(Track *t);
 };

@@ -21,6 +21,7 @@ class Track : public QWidget, public DataSeriesVisitor, public Serializable
 public:
     Track(const DataProvider &dataProvider, QWidget *parent = 0);
     Track(const DataProvider &dataProvider, const QString &fullDataSeriesName, QWidget *parent = 0);
+    Track(const DataProvider &dataProvider, const QStringList &fullDataSeriesNames, QWidget *parent = 0);
 
     /**
      * Visitor pattern.
@@ -48,6 +49,7 @@ private:
 
     int offset;
 
+    void init();
     void setupButtons();
     void setupPlot();
 
