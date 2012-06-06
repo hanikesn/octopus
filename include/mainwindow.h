@@ -76,6 +76,8 @@ private:
 
     void setUpMenu();
 
+    void setTitle(QString pName);
+
 signals:
     void verticalScroll(QRectF visibleRectangle);
     void changedWindowSize(QSize size);

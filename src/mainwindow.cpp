@@ -59,7 +59,7 @@ namespace boost { namespace property_tree { namespace json_parser
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    projectName(QString::fromUtf8("ü"))
+    projectName(QString::fromUtf8("projectName"))
 {    
     ui.setupUi(this);
     pa = new PresentationArea(&trackScene, dataProvider, ui.hScrollBar);
@@ -169,16 +169,19 @@ void MainWindow::onSave()
 {
     using boost::property_tree::ptree;
 
-    QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"));
+    QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
+                                                    QDir::currentPath(), "Octopus (*.oct)");
     if(fileName.isEmpty()) return;
 
+    if(fileName.endsWith(".oct") == false)
+        fileName += ".oct";
 
-    //TODO(domi): set name of project
+    QFileInfo file(fileName);
+    projectName = file.completeBaseName().remove(".oct");
+    setTitle(projectName);
 
-    ptree pt;
-    //auto const& data = projectName.toUtf8();
+    ptree pt;    
     pt.put("projectName", projectName);
-
 
     pa->save(&pt);
     std::string fn = fileName.toLocal8Bit().constData();
@@ -189,15 +192,20 @@ void MainWindow::onLoad()
 {
     using boost::property_tree::ptree;
 
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Save File"));
-    qDebug() << "load file: " << fileName;
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Load File"),
+                                                    QDir::currentPath(), "Octopus (*.oct)");
+    if(fileName.isEmpty()) return;
 
     ptree pt;
     std::string fn = fileName.toLocal8Bit().constData();
     read_json(fn, pt);
 
-    QString projectname = pt.get<QString>("projectName");
+    setTitle(pt.get<QString>("projectName"));
+}
 
-    qDebug() << projectname;
-
+void MainWindow::setTitle(QString pName)
+{
+    QString windowTitle("Octopus 0.1 - ");
+    windowTitle += pName;
+    setWindowTitle(windowTitle);
 }
