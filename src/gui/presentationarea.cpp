@@ -22,6 +22,7 @@ PresentationArea::PresentationArea(QGraphicsScene *scene, const DataProvider &da
     connect(pi, SIGNAL(selection(qint64,qint64)), this, SLOT(onSelection(qint64, qint64)));
     connect(pi, SIGNAL(exportTriggered()), this, SLOT(onExportTriggered()));
 
+    // TODO(domi): nicht vergessen :)
 //    connect(dataProvider, SIGNAL(newMax(qint64)), pi, SLOT(onNewMax(qint64)));
 
 }
