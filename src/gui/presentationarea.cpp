@@ -99,19 +99,7 @@ void PresentationArea::save(boost::property_tree::ptree *pt)
 
         t->save(&trackTree);
 
-        tracksTree.push_back(std::make_pair(tmp.toStdString(), trackTree));
-//        tracksTree.put_child(tmp.toStdString(), trackTree);
-
-
-
-
-
-
-
-/*      tracksTree.push_back(std::make_pair("", tmp.toStdString()));
-        tracksTree.put_child("tmp", trackTree);*/
-
-
+        tracksTree.push_back(std::make_pair("", trackTree));
 
         counter++;
     }

@@ -309,11 +309,13 @@ void PresentationItem::save(boost::property_tree::ptree *pt)
 {
     using boost::property_tree::ptree;
 
-    pt->put("cursorPos", cursor->pos().x());
+    pt->put<int>("cursorPos", cursor->pos().x());
 
     ptree visibleArea;
-    visibleArea.push_back(std::make_pair("", QString::number(visRangeLow).toStdString()));
-    visibleArea.push_back(std::make_pair("", QString::number(visRangeHigh).toStdString()));
+
+
+    visibleArea.push_back(std::make_pair("low", QString::number(visRangeLow).toStdString()));
+    visibleArea.push_back(std::make_pair("high", QString::number(visRangeHigh).toStdString()));
     pt->put_child("visibleArea", visibleArea);
 
 
