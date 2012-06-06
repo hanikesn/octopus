@@ -6,7 +6,6 @@
 #include "visitor.h"
 #include "gui/graph.h"
 #include "serializable.h"
-#include "boost/property_tree/ptree.hpp"
 
 #include <QLabel>
 #include <QPainter>
@@ -30,8 +29,8 @@ public:
 
     void setOffset(int pixel);
 
-    void save(boost::property_tree::ptree *pt);
-    void load(boost::property_tree::ptree *pt);
+    void save(QVariantMap *qvm);
+    void load(QVariantMap *qvm);
 
 signals:
     void del(Track*);

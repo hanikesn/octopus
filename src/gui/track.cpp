@@ -161,21 +161,20 @@ void Track::setOffset(int pixel)
     offset = pixel;
 }
 
-void Track::save(boost::property_tree::ptree *pt)
+void Track::save(QVariantMap *qvm)
 {
     //TODO(domi): dummyseries entfernen und durch richtige ersetzen
-    using boost::property_tree::ptree;
-    ptree series;
-    series.push_back(std::make_pair("", "dataSeries1"));
-    series.push_back(std::make_pair("", "dataSeries2"));
-
-
-    pt->put_child("dataSeries", series);
-    //TODO(domi): track-sachen speichern.
+    QVariantList track;
+    track << "dataSeries1" << "dataSeries2";
+    qvm->insert("dataSeries", track);
 }
 
-void Track::load(boost::property_tree::ptree *pt)
+void Track::load(QVariantMap *qvm)
 {
-    //TODO(domi): track-sachen speichern.
+    QVariantMap map = qvm->find("track").value().toMap();
+    QVariantList seriesList = map.find("dataSeries").value().toList();
+    foreach(QVariant series, seriesList){
+        addSource(series.toString());
+    }
 }
 

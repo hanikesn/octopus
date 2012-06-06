@@ -5,7 +5,6 @@
 
 #include "dataprovider.h"
 #include "presentationitem.h"
-#include "boost/property_tree/ptree.hpp"
 #include "serializable.h"
 
 class Track;
@@ -23,8 +22,10 @@ public:
                               QScrollBar *hScrollBar);
     ~PresentationArea();
 
-    void save(boost::property_tree::ptree *pt);
-    void load(boost::property_tree::ptree *pt);
+    void save(QVariantMap *qvm);
+    void load(QVariantMap *qvm);
+
+    void addTracks(const QList<QString>& fullDataSeriesNames);
 
 signals:
     void changedWindowSize(QSize size);
@@ -71,7 +72,9 @@ private:
 
     QSize currentViewSize;
 
-    qint64 selectionBegin, selectionEnd;            
+    qint64 selectionBegin, selectionEnd;
+
+    void add(Track *t);
 };
 
 #endif // PRESENTATIONAREA_H
