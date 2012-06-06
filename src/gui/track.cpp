@@ -26,8 +26,6 @@ Track::Track(const DataProvider &dataProvider, QWidget *parent) :
 //    addData();
     addSource("Dummy.Interpolatable");
     addSource("Dummy.Discrete");
-
-//    connect(dataProvider, SIGNAL(newMax(qint64)), this, SLOT(onNewMax(qint64)));
 }
 
 Track::Track(const DataProvider &dataProvider, const QString &fullDataSeriesName, QWidget *parent) :
@@ -156,11 +154,6 @@ void Track::onPlotSettings()
 {
     qDebug() << "Pretending to show plot settings dialog.";
     // TODO(Steffi)
-}
-
-void Track::onNewMax(qint64 timestamp)
-{
-    // TODO(Steffi) qcp anpassen
 }
 
 void Track::setOffset(int pixel)
