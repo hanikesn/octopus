@@ -31,6 +31,10 @@ PresentationArea::PresentationArea(QGraphicsScene *scene, const DataProvider &da
 
 PresentationArea::~PresentationArea()
 {
+    while (!tracks.isEmpty()) {
+        Track *t = tracks.takeFirst();
+        t->deleteLater();
+    }
 }
 
 void PresentationArea::addTrack(const QList<QString> &fullDataSeriesNames)
@@ -50,7 +54,7 @@ void PresentationArea::addTracks(const QList<QString> &fullDataSeriesNames)
 void PresentationArea::onAddTrack()
 {
     // TODO(Steffi): Unterscheidung, ob einzeln oder alle in einen
-    addTracks(SourceDialog::getSources(dataProvider));
+    addTracks(SourceDialog::getSources(dataProvider, true));
 }
 
 Track* PresentationArea::add(const QList<QString>& fullDataSeriesNames)
