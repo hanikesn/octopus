@@ -20,7 +20,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX11_FLAG}")
 add_subdirectory(contrib)
 enable_Warnings()
 
-find_package(EIToolkit)
+find_package(EIToolkit REQUIRED)
 include_directories(${EIToolkit_INCLUDE_DIR})
 
 find_package(Qt4 REQUIRED)
