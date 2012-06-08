@@ -126,9 +126,10 @@ void PresentationArea::load(QVariantMap *qvm)
 
     foreach(QVariant track, trackList){
         // add new track to presentationarea set it to the current size
-        onAddTrack();
+        t = new Track(dataProvider);
+        add(t);
+
         t = tracks.at(tracks.size() - 1 - counter);
-        t->resize(currentViewSize.width(), t->size().height());
         // 'load(QVariantMap)' needs a map --> put current track in a new map
         QVariantMap trackMap;
         trackMap.insert("track", track);
