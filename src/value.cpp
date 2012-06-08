@@ -25,25 +25,6 @@ Value::Value(double value):
 {
 }
 
-Value::Value(const Value& value):
-    type(value.getType())
-{
-    if (value.getType() == STRING) {
-        s = value.asString();
-    } else if (value.getType() == DOUBLE) {
-        d = value.asDouble();
-    }
-}
-
-Value& Value::operator=(const Value& other)
-{
-    type = other.type;
-    s = other.s;
-    d = other.d;
-
-    return *this;
-}
-
 Value::Type Value::getType() const
 {
     return type;
