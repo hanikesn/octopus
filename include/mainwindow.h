@@ -63,12 +63,13 @@ private:
     QAction *saveAction;
     QAction *loadAction;
 
-    DataProvider dataProvider;
+    DataProvider *dataProvider;
+
     NetworkAdapter networkAdapter;
 
     Ui::MainWindow ui;
 
-    TrackScene trackScene;
+    TrackScene *trackScene;
 
     HorizontalScrollBar *hScrollBar;
 
@@ -79,6 +80,12 @@ private:
     void setUpMenu();
 
     void setTitle(QString pName);
+
+    /**
+      * Deletes and sets new objects for: pa, dataProvider trackScene.
+      * Reconnects necessary signals.
+      */
+    void setUpView();
 
 signals:
     void verticalScroll(QRectF visibleRectangle);
