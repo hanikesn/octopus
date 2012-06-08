@@ -2,18 +2,18 @@
 
 #include <QDebug>
 
-SourceDialog::SourceDialog(const DataProvider &dataProvider, QWidget *parent) :
+SourceDialog::SourceDialog(const DataProvider &dataProvider, bool allInOneOption, QWidget *parent) :
     QDialog(parent),
     checkStateChangeSource(0)
 {
     ui.setupUi(this);
     setUpSourceTree(dataProvider);
     connect(ui.sourceTree, SIGNAL(itemChanged(QTreeWidgetItem*,int)), this, SLOT(onItemChanged(QTreeWidgetItem*,int)));
+    ui.allInOneOption->setVisible(allInOneOption);
 }
 
 void SourceDialog::setUpSourceTree(const DataProvider &dataProvider)
 {
-    ui.sourceTree->header()->setVisible(false);
     foreach (QString s, dataProvider.getDataSeriesList()) {
         QStringList components = s.split(".", QString::SkipEmptyParts);
 
@@ -77,9 +77,9 @@ void SourceDialog::onItemChanged(QTreeWidgetItem *item, int /*column*/)
     }
 }
 
-QStringList SourceDialog::getSources(const DataProvider &dataProvider, QWidget *parent)
+QStringList SourceDialog::getSources(const DataProvider &dataProvider, bool allInOneOption, QWidget *parent)
 {
-    SourceDialog *d = new SourceDialog(dataProvider, parent);
+    SourceDialog *d = new SourceDialog(dataProvider, allInOneOption, parent);
     d->exec();
     return d->getResult();
 }

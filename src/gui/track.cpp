@@ -3,6 +3,7 @@
 #include "abstractdataseries.h"
 #include "gui/discretegraph.h"
 #include "gui/interpolatinggraph.h"
+#include "gui/sourcedialog.h"
 
 #include <cmath>
 
@@ -148,18 +149,8 @@ void Track::onDelete()
 
 void Track::onSources()
 {
-    qDebug() << "Pretending to show source dialog.";
-
-    // TODO(Steffi):
-
-    QList<QString> dataSeriesNames = dataProvider.getDataSeriesList();
-    // parse list entries
-    // show dialog
-
-    // save dialog result in string list
-    QList<QString> selected;
-    foreach (QString s, selected) {
-        addSource(s);
+    foreach (QString source, SourceDialog::getSources(dataProvider, false)) {
+        addSource(source);
     }
 }
 

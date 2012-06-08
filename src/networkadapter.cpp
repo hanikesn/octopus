@@ -55,8 +55,7 @@ void NetworkAdapter::onMessage(EI::Message const& msg)
     if(msg.getMsgType()==EI::DescriptionMessage::IDENTIFIER)
     {
         auto const& d = dynamic_cast<EI::DescriptionMessage const&>(msg);
-        auto const& desc = d.getDescription();
-        auto const& c = desc.getDataSeries();
+        auto const& c = d.getDescription().getDataSeries();
         std::for_each(c.begin(), c.end(),
             [this, &d](EI::DataSeriesInfoMap::value_type const& p)
         {
