@@ -34,9 +34,9 @@ signals:
     void newMax(qint64 maxTimestamp);
 
 public slots:
-    void onNewDataSeries(const QString &deviceName, const QString &dataSeriesName, Data::Properties properties);
+    void onNewDataSeries(QString deviceName, QString dataSeriesName, Data::Properties properties);
 
-    void onNewData(qint64 timestamp, const QString &fullDataSeriesName, const Value &value);
+    void onNewData(qint64 timestamp, QString fullDataSeriesName, Value value);
 
 private:
     QMap<QString, AbstractDataSeries*> dataSeries;

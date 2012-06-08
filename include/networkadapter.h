@@ -2,6 +2,7 @@
 #define NETWORKADAPTER_H
 
 #include "common.h"
+#include "value.h"
 
 #include <EIToolkit.h>
 #include <QObject>
@@ -12,7 +13,7 @@
 class Value;
 class QString;
 
-class NetworkAdapter : QObject, public EI::DataListener, public EI::CommunicationListener
+class NetworkAdapter : public QObject, public EI::DataListener, public EI::CommunicationListener
 {
     Q_OBJECT
 public:
@@ -23,9 +24,9 @@ public:
     virtual void onMessage(EI::Message const& msg);
 
 signals:
-    void onNewDataSeries(const QString &deviceName, const QString &dataSeriesName, Data::Properties properties);
+    void onNewDataSeries(QString deviceName, QString dataSeriesName, Data::Properties properties);
 
-    void onNewData(qint64 timestamp, const QString &fullDataSeriesName, const Value &value);
+    void onNewData(qint64 timestamp, QString fullDataSeriesName, Value value);
 
 private:
     EI::Receiver receiver;

@@ -15,9 +15,6 @@ public:
     explicit Value(EI::Value const& value);
     explicit Value(const QString& value);
     explicit Value(double value);
-    Value(Value const& value);
-    Value& operator=(const Value& other);
-    ~Value() {}
 
     Type getType() const;
 

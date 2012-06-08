@@ -3,11 +3,10 @@
 
 #include "common.h"
 #include "visitor.h"
+#include "value.h"
 
 #include <QMap>
 #include <QObject>
-
-class Value;
 
 class AbstractDataSeries : public QObject, public Visitable
 {

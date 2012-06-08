@@ -21,6 +21,7 @@ MainWindow::MainWindow(QWidget *parent) :
     pa = new PresentationArea(trackScene, *dataProvider, ui.hScrollBar, this);
 
     saveAction = new QAction(tr("Save"), this);
+    saveAsAction = new QAction(tr("Save As ..."), this);
     loadAction = new QAction(tr("Load..."), this);
 
     ui.mainView->setAlignment(Qt::AlignTop | Qt::AlignLeft);
@@ -35,6 +36,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, SIGNAL(changedWindowSize(QSize)), pa, SLOT(onChangedWindowSize(QSize)));
     connect(pa, SIGNAL(exportRange(qint64,qint64)), this, SLOT(onExportRange(qint64,qint64)));
     connect(saveAction, SIGNAL(triggered()), this, SLOT(onSave()));
+    connect(saveAsAction, SIGNAL(triggered()), this, SLOT(onSaveAs()));
     connect(loadAction, SIGNAL(triggered()), this, SLOT(onLoad()));
 
     setUpButtonBars();
@@ -120,36 +122,18 @@ void MainWindow::setUpMenu()
     menu.setTitle(tr("File"));
     menu.addAction(saveAction);
     menu.addAction(loadAction);
+    menu.addAction(saveAsAction);
     ui.menuBar->addMenu(&menu);
 }
 
 void MainWindow::onSave()
 {
-    if(projectPath.isEmpty()){
-        QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
-                                                        QDir::currentPath(), "Octopus (*.oct)");
-        if(fileName.isEmpty()) return;
+    save(false);
+}
 
-        if(fileName.endsWith(".oct") == false)
-            fileName += ".oct";
-
-        projectPath = fileName;
-        projectName = QFileInfo(fileName).completeBaseName().remove(".oct");
-        setTitle(projectName);
-    }
-    QVariantMap pName;
-    pName.insert("projectName", projectName);
-    pa->save(&pName);
-
-    QJson::Serializer serializer;
-    serializer.setIndentMode(QJson::IndentFull);
-    QByteArray json = serializer.serialize(pName);
-
-    // open/create the file
-    QFile file(projectPath);
-    file.open(QIODevice::WriteOnly);
-    if(file.write(json) == -1)
-        qDebug() << "Could not write config file!";
+void MainWindow::onSaveAs()
+{
+    save(true);
 }
 
 void MainWindow::onLoad()
@@ -204,4 +188,35 @@ void MainWindow::setUpView()
     connect(this, SIGNAL(verticalScroll(QRectF)), pa, SIGNAL(verticalScroll(QRectF)));
     connect(this, SIGNAL(changedWindowSize(QSize)), pa, SLOT(onChangedWindowSize(QSize)));
     connect(&addTrackButton, SIGNAL(clicked()), pa, SLOT(onAddTrack()));
+}
+
+void MainWindow::save(bool saveAs)
+{
+    if (projectPath.isEmpty() || saveAs) {
+        QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
+                                                        QDir::currentPath(), "Octopus (*.oct)");
+        if (fileName.isEmpty()) return;
+
+        if (fileName.endsWith(".oct") == false)
+            fileName += ".oct";
+
+        projectPath = fileName;
+        if (!saveAs){
+            projectName = QFileInfo(fileName).completeBaseName().remove(".oct");
+            setTitle(projectName);
+        }
+    }
+    QVariantMap pName;
+    pName.insert("projectName", projectName);
+    pa->save(&pName);
+
+    QJson::Serializer serializer;
+    serializer.setIndentMode(QJson::IndentFull);
+    QByteArray json = serializer.serialize(pName);
+
+    // open/create the file
+    QFile file(projectPath);
+    file.open(QIODevice::WriteOnly);
+    if(file.write(json) == -1)
+        qDebug() << "Could not write config file!";
 }

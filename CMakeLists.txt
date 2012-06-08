@@ -25,6 +25,8 @@ include_directories(${EIToolkit_INCLUDE_DIR})
 
 find_package(Qt4 REQUIRED)
 
+add_definitions(-DQT_USE_QSTRINGBUILDER)
+
 set(BOOST_components system chrono filesystem)
 find_package(Boost COMPONENTS ${BOOST_components} REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
