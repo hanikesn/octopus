@@ -68,7 +68,7 @@ void PresentationArea::onRangeChanged(qint64 begin, qint64 end)
 }
 
 void PresentationArea::onChangedWindowSize(QSize size)
-{
+{    
     currentViewSize = size;
     // resize tracks:
     foreach(Track *t, tracks) {
@@ -118,9 +118,10 @@ void PresentationArea::load(QVariantMap *qvm)
     QVariantList trackList = qvm->find("tracks").value().toList();
 
     foreach(QVariant track, trackList){
-        // add new track to presentationarea
+        // add new track to presentationarea set it to the current size
         onAddTrack();
         t = tracks.at(tracks.size() - 1 - counter);
+        t->resize(currentViewSize.width(), t->size().height());
         // 'load(QVariantMap)' needs a map --> put current track in a new map
         QVariantMap trackMap;
         trackMap.insert("track", track);

@@ -318,16 +318,15 @@ void PresentationItem::save(QVariantMap *qvm)
 
 void PresentationItem::load(QVariantMap *qvm)
 {
-    //TODO(domi): implementieren
-
     cursor->setPos(qvm->find("cursorPos").value().toInt(), 0);
 
     QVariantMap visibleArea = qvm->find("visibleArea").value().toMap();
     visRangeHigh = visibleArea["high"].toLongLong();
     visRangeLow = visibleArea["low"].toLongLong();
 
+    emit rangeChanged(visRangeLow, visRangeHigh);
 
-
-    //TODO(domi): emit rangeChanged()...
-
+    // step-size of scrollbar is 1 second --> left border of timeline is always a full second
+    // so we can set the value of the scrollbars slider to the second visRangeLow represents
+    hScrollBar->setValue(visRangeLow/1000000);
 }
