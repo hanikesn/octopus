@@ -21,7 +21,7 @@ class PresentationArea : public QObject, public Serializable
     Q_OBJECT
 public:
     explicit PresentationArea(QGraphicsScene *scene, const DataProvider &dataProvider,
-                              QScrollBar *hScrollBar);
+                              QScrollBar *hScrollBar, QObject *parent = 0);
     ~PresentationArea();
 
     void save(QVariantMap *qvm);

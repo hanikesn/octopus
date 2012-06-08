@@ -8,12 +8,9 @@
 #include "gui/sourcedialog.h"
 #include "gui/track.h"
 
-
-//TODO(domi): parent setzen + delete in mainwindow löschen
-
-
 PresentationArea::PresentationArea(QGraphicsScene *scene, const DataProvider &dataProvider,
-                                   QScrollBar *hScrollBar):
+                                   QScrollBar *hScrollBar, QObject *parent):
+    QObject(parent),
     dataProvider(dataProvider),
     currentViewSize(949, 1),
     selectionBegin(-1),
