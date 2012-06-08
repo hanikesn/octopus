@@ -18,7 +18,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui.setupUi(this);
     dataProvider = new DataProvider();
     trackScene = new TrackScene(this);
-    pa = new PresentationArea(trackScene, *dataProvider, ui.hScrollBar);
+    pa = new PresentationArea(trackScene, *dataProvider, ui.hScrollBar, this);
 
     saveAction = new QAction(tr("Save"), this);
     loadAction = new QAction(tr("Load..."), this);
@@ -44,9 +44,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-    delete pa;
-    delete dataProvider;
-    delete trackScene;
+    dataProvider->deleteLater();
+    trackScene->deleteLater();
 }
 
 void MainWindow::resizeEvent(QResizeEvent *event)
@@ -187,17 +186,17 @@ void MainWindow::setTitle(QString pName)
 
 void MainWindow::setUpView()
 {
-    delete dataProvider;
+    dataProvider->deleteLater();
     dataProvider = 0;
-    delete trackScene;
+    trackScene->deleteLater();
     trackScene = 0;
-    delete pa;
+    pa->deleteLater();
     pa = 0;
 
     dataProvider = new DataProvider();
     trackScene = new TrackScene(this);
     ui.mainView->setScene(trackScene);
-    pa = new PresentationArea(trackScene, *dataProvider, ui.hScrollBar);
+    pa = new PresentationArea(trackScene, *dataProvider, ui.hScrollBar, this);
     // set new PA to current viewsize
     pa->onChangedWindowSize(ui.mainView->size());
 

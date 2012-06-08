@@ -21,7 +21,7 @@ class PresentationArea : public QObject, public Serializable
     Q_OBJECT
 public:
     explicit PresentationArea(QGraphicsScene *scene, const DataProvider &dataProvider,
-                              QScrollBar *hScrollBar);
+                              QScrollBar *hScrollBar, QObject *parent = 0);
     ~PresentationArea();
 
     void save(QVariantMap *qvm);
@@ -73,8 +73,10 @@ private:
     QSize currentViewSize;
     qint64 selectionBegin, selectionEnd;
 
-    Track* add();
-    QList<Track*> add(const QList<QString>& fullDataSeriesNames, bool multipleTracks);
+    void addTrack(const QList<QString>& fullDataSeriesNames);
+    void addTracks(const QList<QString>& fullDataSeriesNames);
+    Track* add(const QList<QString>& fullDataSeriesNames);
+
 
 };
 
