@@ -36,6 +36,7 @@ set(Octopus_SOURCES
   src/doubleseries.cpp
   src/dataprovider.cpp
   src/value.cpp
+  src/networkadapter.cpp
   src/gui/discretegraph.cpp
   src/gui/interpolatinggraph.cpp
   src/gui/track.cpp
@@ -58,6 +59,7 @@ set(Octopus_HEADERS
   include/doubleseries.h
   include/dataprovider.h
   include/value.h
+  include/networkadapter.h
   include/visitor.h
   include/gui/graph.h
   include/gui/discretegraph.h

@@ -139,7 +139,7 @@ void MainWindow::onSave()
     pa->save(&pName);
 
     QJson::Serializer serializer;
-    serializer.setIndentMode(QJson::IndentMode::IndentFull);
+    serializer.setIndentMode(QJson::IndentFull);
     QByteArray json = serializer.serialize(pName);
 
     // open/create the file
