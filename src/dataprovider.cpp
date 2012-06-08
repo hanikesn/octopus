@@ -39,7 +39,7 @@ AbstractDataSeries* DataProvider::getDataSeries(const QString &fullName) const
     return dataSeries.value(fullName);
 }
 
-void DataProvider::onNewDataSeries(const QString &deviceName, const QString &dataSeriesName, Data::Properties properties)
+void DataProvider::onNewDataSeries(QString deviceName, QString dataSeriesName, Data::Properties properties)
 {
     AbstractDataSeries *series;
     if (properties & Data::INTERPOLATABLE) {
@@ -51,7 +51,7 @@ void DataProvider::onNewDataSeries(const QString &deviceName, const QString &dat
     dataSeries.insert(deviceName + "." + dataSeriesName, series);
 }
 
-void DataProvider::onNewData(qint64 timestamp, const QString &fullDataSeriesName, const Value &value)
+void DataProvider::onNewData(qint64 timestamp, QString fullDataSeriesName, Value value)
 {
     if (dataSeries.contains(fullDataSeriesName)) {
         dataSeries.value(fullDataSeriesName)->addData(timestamp, value);
