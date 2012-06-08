@@ -30,6 +30,10 @@ PresentationArea::PresentationArea(QGraphicsScene *scene, const DataProvider &da
 
 PresentationArea::~PresentationArea()
 {    
+    while (!tracks.isEmpty()) {
+        Track *t = tracks.takeFirst();
+        t->deleteLater();
+    }
 }
 
 void PresentationArea::addTracks(const QList<QString> &fullDataSeriesNames)
