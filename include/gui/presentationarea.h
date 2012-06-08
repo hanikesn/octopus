@@ -73,8 +73,10 @@ private:
     QSize currentViewSize;
     qint64 selectionBegin, selectionEnd;
 
-    Track* add();
-    QList<Track*> add(const QList<QString>& fullDataSeriesNames, bool multipleTracks);
+    void addTrack(const QList<QString>& fullDataSeriesNames);
+    void addTracks(const QList<QString>& fullDataSeriesNames);
+    Track* add(const QList<QString>& fullDataSeriesNames);
+
 
 };
 
