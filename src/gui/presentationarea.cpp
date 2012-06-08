@@ -5,6 +5,7 @@
 #include <QScrollBar>
 
 #include "gui/cursor.h"
+#include "gui/sourcedialog.h"
 #include "gui/track.h"
 
 PresentationArea::PresentationArea(QGraphicsScene *scene, const DataProvider &dataProvider,
@@ -28,7 +29,7 @@ PresentationArea::PresentationArea(QGraphicsScene *scene, const DataProvider &da
 }
 
 PresentationArea::~PresentationArea()
-{
+{    
 }
 
 void PresentationArea::addTracks(const QList<QString> &fullDataSeriesNames)
@@ -38,9 +39,15 @@ void PresentationArea::addTracks(const QList<QString> &fullDataSeriesNames)
     }
 }
 
+void PresentationArea::addTrack(const QList<QString> &fullDataSeriesNames)
+{
+    add(new Track(dataProvider, fullDataSeriesNames));
+}
+
 void PresentationArea::onAddTrack()
 {
-    add(new Track(dataProvider));
+    // TODO(Steffi): Unterscheidung, ob einzeln oder alle in einen
+    addTracks(SourceDialog::getSources(dataProvider));
 }
 
 void PresentationArea::add(Track *t)
@@ -57,7 +64,7 @@ void PresentationArea::add(Track *t)
 void PresentationArea::onDelete(Track *t)
 {
     tracks.removeAll(t);
-    pi->deleteTrack(t);
+    pi->deleteTrack(t);    
 }
 
 void PresentationArea::onRangeChanged(qint64 begin, qint64 end)
@@ -112,8 +119,6 @@ void PresentationArea::save(QVariantMap *qvm)
 
 void PresentationArea::load(QVariantMap *qvm)
 {
-    //TODO(domi): alte Tracks gelöscht?
-
     int counter = 0;
     Track *t;
     // get array of all tracks

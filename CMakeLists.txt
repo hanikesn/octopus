@@ -48,6 +48,7 @@ set(Octopus_SOURCES
   src/gui/presentationitem.cpp
   src/gui/cursor.cpp
   src/gui/selection.cpp
+  src/gui/sourcedialog.cpp
 )
 
 set(Octopus_HEADERS
@@ -73,9 +74,11 @@ set(Octopus_HEADERS
   include/gui/presentationitem.h
   include/gui/cursor.h
   include/gui/selection.h
+  include/gui/sourcedialog.h
 )
 set(Octopus_FORMS
   ui/mainwindow.ui
+  ui/sourcedialog.ui
   ui/track.ui
 )
 set(Octopus_RESOURCES

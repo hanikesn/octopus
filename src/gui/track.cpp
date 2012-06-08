@@ -17,10 +17,7 @@ Track::Track(const DataProvider &dataProvider, QWidget *parent) :
     dataProvider(dataProvider),
     offset(52)
 {
-    ui.setupUi(this);
-
-    setupButtons();
-    setupPlot();
+    init();
 
     // TODO(Steffi): Remove (dummy func)
 //    addData();
@@ -32,12 +29,28 @@ Track::Track(const DataProvider &dataProvider, const QString &fullDataSeriesName
     QWidget(parent),
     dataProvider(dataProvider)
 {
+    init();
+
+    addSource(fullDataSeriesName);
+}
+
+Track::Track(const DataProvider &dataProvider, const QStringList &fullDataSeriesNames, QWidget *parent) :
+    QWidget(parent),
+    dataProvider(dataProvider)
+{
+    init();
+
+    foreach (QString name, fullDataSeriesNames) {
+        addSource(name);
+    }
+}
+
+void Track::init()
+{
     ui.setupUi(this);
 
     setupButtons();
     setupPlot();
-
-    addSource(fullDataSeriesName);
 }
 
 void Track::setupButtons()
