@@ -44,7 +44,7 @@ void PresentationArea::addTrack(const QList<QString> &fullDataSeriesNames)
 
 void PresentationArea::addTracks(const QList<QString> &fullDataSeriesNames)
 {
-    foreach(QString dataSeries, fullDataSeriesNames){
+    foreach (QString dataSeries, fullDataSeriesNames) {
         QList<QString> series;
         series << dataSeries;
         add(series);
@@ -101,10 +101,10 @@ void PresentationArea::onExportTriggered()
 
 void PresentationArea::onSelection(qint64 begin, qint64 end)
 {
-    if((begin != -1) && (end != -1)){
+    if ((begin != -1) && (end != -1)) {
         selectionBegin = begin;
         selectionEnd = end;
-    }else{
+    } else {
         // no more selection:
         selectionBegin = -1;
         selectionEnd = -1;
