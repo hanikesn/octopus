@@ -15,13 +15,16 @@ DataProvider::DataProvider() :
 
 void DataProvider::addData()
 {
-    onNewDataSeries("Dummy", "Interpolatable", Data::INTERPOLATABLE);
+    onNewDataSeries("Dummy", "Interpolatable.x", Data::INTERPOLATABLE);
+    onNewDataSeries("Dummy", "Interpolatable.y", Data::INTERPOLATABLE);
+    onNewDataSeries("Dummy-2", "Interpolatable.x", Data::INTERPOLATABLE);
+    onNewDataSeries("Dummy-2", "Interpolatable.y", Data::INTERPOLATABLE);
     onNewDataSeries("Dummy", "Discrete", Data::STATEFUL);
 
     for (int j=0; j<500; ++j)
     {
       double d = j/15.0 * 5*3.14 + 0.01;
-      onNewData(d*1000000, "Dummy.Interpolatable", Value(7*sin(d)/d + 2));
+      onNewData(d*1000000, "Dummy.Interpolatable.x", Value(7*sin(d)/d + 2));
       onNewData(d*1000000, "Dummy.Discrete", Value("ping"));
     }
 }

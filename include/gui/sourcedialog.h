@@ -17,7 +17,15 @@ public:
 private:
     Ui::SourceDialog ui;
 
+    QList<QTreeWidgetItem*> checkedItems;
+    QTreeWidgetItem *checkStateChangeSource;
+
+    void setUpSourceTree(const DataProvider &dataProvider);
     QStringList getResult();
+
+private slots:
+    void onItemChanged(QTreeWidgetItem* item, int /*column*/);
+    QStringList selectedSeries();
 };
 
 #endif // SOURCEDIALOG_H
