@@ -39,7 +39,7 @@ static Data::Properties convert(EI::DataSeriesInfo::Properties prop)
     if(prop & EI::DataSeriesInfo::STATEFUL)
         result |= Data::STATEFUL;
 
-    return prop;
+    return result;
 }
 
 void NetworkAdapter::onMessage(EI::Message const& msg)
