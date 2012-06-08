@@ -20,7 +20,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX11_FLAG}")
 add_subdirectory(contrib)
 enable_Warnings()
 
-find_package(EIToolkit)
+find_package(EIToolkit REQUIRED)
 include_directories(${EIToolkit_INCLUDE_DIR})
 
 find_package(Qt4 REQUIRED)
@@ -36,6 +36,7 @@ set(Octopus_SOURCES
   src/doubleseries.cpp
   src/dataprovider.cpp
   src/value.cpp
+  src/networkadapter.cpp
   src/gui/discretegraph.cpp
   src/gui/interpolatinggraph.cpp
   src/gui/track.cpp
@@ -47,6 +48,7 @@ set(Octopus_SOURCES
   src/gui/presentationitem.cpp
   src/gui/cursor.cpp
   src/gui/selection.cpp
+  src/gui/sourcedialog.cpp
 )
 
 set(Octopus_HEADERS
@@ -58,6 +60,7 @@ set(Octopus_HEADERS
   include/doubleseries.h
   include/dataprovider.h
   include/value.h
+  include/networkadapter.h
   include/visitor.h
   include/gui/graph.h
   include/gui/discretegraph.h
@@ -71,9 +74,11 @@ set(Octopus_HEADERS
   include/gui/presentationitem.h
   include/gui/cursor.h
   include/gui/selection.h
+  include/gui/sourcedialog.h
 )
 set(Octopus_FORMS
   ui/mainwindow.ui
+  ui/sourcedialog.ui
   ui/track.ui
 )
 set(Octopus_RESOURCES

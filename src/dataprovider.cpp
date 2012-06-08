@@ -5,6 +5,8 @@
 #include "stringseries.h"
 #include "value.h"
 
+#include <cmath>
+
 DataProvider::DataProvider() :
     currentMax(0)
 {
