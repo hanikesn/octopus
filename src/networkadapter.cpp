@@ -7,8 +7,8 @@
 NetworkAdapter::NetworkAdapter()
     : receiver(EI::StringMap())
 {
-    receiver.addCommunicationListener(*this);
-    receiver.addDataListener(*this);
+    receiver.addCommunicationListener(this);
+    receiver.addDataListener(this);
 
     receiver.discoverSenders();
     lastDiscoverSent = startTime = Clock::now();
@@ -16,8 +16,8 @@ NetworkAdapter::NetworkAdapter()
 
 NetworkAdapter::~NetworkAdapter()
 {
-    receiver.removeDataListener(*this);
-    receiver.removeCommunicationListener(*this);
+    receiver.removeDataListener(this);
+    receiver.removeCommunicationListener(this);
 }
 
 void NetworkAdapter::onMessage(EI::DataMessage msg)
