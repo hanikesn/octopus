@@ -51,7 +51,7 @@ void PresentationArea::addTrack(const QList<QString> &fullDataSeriesNames)
 void PresentationArea::onAddTrack()
 {
     // TODO(Steffi): Unterscheidung, ob einzeln oder alle in einen
-    addTracks(SourceDialog::getSources(dataProvider));
+    addTracks(SourceDialog::getSources(dataProvider, true));
 }
 
 void PresentationArea::add(Track *t)

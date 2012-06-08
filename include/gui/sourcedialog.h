@@ -10,9 +10,9 @@ class SourceDialog : public QDialog
 {
     Q_OBJECT
 public:
-    explicit SourceDialog(const DataProvider &dataProvider, QWidget *parent = 0);
+    explicit SourceDialog(const DataProvider &dataProvider, bool allInOneOption, QWidget *parent = 0);
 
-    static QStringList getSources(const DataProvider &dataProvider, QWidget *parent = 0);
+    static QStringList getSources(const DataProvider &dataProvider, bool allInOneOption, QWidget *parent = 0);
 
 private:
     Ui::SourceDialog ui;
