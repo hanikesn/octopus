@@ -24,7 +24,7 @@ private:
     QStringList getResult();
 
 private slots:
-    void onItemChanged(QTreeWidgetItem* item, int column);
+    void onItemChanged(QTreeWidgetItem* item, int /*column*/);
     QStringList selectedSeries();
 };
 
