@@ -9,7 +9,8 @@
 #include "gui/track.h"
 
 PresentationArea::PresentationArea(QGraphicsScene *scene, const DataProvider &dataProvider,
-                                   QScrollBar *hScrollBar):
+                                   QScrollBar *hScrollBar, QObject *parent):
+    QObject(parent),
     dataProvider(dataProvider),
     currentViewSize(949, 1),
     selectionBegin(-1),
@@ -29,22 +30,36 @@ PresentationArea::PresentationArea(QGraphicsScene *scene, const DataProvider &da
 }
 
 PresentationArea::~PresentationArea()
-{    
+{
     while (!tracks.isEmpty()) {
         Track *t = tracks.takeFirst();
         t->deleteLater();
     }
 }
 
+void PresentationArea::addTrack(const QList<QString> &fullDataSeriesNames)
+{
+    add(fullDataSeriesNames);
+}
+
+void PresentationArea::addTracks(const QList<QString> &fullDataSeriesNames)
+{
+    foreach(QString dataSeries, fullDataSeriesNames){
+        QList<QString> series;
+        series << dataSeries;
+        add(series);
+    }
+}
+
 void PresentationArea::onAddTrack()
 {
     // TODO(Steffi): Unterscheidung, ob einzeln oder alle in einen
-    add(SourceDialog::getSources(dataProvider, true), true);
+    addTracks(SourceDialog::getSources(dataProvider, true));
 }
 
-Track* PresentationArea::add()
-{
-    Track *t = new Track(dataProvider);
+Track* PresentationArea::add(const QList<QString>& fullDataSeriesNames)
+{    
+    Track *t = new Track(dataProvider, fullDataSeriesNames);
     tracks.append(t);
     connect(t, SIGNAL(del(Track*)), this, SLOT(onDelete(Track*)));
     pi->addTrack(t);
@@ -53,38 +68,6 @@ Track* PresentationArea::add()
     //TODO(domi): entfernen, nur für debug-zwecke:
     pi->onNewMax(tracks.size()*30000000);
     return t;
-}
-
-
-QList<Track*> PresentationArea::add(const QList<QString> &fullDataSeriesNames, bool multipleTracks)
-{
-    Track *t;
-    QList<Track*> addedTracks;
-    if(multipleTracks){ // add one track for each dataseries
-        foreach(QString dataSeries, fullDataSeriesNames){
-            t = new Track(dataProvider, dataSeries);
-            tracks.append(t);
-            addedTracks.append(t);
-            connect(t, SIGNAL(del(Track*)), this, SLOT(onDelete(Track*)));
-            pi->addTrack(t);
-            t->resize(currentViewSize.width(), t->size().height());
-
-            //TODO(domi): entfernen, nur für debug-zwecke:
-            pi->onNewMax(tracks.size()*30000000);
-        }
-
-    }else{ // add one track with all dataseries
-        t = new Track(dataProvider, fullDataSeriesNames);
-        tracks.append(t);
-        addedTracks.append(t);
-        connect(t, SIGNAL(del(Track*)), this, SLOT(onDelete(Track*)));
-        pi->addTrack(t);
-        t->resize(currentViewSize.width(), t->size().height());
-
-        //TODO(domi): entfernen, nur für debug-zwecke:
-        pi->onNewMax(tracks.size()*30000000);
-    }
-    return addedTracks;
 }
 
 void PresentationArea::onDelete(Track *t)
@@ -151,7 +134,7 @@ void PresentationArea::load(QVariantMap *qvm)
 
     foreach(QVariant track, trackList){
         // add new track to presentationarea set it to the current size
-        t = add();
+        t = add(QList<QString>());
         // 'load(QVariantMap)' needs a map --> put current track in a new map
         QVariantMap trackMap;
         trackMap.insert("track", track);
