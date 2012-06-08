@@ -1,4 +1,17 @@
 #include "value.h"
+#include <EIValue.h>
+
+Value::Value(EI::Value const& value)
+{
+    auto t = value.getType();
+    if(t == EI::Value::DOUBLE) {
+        type = DOUBLE;
+        d = value.asDouble();
+    } else if(t == EI::Value::STRING) {
+        type = STRING;
+        s = QString::fromUtf8(value.asString().c_str());
+    }
+}
 
 Value::Value(const QString &value):
     type(STRING),

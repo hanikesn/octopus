@@ -3,11 +3,16 @@
 
 #include <QString>
 
+namespace EI {
+    class Value;
+}
+
 class Value
 {
 public:
     enum Type {DOUBLE, STRING};
 
+    explicit Value(EI::Value const& value);
     explicit Value(const QString& value);
     explicit Value(double value);
     explicit Value(Value const& value);
