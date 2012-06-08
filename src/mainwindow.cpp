@@ -16,13 +16,15 @@ MainWindow::MainWindow(QWidget *parent) :
     projectPath(QString::fromUtf8(""))
 {    
     ui.setupUi(this);
-    pa = new PresentationArea(&trackScene, dataProvider, ui.hScrollBar);
+    dataProvider = new DataProvider();
+    trackScene = new TrackScene(this);
+    pa = new PresentationArea(trackScene, *dataProvider, ui.hScrollBar);
 
     saveAction = new QAction(tr("Save"), this);
     loadAction = new QAction(tr("Load..."), this);
 
     ui.mainView->setAlignment(Qt::AlignTop | Qt::AlignLeft);
-    ui.mainView->setScene(&trackScene);
+    ui.mainView->setScene(trackScene);
     ui.mainView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);    
     ui.mainView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
@@ -43,6 +45,8 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete pa;
+    delete dataProvider;
+    delete trackScene;
 }
 
 void MainWindow::resizeEvent(QResizeEvent *event)
@@ -145,21 +149,19 @@ void MainWindow::onSave()
     // open/create the file
     QFile file(projectPath);
     file.open(QIODevice::WriteOnly);
-    file.write(json);
+    if(file.write(json) == -1)
+        qDebug() << "Could not write config file!";
 }
 
 void MainWindow::onLoad()
-{    
-    //TODO(domi): laden
+{        
     QString fileName = QFileDialog::getOpenFileName(this, tr("Load File"),
                                                     QDir::currentPath(), "Octopus (*.oct)");
     if(fileName.isEmpty()) return;
     QFile file(fileName);
-    file.open(QIODevice::ReadOnly);
-    QTextStream in(&file);
+    file.open(QIODevice::ReadOnly);    
 
     QByteArray json = file.readAll();
-
     QJson::Parser parser;
     bool ok;
     QVariantMap result = parser.parse(json, &ok).toMap();
@@ -169,13 +171,11 @@ void MainWindow::onLoad()
     }
 
     // at this point loading was successful --> delete old presentationArea and create new one.
-    //TODO(domi): alte pa löschen und neu erstellen.
-
+    setUpView();
     projectName = result["projectName"].toString();
     setTitle(projectName);
 
-    //TODO(domi): entkommentieren
-//    pa->load(&result);
+    pa->load(&result);    
 }
 
 void MainWindow::setTitle(QString pName)
@@ -183,4 +183,26 @@ void MainWindow::setTitle(QString pName)
     QString windowTitle("Octopus 0.1 - ");
     windowTitle += pName;
     setWindowTitle(windowTitle);
+}
+
+void MainWindow::setUpView()
+{
+    delete dataProvider;
+    dataProvider = 0;
+    delete trackScene;
+    trackScene = 0;
+    delete pa;
+    pa = 0;
+
+    dataProvider = new DataProvider();
+    trackScene = new TrackScene(this);
+    ui.mainView->setScene(trackScene);
+    pa = new PresentationArea(trackScene, *dataProvider, ui.hScrollBar);
+    // set new PA to current viewsize
+    pa->onChangedWindowSize(ui.mainView->size());
+
+    connect(pa, SIGNAL(exportRange(qint64,qint64)), this, SLOT(onExportRange(qint64,qint64)));
+    connect(this, SIGNAL(verticalScroll(QRectF)), pa, SIGNAL(verticalScroll(QRectF)));
+    connect(this, SIGNAL(changedWindowSize(QSize)), pa, SLOT(onChangedWindowSize(QSize)));
+    connect(&addTrackButton, SIGNAL(clicked()), pa, SLOT(onAddTrack()));
 }
