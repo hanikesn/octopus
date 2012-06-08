@@ -175,10 +175,11 @@ void Track::setOffset(int pixel)
 }
 
 void Track::save(QVariantMap *qvm)
-{
-    //TODO(domi): dummyseries entfernen und durch richtige ersetzen
+{    
     QVariantList track;
-    track << "dataSeries1" << "dataSeries2";
+    foreach(Graph *g, graphs){
+        track << g->dataSeriesName();
+    }
     qvm->insert("dataSeries", track);
 }
 
