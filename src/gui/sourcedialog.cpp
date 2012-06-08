@@ -51,7 +51,7 @@ void SourceDialog::setUpSourceTree(const DataProvider &dataProvider)
     ui.sourceTree->expandAll();
 }
 
-void SourceDialog::onItemChanged(QTreeWidgetItem *item, int column)
+void SourceDialog::onItemChanged(QTreeWidgetItem *item, int /*column*/)
 {
     if (!checkStateChangeSource) {
         checkStateChangeSource = item;
