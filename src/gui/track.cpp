@@ -149,7 +149,7 @@ void Track::onDelete()
 
 void Track::onSources()
 {
-    foreach (QString source, SourceDialog::getSources(dataProvider, false)) {
+    foreach (QString source, SourceDialog::getSources(dataProvider, false).takeFirst()) {
         addSource(source);
     }
 }

@@ -10,6 +10,8 @@ SourceDialog::SourceDialog(const DataProvider &dataProvider, bool allInOneOption
     setUpSourceTree(dataProvider);
     connect(ui.sourceTree, SIGNAL(itemChanged(QTreeWidgetItem*,int)), this, SLOT(onItemChanged(QTreeWidgetItem*,int)));
     ui.allInOneOption->setVisible(allInOneOption);
+    // If option is visible, default checkState is Qt::Unchecked. If option is invisible, default checkState is Qt::Checked.
+    ui.allInOneOption->setChecked(!allInOneOption);
 }
 
 void SourceDialog::setUpSourceTree(const DataProvider &dataProvider)
@@ -77,23 +79,28 @@ void SourceDialog::onItemChanged(QTreeWidgetItem *item, int /*column*/)
     }
 }
 
-QStringList SourceDialog::getSources(const DataProvider &dataProvider, bool allInOneOption, QWidget *parent)
+QList<QStringList> SourceDialog::getSources(const DataProvider &dataProvider, bool allInOneOption, QWidget *parent)
 {
     SourceDialog *d = new SourceDialog(dataProvider, allInOneOption, parent);
     d->exec();
     return d->getResult();
 }
 
-QStringList SourceDialog::getResult()
+QList<QStringList> SourceDialog::getResult()
 {
-    if (result() == QDialog::Accepted) {
-        return selectedSeries();
-    } else {
-        return QStringList();
+    QList<QStringList> sources;
+    if (result() == QDialog::Accepted && ui.allInOneOption->checkState() == Qt::Checked) {
+        sources.append(selectedSeries());
+    } else if (result() == QDialog::Accepted && ui.allInOneOption->checkState() == Qt::Unchecked) {
+        foreach (QString s, selectedSeries()) {
+            sources.append(QStringList(s));
+        }
     }
+    return sources;
 }
 
-QStringList SourceDialog::selectedSeries() {
+QStringList SourceDialog::selectedSeries()
+{
     QStringList selection;
 
     foreach (QTreeWidgetItem *item, checkedItems) {

@@ -12,7 +12,7 @@ class SourceDialog : public QDialog
 public:
     explicit SourceDialog(const DataProvider &dataProvider, bool allInOneOption, QWidget *parent = 0);
 
-    static QStringList getSources(const DataProvider &dataProvider, bool allInOneOption, QWidget *parent = 0);
+    static QList<QStringList> getSources(const DataProvider &dataProvider, bool allInOneOption, QWidget *parent = 0);
 
 private:
     Ui::SourceDialog ui;
@@ -21,7 +21,7 @@ private:
     QTreeWidgetItem *checkStateChangeSource;
 
     void setUpSourceTree(const DataProvider &dataProvider);
-    QStringList getResult();
+    QList<QStringList> getResult();
 
 private slots:
     void onItemChanged(QTreeWidgetItem* item, int /*column*/);
