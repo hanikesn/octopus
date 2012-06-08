@@ -55,6 +55,7 @@ QString Value::asString() const
         return s;
     } else {
         // TODO(Steffi)
+        return "";
     }
 }
 
@@ -64,5 +65,6 @@ double Value::asDouble() const
         return d;
     } else {
         // TODO(Steffi)
+        return 0.0;
     }
 }
