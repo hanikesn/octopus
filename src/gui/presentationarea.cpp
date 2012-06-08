@@ -32,26 +32,17 @@ PresentationArea::~PresentationArea()
 {    
 }
 
-void PresentationArea::addTracks(const QList<QString> &fullDataSeriesNames)
-{
-    foreach (QString name, fullDataSeriesNames) {
-        add(new Track(dataProvider, name));
-    }
-}
-
-void PresentationArea::addTrack(const QList<QString> &fullDataSeriesNames)
-{
-    add(new Track(dataProvider, fullDataSeriesNames));
-}
-
 void PresentationArea::onAddTrack()
 {
     // TODO(Steffi): Unterscheidung, ob einzeln oder alle in einen
-    addTracks(SourceDialog::getSources(dataProvider));
+    //               add(QList<QString> series, false) -- EIN Track
+    //               add(QList<QString> series, true) -- VIELE Tracks
+    add(SourceDialog::getSources(dataProvider), true);
 }
 
-void PresentationArea::add(Track *t)
+Track* PresentationArea::add()
 {
+    Track *t = new Track(dataProvider);
     tracks.append(t);
     connect(t, SIGNAL(del(Track*)), this, SLOT(onDelete(Track*)));
     pi->addTrack(t);
@@ -59,6 +50,39 @@ void PresentationArea::add(Track *t)
 
     //TODO(domi): entfernen, nur für debug-zwecke:
     pi->onNewMax(tracks.size()*30000000);
+    return t;
+}
+
+
+QList<Track*> PresentationArea::add(const QList<QString> &fullDataSeriesNames, bool multipleTracks)
+{
+    Track *t;
+    QList<Track*> addedTracks;
+    if(multipleTracks){ // add one track for each dataseries
+        foreach(QString dataSeries, fullDataSeriesNames){
+            t = new Track(dataProvider, dataSeries);
+            tracks.append(t);
+            addedTracks.append(t);
+            connect(t, SIGNAL(del(Track*)), this, SLOT(onDelete(Track*)));
+            pi->addTrack(t);
+            t->resize(currentViewSize.width(), t->size().height());
+
+            //TODO(domi): entfernen, nur für debug-zwecke:
+            pi->onNewMax(tracks.size()*30000000);
+        }
+
+    }else{ // add one track with all dataseries
+        t = new Track(dataProvider, fullDataSeriesNames);
+        tracks.append(t);
+        addedTracks.append(t);
+        connect(t, SIGNAL(del(Track*)), this, SLOT(onDelete(Track*)));
+        pi->addTrack(t);
+        t->resize(currentViewSize.width(), t->size().height());
+
+        //TODO(domi): entfernen, nur für debug-zwecke:
+        pi->onNewMax(tracks.size()*30000000);
+    }
+    return addedTracks;
 }
 
 void PresentationArea::onDelete(Track *t)
@@ -119,22 +143,17 @@ void PresentationArea::save(QVariantMap *qvm)
 
 void PresentationArea::load(QVariantMap *qvm)
 {
-    int counter = 0;
     Track *t;
     // get array of all tracks
     QVariantList trackList = qvm->find("tracks").value().toList();
 
     foreach(QVariant track, trackList){
         // add new track to presentationarea set it to the current size
-        t = new Track(dataProvider);
-        add(t);
-
-        t = tracks.at(tracks.size() - 1 - counter);
+        t = add();
         // 'load(QVariantMap)' needs a map --> put current track in a new map
         QVariantMap trackMap;
         trackMap.insert("track", track);
         t->load(&trackMap);
-        counter++;
     }
     pi->load(qvm);
 }

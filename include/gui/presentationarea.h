@@ -73,10 +73,9 @@ private:
     QSize currentViewSize;
     qint64 selectionBegin, selectionEnd;
 
-    void addTracks(const QList<QString>& fullDataSeriesNames);
-    void addTrack(const QList<QString>& fullDataSeriesNames);
+    Track* add();
+    QList<Track*> add(const QList<QString>& fullDataSeriesNames, bool multipleTracks);
 
-    void add(Track *t);
 };
 
 #endif // PRESENTATIONAREA_H
