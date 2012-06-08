@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include "dataprovider.h"
+#include "networkadapter.h"
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "gui/presentationarea.h"
@@ -63,6 +64,7 @@ private:
     QAction *loadAction;
 
     DataProvider dataProvider;
+    NetworkAdapter networkAdapter;
 
     Ui::MainWindow ui;
 
