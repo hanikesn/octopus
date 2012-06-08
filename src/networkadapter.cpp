@@ -1,5 +1,7 @@
 #include "networkadapter.h"
 
+#include "value.h"
+
 #include <algorithm>
 
 NetworkAdapter::NetworkAdapter()
@@ -9,7 +11,7 @@ NetworkAdapter::NetworkAdapter()
     receiver.addDataListener(*this);
 
     receiver.discoverSenders();
-    startTime = Clock::now();
+    lastDiscoverSent = startTime = Clock::now();
 }
 
 NetworkAdapter::~NetworkAdapter()
@@ -21,12 +23,18 @@ NetworkAdapter::~NetworkAdapter()
 void NetworkAdapter::onMessage(EI::DataMessage msg)
 {
     Clock::time_point now = Clock::now();
-    //qint64 timestamp = (current_time - startTime) * 1,000,000 CLOCKS_PER_SEC;
-    // TODO steffen rate limiting
-    if(knownSenders.find(msg.getSender()) == knownSenders.end())
-        receiver.discoverSenders();
 
-    //emit onNewData();    
+    if(knownSenders.find(msg.getSender()) == knownSenders.end()
+            && (now - lastDiscoverSent) < boost::chrono::seconds(5)) {
+        receiver.discoverSenders();
+        lastDiscoverSent = now;
+    }
+
+    qint64 timestamp = boost::chrono::duration_cast<boost::chrono::microseconds>(now - startTime).count();
+
+    foreach(auto const& p, msg.getContent()) {
+        emit onNewData(timestamp, QString::fromUtf8(std::string(msg.getSender() + "." + p.first).c_str()), Value(p.second));
+    }
 }
 
 static Data::Properties convert(EI::DataSeriesInfo::Properties prop)
