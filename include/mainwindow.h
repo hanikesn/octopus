@@ -36,6 +36,7 @@ private slots:
     void onExportAction();
     void onPlayAction();    
     void onSave();
+    void onSaveAs();
     void onLoad();
     void onVerticalScroll();
     void onExportRange(qint64 begin, qint64 end);
@@ -61,6 +62,7 @@ private:
     // Menu
     QMenu menu;
     QAction *saveAction;
+    QAction *saveAsAction;
     QAction *loadAction;
 
     DataProvider *dataProvider;
@@ -86,6 +88,15 @@ private:
       * Reconnects necessary signals.
       */
     void setUpView();
+
+    /**
+      * Saves the current projects configuration (position of cursor, view range...).
+      * @param saveAs If this flag is set to true, the user will be asked for a new projectName
+      *               'save as'-semantics.
+      *               If this flag is false the user will be asked for a projectName only if this
+      *               project hasn't been saved before.
+      */
+    void save(bool saveAs);
 
 signals:
     void verticalScroll(QRectF visibleRectangle);
