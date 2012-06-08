@@ -1,10 +1,10 @@
 # See http://qt-project.org/quarterly/view/using_cmake_to_build_qt_projects
 cmake_minimum_required(VERSION 2.6)
 
+project(Octopus CXX)
+
 add_subdirectory(qjson)
 include_directories("qjson/src/")
-
-project(Octopus)
 
 if(CMAKE_CXX_COMPILER MATCHES ".*clang")
   set(CMAKE_COMPILER_IS_CLANGXX 1)
@@ -25,8 +25,10 @@ include_directories(${EIToolkit_INCLUDE_DIR})
 
 find_package(Qt4 REQUIRED)
 
-find_package(Boost REQUIRED)
+set(BOOST_components system chrono filesystem)
+find_package(Boost COMPONENTS ${BOOST_components} REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
+link_directories(${Boost_LIBRARY_DIRS})
 add_definitions(-DBOOST_ALL_NO_LIB)
 
 set(Octopus_SOURCES
@@ -97,7 +99,10 @@ add_executable(Octopus "src/main.cpp" ${Octopus_SOURCES} ${Octopus_HEADERS}
     ${Octopus_HEADERS_MOC}
     ${Octopus_FORMS_HEADERS} 
     ${Octopus_RESOURCES_RCC})
-target_link_libraries(Octopus EIToolkit qjson ${QT_LIBRARIES})
+
+set(Octopus_LIBRARIES EIToolkit qjson ${Boost_LIBRARIES} ${QT_LIBRARIES})
+
+target_link_libraries(Octopus ${Octopus_LIBRARIES})
 
 if(NOT WIN32)
 enable_testing()
@@ -114,7 +119,7 @@ add_executable(SampleTest ${SampleTest_Sources} ${Octopus_SOURCES} ${Octopus_HEA
 
 # target_link_libraries(<BINARY_NAME> ...)
 # Jedes Binary muss separat mit den benötigten Libraries verlinkt werden.
-target_link_libraries(SampleTest qjson gtest gtest_main ${QT_LIBRARIES})
+target_link_libraries(SampleTest gtest gtest_main ${Octopus_LIBRARIES})
 
 # add_test(<TEST_NAME> <BINARY>)
 add_test(AllTestsInSampleTest SampleTest)
