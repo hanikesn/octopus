@@ -33,6 +33,8 @@ private:
 
     typedef boost::chrono::high_resolution_clock Clock;
 
+    Clock::time_point lastDiscoverSent;
+
     Clock::time_point startTime;
 };
 
