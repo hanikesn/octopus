@@ -15,7 +15,8 @@ PresentationArea::PresentationArea(QGraphicsScene *scene, const DataProvider &da
     currentViewSize(949, 1),
     selectionBegin(-1),
     selectionEnd(-1),
-    unsavedChanges(false)
+    unsavedChanges(false),
+    playstate(PresentationItem::STOPPED)
 {
     pi = new PresentationItem(hScrollBar, scene);
 
@@ -23,7 +24,8 @@ PresentationArea::PresentationArea(QGraphicsScene *scene, const DataProvider &da
     connect(pi, SIGNAL(rangeChanged(qint64,qint64)), this, SLOT(onRangeChanged(qint64,qint64)));
     connect(this, SIGNAL(verticalScroll(QRectF)), pi, SLOT(onVerticalScroll(QRectF)));
     connect(pi, SIGNAL(selection(qint64,qint64)), this, SLOT(onSelection(qint64, qint64)));
-    connect(pi, SIGNAL(exportTriggered()), this, SLOT(onExportTriggered()));
+    connect(pi, SIGNAL(exportTriggered()), this, SLOT(onExportTriggered()));    
+    connect(this, SIGNAL(play()), pi, SLOT(onPlay()));
 
     // TODO(domi): nicht vergessen :)
 //    connect(dataProvider, SIGNAL(newMax(qint64)), pi, SLOT(onNewMax(qint64)));
@@ -51,7 +53,8 @@ void PresentationArea::addTracks(const QList<QString> &fullDataSeriesNames)
 
 void PresentationArea::onAddTrack()
 {
-    foreach (QStringList list, SourceDialog::getSources(dataProvider, "Select Data Series to be Shown")) {
+    // TODO(Steffi) : Hier sollte keine Preselected-Liste mitgegeben werden.
+    foreach (QStringList list, SourceDialog::getSources(dataProvider, "Select Data Series to be Shown", true, dataProvider.getDataSeriesList())) {
         add(list);
     }
 }
@@ -150,3 +153,22 @@ void PresentationArea::setUnsavedChanges(bool uc)
 {
     unsavedChanges = uc;
 }
+
+void PresentationArea::onPlay()
+{
+    //TODO(domi): getter in PI?
+    switch(playstate)
+    {
+    case PresentationItem::PLAYING:
+        playstate = PresentationItem::PAUSED;
+        break;
+    case PresentationItem::PAUSED:
+        playstate = PresentationItem::PLAYING;
+        break;
+    case PresentationItem::STOPPED:
+        playstate = PresentationItem::PLAYING;
+        break;
+    }
+    emit play();
+}
+

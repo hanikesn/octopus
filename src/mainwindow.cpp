@@ -43,8 +43,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(saveAsAction, SIGNAL(triggered()), this, SLOT(onSaveAs()));
     connect(loadAction, SIGNAL(triggered()), this, SLOT(onLoad()));
     connect(newAction, SIGNAL(triggered()), this, SLOT(onNew()));
-    //TODO(domi): anderen slot wählen, sonst wird man nicht nach Änderungen gefragt.
-//    connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
+    connect(quitAction, SIGNAL(triggered()), this, SLOT(close()));
 
     setUpButtonBars();
     setUpMenu();
@@ -78,12 +77,6 @@ void MainWindow::onExportAction()
     qDebug() << "Export";
 }
 
-void MainWindow::onPlayAction()
-{
-    // TODO:
-    qDebug() << "Play";
-}
-
 void MainWindow::setUpButtonBars()
 {
     addTrackButton.setIcon(QIcon(":/buttons/toolbar/icons/add.png"));
@@ -108,7 +101,7 @@ void MainWindow::setUpButtonBars()
 
     connect(&importButton, SIGNAL(clicked()), this, SLOT(onImportAction()));
     connect(&exportButton, SIGNAL(clicked()), this, SLOT(onExportAction()));
-    connect(&playButton, SIGNAL(clicked()), this, SLOT(onPlayAction()));
+    connect(&playButton, SIGNAL(clicked()), pa, SLOT(onPlay()));
 
     ui.mainToolBar->addWidget(&toolBarWidget);
     addToolBar(Qt::LeftToolBarArea, ui.mainToolBar);
@@ -214,6 +207,8 @@ void MainWindow::setUpView()
 
     connect(&networkAdapter, SIGNAL(onNewDataSeries(QString,QString,Data::Properties)), dataProvider, SLOT(onNewDataSeries(QString,QString,Data::Properties)));
     connect(&networkAdapter, SIGNAL(onNewData(qint64,QString,Value)),                   dataProvider, SLOT(onNewData(qint64,QString,Value)));
+
+    connect(&playButton, SIGNAL(clicked()), pa, SLOT(onPlay()));
 }
 
 void MainWindow::save(bool saveAs)

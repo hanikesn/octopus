@@ -37,7 +37,6 @@ protected:
 private slots:
     void onImportAction();
     void onExportAction();
-    void onPlayAction();    
     void onSave();
     void onSaveAs();
     void onLoad();

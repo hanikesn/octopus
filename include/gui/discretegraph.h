@@ -6,6 +6,9 @@
 
 class QCustomPlot;
 class QCPGraph;
+class QCPItemAnchor;
+class QCPItemTracer;
+class QCPItemText;
 
 class DiscreteGraph : public Graph
 {
@@ -23,6 +26,8 @@ private:
 
     void configureAppearance();
     void initialize();
+    QCPItemTracer* addTracer(double graphKey, double size);
+    QCPItemText* addLabel(const QString& text, QCPItemAnchor *parentAnchor);
 
 protected slots:
     void onNewData(qint64 timestamp);

@@ -60,7 +60,7 @@ public:
         QueryIterator(PreparedStatement* stmt);
 
     public:
-        QueryIterator() : QueryIterator(nullptr) {}
+        QueryIterator() : stmt(0) {}
 
         Row operator*();
         Row operator->();
