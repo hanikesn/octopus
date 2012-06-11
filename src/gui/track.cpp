@@ -86,7 +86,7 @@ void Track::addData()
     ui.plot->addGraph();
     ui.plot->graph()->setName("Interpolating");
     ui.plot->graph()->setLineStyle(QCPGraph::lsLine);
-    ui.plot->graph()->setScatterStyle(QCPGraph::ssDisc);
+    ui.plot->graph()->setScatterStyle(QCP::ssDisc);
     ui.plot->graph()->setScatterSize(4);
     pen.setColor(QColor(sin(1+1.2)*80+80, sin(1*0.3+0)*80+80, sin(1*0.3+1.5)*80+80));
     ui.plot->graph()->setPen(pen);
@@ -108,7 +108,7 @@ void Track::addData()
     ui.plot->addGraph();
     ui.plot->graph()->setName("Discrete");
     ui.plot->graph()->setLineStyle(QCPGraph::lsImpulse);
-    ui.plot->graph()->setScatterStyle(QCPGraph::ssTriangleInverted);
+    ui.plot->graph()->setScatterStyle(QCP::ssTriangleInverted);
     ui.plot->graph()->setScatterSize(4);
     pen.setColor(QColor(sin(2+1.2)*80+80, sin(2*0.3+0)*80+80, sin(2*0.3+1.5)*80+80));
     ui.plot->graph()->setPen(pen);
