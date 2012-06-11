@@ -1,10 +1,13 @@
 #include "gui/discretegraph.h"
 
+#include "gui/qcustomplot.h"
+
 const QCPRange RANGE(0.0, 1.0);
 const double IMPULSE_HEIGHT = RANGE.lower + 0.4 * RANGE.size();
 
 DiscreteGraph::DiscreteGraph(QCustomPlot *plot, const StringSeries &s) :
-    series(s)
+    series(s),
+    plot(plot)
 {
     connect(&series, SIGNAL(newData(qint64)), this, SLOT(onNewData(qint64)));
 
@@ -14,6 +17,13 @@ DiscreteGraph::DiscreteGraph(QCustomPlot *plot, const StringSeries &s) :
     configureAppearance();
     initialize();
 
+    plot->replot();
+}
+
+DiscreteGraph::~DiscreteGraph()
+{
+    // graph is deleted by plot upon removal
+    plot->removeGraph(graph);
     plot->replot();
 }
 
@@ -45,5 +55,5 @@ void DiscreteGraph::onNewData(qint64 timestamp)
     QString data = series.getData(timestamp);
     graph->addData(timestamp, IMPULSE_HEIGHT);
 
-    emit needsReplot();
+    plot->replot();
 }

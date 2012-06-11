@@ -2,21 +2,25 @@
 
 #include <QDebug>
 
-SourceDialog::SourceDialog(const DataProvider &dataProvider, bool allInOneOption, QWidget *parent) :
+SourceDialog::SourceDialog(const DataProvider &dataProvider, const QStringList &preselected, bool allInOneOption, QWidget *parent) :
     QDialog(parent),
     checkStateChangeSource(0)
 {
     ui.setupUi(this);
-    setUpSourceTree(dataProvider);
+    setUpSourceTree(dataProvider, preselected);
     connect(ui.sourceTree, SIGNAL(itemChanged(QTreeWidgetItem*,int)), this, SLOT(onItemChanged(QTreeWidgetItem*,int)));
     ui.allInOneOption->setVisible(allInOneOption);
     // If option is visible, default checkState is Qt::Unchecked. If option is invisible, default checkState is Qt::Checked.
     ui.allInOneOption->setChecked(!allInOneOption);
 }
 
-void SourceDialog::setUpSourceTree(const DataProvider &dataProvider)
+void SourceDialog::setUpSourceTree(const DataProvider &dataProvider, const QStringList &preselectedItems)
 {
     foreach (QString s, dataProvider.getDataSeriesList()) {
+        bool preselect = false;
+        if (preselectedItems.contains(s)) {
+            preselect = true;
+        }
         QStringList components = s.split(".", QString::SkipEmptyParts);
 
         QString deviceName = components.takeFirst();
@@ -40,7 +44,12 @@ void SourceDialog::setUpSourceTree(const DataProvider &dataProvider)
             QTreeWidgetItem *childItem = 0;
             if (itemsWithSameName.isEmpty()) {
                 childItem = new QTreeWidgetItem(parentItem);
-                childItem->setCheckState(0, Qt::Unchecked);
+                if (preselect && components.indexOf(comp) == components.length() - 1) {
+                    childItem->setCheckState(0, Qt::Checked);
+                    checkedItems.append(childItem);
+                } else {
+                    childItem->setCheckState(0, Qt::Unchecked);
+                }
                 childItem->setText(0, comp);
             } else {
                 childItem = itemsWithSameName.takeFirst();
@@ -79,9 +88,9 @@ void SourceDialog::onItemChanged(QTreeWidgetItem *item, int /*column*/)
     }
 }
 
-QList<QStringList> SourceDialog::getSources(const DataProvider &dataProvider, bool allInOneOption, QWidget *parent)
+QList<QStringList> SourceDialog::getSources(const DataProvider &dataProvider, bool allInOneOption, const QStringList &preselected, QWidget *parent)
 {
-    SourceDialog *d = new SourceDialog(dataProvider, allInOneOption, parent);
+    SourceDialog *d = new SourceDialog(dataProvider, preselected, allInOneOption, parent);
     d->exec();
     return d->getResult();
 }
