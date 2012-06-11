@@ -102,6 +102,8 @@ private:
       */
     void save(bool saveAs);
 
+    void checkForUnsavedChanges();
+
 signals:
     void verticalScroll(QRectF visibleRectangle);
     void changedWindowSize(QSize size);

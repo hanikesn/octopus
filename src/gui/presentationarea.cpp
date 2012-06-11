@@ -14,7 +14,8 @@ PresentationArea::PresentationArea(QGraphicsScene *scene, const DataProvider &da
     dataProvider(dataProvider),
     currentViewSize(949, 1),
     selectionBegin(-1),
-    selectionEnd(-1)
+    selectionEnd(-1),
+    unsavedChanges(false)
 {
     pi = new PresentationItem(hScrollBar, scene);
 
@@ -65,6 +66,7 @@ Track* PresentationArea::add(const QList<QString>& fullDataSeriesNames)
 
     //TODO(domi): entfernen, nur für debug-zwecke:
     pi->onNewMax(tracks.size()*30000000);
+    unsavedChanges = true;
     return t;
 }
 
@@ -73,6 +75,7 @@ void PresentationArea::onDelete(Track *t)
     tracks.removeAll(t);
     pi->deleteTrack(t);
     t->deleteLater();
+    unsavedChanges = true;
 }
 
 void PresentationArea::onRangeChanged(qint64 begin, qint64 end)
@@ -80,6 +83,7 @@ void PresentationArea::onRangeChanged(qint64 begin, qint64 end)
     foreach(Track *t, tracks) {
         t->setPlotRange(begin, end);
     }    
+    unsavedChanges = true;
 }
 
 void PresentationArea::onChangedWindowSize(QSize size)
@@ -140,4 +144,9 @@ void PresentationArea::load(QVariantMap *qvm)
         t->load(&trackMap);
     }
     pi->load(qvm);
+}
+
+void PresentationArea::setUnsavedChanges(bool uc)
+{
+    unsavedChanges = uc;
 }

@@ -2,6 +2,7 @@
 
 #include <QDebug>
 #include <QFileDialog>
+#include <QMessageBox>
 #include <sstream>
 
 #include "dataprovider.h"
@@ -47,7 +48,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     setUpButtonBars();
     setUpMenu();
-
 }
 
 MainWindow::~MainWindow()
@@ -145,6 +145,7 @@ void MainWindow::onSaveAs()
 
 void MainWindow::onLoad()
 {
+    checkForUnsavedChanges();
     QString fileName = QFileDialog::getOpenFileName(this, tr("Load File"),
                                                     projectPath, "Octopus (*.oct)");
     if(fileName.isEmpty()) return;
@@ -165,11 +166,13 @@ void MainWindow::onLoad()
     projectName = result["projectName"].toString();
     setTitle(projectName);
 
-    pa->load(&result);    
+    pa->load(&result);
+    pa->setUnsavedChanges(false);
 }
 
 void MainWindow::onNew()
 {
+    checkForUnsavedChanges();
     setUpView();
     projectName = "";
     setTitle(projectName);
@@ -236,4 +239,25 @@ void MainWindow::save(bool saveAs)
     file.open(QIODevice::WriteOnly);
     if(file.write(json) == -1)
         qDebug() << "Could not write config file!";
+
+    pa->setUnsavedChanges(false);
+}
+
+void MainWindow::checkForUnsavedChanges()
+{
+    if(!pa->hasUnsavedChanges())
+        return;
+
+    QMessageBox msg;
+    msg.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+    msg.setIcon(QMessageBox::Information);
+    msg.setButtonText(QMessageBox::Cancel, tr("Save"));
+    msg.setButtonText(QMessageBox::Ok, tr("Ignore"));
+    msg.setText(tr("There are some unsaved changes in this project. Do you wish to save these?"));
+    int result = msg.exec();
+    if (result == QMessageBox::Cancel){
+        save(false);
+    }else if(result == QMessageBox::Ok){
+        // ignore unsaved changes
+    }
 }
