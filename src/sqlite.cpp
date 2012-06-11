@@ -15,6 +15,8 @@ const char *Exception::what() const noexcept
         return "SQLITE_ERROR";
     case 2:
         return "SQLITE_INTERNAL";
+    case 14:
+        return "SQLITE_CANTOPEN";
     case 21:
         return "SQLITE_MISUSE";
     case 25:
@@ -37,6 +39,8 @@ DB::~DB()
     sqlite3_close(db);
 }
 
+const PreparedStatement::QueryIterator DB::Done;
+
 PreparedStatement DB::prepare(const std::string& query)
 {
     sqlite3_stmt* stmt;
@@ -45,8 +49,20 @@ PreparedStatement DB::prepare(const std::string& query)
     if(ret != SQLITE_OK)
         throw Exception(ret);
 
-    return PreparedStatement(stmt);
+    return std::move(PreparedStatement(stmt));
 }
+
+PreparedStatement::PreparedStatement(PreparedStatement && other)
+    : stmt(other.stmt)
+{
+    other.stmt = 0;
+}
+
+PreparedStatement::QueryIterator DB::execute(std::string const& query)
+{
+    return prepare(query).execute();
+}
+
 
 PreparedStatement::PreparedStatement(sqlite3_stmt* stmt) :
     stmt(stmt)

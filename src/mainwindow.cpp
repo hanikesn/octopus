@@ -4,6 +4,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <sstream>
+#include <QDateTime>
 
 #include "dataprovider.h"
 #include "gui/presentationarea.h"
@@ -15,13 +16,13 @@ const QString MainWindow::TITLE = "Octopus 0.1";
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
+    pa(0),
+    dataProvider(0),
+    trackScene(0),
     projectName(QString::fromUtf8("projectName")),
     projectPath(QString::fromUtf8(""))
 {    
     ui.setupUi(this);
-    dataProvider = new DataProvider();
-    trackScene = new TrackScene(this);
-    pa = new PresentationArea(trackScene, *dataProvider, ui.hScrollBar, this);
 
     saveAction = new QAction(tr("&Save"), this);
     saveAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_S));
@@ -35,14 +36,9 @@ MainWindow::MainWindow(QWidget *parent) :
     newAction->setShortcut(QKeySequence(QKeySequence::Quit));
 
     ui.mainView->setAlignment(Qt::AlignTop | Qt::AlignLeft);
-    ui.mainView->setScene(trackScene);
-    ui.mainView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);    
+    ui.mainView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
     ui.mainView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
-    connect(ui.mainView, SIGNAL(verticalScroll()), this, SLOT(onVerticalScroll()));
-    connect(this, SIGNAL(verticalScroll(QRectF)), pa, SIGNAL(verticalScroll(QRectF)));
-    connect(this, SIGNAL(changedWindowSize(QSize)), pa, SLOT(onChangedWindowSize(QSize)));
-    connect(pa, SIGNAL(exportRange(qint64,qint64)), this, SLOT(onExportRange(qint64,qint64)));
     connect(saveAction, SIGNAL(triggered()), this, SLOT(onSave()));
     connect(saveAsAction, SIGNAL(triggered()), this, SLOT(onSaveAs()));
     connect(loadAction, SIGNAL(triggered()), this, SLOT(onLoad()));
@@ -50,11 +46,10 @@ MainWindow::MainWindow(QWidget *parent) :
     //TODO(domi): anderen slot wählen, sonst wird man nicht nach Änderungen gefragt.
 //    connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
 
-    connect(&networkAdapter, SIGNAL(onNewDataSeries(QString,QString,Data::Properties)), dataProvider, SLOT(onNewDataSeries(QString,QString,Data::Properties)));
-    connect(&networkAdapter, SIGNAL(onNewData(qint64,QString,Value)),                   dataProvider, SLOT(onNewData(qint64,QString,Value)));
-
     setUpButtonBars();
     setUpMenu();
+
+    setUpView();
 }
 
 MainWindow::~MainWindow()
@@ -111,7 +106,6 @@ void MainWindow::setUpButtonBars()
 
     toolBarWidget.setLayout(&layout);
 
-    connect(&addTrackButton, SIGNAL(clicked()), pa, SLOT(onAddTrack()));
     connect(&importButton, SIGNAL(clicked()), this, SLOT(onImportAction()));
     connect(&exportButton, SIGNAL(clicked()), this, SLOT(onExportAction()));
     connect(&playButton, SIGNAL(clicked()), this, SLOT(onPlayAction()));
@@ -198,14 +192,15 @@ void MainWindow::setTitle(QString pName)
 
 void MainWindow::setUpView()
 {
-    dataProvider->deleteLater();
-    dataProvider = 0;
-    trackScene->deleteLater();
-    trackScene = 0;
-    pa->deleteLater();
-    pa = 0;
+    if(dataProvider)
+        dataProvider->deleteLater();
+    if(trackScene)
+        trackScene->deleteLater();
+    if(pa)
+        pa->deleteLater();;
 
-    dataProvider = new DataProvider();
+    // TODO(steffen) richtige datei öffnen kopieren etc.
+    dataProvider = new DataProvider(QDir::tempPath() + "/" + QDateTime::currentDateTime().toString(Qt::ISODate));
     trackScene = new TrackScene(this);
     ui.mainView->setScene(trackScene);
     pa = new PresentationArea(trackScene, *dataProvider, ui.hScrollBar, this);
@@ -216,6 +211,9 @@ void MainWindow::setUpView()
     connect(this, SIGNAL(verticalScroll(QRectF)), pa, SIGNAL(verticalScroll(QRectF)));
     connect(this, SIGNAL(changedWindowSize(QSize)), pa, SLOT(onChangedWindowSize(QSize)));
     connect(&addTrackButton, SIGNAL(clicked()), pa, SLOT(onAddTrack()));
+
+    connect(&networkAdapter, SIGNAL(onNewDataSeries(QString,QString,Data::Properties)), dataProvider, SLOT(onNewDataSeries(QString,QString,Data::Properties)));
+    connect(&networkAdapter, SIGNAL(onNewData(qint64,QString,Value)),                   dataProvider, SLOT(onNewData(qint64,QString,Value)));
 }
 
 void MainWindow::save(bool saveAs)

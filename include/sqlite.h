@@ -51,7 +51,7 @@ class PreparedStatement
 public:
     ~PreparedStatement();
 
-    PreparedStatement(PreparedStatement&&);
+    PreparedStatement(PreparedStatement &&);
     //PreparedStatement& operator=(PreparedStatement&&);
 
     class QueryIterator : public std::iterator< std::input_iterator_tag, Row >
@@ -85,7 +85,7 @@ public:
     QueryIterator done();
 
 private:
-    sqlite3_stmt * const stmt;
+    sqlite3_stmt* stmt;
 };
 
 class DB
@@ -97,7 +97,11 @@ public:
     DB(std::string name);
     ~DB();
 
+    PreparedStatement::QueryIterator execute(std::string const& query);
+
     PreparedStatement prepare(const std::string& query);
+
+    static const PreparedStatement::QueryIterator Done;
 
 private:
     sqlite3* db;

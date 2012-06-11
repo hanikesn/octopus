@@ -3,6 +3,7 @@
 
 #include "abstractdataseries.h"
 #include "common.h"
+#include "databaseadapter.h"
 
 #include <QMap>
 #include <QObject>
@@ -12,7 +13,7 @@ class DataProvider : public QObject
 {
     Q_OBJECT
 public:
-    DataProvider();
+    DataProvider(QString const& filename);
 
     // TODO(Steffi): Remove (dummy func)
     void addData();
@@ -40,6 +41,8 @@ public slots:
 
 private:
     QMap<QString, AbstractDataSeries*> dataSeries;
+
+    DatabaseAdapter db;
 
     qint64 currentMax;
 };

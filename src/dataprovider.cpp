@@ -7,8 +7,8 @@
 
 #include <cmath>
 
-DataProvider::DataProvider() :
-    currentMax(0)
+DataProvider::DataProvider(QString const& filename) :
+    db(filename), currentMax(0)
 {
     addData();
 }
