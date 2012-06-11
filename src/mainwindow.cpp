@@ -212,8 +212,9 @@ void MainWindow::setUpView()
 
 void MainWindow::save(bool saveAs)
 {
+    QString caption = saveAs ? tr("Save as") : tr("Save");
     if (projectPath.isEmpty() || saveAs) {
-        QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
+        QString fileName = QFileDialog::getSaveFileName(this, caption,
                                                         projectPath, "Octopus (*.oct)");
         if (fileName.isEmpty()) return;
 
@@ -255,9 +256,6 @@ void MainWindow::checkForUnsavedChanges()
     msg.setButtonText(QMessageBox::Ok, tr("Ignore"));
     msg.setText(tr("There are some unsaved changes in this project. Do you wish to save these?"));
     int result = msg.exec();
-    if (result == QMessageBox::Cancel){
+    if (result == QMessageBox::Cancel)
         save(false);
-    }else if(result == QMessageBox::Ok){
-        // ignore unsaved changes
-    }
 }
