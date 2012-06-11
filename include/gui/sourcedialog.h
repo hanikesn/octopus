@@ -10,12 +10,17 @@ class SourceDialog : public QDialog
 {
     Q_OBJECT
 public:
-    explicit SourceDialog(const DataProvider &dataProvider, const QStringList &preselected, bool allInOneOption, QWidget *parent = 0);
+    explicit SourceDialog(const DataProvider &dataProvider,
+                          const QString &dialogTitle,
+                          bool allInOneOption,
+                          const QStringList &preselected,
+                          QWidget *parent = 0);
 
     /**
      * @return One list per track, with the full names of the selected data series. An empty list if the dialog was canceled.
      */
     static QList<QStringList> getSources(const DataProvider &dataProvider,
+                                         const QString &dialogTitle,
                                          bool allInOneOption = true,
                                          const QStringList &preselected = QStringList(),
                                          QWidget *parent = 0);

@@ -158,7 +158,10 @@ void Track::onDelete()
 
 void Track::onSources()
 {
-    QList<QStringList> sources = SourceDialog::getSources(dataProvider, false, getFullDataSeriesNames());
+    QList<QStringList> sources = SourceDialog::getSources(dataProvider,
+                                                          "Select Data Series to be Shown in This Track",
+                                                          false,
+                                                          getFullDataSeriesNames());
     if (!sources.isEmpty()) {
         while (!graphs.isEmpty()) {
             graphs.takeFirst()->deleteLater();
