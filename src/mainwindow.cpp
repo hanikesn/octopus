@@ -47,8 +47,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(saveAsAction, SIGNAL(triggered()), this, SLOT(onSaveAs()));
     connect(loadAction, SIGNAL(triggered()), this, SLOT(onLoad()));
     connect(newAction, SIGNAL(triggered()), this, SLOT(onNew()));
-    //TODO(domi): anderen slot wählen, sonst wird man nicht nach Änderungen gefragt.
-//    connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
+    connect(quitAction, SIGNAL(triggered()), this, SLOT(close()));
 
     setUpButtonBars();
     setUpMenu();
