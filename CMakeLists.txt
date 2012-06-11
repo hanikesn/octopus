@@ -33,6 +33,9 @@ include_directories(${Boost_INCLUDE_DIR})
 link_directories(${Boost_LIBRARY_DIRS})
 add_definitions(-DBOOST_ALL_NO_LIB)
 
+find_package(Sqlite3 REQUIRED)
+include_directories(${SQLITE3_INCLUDE_DIR})
+
 set(Octopus_SOURCES
   src/abstractdataseries.cpp
   src/databaseadapter.cpp
@@ -52,6 +55,7 @@ set(Octopus_SOURCES
   src/gui/trackscene.cpp
   src/mainwindow.cpp
   src/networkadapter.cpp
+  src/sqlite.cpp
   src/stringseries.cpp
   src/value.cpp
 )
@@ -78,6 +82,7 @@ set(Octopus_HEADERS
   include/mainwindow.h
   include/networkadapter.h
   include/serializable.h
+  include/sqlite.h
   include/stringseries.h
   include/value.h
   include/visitor.h
@@ -105,7 +110,7 @@ add_executable(Octopus "src/main.cpp" ${Octopus_SOURCES} ${Octopus_HEADERS}
     ${Octopus_FORMS_HEADERS} 
     ${Octopus_RESOURCES_RCC})
 
-set(Octopus_LIBRARIES EIToolkit qjson ${Boost_LIBRARIES} ${QT_LIBRARIES})
+set(Octopus_LIBRARIES EIToolkit qjson ${Boost_LIBRARIES} ${SQLITE3_LIBRARIES} ${QT_LIBRARIES})
 
 target_link_libraries(Octopus ${Octopus_LIBRARIES})
 
