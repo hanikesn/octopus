@@ -50,13 +50,13 @@ void SourceDialog::setUpSourceTree(const DataProvider &dataProvider, const QStri
             QTreeWidgetItem *childItem = 0;
             if (itemsWithSameName.isEmpty()) {
                 childItem = new QTreeWidgetItem(parentItem);
+                childItem->setText(0, comp);
                 if (preselect && components.indexOf(comp) == components.length() - 1) {
                     childItem->setCheckState(0, Qt::Checked);
                     checkedItems.append(childItem);
                 } else {
                     childItem->setCheckState(0, Qt::Unchecked);
                 }
-                childItem->setText(0, comp);
             } else {
                 childItem = itemsWithSameName.takeFirst();
             }
