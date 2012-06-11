@@ -10,9 +10,12 @@ class SourceDialog : public QDialog
 {
     Q_OBJECT
 public:
-    explicit SourceDialog(const DataProvider &dataProvider, bool allInOneOption, QWidget *parent = 0);
+    explicit SourceDialog(const DataProvider &dataProvider, const QStringList &preselected, bool allInOneOption, QWidget *parent = 0);
 
-    static QList<QStringList> getSources(const DataProvider &dataProvider, bool allInOneOption, QWidget *parent = 0);
+    static QList<QStringList> getSources(const DataProvider &dataProvider,
+                                         bool allInOneOption = true,
+                                         const QStringList &preselected = QStringList(),
+                                         QWidget *parent = 0);
 
 private:
     Ui::SourceDialog ui;
@@ -20,7 +23,7 @@ private:
     QList<QTreeWidgetItem*> checkedItems;
     QTreeWidgetItem *checkStateChangeSource;
 
-    void setUpSourceTree(const DataProvider &dataProvider);
+    void setUpSourceTree(const DataProvider &dataProvider, const QStringList &preselectedItems);
     QList<QStringList> getResult();
 
 private slots:

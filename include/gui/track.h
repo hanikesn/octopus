@@ -56,6 +56,8 @@ private:
     void addData();
     void addSource(const QString &fullDataSeriesName);
 
+    QStringList getFullDataSeriesNames();
+
 private slots:
     void onDelete();
     void onSources();

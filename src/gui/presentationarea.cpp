@@ -51,7 +51,7 @@ void PresentationArea::addTracks(const QList<QString> &fullDataSeriesNames)
 
 void PresentationArea::onAddTrack()
 {
-    foreach (QStringList list, SourceDialog::getSources(dataProvider, true)) {
+    foreach (QStringList list, SourceDialog::getSources(dataProvider)) {
         add(list);
     }
 }
