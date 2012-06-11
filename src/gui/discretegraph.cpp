@@ -57,7 +57,6 @@ QCPItemTracer* DiscreteGraph::addTracer(double graphKey, double size)
     tracer->setGraph(graph);
     tracer->setGraphKey(graphKey);
 
-    // The appearance of the tracer needs to be configured so its position can be used as an anchor.
     tracer->setStyle(QCPItemTracer::tsCircle);
     tracer->setSize(size);
 
