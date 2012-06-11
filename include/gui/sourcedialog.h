@@ -12,6 +12,9 @@ class SourceDialog : public QDialog
 public:
     explicit SourceDialog(const DataProvider &dataProvider, const QStringList &preselected, bool allInOneOption, QWidget *parent = 0);
 
+    /**
+     * @return One list per track, with the full names of the selected data series. An empty list if the dialog was canceled.
+     */
     static QList<QStringList> getSources(const DataProvider &dataProvider,
                                          bool allInOneOption = true,
                                          const QStringList &preselected = QStringList(),
@@ -24,10 +27,18 @@ private:
     QTreeWidgetItem *checkStateChangeSource;
 
     void setUpSourceTree(const DataProvider &dataProvider, const QStringList &preselectedItems);
+
+    /**
+     * @return The result of the dialog to be returned to the caller.
+     */
     QList<QStringList> getResult();
 
 private slots:
     void onItemChanged(QTreeWidgetItem* item, int /*column*/);
+
+    /**
+     * @return A list of the full names of the selected data series.
+     */
     QStringList selectedSeries();
 };
 
