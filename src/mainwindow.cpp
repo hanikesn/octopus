@@ -10,6 +10,8 @@
 #include "serializer.h"
 #include "parser.h"
 
+const QString MainWindow::TITLE = "Octopus 0.1";
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     projectName(QString::fromUtf8("projectName")),
@@ -20,9 +22,14 @@ MainWindow::MainWindow(QWidget *parent) :
     trackScene = new TrackScene(this);
     pa = new PresentationArea(trackScene, *dataProvider, ui.hScrollBar, this);
 
-    saveAction = new QAction(tr("Save"), this);
+    saveAction = new QAction(tr("&Save"), this);
+    saveAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_S));
     saveAsAction = new QAction(tr("Save As ..."), this);
+    saveAsAction->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_S));
     loadAction = new QAction(tr("Load..."), this);
+    loadAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_O));
+    newAction = new QAction(tr("&New"), this);
+    newAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_N));
 
     ui.mainView->setAlignment(Qt::AlignTop | Qt::AlignLeft);
     ui.mainView->setScene(trackScene);
@@ -38,6 +45,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(saveAction, SIGNAL(triggered()), this, SLOT(onSave()));
     connect(saveAsAction, SIGNAL(triggered()), this, SLOT(onSaveAs()));
     connect(loadAction, SIGNAL(triggered()), this, SLOT(onLoad()));
+    connect(newAction, SIGNAL(triggered()), this, SLOT(onNew()));
 
     setUpButtonBars();
     setUpMenu();
@@ -119,9 +127,10 @@ void MainWindow::onExportRange(qint64 begin, qint64 end)
 
 void MainWindow::setUpMenu()
 {
-    menu.setTitle(tr("File"));
-    menu.addAction(saveAction);
+    menu.setTitle(tr("&File"));
+    menu.addAction(newAction);
     menu.addAction(loadAction);
+    menu.addAction(saveAction);    
     menu.addAction(saveAsAction);
     ui.menuBar->addMenu(&menu);
 }
@@ -137,9 +146,9 @@ void MainWindow::onSaveAs()
 }
 
 void MainWindow::onLoad()
-{        
+{
     QString fileName = QFileDialog::getOpenFileName(this, tr("Load File"),
-                                                    QDir::currentPath(), "Octopus (*.oct)");
+                                                    projectPath, "Octopus (*.oct)");
     if(fileName.isEmpty()) return;
     QFile file(fileName);
     file.open(QIODevice::ReadOnly);    
@@ -152,7 +161,7 @@ void MainWindow::onLoad()
         qDebug() << "Could not parse config file! Aborting...";
         return;
     }
-
+    projectPath = fileName;
     // at this point loading was successful --> delete old presentationArea and create new one.
     setUpView();
     projectName = result["projectName"].toString();
@@ -161,9 +170,19 @@ void MainWindow::onLoad()
     pa->load(&result);    
 }
 
+void MainWindow::onNew()
+{
+    setUpView();
+    projectName = "";
+    setTitle(projectName);
+}
+
 void MainWindow::setTitle(QString pName)
 {
-    QString windowTitle("Octopus 0.1 - ");
+    QString windowTitle(TITLE);
+    if(!pName.isEmpty())
+        windowTitle += " - ";
+
     windowTitle += pName;
     setWindowTitle(windowTitle);
 }
@@ -194,7 +213,7 @@ void MainWindow::save(bool saveAs)
 {
     if (projectPath.isEmpty() || saveAs) {
         QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
-                                                        QDir::currentPath(), "Octopus (*.oct)");
+                                                        projectPath, "Octopus (*.oct)");
         if (fileName.isEmpty()) return;
 
         if (fileName.endsWith(".oct") == false)
