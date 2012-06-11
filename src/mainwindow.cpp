@@ -82,12 +82,6 @@ void MainWindow::onExportAction()
     qDebug() << "Export";
 }
 
-void MainWindow::onPlayAction()
-{
-    // TODO:
-    qDebug() << "Play";
-}
-
 void MainWindow::setUpButtonBars()
 {
     addTrackButton.setIcon(QIcon(":/buttons/toolbar/icons/add.png"));
@@ -113,7 +107,7 @@ void MainWindow::setUpButtonBars()
     connect(&addTrackButton, SIGNAL(clicked()), pa, SLOT(onAddTrack()));
     connect(&importButton, SIGNAL(clicked()), this, SLOT(onImportAction()));
     connect(&exportButton, SIGNAL(clicked()), this, SLOT(onExportAction()));
-    connect(&playButton, SIGNAL(clicked()), this, SLOT(onPlayAction()));
+    connect(&playButton, SIGNAL(clicked()), pa, SLOT(onPlay()));
 
     ui.mainToolBar->addWidget(&toolBarWidget);
     addToolBar(Qt::LeftToolBarArea, ui.mainToolBar);
@@ -215,6 +209,7 @@ void MainWindow::setUpView()
     connect(this, SIGNAL(verticalScroll(QRectF)), pa, SIGNAL(verticalScroll(QRectF)));
     connect(this, SIGNAL(changedWindowSize(QSize)), pa, SLOT(onChangedWindowSize(QSize)));
     connect(&addTrackButton, SIGNAL(clicked()), pa, SLOT(onAddTrack()));
+    connect(&playButton, SIGNAL(clicked()), pa, SLOT(onPlay()));
 }
 
 void MainWindow::save(bool saveAs)

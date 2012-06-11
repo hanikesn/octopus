@@ -96,3 +96,23 @@ void TimeLine::drawTicks(QPainter *painter)
         currentPos += 5;
     }
 }
+
+int TimeLine::convertTimeToInt(qint64 time)
+{
+    if(time < beginRange) return -1;
+
+    int position = 0;
+    qint64 currentTime = beginRange;
+    while(currentTime < time){
+        currentTime += value;
+        position++;
+    }
+    return position;
+}
+
+qint64 TimeLine::convertIntToTime(int pos)
+{
+    return ((pos - offset)*value) + beginRange;
+}
+
+

@@ -22,7 +22,8 @@ PresentationItem::PresentationItem(QScrollBar *hScrollBar, QGraphicsScene *paren
     createSelection(false),
     visRangeLow(0),
     visRangeHigh(TIMEFRAME),
-    minCoverHeight(712)
+    minCoverHeight(712),
+    playstate(STOPPED)
 {            
     timeLine = new TimeLine(ACTIONAREAOFFSET, this, 0);
     timeLine->setZValue(1.0);
@@ -45,10 +46,14 @@ PresentationItem::PresentationItem(QScrollBar *hScrollBar, QGraphicsScene *paren
     hScrollBar->setMinimum(0);
     hScrollBar->setMaximum(0);
 
+    timer.setSingleShot(false);
+    timer.setInterval(20);
+
     connect(selectedArea, SIGNAL(exportTriggered()), this, SIGNAL(exportTriggered()));
     connect(hScrollBar, SIGNAL(sliderMoved(int)), this, SLOT(horizontalScroll(int)));
     connect(hScrollBar, SIGNAL(valueChanged(int)), this, SLOT(horizontalScroll(int)));
     connect(this, SIGNAL(rangeChanged(qint64,qint64)), this, SLOT(onRangeChanged(qint64,qint64)));
+    connect(&timer, SIGNAL(timeout()), this, SLOT(onTimeout()));
 }
 
 PresentationItem::~PresentationItem()
@@ -116,11 +121,6 @@ void PresentationItem::recalcPositions()
     }
 }
 
-void PresentationItem::repositionTimeLine(QRectF visibleRectangle)
-{
-    timeLine->setPos(0, visibleRectangle.y()-1);
-}
-
 void PresentationItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
     if((event->button() == Qt::LeftButton) &&
@@ -172,7 +172,7 @@ void PresentationItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 
         emit selection(selectionStart, selectionEnd);
     }else{
-        cursorPosChanged(event->pos().x());
+        changeCursorPos(event->pos().x());
         showCursor();
     }
 }
@@ -229,7 +229,7 @@ void PresentationItem::recalcBoundingRec()
     parent->setSceneRect(boundingRectangle);    
 }
 
-void PresentationItem::cursorPosChanged(int pos)
+void PresentationItem::changeCursorPos(int pos)
 {
     if(pos < ACTIONAREAOFFSET) return;
     cursor->setPos(pos, 0);
@@ -262,7 +262,7 @@ void PresentationItem::onRangeChanged(qint64 begin, qint64 end)
 
 void PresentationItem::onVerticalScroll(QRectF visibleRectangle)
 {
-    repositionTimeLine(visibleRectangle);
+    timeLine->setPos(0, visibleRectangle.y()-1);
 }
 
 void PresentationItem::resizeCursorAndSelection()
@@ -330,3 +330,43 @@ void PresentationItem::load(QVariantMap *qvm)
     // so we can set the value of the scrollbars slider to the second visRangeLow represents
     hScrollBar->setValue(visRangeLow/1000000);
 }
+
+void PresentationItem::onTimeout()
+{
+    //TODO(domi): Auf Rundungsfehler achten
+    //TODO(domi): magic numbers entfernen
+    qint64 currentTime = timeLine->convertIntToTime(cursor->pos().x());
+    if(cursor->pos().x() < boundingRectangle.width() - 12){// cursor hasn't reached right border yet
+        // determine position for currentTime + 20ms
+        currentTime += 20000;
+        changeCursorPos(timeLine->convertTimeToInt(currentTime) + ACTIONAREAOFFSET);
+    }else{
+        emit rangeChanged(visRangeLow + 20000, visRangeHigh + 20000);
+        hScrollBar->setValue(visRangeLow/1000000);
+    }
+
+}
+
+void PresentationItem::onPlay()
+{
+    switch(playstate)
+    {
+    case PLAYING:
+        playstate = PAUSED;
+        timer.stop();
+        break;
+    case PAUSED:
+        playstate = PLAYING;
+        timer.start();
+        break;
+    case STOPPED:
+        playstate = PLAYING;
+        timer.start();
+        break;
+    }
+}
+
+//void PresentationItem::setPlayState(const Playstate& p)
+//{
+////    playstate = p;
+//}

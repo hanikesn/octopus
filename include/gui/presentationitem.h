@@ -5,6 +5,7 @@
 #include <QGraphicsScene>
 #include <QGraphicsWidget>
 #include <QList>
+#include <QTimer>
 
 #include "serializable.h"
 
@@ -73,6 +74,10 @@ public:
 
     void load(QVariantMap *qvm);
 
+    enum Playstate {PLAYING, PAUSED, STOPPED};
+
+//    void setPlayState(const Playstate& p);
+
 public slots:
     /**
       * Calculates the current size of the bounding rectangle.
@@ -87,19 +92,19 @@ public slots:
       */
     void onChangedWindowSize(QSize size);
 
-
     /**
       * Repositions timeLine to the top of the visible area.
       * @param visibleRectangle Current size and position of the visible track-area
       */
     void onVerticalScroll(QRectF visibleRectangle);
 
-
     /**
       * Updates the timeLine, hScrollBar and the tracks to the new maximum timestamp.
       * @param timestamp New maximum timestamp
       */
     void onNewMax(qint64);
+
+    void onPlay();
 
 private slots:
     void horizontalScroll(int);
@@ -111,6 +116,9 @@ private slots:
       * @param end End of the visible range
       */
     void onRangeChanged(qint64 begin, qint64 end);
+
+
+    void onTimeout();
 
 signals:
     void selection(qint64 begin, qint64 end);
@@ -134,17 +142,34 @@ private:
 
     bool autoScroll;
 
+    QTimer timer;
+
+    bool createSelection;
+    int selectionStart, selectionEnd;
+    qint64 visRangeLow, visRangeHigh;
+
+    // minmal height to cover the full presentationArea
+    int minCoverHeight;
+
+    Playstate playstate;
+
+    static const int ACTIONAREAOFFSET;
+
+    /**
+      * Determines how far the range should go back in time (in microseconds)
+      */
+    static const int TIMEFRAME;
+
     /**
       * Makes sure that no gaps exist between tracks (for example after deleting a track).
       */
     void recalcPositions();
 
-    void cursorPosChanged(int pos);
-
     /**
-      * Repositions the timeline to the top of the visible area.
+      * Sets the cursor to a specified coordinate.
+      * @param pos The position to which the cursor is set.
       */
-    void repositionTimeLine(QRectF visibleRectangle);
+    void changeCursorPos(int pos);
 
     void resizeCursorAndSelection();
 
@@ -153,19 +178,6 @@ private:
       * Emits selection(-1, -1) to update every objects selection-parameters.
       */
     void showCursor();
-
-    bool createSelection;
-    int selectionStart, selectionEnd;
-    qint64 visRangeLow, visRangeHigh;
-
-    // minmal height to cover the full presentationArea
-    int minCoverHeight;
-    static const int ACTIONAREAOFFSET;
-
-    /**
-      * Determines how far the range should go back in time (in microseconds)
-      */
-    static const int TIMEFRAME;
 };
 
 #endif // PRESENTATIONITEM_H

@@ -31,7 +31,8 @@ public:
 signals:
     void changedWindowSize(QSize size);
     void verticalScroll(QRectF visibleRectangle);
-    void exportRange(qint64 begin, qint64 end);        
+    void exportRange(qint64 begin, qint64 end);
+    void play();
 
 public slots:
     void onAddTrack();
@@ -43,6 +44,8 @@ public slots:
       * @param size Size of the new view (it's the size of the mainView not the window size)
       */
     void onChangedWindowSize(QSize size);    
+
+    void onPlay();
 
 private slots:
     /**
@@ -76,11 +79,11 @@ private:
 
     bool unsavedChanges;
 
+    PresentationItem::Playstate playstate;
+
     void addTrack(const QList<QString>& fullDataSeriesNames);
     void addTracks(const QList<QString>& fullDataSeriesNames);
     Track* add(const QList<QString>& fullDataSeriesNames);
-
-
 };
 
 #endif // PRESENTATIONAREA_H
