@@ -36,8 +36,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui.mainView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);    
     ui.mainView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
-    // TODO(domi): nicht vergessen :)
-//    connect(ui.mainView, SIGNAL(changedRange(qint64, qint64)), pa, SLOT(onRangeChanged(qint64, qint64)));
     connect(ui.mainView, SIGNAL(verticalScroll()), this, SLOT(onVerticalScroll()));
     connect(this, SIGNAL(verticalScroll(QRectF)), pa, SIGNAL(verticalScroll(QRectF)));
     connect(this, SIGNAL(changedWindowSize(QSize)), pa, SLOT(onChangedWindowSize(QSize)));
