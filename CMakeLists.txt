@@ -33,53 +33,61 @@ include_directories(${Boost_INCLUDE_DIR})
 link_directories(${Boost_LIBRARY_DIRS})
 add_definitions(-DBOOST_ALL_NO_LIB)
 
+find_package(Sqlite3 REQUIRED)
+include_directories(${SQLITE3_INCLUDE_DIR})
+
 set(Octopus_SOURCES
-  src/mainwindow.cpp
   src/abstractdataseries.cpp
-  src/stringseries.cpp
-  src/doubleseries.cpp
+  src/databaseadapter.cpp
   src/dataprovider.cpp
-  src/value.cpp
-  src/networkadapter.cpp
+  src/doubleseries.cpp
+  src/gui/cursor.cpp
   src/gui/discretegraph.cpp
   src/gui/interpolatinggraph.cpp
-  src/gui/track.cpp
-  src/gui/presentationarea.cpp
-  src/gui/timeline.cpp
-  src/gui/qcustomplot.cpp
   src/gui/mainview.cpp
-  src/gui/trackscene.cpp
+  src/gui/presentationarea.cpp
   src/gui/presentationitem.cpp
-  src/gui/cursor.cpp
+  src/gui/qcustomplot.cpp
   src/gui/selection.cpp
   src/gui/sourcedialog.cpp
+  src/gui/timeline.cpp
+  src/gui/track.cpp
+  src/gui/trackscene.cpp
+  src/mainwindow.cpp
+  src/networkadapter.cpp
+  src/sqlite.cpp
+  src/stringseries.cpp
+  src/value.cpp
 )
 
 set(Octopus_HEADERS
-  include/mainwindow.h
-  include/common.h
   include/abstractdataseries.h
-  include/serializable.h
-  include/stringseries.h
-  include/doubleseries.h
+  include/common.h
+  include/databaseadapter.h
   include/dataprovider.h
-  include/value.h
-  include/networkadapter.h
-  include/visitor.h
-  include/gui/graph.h
-  include/gui/discretegraph.h
-  include/gui/interpolatinggraph.h
-  include/gui/track.h
-  include/gui/presentationarea.h
-  include/gui/timeline.h
-  include/gui/qcustomplot.h
-  include/gui/mainview.h
-  include/gui/trackscene.h
-  include/gui/presentationitem.h
+  include/doubleseries.h
   include/gui/cursor.h
+  include/gui/discretegraph.h
+  include/gui/graph.h
+  include/gui/interpolatinggraph.h
+  include/gui/mainview.h
+  include/gui/presentationarea.h
+  include/gui/presentationitem.h
+  include/gui/qcustomplot.h
   include/gui/selection.h
   include/gui/sourcedialog.h
+  include/gui/timeline.h
+  include/gui/track.h
+  include/gui/trackscene.h
+  include/mainwindow.h
+  include/networkadapter.h
+  include/serializable.h
+  include/sqlite.h
+  include/stringseries.h
+  include/value.h
+  include/visitor.h
 )
+
 set(Octopus_FORMS
   ui/mainwindow.ui
   ui/sourcedialog.ui
@@ -102,7 +110,7 @@ add_executable(Octopus "src/main.cpp" ${Octopus_SOURCES} ${Octopus_HEADERS}
     ${Octopus_FORMS_HEADERS} 
     ${Octopus_RESOURCES_RCC})
 
-set(Octopus_LIBRARIES EIToolkit qjson ${Boost_LIBRARIES} ${QT_LIBRARIES})
+set(Octopus_LIBRARIES EIToolkit qjson ${Boost_LIBRARIES} ${SQLITE3_LIBRARIES} ${QT_LIBRARIES})
 
 target_link_libraries(Octopus ${Octopus_LIBRARIES})
 
