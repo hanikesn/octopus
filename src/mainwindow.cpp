@@ -49,6 +49,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(newAction, SIGNAL(triggered()), this, SLOT(onNew()));
     connect(quitAction, SIGNAL(triggered()), this, SLOT(close()));
 
+    connect(&networkAdapter, SIGNAL(onNewDataSeries(QString,QString,Data::Properties)), dataProvider, SLOT(onNewDataSeries(QString,QString,Data::Properties)));
+    connect(&networkAdapter, SIGNAL(onNewData(qint64,QString,Value)),                   dataProvider, SLOT(onNewData(qint64,QString,Value)));
+
     setUpButtonBars();
     setUpMenu();
 }
