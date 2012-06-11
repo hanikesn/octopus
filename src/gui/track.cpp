@@ -134,6 +134,15 @@ void Track::addSource(const QString &fullDataSeriesName)
     }
 }
 
+QStringList Track::getFullDataSeriesNames()
+{
+    QStringList list;
+    foreach (Graph *g, graphs) {
+        list.append(g->dataSeriesName());
+    }
+    return list;
+}
+
 void Track::addGraph(const DoubleSeries &s) {
     graphs.append(new InterpolatingGraph(ui.plot, s));
 }
@@ -149,8 +158,18 @@ void Track::onDelete()
 
 void Track::onSources()
 {
-    foreach (QString source, SourceDialog::getSources(dataProvider, false)) {
-        addSource(source);
+    QList<QStringList> sources = SourceDialog::getSources(dataProvider,
+                                                          "Select Data Series to be Shown in This Track",
+                                                          false,
+                                                          getFullDataSeriesNames());
+    if (!sources.isEmpty()) {
+        while (!graphs.isEmpty()) {
+            graphs.takeFirst()->deleteLater();
+        }
+        foreach (QString source, sources.first()) {
+            addSource(source);
+        }
+        ui.plot->replot();
     }
 }
 

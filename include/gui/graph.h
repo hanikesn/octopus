@@ -11,9 +11,6 @@ public:
     virtual ~Graph() {}
     virtual QString dataSeriesName() = 0;
 
-signals:
-    void needsReplot();
-
 protected slots:
     virtual void onNewData(qint64 timestamp) = 0;
 };

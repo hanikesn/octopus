@@ -14,7 +14,8 @@ PresentationArea::PresentationArea(QGraphicsScene *scene, const DataProvider &da
     dataProvider(dataProvider),
     currentViewSize(949, 1),
     selectionBegin(-1),
-    selectionEnd(-1)
+    selectionEnd(-1),
+    unsavedChanges(false)
 {
     pi = new PresentationItem(hScrollBar, scene);
 
@@ -31,10 +32,7 @@ PresentationArea::PresentationArea(QGraphicsScene *scene, const DataProvider &da
 
 PresentationArea::~PresentationArea()
 {
-    while (!tracks.isEmpty()) {
-        Track *t = tracks.takeFirst();
-        t->deleteLater();
-    }
+    // Tracks werden über pi gelöscht, das über die TrackScene gelöscht wird.
 }
 
 void PresentationArea::addTrack(const QList<QString> &fullDataSeriesNames)
@@ -44,7 +42,7 @@ void PresentationArea::addTrack(const QList<QString> &fullDataSeriesNames)
 
 void PresentationArea::addTracks(const QList<QString> &fullDataSeriesNames)
 {
-    foreach(QString dataSeries, fullDataSeriesNames){
+    foreach (QString dataSeries, fullDataSeriesNames) {
         QList<QString> series;
         series << dataSeries;
         add(series);
@@ -53,8 +51,9 @@ void PresentationArea::addTracks(const QList<QString> &fullDataSeriesNames)
 
 void PresentationArea::onAddTrack()
 {
-    // TODO(Steffi): Unterscheidung, ob einzeln oder alle in einen
-    addTracks(SourceDialog::getSources(dataProvider, true));
+    foreach (QStringList list, SourceDialog::getSources(dataProvider, "Select Data Series to be Shown")) {
+        add(list);
+    }
 }
 
 Track* PresentationArea::add(const QList<QString>& fullDataSeriesNames)
@@ -67,13 +66,16 @@ Track* PresentationArea::add(const QList<QString>& fullDataSeriesNames)
 
     //TODO(domi): entfernen, nur für debug-zwecke:
     pi->onNewMax(tracks.size()*30000000);
+    unsavedChanges = true;
     return t;
 }
 
 void PresentationArea::onDelete(Track *t)
 {
     tracks.removeAll(t);
-    pi->deleteTrack(t);    
+    pi->deleteTrack(t);
+    t->deleteLater();
+    unsavedChanges = true;
 }
 
 void PresentationArea::onRangeChanged(qint64 begin, qint64 end)
@@ -81,6 +83,7 @@ void PresentationArea::onRangeChanged(qint64 begin, qint64 end)
     foreach(Track *t, tracks) {
         t->setPlotRange(begin, end);
     }    
+    unsavedChanges = true;
 }
 
 void PresentationArea::onChangedWindowSize(QSize size)
@@ -101,10 +104,10 @@ void PresentationArea::onExportTriggered()
 
 void PresentationArea::onSelection(qint64 begin, qint64 end)
 {
-    if((begin != -1) && (end != -1)){
+    if ((begin != -1) && (end != -1)) {
         selectionBegin = begin;
         selectionEnd = end;
-    }else{
+    } else {
         // no more selection:
         selectionBegin = -1;
         selectionEnd = -1;
@@ -141,4 +144,9 @@ void PresentationArea::load(QVariantMap *qvm)
         t->load(&trackMap);
     }
     pi->load(qvm);
+}
+
+void PresentationArea::setUnsavedChanges(bool uc)
+{
+    unsavedChanges = uc;
 }

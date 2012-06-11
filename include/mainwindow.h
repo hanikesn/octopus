@@ -30,6 +30,9 @@ public:
     ~MainWindow();
 
     void resizeEvent(QResizeEvent *event);
+
+protected:
+    void closeEvent(QCloseEvent *ce);
     
 private slots:
     void onImportAction();
@@ -38,6 +41,7 @@ private slots:
     void onSave();
     void onSaveAs();
     void onLoad();
+    void onNew();
     void onVerticalScroll();
     void onExportRange(qint64 begin, qint64 end);
 
@@ -64,6 +68,8 @@ private:
     QAction *saveAction;
     QAction *saveAsAction;
     QAction *loadAction;
+    QAction *newAction;
+    QAction *quitAction;
 
     DataProvider *dataProvider;
 
@@ -76,6 +82,8 @@ private:
     HorizontalScrollBar *hScrollBar;
 
     QString projectName, projectPath;
+
+    const static QString TITLE;
 
     void setUpButtonBars();
 
@@ -97,6 +105,8 @@ private:
       *               project hasn't been saved before.
       */
     void save(bool saveAs);
+
+    int checkForUnsavedChanges();
 
 signals:
     void verticalScroll(QRectF visibleRectangle);

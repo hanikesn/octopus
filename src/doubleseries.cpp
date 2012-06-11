@@ -39,11 +39,10 @@ QMap<qint64, double> DoubleSeries::getData(qint64 begin, qint64 end) const
 {
     QMap<qint64, double> selection;
 
-    QMap<qint64, double>::const_iterator i = values.constBegin();
-    while (i != values.constEnd()) {
-        if (begin <= i.key() && i.key() <= end) {
-            selection.insert(i.key(), i.value());
-        }
+    QMap<qint64, double>::const_iterator i = values.lowerBound(begin);
+    while (i != values.upperBound(end)) {
+        selection.insert(i.key(), i.value());
+        i++;
     }
 
     return selection;

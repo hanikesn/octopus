@@ -2,6 +2,7 @@
 
 #include <QDebug>
 #include <QFileDialog>
+#include <QMessageBox>
 #include <sstream>
 
 #include "dataprovider.h"
@@ -9,6 +10,8 @@
 #include "gui/mainview.h"
 #include "serializer.h"
 #include "parser.h"
+
+const QString MainWindow::TITLE = "Octopus 0.1";
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -20,17 +23,22 @@ MainWindow::MainWindow(QWidget *parent) :
     trackScene = new TrackScene(this);
     pa = new PresentationArea(trackScene, *dataProvider, ui.hScrollBar, this);
 
-    saveAction = new QAction(tr("Save"), this);
+    saveAction = new QAction(tr("&Save"), this);
+    saveAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_S));
     saveAsAction = new QAction(tr("Save As ..."), this);
+    saveAsAction->setShortcut(QKeySequence(Qt::CTRL + Qt::SHIFT + Qt::Key_S));
     loadAction = new QAction(tr("Load..."), this);
+    loadAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_O));
+    newAction = new QAction(tr("&New"), this);
+    newAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_N));
+    quitAction = new QAction(tr("&Quit"), this);
+    newAction->setShortcut(QKeySequence(QKeySequence::Quit));
 
     ui.mainView->setAlignment(Qt::AlignTop | Qt::AlignLeft);
     ui.mainView->setScene(trackScene);
     ui.mainView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);    
     ui.mainView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
-    // TODO(domi): nicht vergessen :)
-//    connect(ui.mainView, SIGNAL(changedRange(qint64, qint64)), pa, SLOT(onRangeChanged(qint64, qint64)));
     connect(ui.mainView, SIGNAL(verticalScroll()), this, SLOT(onVerticalScroll()));
     connect(this, SIGNAL(verticalScroll(QRectF)), pa, SIGNAL(verticalScroll(QRectF)));
     connect(this, SIGNAL(changedWindowSize(QSize)), pa, SLOT(onChangedWindowSize(QSize)));
@@ -38,6 +46,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(saveAction, SIGNAL(triggered()), this, SLOT(onSave()));
     connect(saveAsAction, SIGNAL(triggered()), this, SLOT(onSaveAs()));
     connect(loadAction, SIGNAL(triggered()), this, SLOT(onLoad()));
+    connect(newAction, SIGNAL(triggered()), this, SLOT(onNew()));
+    //TODO(domi): anderen slot wählen, sonst wird man nicht nach Änderungen gefragt.
+//    connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
 
     connect(&networkAdapter, SIGNAL(onNewDataSeries(QString,QString,Data::Properties)), dataProvider, SLOT(onNewDataSeries(QString,QString,Data::Properties)));
     connect(&networkAdapter, SIGNAL(onNewData(qint64,QString,Value)),                   dataProvider, SLOT(onNewData(qint64,QString,Value)));
@@ -121,10 +132,12 @@ void MainWindow::onExportRange(qint64 begin, qint64 end)
 
 void MainWindow::setUpMenu()
 {
-    menu.setTitle(tr("File"));
-    menu.addAction(saveAction);
+    menu.setTitle(tr("&File"));
+    menu.addAction(newAction);
     menu.addAction(loadAction);
+    menu.addAction(saveAction);    
     menu.addAction(saveAsAction);
+    menu.addAction(quitAction);
     ui.menuBar->addMenu(&menu);
 }
 
@@ -139,9 +152,10 @@ void MainWindow::onSaveAs()
 }
 
 void MainWindow::onLoad()
-{        
+{
+    if(checkForUnsavedChanges() == QMessageBox::Abort) return;
     QString fileName = QFileDialog::getOpenFileName(this, tr("Load File"),
-                                                    QDir::currentPath(), "Octopus (*.oct)");
+                                                    projectPath, "Octopus (*.oct)");
     if(fileName.isEmpty()) return;
     QFile file(fileName);
     file.open(QIODevice::ReadOnly);    
@@ -154,18 +168,30 @@ void MainWindow::onLoad()
         qDebug() << "Could not parse config file! Aborting...";
         return;
     }
-
+    projectPath = fileName;
     // at this point loading was successful --> delete old presentationArea and create new one.
     setUpView();
     projectName = result["projectName"].toString();
     setTitle(projectName);
 
-    pa->load(&result);    
+    pa->load(&result);
+    pa->setUnsavedChanges(false);
+}
+
+void MainWindow::onNew()
+{
+    if(checkForUnsavedChanges() == QMessageBox::Abort) return;
+    setUpView();
+    projectName = "";
+    setTitle(projectName);
 }
 
 void MainWindow::setTitle(QString pName)
 {
-    QString windowTitle("Octopus 0.1 - ");
+    QString windowTitle(TITLE);
+    if(!pName.isEmpty())
+        windowTitle += " - ";
+
     windowTitle += pName;
     setWindowTitle(windowTitle);
 }
@@ -194,9 +220,10 @@ void MainWindow::setUpView()
 
 void MainWindow::save(bool saveAs)
 {
+    QString caption = saveAs ? tr("Save as") : tr("Save");
     if (projectPath.isEmpty() || saveAs) {
-        QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),
-                                                        QDir::currentPath(), "Octopus (*.oct)");
+        QString fileName = QFileDialog::getSaveFileName(this, caption,
+                                                        projectPath, "Octopus (*.oct)");
         if (fileName.isEmpty()) return;
 
         if (fileName.endsWith(".oct") == false)
@@ -221,4 +248,34 @@ void MainWindow::save(bool saveAs)
     file.open(QIODevice::WriteOnly);
     if(file.write(json) == -1)
         qDebug() << "Could not write config file!";
+
+    pa->setUnsavedChanges(false);
+}
+
+int MainWindow::checkForUnsavedChanges()
+{
+    if(!pa->hasUnsavedChanges())
+        return -1;
+
+    QMessageBox msg;
+    msg.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Abort);
+    msg.setIcon(QMessageBox::Information);
+    msg.setButtonText(QMessageBox::Save, tr("Save"));
+    msg.setButtonText(QMessageBox::Discard, tr("Ignore"));
+    msg.setButtonText(QMessageBox::Abort, tr("Abort"));
+    msg.setDefaultButton(QMessageBox::Save);
+    msg.setText(tr("There are some unsaved changes in this project. Do you wish to save these?"));
+    int result = msg.exec();
+    if (result == QMessageBox::Save)
+        save(false);
+    return result;
+}
+
+void MainWindow::closeEvent(QCloseEvent *ce)
+{
+    //TODO(domi): Kommentare wegmachen:
+//    if(checkForUnsavedChanges() != QMessageBox::Abort)
+//        QMainWindow::closeEvent(ce);
+//    else
+//        ce->ignore();
 }
