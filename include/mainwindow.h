@@ -30,6 +30,9 @@ public:
     ~MainWindow();
 
     void resizeEvent(QResizeEvent *event);
+
+protected:
+    void closeEvent(QCloseEvent *ce);
     
 private slots:
     void onImportAction();
@@ -66,6 +69,7 @@ private:
     QAction *saveAsAction;
     QAction *loadAction;
     QAction *newAction;
+    QAction *quitAction;
 
     DataProvider *dataProvider;
 
@@ -101,6 +105,8 @@ private:
       *               project hasn't been saved before.
       */
     void save(bool saveAs);
+
+    int checkForUnsavedChanges();
 
 signals:
     void verticalScroll(QRectF visibleRectangle);

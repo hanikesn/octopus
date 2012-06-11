@@ -7,8 +7,6 @@
 #include "presentationitem.h"
 #include "serializable.h"
 
-#include "boost/property_tree/ptree.hpp"
-
 class Track;
 class QVBoxLayout;
 class QGraphicsScene;
@@ -27,10 +25,13 @@ public:
     void save(QVariantMap *qvm);
     void load(QVariantMap *qvm);
 
+    bool hasUnsavedChanges(){return unsavedChanges;}
+    void setUnsavedChanges(bool uc);
+
 signals:
     void changedWindowSize(QSize size);
     void verticalScroll(QRectF visibleRectangle);
-    void exportRange(qint64 begin, qint64 end);    
+    void exportRange(qint64 begin, qint64 end);        
 
 public slots:
     void onAddTrack();
@@ -72,6 +73,8 @@ private:
 
     QSize currentViewSize;
     qint64 selectionBegin, selectionEnd;
+
+    bool unsavedChanges;
 
     void addTrack(const QList<QString>& fullDataSeriesNames);
     void addTracks(const QList<QString>& fullDataSeriesNames);
