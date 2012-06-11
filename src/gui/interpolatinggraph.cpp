@@ -31,7 +31,7 @@ QString InterpolatingGraph::dataSeriesName()
 void InterpolatingGraph::configureAppearance()
 {
     graph->setLineStyle(QCPGraph::lsLine);
-    graph->setScatterStyle(QCPGraph::ssDisc);
+    graph->setScatterStyle(QCP::ssDisc);
     graph->setScatterSize(4);
 }
 

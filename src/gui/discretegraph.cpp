@@ -35,7 +35,7 @@ QString DiscreteGraph::dataSeriesName()
 void DiscreteGraph::configureAppearance()
 {
     graph->setLineStyle(QCPGraph::lsImpulse);
-    graph->setScatterStyle(QCPGraph::ssTriangleInverted);
+    graph->setScatterStyle(QCP::ssTriangleInverted);
     graph->setScatterSize(4);
 }
 
