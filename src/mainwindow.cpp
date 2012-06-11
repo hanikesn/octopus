@@ -50,6 +50,9 @@ MainWindow::MainWindow(QWidget *parent) :
     //TODO(domi): anderen slot wählen, sonst wird man nicht nach Änderungen gefragt.
 //    connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
 
+    connect(&networkAdapter, SIGNAL(onNewDataSeries(QString,QString,Data::Properties)), dataProvider, SLOT(onNewDataSeries(QString,QString,Data::Properties)));
+    connect(&networkAdapter, SIGNAL(onNewData(qint64,QString,Value)),                   dataProvider, SLOT(onNewData(qint64,QString,Value)));
+
     setUpButtonBars();
     setUpMenu();
 }
