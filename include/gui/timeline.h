@@ -24,14 +24,18 @@ public:
       * specified in the constructor)
       * @param time The point in time to be converted
       */
-    int convertTimeToInt(qint64 time);
+    int convertTimeToPos(qint64 time);
 
     /**
       * Converts a position on the view into the corresponting point in time.
       * @param pos The position in the view to be converted. The position needs to be absolute, no
       *            offset subtracted beforehand.
       */
-    qint64 convertIntToTime(int pos);
+    qint64 convertPosToTime(int pos);
+
+    void drawFrom(qint64 time);
+
+    qint64 getUpperEnd(qint64 lowerEnd);
 
 public slots:    
 
@@ -50,6 +54,12 @@ private:
     int mediumTickHeight;
     int largeTickHeight;
     QPen pen;
+
+
+    static const qint64 LARGETICKAMOUNT;
+    static const qint64 MEDIUMTICKAMOUNT;
+    static const qint64 SMALLTICKAMOUNT;
+    static const qint64 TIMEPERPX;
 
     void drawTicks(QPainter *painter);
 

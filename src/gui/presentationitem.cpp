@@ -27,6 +27,7 @@ PresentationItem::PresentationItem(QScrollBar *hScrollBar, QGraphicsScene *paren
 {            
     timeLine = new TimeLine(ACTIONAREAOFFSET, this, 0);
     timeLine->setZValue(1.0);
+    timeLine->drawFrom(0);
 
     cursor = new Cursor(ACTIONAREAOFFSET, parent);    
     cursor->setParentItem(this);
@@ -255,17 +256,17 @@ void PresentationItem::onChangedWindowSize(QSize size)
     }
 
     recalcBoundingRec();
+    emit rangeChanged(visRangeLow, timeLine->getUpperEnd(visRangeLow));
 }
 
 void PresentationItem::onRangeChanged(qint64 begin, qint64 end)
 {
-    timeLine->adjustVisibleRange(begin, end);
     visRangeLow = begin;
     visRangeHigh = end;
 }
 
 void PresentationItem::onVerticalScroll(QRectF visibleRectangle)
-{
+{    
     timeLine->setPos(0, visibleRectangle.y()-1);
 }
 
@@ -287,6 +288,8 @@ void PresentationItem::onNewMax(qint64 timestamp)
     hScrollBar->setMinimum(min);
 
     if(autoScroll){
+
+        //TODO(domi) autoscroll auf neue grenzen bei rangeChanged() anpassen
         hScrollBar->setValue(hScrollBar->maximum());
         qint64 lowerRange = timestamp <= TIMEFRAME ? 0 : timestamp - TIMEFRAME;
         emit rangeChanged(lowerRange, timestamp);
@@ -296,7 +299,9 @@ void PresentationItem::onNewMax(qint64 timestamp)
 void PresentationItem::horizontalScroll(int pos)
 {
     qint64 lowerRange = pos*1000000;
-    emit rangeChanged(lowerRange, lowerRange + TIMEFRAME);
+
+//    emit rangeChanged(lowerRange, lowerRange + TIMEFRAME);
+    emit rangeChanged(lowerRange, timeLine->getUpperEnd(lowerRange));
     // remove selection:
     showCursor();
 }
@@ -338,14 +343,16 @@ void PresentationItem::load(QVariantMap *qvm)
 void PresentationItem::onTimeout()
 {
     //TODO(domi): Auf Rundungsfehler achten
-    //TODO(domi): magic numbers entfernen
-    qint64 currentTime = timeLine->convertIntToTime(cursor->pos().x());
+    //TODO(domi): magic numbers entfernen    
     if(cursor->pos().x() < boundingRectangle.width() - 12){// cursor hasn't reached right border yet
         // determine position for currentTime + 20ms
         currentTime += 20000;
-        changeCursorPos(timeLine->convertTimeToInt(currentTime) + ACTIONAREAOFFSET);
+        changeCursorPos(timeLine->convertTimeToPos(currentTime) + ACTIONAREAOFFSET);
     }else{
-        emit rangeChanged(visRangeLow + 20000, visRangeHigh + 20000);
+        //TODO(domi): andere grenzen für range übergeben
+        visRangeLow += 20000;
+        emit rangeChanged(visRangeLow, timeLine->getUpperEnd(visRangeLow));
+        timeLine->drawFrom(visRangeLow);
         hScrollBar->setValue(visRangeLow/1000000);
     }
 
@@ -361,11 +368,13 @@ void PresentationItem::onPlay()
         break;
     case PAUSED:
         playstate = PLAYING;
-        timer.start();
+        currentTime = timeLine->convertPosToTime(cursor->pos().x());
+        timer.start();        
         break;
     case STOPPED:
         playstate = PLAYING;
-        timer.start();
+        currentTime = timeLine->convertPosToTime(cursor->pos().x());
+        timer.start();        
         break;
     }
 }

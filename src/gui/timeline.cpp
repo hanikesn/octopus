@@ -5,6 +5,12 @@
 
 #include <QDebug>
 
+const qint64 TimeLine::LARGETICKAMOUNT = 2000000;  // two seconds in µs
+const qint64 TimeLine::MEDIUMTICKAMOUNT = 1000000; // one second in µs
+const qint64 TimeLine::SMALLTICKAMOUNT = 200000; // 0,2 seconds in µs
+const qint64 TimeLine::TIMEPERPX = 40000;  /* Amount of time which one pixel represents
+                                              40 milliseconds in µs*/
+
 TimeLine::TimeLine(int offset, QGraphicsItem * parent, Qt::WindowFlags wFlags):
     QGraphicsWidget(parent, wFlags),
     offset(offset),
@@ -17,7 +23,6 @@ TimeLine::TimeLine(int offset, QGraphicsItem * parent, Qt::WindowFlags wFlags):
     largeTickHeight(15),
     pen(Qt::black, 1, Qt::SolidLine)
 {
-//    setGeometry(0, 0, 946, 50);
     setGeometry(0, 0, 946, 50);
 }
 
@@ -59,60 +64,73 @@ QRectF TimeLine::boundingRect(){
 
 void TimeLine::drawTicks(QPainter *painter)
 {
-    // range per pixel ("value" of a pixel)
-    value = (double) (endRange - beginRange + 1) / (double) (geometry().width() - offset);
-//    qDebug() << "TimeLine::drawTicks()  range-per-pixel: " << value;
-
-    // if the range doesn't start at 0 we need to add a offset
-    rangeOffset = beginRange;
     currentPos = 0;
+    qint64 currentTime = rangeOffset;
+    currentTime -= currentTime%TIMEPERPX;
+
     bottom = geometry().height() - 10;
+    /*
+      2 seconds: large tick
+      1 second : medium tick
+      0,2 seconds: small tick
+      */
     double output  = 0.0;
-    while(currentPos < geometry().width()){        
-        if(currentPos % 50 == 0){
-            output = ((currentPos * value) + rangeOffset)/1000000;
+    while (currentPos < geometry().width()) {
+        if (currentTime % LARGETICKAMOUNT == 0) {
+            // large tick
+            output = currentTime/1000000;
             // large tick
             painter->drawLine(currentPos + offset, bottom, currentPos + offset,
                               bottom - largeTickHeight);
             QRect rect = QRect(currentPos + offset - textBoxWidth/2, bottom, textBoxWidth,
                                textBoxHeight);
-            if(value < 0.02){
-                painter->drawText(rect, Qt::AlignCenter, QString("%1").arg(output, 0, 'f', 3));
-            }else{                
-                painter->drawText(rect, Qt::AlignCenter, QString("%1").arg(output, 0, 'f', 1));
-//                painter->drawText(rect, Qt::AlignCenter, QString::number((int)output));
-            }
+            painter->drawText(rect, Qt::AlignCenter, QString("%1").arg(output, 0, 'f', 0));
 
-        }else if(currentPos % 25 == 0){
+
+        } else if (currentTime % MEDIUMTICKAMOUNT == 0) {
             // medium tick
             painter->drawLine(currentPos + offset, bottom, currentPos + offset,
                               bottom - mediumTickHeight);
-        }else if(currentPos % 5 == 0){
-            // short tick
+        } else if (currentTime % SMALLTICKAMOUNT == 0) {
+            // small tick
             painter->drawLine(currentPos + offset, bottom, currentPos + offset,
                               bottom - shortTickHeight);
         }
-        // draw a tick every 5 pixels
-        currentPos += 5;
+
+        currentTime += TIMEPERPX;
+        currentPos++;
     }
 }
 
-int TimeLine::convertTimeToInt(qint64 time)
+int TimeLine::convertTimeToPos(qint64 time)
 {
     if(time < beginRange) return -1;
 
     int position = 0;
     qint64 currentTime = beginRange;
     while(currentTime < time){
-        currentTime += value;
+        currentTime += TIMEPERPX;
         position++;
     }
     return position;
 }
 
-qint64 TimeLine::convertIntToTime(int pos)
+qint64 TimeLine::convertPosToTime(int pos)
 {
-    return ((pos - offset)*value) + beginRange;
+    // since every pixel represents a defined amount of time we only need to multiply TIMEPERPX
+    return ((pos - offset)*TIMEPERPX) + beginRange;
 }
 
+void TimeLine::drawFrom(qint64 time)
+{
+    rangeOffset = time;
+    update(boundingRect());
+}
 
+qint64 TimeLine::getUpperEnd(qint64 lowerEnd)
+{
+    beginRange = lowerEnd;
+    return beginRange + ((geometry().width()-offset)*TIMEPERPX);
+}
+
+//TODO(domi): %LARGETI... geht nur mit Zahlen die vielfache von LARGETICKAMOUNT sind

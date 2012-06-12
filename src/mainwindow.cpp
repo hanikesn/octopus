@@ -39,6 +39,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui.mainView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
     ui.mainView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     connect(ui.mainView, SIGNAL(resized(QSize)), this, SIGNAL(changedWindowSize(QSize)));
+    connect(ui.mainView, SIGNAL(verticalScroll()), this, SLOT(onVerticalScroll()));
 
     connect(saveAction, SIGNAL(triggered()), this, SLOT(onSave()));
     connect(saveAsAction, SIGNAL(triggered()), this, SLOT(onSaveAs()));
@@ -48,7 +49,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     setUpButtonBars();
     setUpMenu();
-
 
     setUpView();
 }
