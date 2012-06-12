@@ -52,10 +52,23 @@ PreparedStatement DB::prepare(const std::string& query)
     return std::move(PreparedStatement(stmt));
 }
 
+PreparedStatement::PreparedStatement()
+    : stmt(0)
+{
+}
+
 PreparedStatement::PreparedStatement(PreparedStatement && other)
-    : stmt(other.stmt)
+    : stmt(other.stmt), index(other.index)
 {
     other.stmt = 0;
+    other.index = 0;
+}
+
+PreparedStatement& PreparedStatement::operator =(PreparedStatement && other)
+{
+    std::swap(stmt, other.stmt);
+    std::swap(index, other.index);
+    return *this;
 }
 
 PreparedStatement::QueryIterator DB::execute(std::string const& query)
@@ -84,21 +97,21 @@ PreparedStatement::QueryIterator PreparedStatement::done()
     return QueryIterator();
 }
 
-void PreparedStatement::bindDouble(int index, double value)
+void PreparedStatement::bind(int index, double value)
 {
     int ret = sqlite3_bind_double(stmt, index, value);
     if(ret != SQLITE_OK)
         throw Exception(ret);
 }
 
-void PreparedStatement::bindInt(int index, sqlite3_int64 value)
+void PreparedStatement::bind(int index, sqlite3_int64 value)
 {
     int ret = sqlite3_bind_int(stmt, index, value);
     if(ret != SQLITE_OK)
         throw Exception(ret);
 }
 
-void PreparedStatement::bindText(int index, const std::string& value)
+void PreparedStatement::bind(int index, const std::string& value)
 {
     int ret = sqlite3_bind_text(stmt, index, value.c_str(), value.length(), SQLITE_TRANSIENT);
     if(ret != SQLITE_OK)
@@ -107,7 +120,29 @@ void PreparedStatement::bindText(int index, const std::string& value)
 
 void PreparedStatement::reset()
 {
+    index = 0;
     sqlite3_reset(stmt);
+}
+
+PreparedStatement& PreparedStatement::operator<<(std::string const& value)
+{
+    index++;
+    bind(index, value);
+    return *this;
+}
+
+PreparedStatement& PreparedStatement::operator<<(sqlite3_int64 value)
+{
+    index++;
+    bind(index, value);
+    return *this;
+}
+
+PreparedStatement& PreparedStatement::operator<<(double value)
+{
+    index++;
+    bind(index, value);
+    return *this;
 }
 
 PreparedStatement::QueryIterator& PreparedStatement::QueryIterator::operator++()
@@ -159,6 +194,27 @@ Row PreparedStatement::QueryIterator::operator->()
 Row::Row(PreparedStatement &stmt)
     : stmt(stmt)
 {
+}
+
+Row& Row::operator>>(std::string& value)
+{
+    index++;
+    value = std::string((const char*)sqlite3_column_text(stmt.stmt, index));
+    return *this;
+}
+
+Row& Row::operator>>(double& value)
+{
+    index++;
+    value = sqlite3_column_double(stmt.stmt, index);
+    return *this;
+}
+
+Row& Row::operator>>(sqlite3_int64& value)
+{
+    index++;
+    value = sqlite3_column_int64(stmt.stmt, index);
+    return *this;
 }
 
 int Row::columnCount()

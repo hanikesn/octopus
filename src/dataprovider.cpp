@@ -53,6 +53,8 @@ void DataProvider::onNewDataSeries(QString deviceName, QString dataSeriesName, D
 
 void DataProvider::onNewData(qint64 timestamp, QString fullDataSeriesName, Value value)
 {
+    db.add(fullDataSeriesName, timestamp, value);
+
     if (dataSeries.contains(fullDataSeriesName)) {
         dataSeries.value(fullDataSeriesName)->addData(timestamp, value);
 

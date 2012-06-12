@@ -32,8 +32,10 @@ void NetworkAdapter::onMessage(EI::DataMessage msg)
 
     qint64 timestamp = boost::chrono::duration_cast<boost::chrono::microseconds>(now - startTime).count();
 
+    auto const& prefix = QString::fromUtf8(msg.getSender().c_str()) + ".";
+
     foreach(auto const& p, msg.getContent()) {
-        emit onNewData(timestamp, QString::fromUtf8(std::string(msg.getSender() + "." + p.first).c_str()), Value(p.second));
+        emit onNewData(timestamp, prefix + fromStdString(p.first), Value(p.second));
     }
 }
 
@@ -56,13 +58,14 @@ void NetworkAdapter::onMessage(EI::Message const& msg)
     {
         auto const& d = dynamic_cast<EI::DescriptionMessage const&>(msg);
         auto const& c = d.getDescription().getDataSeries();
+        auto const& sender = fromStdString(d.getSender());
         std::for_each(c.begin(), c.end(),
-            [this, &d](EI::DataSeriesInfoMap::value_type const& p)
+            [this, &sender](EI::DataSeriesInfoMap::value_type const& p)
         {
             emit onNewDataSeries(
-                QString::fromUtf8(d.getSender().c_str()),
-                QString::fromUtf8(p.first.c_str()),
-                convert(p.second.getProperties())
+                          sender,
+                          fromStdString(p.first.c_str()),
+                          convert(p.second.getProperties())
                 );
         });
         knownSenders.insert(d.getSender());

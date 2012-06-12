@@ -34,8 +34,13 @@ public:
 
     std::string getText(int index);
 
+    Row& operator>>(std::string& value);
+    Row& operator>>(double& value);
+    Row& operator>>(sqlite3_int64& value);
+
 private:
     PreparedStatement& stmt;
+    int index;
 };
 
 class PreparedStatement
@@ -49,10 +54,11 @@ class PreparedStatement
     friend class Row;
     PreparedStatement(sqlite3_stmt* stmt);
 public:
+    PreparedStatement();
     ~PreparedStatement();
 
     PreparedStatement(PreparedStatement &&);
-    //PreparedStatement& operator=(PreparedStatement&&);
+    PreparedStatement& operator=(PreparedStatement&&);
 
     class QueryIterator : public std::iterator< std::input_iterator_tag, Row >
     {
@@ -77,15 +83,20 @@ public:
 
     void reset();
 
-    void bindText(int index, const std::string& value);
-    void bindInt(int index, sqlite3_int64 value);
-    void bindDouble(int index, double value);
+    void bind(int index, const std::string& value);
+    void bind(int index, sqlite3_int64 value);
+    void bind(int index, double value);
+
+    PreparedStatement& operator<<(std::string const& value);
+    PreparedStatement& operator<<(sqlite3_int64 value);
+    PreparedStatement& operator<<(double value);
 
     QueryIterator execute();
     QueryIterator done();
 
 private:
     sqlite3_stmt* stmt;
+    int index;
 };
 
 class DB
