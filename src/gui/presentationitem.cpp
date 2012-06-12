@@ -174,7 +174,7 @@ void PresentationItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
         selectionEnd = highRange;
 
         emit selection(selectionStart, selectionEnd);
-    }else{
+    }else if (playstate != PLAYING) {
         changeCursorPos(event->pos().x());
         showCursor();
     }
@@ -299,8 +299,6 @@ void PresentationItem::onNewMax(qint64 timestamp)
 void PresentationItem::horizontalScroll(int pos)
 {
     qint64 lowerRange = pos*1000000;
-
-//    emit rangeChanged(lowerRange, lowerRange + TIMEFRAME);
     emit rangeChanged(lowerRange, timeLine->getUpperEnd(lowerRange));
     // remove selection:
     showCursor();
@@ -349,13 +347,11 @@ void PresentationItem::onTimeout()
         currentTime += 20000;
         changeCursorPos(timeLine->convertTimeToPos(currentTime) + ACTIONAREAOFFSET);
     }else{
-        //TODO(domi): andere grenzen für range übergeben
         visRangeLow += 20000;
         emit rangeChanged(visRangeLow, timeLine->getUpperEnd(visRangeLow));
         timeLine->drawFrom(visRangeLow);
         hScrollBar->setValue(visRangeLow/1000000);
     }
-
 }
 
 void PresentationItem::onPlay()
