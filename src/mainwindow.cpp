@@ -38,6 +38,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui.mainView->setAlignment(Qt::AlignTop | Qt::AlignLeft);
     ui.mainView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
     ui.mainView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    connect(ui.mainView, SIGNAL(resized(QSize)), this, SIGNAL(changedWindowSize(QSize)));
 
     connect(saveAction, SIGNAL(triggered()), this, SLOT(onSave()));
     connect(saveAsAction, SIGNAL(triggered()), this, SLOT(onSaveAs()));
@@ -48,6 +49,7 @@ MainWindow::MainWindow(QWidget *parent) :
     setUpButtonBars();
     setUpMenu();
 
+
     setUpView();
 }
 
@@ -55,14 +57,6 @@ MainWindow::~MainWindow()
 {
     dataProvider->deleteLater();
     trackScene->deleteLater();
-}
-
-void MainWindow::resizeEvent(QResizeEvent *event)
-{
-    /* One resizeEvent is fired right after initialisation of window.
-       We dont want to receive this --> wait for first "actual" resizeEvent.*/
-    if(event->oldSize().isValid())
-        emit changedWindowSize(ui.mainView->size());
 }
 
 void MainWindow::onImportAction()
@@ -189,14 +183,16 @@ void MainWindow::setUpView()
     if(trackScene)
         trackScene->deleteLater();
     if(pa)
-        pa->deleteLater();;
+        pa->deleteLater();
 
-    // TODO(steffen) richtige datei öffnen kopieren etc.
+//     TODO(steffen) richtige datei öffnen kopieren etc.
     dataProvider = new DataProvider(QDir::tempPath() + "/" + QDateTime::currentDateTime().toString(Qt::ISODate));
     trackScene = new TrackScene(this);
-    ui.mainView->setScene(trackScene);
+
     pa = new PresentationArea(trackScene, *dataProvider, ui.hScrollBar, this);
+    ui.mainView->setScene(trackScene);
     // set new PA to current viewsize
+
     pa->onChangedWindowSize(ui.mainView->size());
 
     connect(pa, SIGNAL(exportRange(qint64,qint64)), this, SLOT(onExportRange(qint64,qint64)));

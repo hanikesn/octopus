@@ -29,8 +29,6 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-    void resizeEvent(QResizeEvent *event);
-
 protected:
     void closeEvent(QCloseEvent *ce);
     

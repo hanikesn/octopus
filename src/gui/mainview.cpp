@@ -21,3 +21,8 @@ void MainView::scrollContentsBy(int dx, int dy)
         emit verticalScroll();
     }
 }
+
+void MainView::resizeEvent(QResizeEvent *event)
+{
+    emit resized(size());
+}

@@ -22,7 +22,7 @@ PresentationItem::PresentationItem(QScrollBar *hScrollBar, QGraphicsScene *paren
     createSelection(false),
     visRangeLow(0),
     visRangeHigh(TIMEFRAME),
-    minCoverHeight(712),
+    minCoverHeight(672),
     playstate(STOPPED)
 {            
     timeLine = new TimeLine(ACTIONAREAOFFSET, this, 0);
@@ -53,7 +53,9 @@ PresentationItem::PresentationItem(QScrollBar *hScrollBar, QGraphicsScene *paren
     connect(hScrollBar, SIGNAL(sliderMoved(int)), this, SLOT(horizontalScroll(int)));
     connect(hScrollBar, SIGNAL(valueChanged(int)), this, SLOT(horizontalScroll(int)));
     connect(this, SIGNAL(rangeChanged(qint64,qint64)), this, SLOT(onRangeChanged(qint64,qint64)));
-    connect(&timer, SIGNAL(timeout()), this, SLOT(onTimeout()));
+    connect(&timer, SIGNAL(timeout()), this, SLOT(onTimeout()));    
+
+    recalcBoundingRec();
 }
 
 PresentationItem::~PresentationItem()
@@ -208,9 +210,10 @@ void PresentationItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
 void PresentationItem::recalcBoundingRec()
 {
     // If there are no tracks height/width are the size of the timeLine
-    if(tracks.isEmpty()){
+    if(tracks.isEmpty()){        
         boundingRectangle.setHeight(minCoverHeight);
         boundingRectangle.setWidth(timeLine->size().width());        
+        parent->setSceneRect(boundingRectangle);
         return;
     }
 
@@ -237,7 +240,8 @@ void PresentationItem::changeCursorPos(int pos)
 
 void PresentationItem::onChangedWindowSize(QSize size)
 {
-    minCoverHeight = size.height();
+    //TODO(domi): damit erscheint am Anfang kein vertikaler Scrollbalken --> Ursache finden!
+    minCoverHeight = size.height()-2;
 
     // resize cursor, timeLine, selectedArea
     if(boundingRectangle.height() > minCoverHeight){

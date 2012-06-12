@@ -13,11 +13,14 @@ public:
 
 signals:    
     void verticalScroll();
+    void resized(QSize size);
 
 public slots:
 
 protected:
     void scrollContentsBy(int dx, int dy);
+
+    void resizeEvent(QResizeEvent *event);
 };
 
 #endif // MAINVIEW_H
