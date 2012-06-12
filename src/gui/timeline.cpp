@@ -14,8 +14,7 @@ const qint64 TimeLine::TIMEPERPX = 40000;  /* Amount of time which one pixel rep
 TimeLine::TimeLine(int offset, QGraphicsItem * parent, Qt::WindowFlags wFlags):
     QGraphicsWidget(parent, wFlags),
     offset(offset),
-    beginRange(0),
-    endRange(30000000),
+    beginRange(0),    
     textBoxWidth(50),
     textBoxHeight(10),
     shortTickHeight(5),
@@ -24,13 +23,6 @@ TimeLine::TimeLine(int offset, QGraphicsItem * parent, Qt::WindowFlags wFlags):
     pen(Qt::black, 1, Qt::SolidLine)
 {
     setGeometry(0, 0, 946, 50);
-}
-
-void TimeLine::adjustVisibleRange(qint64 begin, qint64 end)
-{
-    beginRange = begin;
-    endRange = end;
-    update(boundingRect());
 }
 
 void TimeLine::paint(QPainter *painter,

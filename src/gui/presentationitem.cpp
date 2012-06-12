@@ -174,7 +174,7 @@ void PresentationItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
         selectionEnd = highRange;
 
         emit selection(selectionStart, selectionEnd);
-    }else if (playstate != PLAYING) {
+    } else if (playstate != PLAYING) {
         changeCursorPos(event->pos().x());
         showCursor();
     }
@@ -300,6 +300,7 @@ void PresentationItem::horizontalScroll(int pos)
 {
     qint64 lowerRange = pos*1000000;
     emit rangeChanged(lowerRange, timeLine->getUpperEnd(lowerRange));
+    timeLine->drawFrom(lowerRange);
     // remove selection:
     showCursor();
 }

@@ -13,7 +13,6 @@ class TimeLine : public QGraphicsWidget
     Q_OBJECT
 public:
     explicit TimeLine(int offset, QGraphicsItem * parent = 0, Qt::WindowFlags wFlags = 0);
-    void adjustVisibleRange(qint64 begin, qint64 end);
 
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 
@@ -41,7 +40,7 @@ public slots:
 
 private:
     int offset;
-    qint64 beginRange, endRange;    
+    qint64 beginRange;
 
     // stuff to draw ticks:
     double value;
@@ -62,7 +61,6 @@ private:
     static const qint64 TIMEPERPX;
 
     void drawTicks(QPainter *painter);
-
 };
 
 #endif // TIMELINE_H
