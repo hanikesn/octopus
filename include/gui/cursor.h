@@ -14,7 +14,7 @@ public:
 
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 
-    QRectF boundingRect();
+    QRectF boundingRect() const;
 
 private:    
     QPen pen;    

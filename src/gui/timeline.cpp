@@ -50,7 +50,8 @@ void TimeLine::paint(QPainter *painter,
     drawTicks(painter);
 }
 
-QRectF TimeLine::boundingRect(){    
+QRectF TimeLine::boundingRect() const
+{
     return QRectF(0, 0, geometry().width(), geometry().height());
 }
 

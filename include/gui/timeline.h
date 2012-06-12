@@ -16,7 +16,7 @@ public:
 
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 
-    QRectF boundingRect();
+    QRectF boundingRect() const;
 
     /**
       * Converts a point in time to the according x-position on the screen (subtracts the offset

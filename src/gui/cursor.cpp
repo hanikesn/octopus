@@ -33,7 +33,7 @@ void Cursor::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QW
     painter->drawRect(frame);
 }
 
-QRectF Cursor::boundingRect()
+QRectF Cursor::boundingRect() const
 {    
     return QRectF(0, 0, geometry().width(), geometry().height());
 }
