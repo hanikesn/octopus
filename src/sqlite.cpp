@@ -192,28 +192,28 @@ Row PreparedStatement::QueryIterator::operator->()
 }
 
 Row::Row(PreparedStatement &stmt)
-    : stmt(stmt)
+    : stmt(stmt), index(0)
 {
 }
 
 Row& Row::operator>>(std::string& value)
 {
-    index++;
     value = std::string((const char*)sqlite3_column_text(stmt.stmt, index));
+    index++;
     return *this;
 }
 
 Row& Row::operator>>(double& value)
 {
-    index++;
     value = sqlite3_column_double(stmt.stmt, index);
+    index++;
     return *this;
 }
 
 Row& Row::operator>>(sqlite3_int64& value)
 {
-    index++;
     value = sqlite3_column_int64(stmt.stmt, index);
+    index++;
     return *this;
 }
 

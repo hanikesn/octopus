@@ -4,6 +4,7 @@
 #include "common.h"
 #include "visitor.h"
 #include "value.h"
+#include "databaseadapter.h"
 
 #include <QMap>
 #include <QObject>
@@ -13,7 +14,7 @@ class AbstractDataSeries : public QObject, public Visitable
     Q_OBJECT
 public:
     virtual ~AbstractDataSeries() {}
-    AbstractDataSeries(const QString &deviceName, const QString &dataSeriesName, Data::Properties properties);
+    AbstractDataSeries(const DatabaseAdapter &db, const QString &deviceName, const QString &dataSeriesName, Data::Properties properties);
 
     /**
      * Visitor pattern.
@@ -46,6 +47,10 @@ private:
      * Stores a combination of data property flags.
      */
     Data::Properties props;
+
+
+protected:
+    const DatabaseAdapter &db;
 };
 
 #endif // ABSTRACTDATASERIES_H

@@ -41,14 +41,19 @@ void DiscreteGraph::configureAppearance()
 
 void DiscreteGraph::initialize()
 {
-    QMap<qint64, QString>::const_iterator i = series.getData().constBegin();
-    while (i != series.getData().constEnd()) {
-        graph->addData(i.key(), IMPULSE_HEIGHT);
-        // Create a tracer for each data point and use its position as anchor for the label.
-        addLabel(i.value(), addTracer(i.key(), 0)->position);
-
+    auto const& data = series.getData();
+    QMap<qint64, QString>::const_iterator i = data.constBegin();
+    while (i != data.constEnd()) {
+        internalAddPoint(i.key(), i.value());
         ++i;
     }
+}
+
+void DiscreteGraph::internalAddPoint(qint64 timestamp, const QString &str)
+{
+    graph->addData(timestamp, IMPULSE_HEIGHT);
+    // Create a tracer for each data point and use its position as anchor for the label.
+    addLabel(str, addTracer(timestamp, 0)->position);
 }
 
 QCPItemTracer* DiscreteGraph::addTracer(double graphKey, double size)
@@ -66,7 +71,7 @@ QCPItemTracer* DiscreteGraph::addTracer(double graphKey, double size)
 QCPItemText* DiscreteGraph::addLabel(const QString& text, QCPItemAnchor *parentAnchor)
 {
     QCPItemText *label = new QCPItemText(plot);
-    if (text != "") {
+    if (!text.isEmpty()) {
         label->setText(text);
     } else {
         label->setText("Unlabeled");
@@ -83,9 +88,6 @@ QCPItemText* DiscreteGraph::addLabel(const QString& text, QCPItemAnchor *parentA
 
 void DiscreteGraph::onNewData(qint64 timestamp)
 {
-    graph->addData(timestamp, IMPULSE_HEIGHT);
-    // Create a tracer for the new data point and use its position as anchor for the label.
-    addLabel(series.getData(timestamp), addTracer(timestamp, 0)->position);
-
+    internalAddPoint(timestamp, series.getData(timestamp));
     plot->replot();
 }

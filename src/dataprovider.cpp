@@ -43,9 +43,9 @@ void DataProvider::onNewDataSeries(QString deviceName, QString dataSeriesName, D
 {
     AbstractDataSeries *series;
     if (properties & Data::INTERPOLATABLE) {
-        series = new DoubleSeries(deviceName, dataSeriesName, properties);
+        series = new DoubleSeries(db, deviceName, dataSeriesName, properties);
     } else {
-        series = new StringSeries(deviceName, dataSeriesName, properties);
+        series = new StringSeries(db, deviceName, dataSeriesName, properties);
     }
 
     dataSeries.insert(deviceName + "." + dataSeriesName, series);

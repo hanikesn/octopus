@@ -37,8 +37,9 @@ void InterpolatingGraph::configureAppearance()
 
 void InterpolatingGraph::initialize()
 {
-    QMap<qint64, double>::const_iterator i = series.getData().constBegin();
-    while (i != series.getData().constEnd()) {
+    auto const& data = series.getData();
+    auto i = data.constBegin();
+    while (i != data.constEnd()) {
         graph->addData(i.key(), i.value());
         ++i;
     }

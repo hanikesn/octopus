@@ -16,16 +16,16 @@ public:
 
 
     template<typename T>
-    QMap<qint64, T> getData(QString const& key);
+    QMap<qint64, T> getData(QString const& key) const;
     template<typename T>
-    QMap<qint64, T> getData(QString const& key, qint64 start, qint64 end);
+    QMap<qint64, T> getData(QString const& key, qint64 start, qint64 end) const;
 
 private:
     Sqlite::DB db;
 
-    Sqlite::PreparedStatement stmtAdd;
-    Sqlite::PreparedStatement stmtSelectTime;
-    Sqlite::PreparedStatement stmtSelect;
+    mutable Sqlite::PreparedStatement stmtAdd;
+    mutable Sqlite::PreparedStatement stmtSelectTime;
+    mutable Sqlite::PreparedStatement stmtSelect;
 };
 
 #endif // DATABASEADAPTER_H

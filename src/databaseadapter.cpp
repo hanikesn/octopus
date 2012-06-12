@@ -18,8 +18,8 @@ DatabaseAdapter::DatabaseAdapter(const QString &file)
     stmtSelect = db.prepare("SELECT time, value FROM data WHERE name=?;");
 }
 
-template QMap<qint64, double> DatabaseAdapter::getData<double>(QString const& key);
-template QMap<qint64, QString> DatabaseAdapter::getData<QString>(QString const& key);
+template QMap<qint64, double> DatabaseAdapter::getData<double>(QString const& key) const;
+template QMap<qint64, QString> DatabaseAdapter::getData<QString>(QString const& key) const;
 
 static Sqlite::Row& operator >>(Sqlite::Row& row, QString& value)
 {
@@ -28,16 +28,13 @@ static Sqlite::Row& operator >>(Sqlite::Row& row, QString& value)
     value = fromStdString(str);
     return row;
 }
-
 template<typename T>
-QMap<qint64, T> DatabaseAdapter::getData(QString const& key)
+static QMap<qint64, T> fillMap(Sqlite::PreparedStatement& stmt)
 {
-    stmtSelect.reset();
-    stmtSelect << toStdString(key);
-    auto result = stmtSelect.execute();
+    auto result = stmt.execute();
 
     QMap<qint64, T> map;
-    std::for_each(result, stmtSelect.done(),
+    std::for_each(result, stmt.done(),
                   [&map](Sqlite::Row r)
     {
         qint64 timestamp;
@@ -49,27 +46,25 @@ QMap<qint64, T> DatabaseAdapter::getData(QString const& key)
     return std::move(map);
 }
 
-template QMap<qint64, double> DatabaseAdapter::getData<double>(QString const& key, qint64 start, qint64 end);
-template QMap<qint64, QString> DatabaseAdapter::getData<QString>(QString const& key, qint64 start, qint64 end);
+template<typename T>
+QMap<qint64, T> DatabaseAdapter::getData(QString const& key) const
+{
+    stmtSelect.reset();
+    stmtSelect << toStdString(key);
+
+    return fillMap<T>(stmtSelect);
+}
+
+template QMap<qint64, double> DatabaseAdapter::getData<double>(QString const& key, qint64 start, qint64 end) const;
+template QMap<qint64, QString> DatabaseAdapter::getData<QString>(QString const& key, qint64 start, qint64 end) const;
 
 template<typename T>
-QMap<qint64, T> DatabaseAdapter::getData(QString const& key, qint64 start, qint64 end)
+QMap<qint64, T> DatabaseAdapter::getData(QString const& key, qint64 start, qint64 end) const
 {
     stmtSelectTime.reset();
     stmtSelectTime << toStdString(key) << start << end;
-    auto result = stmtSelectTime.execute();
 
-    QMap<qint64, T> map;
-    std::for_each(result, stmtSelectTime.done(),
-                  [&map](Sqlite::Row r)
-    {
-        qint64 timestamp;
-        T value;
-        r >> timestamp >> value;
-        map.insert(timestamp, value);
-    });
-
-    return std::move(map);
+    return fillMap<T>(stmtSelectTime);
 }
 
 template void DatabaseAdapter::add<Value>(QString const& key, qint64 timestamp, Value const& value);

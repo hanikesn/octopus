@@ -10,7 +10,7 @@ class DoubleSeries : public AbstractDataSeries
 {
     Q_OBJECT
 public:
-    DoubleSeries(const QString &deviceName, const QString &name, Data::Properties properties);
+    DoubleSeries(const DatabaseAdapter &db, const QString &deviceName, const QString &name, Data::Properties properties);
 
     /**
      * Visitor pattern.
