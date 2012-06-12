@@ -101,7 +101,6 @@ void MainWindow::setUpButtonBars()
 
     connect(&importButton, SIGNAL(clicked()), this, SLOT(onImportAction()));
     connect(&exportButton, SIGNAL(clicked()), this, SLOT(onExportAction()));
-    connect(&playButton, SIGNAL(clicked()), pa, SLOT(onPlay()));
 
     ui.mainToolBar->addWidget(&toolBarWidget);
     addToolBar(Qt::LeftToolBarArea, ui.mainToolBar);
