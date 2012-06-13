@@ -10,8 +10,8 @@ InterpolatingGraph::InterpolatingGraph(QCustomPlot *plot, const DoubleSeries &d)
 
     graph = plot->addGraph();
 
-    configureAppearance();
-    initialize();
+    configureAppearance(graph);
+    initialize(graph, series);
 
     plot->replot();
 }
@@ -28,14 +28,14 @@ QString InterpolatingGraph::dataSeriesName()
     return series.fullName();
 }
 
-void InterpolatingGraph::configureAppearance()
+void InterpolatingGraph::configureAppearance(QCPGraph *graph)
 {
     graph->setLineStyle(QCPGraph::lsLine);
     graph->setScatterStyle(QCP::ssDisc);
     graph->setScatterSize(4);
 }
 
-void InterpolatingGraph::initialize()
+void InterpolatingGraph::initialize(QCPGraph *graph, const DoubleSeries &series)
 {
     graph->setName(series.fullName());
 
