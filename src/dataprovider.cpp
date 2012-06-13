@@ -24,7 +24,8 @@ void DataProvider::addData()
     for (int j=0; j<500; ++j)
     {
       double d = j/15.0 * 5*3.14 + 0.01;
-      onNewData(d*1000000, "Dummy.Interpolatable.x", Value(7*sin(d)/d + 2));
+      onNewData(d*1000000, "Dummy.Interpolatable.x", Value(7*sin(d)/d));
+      onNewData(d*1000000, "Dummy.Interpolatable.y", Value(-7*sin(d)/d));
       onNewData(d*1000000, "Dummy.Discrete", Value("ping"));
     }
 }
