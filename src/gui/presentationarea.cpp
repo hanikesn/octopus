@@ -82,7 +82,7 @@ void PresentationArea::onDelete(Track *t)
 }
 
 void PresentationArea::onRangeChanged(qint64 begin, qint64 end)
-{    
+{        
     foreach(Track *t, tracks) {
         t->setPlotRange(begin, end);
     }

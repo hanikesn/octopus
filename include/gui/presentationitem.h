@@ -109,8 +109,7 @@ public slots:
 private slots:
     void horizontalScroll(int);
 
-    /**
-      * Updates timeLine to the visible range.
+    /**      
       * Saves current visible range in visRangeLow and visRangeHigh
       * @param begin Begin of the visible range
       * @param end End of the visible range
