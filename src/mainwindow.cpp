@@ -191,8 +191,8 @@ void MainWindow::setUpView()
 
     pa = new PresentationArea(trackScene, *dataProvider, ui.hScrollBar, this);
     ui.mainView->setScene(trackScene);
-    // set new PA to current viewsize
 
+    // set new PA to current viewsize
     pa->onChangedWindowSize(ui.mainView->size());
 
     connect(pa, SIGNAL(exportRange(qint64,qint64)), this, SLOT(onExportRange(qint64,qint64)));

@@ -74,6 +74,8 @@ public:
 
     void load(QVariantMap *qvm);
 
+    bool isVisible(Track *t);
+
     enum Playstate {PLAYING, PAUSED, STOPPED};
 
 //    void setPlayState(const Playstate& p);
@@ -135,7 +137,7 @@ private:
     Cursor *cursor;
     Selection *selectedArea;
 
-    QRectF boundingRectangle;    
+    QRectF boundingRectangle, visRect;
 
     QScrollBar *hScrollBar;
 

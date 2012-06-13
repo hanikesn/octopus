@@ -16,7 +16,8 @@ const int PresentationItem::TIMEFRAME = 30000000;
 PresentationItem::PresentationItem(QScrollBar *hScrollBar, QGraphicsScene *parent) :
     QGraphicsItem(0, parent),
     parent(parent),
-    boundingRectangle(0, 0, 0, 0),    
+    boundingRectangle(0, 0, 0, 0),
+    visRect(0, 0, 100, 672),
     hScrollBar(hScrollBar),
     autoScroll(false),
     createSelection(false),
@@ -24,7 +25,7 @@ PresentationItem::PresentationItem(QScrollBar *hScrollBar, QGraphicsScene *paren
     visRangeHigh(TIMEFRAME),
     minCoverHeight(672),
     playstate(STOPPED)
-{            
+{
     timeLine = new TimeLine(ACTIONAREAOFFSET, this, 0);
     timeLine->setZValue(1.0);
     timeLine->drawFrom(0);
@@ -270,7 +271,10 @@ void PresentationItem::onRangeChanged(qint64 begin, qint64 end)
 
 void PresentationItem::onVerticalScroll(QRectF visibleRectangle)
 {    
-    timeLine->setPos(0, visibleRectangle.y()-1);
+    timeLine->setPos(0, visibleRectangle.y()-1);    
+    visRect = visibleRectangle;
+    // emit a rangeChange() with current range, so the previously invisible tracks get updated
+    emit rangeChanged(visRangeLow, visRangeHigh);
 }
 
 void PresentationItem::resizeCursorAndSelection()
@@ -340,6 +344,23 @@ void PresentationItem::load(QVariantMap *qvm)
     // step-size of scrollbar is 1 second --> left border of timeline is always a full second
     // so we can set the value of the scrollbars slider to the second visRangeLow represents
     hScrollBar->setValue(visRangeLow/1000000);
+}
+
+bool PresentationItem::isVisible(Track *t)
+{
+    int minYPos = visRect.y();
+    int maxYPos = visRect.y() + visRect.height();
+
+    foreach (QGraphicsProxyWidget *gpw, tracks){
+        if(gpw->widget() == t){
+            if((gpw->pos().y() >= minYPos) &&
+                    (gpw->pos().y() <= maxYPos)){
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
 }
 
 void PresentationItem::onTimeout()
