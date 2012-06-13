@@ -6,7 +6,7 @@
 namespace Sqlite
 {
 
-const char *Exception::what() const noexcept
+const char *Exception::what() const throw()
 {
     switch(code) {
     case 0:
@@ -106,7 +106,7 @@ void PreparedStatement::bind(int index, double value)
 
 void PreparedStatement::bind(int index, sqlite3_int64 value)
 {
-    int ret = sqlite3_bind_int(stmt, index, value);
+    int ret = sqlite3_bind_int64(stmt, index, value);
     if(ret != SQLITE_OK)
         throw Exception(ret);
 }
