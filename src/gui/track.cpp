@@ -70,6 +70,9 @@ void Track::setupButtons()
 void Track::setupPlot()
 {
     setPlotRange(0, 30);
+
+    ui.plot->legend->setVisible(true);
+    ui.plot->legend->setPositionStyle(QCPLegend::psTopLeft);
 }
 
 void Track::setPlotRange(qint64 begin, qint64 end)

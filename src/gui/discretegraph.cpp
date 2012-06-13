@@ -41,6 +41,8 @@ void DiscreteGraph::configureAppearance()
 
 void DiscreteGraph::initialize()
 {
+    graph->setName(series.fullName());
+
     auto const& data = series.getData();
     QMap<qint64, QString>::const_iterator i = data.constBegin();
     while (i != data.constEnd()) {
