@@ -15,6 +15,8 @@ PresentationArea::PresentationArea(QGraphicsScene *scene, const DataProvider &da
     currentViewSize(949, 1),
     selectionBegin(-1),
     selectionEnd(-1),
+    lowRange(-1),
+    highRange(-1),
     unsavedChanges(false),
     playstate(PresentationItem::STOPPED)
 {
@@ -66,6 +68,8 @@ Track* PresentationArea::add(const QList<QString>& fullDataSeriesNames)
     connect(t, SIGNAL(del(Track*)), this, SLOT(onDelete(Track*)));
     pi->addTrack(t);
     t->resize(currentViewSize.width(), t->size().height());
+    if(lowRange != -1 && highRange != -1)
+        t->setPlotRange(lowRange, highRange);
 
     //TODO(domi): entfernen, nur für debug-zwecke:
     pi->onNewMax(tracks.size()*30000000);
@@ -83,10 +87,12 @@ void PresentationArea::onDelete(Track *t)
 
 void PresentationArea::onRangeChanged(qint64 begin, qint64 end)
 {        
+    lowRange = begin;
+    highRange = end;
     foreach(Track *t, tracks) {
         if (pi->isVisible(t))
             t->setPlotRange(begin, end);
-    }
+    }    
     if (!tracks.isEmpty())
         unsavedChanges = true;
 }

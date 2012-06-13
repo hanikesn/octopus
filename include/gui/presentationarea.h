@@ -75,7 +75,8 @@ private:
     QList<Track*> tracks;
 
     QSize currentViewSize;
-    qint64 selectionBegin, selectionEnd;
+    //TODO(domi): low- highRange löschen wenns timemgr gibt
+    qint64 selectionBegin, selectionEnd, lowRange, highRange;
 
     bool unsavedChanges;
 

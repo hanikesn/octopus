@@ -83,6 +83,7 @@ void Track::setPlotRange(qint64 begin, qint64 end)
         lowRange = begin;
         highRange = end;
         ui.plot->xAxis->setRange(begin, end);
+        ui.plot->setNotAntialiasedElements(QCP::aeAll);
         ui.plot->replot();
     }
 }
