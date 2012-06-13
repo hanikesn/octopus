@@ -16,7 +16,9 @@ const QString Track::ICON_AS_BUTTON = QString(
 Track::Track(const DataProvider &dataProvider, QWidget *parent) :
     QWidget(parent),
     dataProvider(dataProvider),
-    offset(52)
+    offset(52),
+    lowRange(-1),
+    highRange(-1)
 {
     init();
 
@@ -77,7 +79,7 @@ void Track::setupPlot()
 
 void Track::setPlotRange(qint64 begin, qint64 end)
 {
-    if (lowRange != begin && highRange != end){
+    if (lowRange != begin || highRange != end){
         lowRange = begin;
         highRange = end;
         ui.plot->xAxis->setRange(begin, end);
