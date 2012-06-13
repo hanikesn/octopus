@@ -5,6 +5,10 @@
 DatabaseAdapter::DatabaseAdapter(const QString &file)
     : db(file.toLocal8Bit().data())
 {
+    db.execute("PRAGMA journal_mode=WAL");
+    db.execute("PRAGMA locking_mode=EXCLUSIVE");
+    db.execute("PRAGMA synchronous=OFF");
+
     if(db.execute("CREATE TABLE IF NOT EXISTS data (name TEXT, time INT, value BLOB);") != Sqlite::DB::Done)
         throw std::exception();
     if(db.execute("CREATE TABLE IF NOT EXISTS series (name TEXT, properties INT);") != Sqlite::DB::Done)
