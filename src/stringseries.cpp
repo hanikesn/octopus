@@ -15,7 +15,6 @@ void StringSeries::accept(DataSeriesVisitor *v)
 void StringSeries::addData(qint64 timestamp, const Value& value)
 {
     if (value.getType() == Value::STRING) {
-        values.insert(timestamp, value.asString());
         emit newData(timestamp);
     } else {
         emit illegalValueType();
@@ -25,7 +24,7 @@ void StringSeries::addData(qint64 timestamp, const Value& value)
 QString StringSeries::getData(qint64 timestamp) const
 {
     // TODO(Steffi): Check! Was ist der Rückgabewert, wenn es den Wert nicht gibt? Sollte !=0 sein!
-    return values.value(timestamp);
+    return getData(timestamp, timestamp).value(timestamp);
 }
 
 QMap<qint64, QString> StringSeries::getData() const
@@ -35,13 +34,5 @@ QMap<qint64, QString> StringSeries::getData() const
 
 QMap<qint64, QString> StringSeries::getData(qint64 begin, qint64 end) const
 {
-    QMap<qint64, QString> selection;
-
-    QMap<qint64, QString>::const_iterator i = values.lowerBound(begin);
-    while (i != values.upperBound(end)) {
-        selection.insert(i.key(), i.value());
-        i++;
-    }
-
-    return selection;
+    return db.getData<QString>(fullName(), begin, end);
 }

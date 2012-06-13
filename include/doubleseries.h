@@ -33,12 +33,6 @@ public:
      * @return A map of timestamps and the respective data for all timestamps t for which begin <= t <= end.
      */
     QMap<qint64, double> getData(qint64 begin, qint64 end) const;
-
-private:
-    /**
-     * Map of timestamps and respective values
-     */
-    QMap<qint64, double> values;
 };
 
 #endif // DOUBLESERIES_H
