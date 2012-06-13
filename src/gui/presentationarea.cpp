@@ -22,7 +22,7 @@ PresentationArea::PresentationArea(QGraphicsScene *scene, const DataProvider &da
 {
     pi = new PresentationItem(hScrollBar, scene);
 
-    connect(this, SIGNAL(changedWindowSize(QSize)), pi, SLOT(onChangedWindowSize(QSize)));    
+    connect(this, SIGNAL(changedViewSize(QSize)), pi, SLOT(onChangedViewSize(QSize)));
     connect(pi, SIGNAL(rangeChanged(qint64,qint64)), this, SLOT(onRangeChanged(qint64,qint64)));
     connect(this, SIGNAL(verticalScroll(QRectF)), pi, SLOT(onVerticalScroll(QRectF)));
     connect(pi, SIGNAL(selection(qint64,qint64)), this, SLOT(onSelection(qint64, qint64)));
@@ -86,18 +86,18 @@ void PresentationArea::onDelete(Track *t)
 }
 
 void PresentationArea::onRangeChanged(qint64 begin, qint64 end)
-{        
+{            
     lowRange = begin;
     highRange = end;
     foreach(Track *t, tracks) {
         if (pi->isVisible(t))
             t->setPlotRange(begin, end);
-    }    
+    }
     if (!tracks.isEmpty())
         unsavedChanges = true;
 }
 
-void PresentationArea::onChangedWindowSize(QSize size)
+void PresentationArea::onChangedViewSize(QSize size)
 {    
     currentViewSize = size;
     // resize tracks:
@@ -105,7 +105,7 @@ void PresentationArea::onChangedWindowSize(QSize size)
         t->resize(size.width(), t->size().height());
     }
     // propagate event (resizes TimeLine and Cursor in PresentationItem)
-    emit changedWindowSize(size);
+    emit changedViewSize(size);
 }
 
 void PresentationArea::onExportTriggered()

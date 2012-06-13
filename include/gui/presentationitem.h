@@ -92,7 +92,7 @@ public slots:
       * TimeLine and selection are only resized in their height, not their width.
       * @param size The size of the visible track-area (mainView)
       */
-    void onChangedWindowSize(QSize size);
+    void onChangedViewSize(QSize size);
 
     /**
       * Repositions timeLine to the top of the visible area.

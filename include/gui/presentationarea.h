@@ -29,7 +29,7 @@ public:
     void setUnsavedChanges(bool uc);
 
 signals:
-    void changedWindowSize(QSize size);
+    void changedViewSize(QSize size);
     void verticalScroll(QRectF visibleRectangle);
     void exportRange(qint64 begin, qint64 end);
     void play();
@@ -43,7 +43,7 @@ public slots:
       * Propagates event (PresentationItem resizes timeLine and cursor)
       * @param size Size of the new view (it's the size of the mainView not the window size)
       */
-    void onChangedWindowSize(QSize size);    
+    void onChangedViewSize(QSize size);
 
     void onPlay();
 

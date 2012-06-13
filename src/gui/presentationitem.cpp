@@ -243,10 +243,11 @@ void PresentationItem::changeCursorPos(int pos)
     cursor->setPos(pos, 0);
 }
 
-void PresentationItem::onChangedWindowSize(QSize size)
+void PresentationItem::onChangedViewSize(QSize size)
 {
     //TODO(domi): damit erscheint am Anfang kein vertikaler Scrollbalken --> Ursache finden!
     minCoverHeight = size.height()-2;
+    visRect.setHeight(size.height());
 
     // resize cursor, timeLine, selectedArea
     if(boundingRectangle.height() > minCoverHeight){
@@ -349,7 +350,7 @@ void PresentationItem::load(QVariantMap *qvm)
 bool PresentationItem::isVisible(Track *t)
 {
     int minYPos = visRect.y();
-    int maxYPos = visRect.y() + visRect.height();
+    int maxYPos = visRect.y() + minCoverHeight;
 
     foreach (QGraphicsProxyWidget *gpw, tracks){
         if(gpw->widget() == t){
