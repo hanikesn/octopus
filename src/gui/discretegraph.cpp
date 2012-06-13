@@ -46,12 +46,12 @@ void DiscreteGraph::initialize(QCPGraph *graph, const StringSeries &series)
     auto const& data = series.getData();
     QMap<qint64, QString>::const_iterator i = data.constBegin();
     while (i != data.constEnd()) {
-        internalAddPoint(i.key(), i.value());
+        addData(i.key(), i.value());
         ++i;
     }
 }
 
-void DiscreteGraph::internalAddPoint(qint64 timestamp, const QString &str)
+void DiscreteGraph::addData(qint64 timestamp, const QString &str)
 {
     graph->addData(timestamp, IMPULSE_HEIGHT);
     // Create a tracer for each data point and use its position as anchor for the label.
@@ -90,6 +90,6 @@ QCPItemText* DiscreteGraph::addLabel(const QString& text, QCPItemAnchor *parentA
 
 void DiscreteGraph::onNewData(qint64 timestamp)
 {
-    internalAddPoint(timestamp, series.getData(timestamp));
+    addData(timestamp, series.getData(timestamp));
     plot->replot();
 }
