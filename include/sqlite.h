@@ -17,7 +17,7 @@ class Exception : public std::exception
 public:
     Exception(int code) : code(code) {}
 
-    virtual const char *what() const noexcept;
+    virtual const char *what() const throw();
 
     const int code;
 };

@@ -27,7 +27,11 @@ find_package(Qt4 REQUIRED)
 
 add_definitions(-DQT_USE_QSTRINGBUILDER)
 
-set(BOOST_components system chrono filesystem)
+if(MSVC)
+  set(Boost_USE_STATIC_LIBS ON)
+endif()
+
+set(BOOST_components system chrono)
 find_package(Boost COMPONENTS ${BOOST_components} REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
 link_directories(${Boost_LIBRARY_DIRS})
