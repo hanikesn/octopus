@@ -14,8 +14,8 @@ DiscreteGraph::DiscreteGraph(QCustomPlot *plot, const StringSeries &s) :
     graph = plot->addGraph(plot->xAxis, plot->yAxis2);
     plot->yAxis2->setRange(RANGE);
     plot->yAxis2->setVisible(false);
-    configureAppearance();
-    initialize();
+    configureAppearance(graph);
+    initialize(graph, series);
 
     plot->replot();
 }
@@ -32,14 +32,14 @@ QString DiscreteGraph::dataSeriesName()
     return series.fullName();
 }
 
-void DiscreteGraph::configureAppearance()
+void DiscreteGraph::configureAppearance(QCPGraph *graph)
 {
     graph->setLineStyle(QCPGraph::lsImpulse);
     graph->setScatterStyle(QCP::ssTriangleInverted);
     graph->setScatterSize(4);
 }
 
-void DiscreteGraph::initialize()
+void DiscreteGraph::initialize(QCPGraph *graph, const StringSeries &series)
 {
     graph->setName(series.fullName());
 
