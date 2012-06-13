@@ -77,8 +77,12 @@ void Track::setupPlot()
 
 void Track::setPlotRange(qint64 begin, qint64 end)
 {
-    ui.plot->xAxis->setRange(begin, end);
-    ui.plot->replot();
+    if (lowRange != begin && highRange != end){
+        lowRange = begin;
+        highRange = end;
+        ui.plot->xAxis->setRange(begin, end);
+        ui.plot->replot();
+    }
 }
 
 void Track::addData()

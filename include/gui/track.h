@@ -48,6 +48,8 @@ private:
 
     int offset;
 
+    qint64 lowRange, highRange;
+
     void init();
     void setupButtons();
     void setupPlot();
