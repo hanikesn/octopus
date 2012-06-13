@@ -203,7 +203,7 @@ void MainWindow::setUpView()
     connect(&networkAdapter, SIGNAL(onNewDataSeries(QString,QString,Data::Properties)), dataProvider, SLOT(onNewDataSeries(QString,QString,Data::Properties)));
     connect(&networkAdapter, SIGNAL(onNewData(qint64,QString,Value)),                   dataProvider, SLOT(onNewData(qint64,QString,Value)));
 
-    connect(&playButton, SIGNAL(clicked()), pa, SLOT(onPlay()));
+    connect(&playButton, SIGNAL(clicked()), pa, SLOT(onPlay()));    
 }
 
 void MainWindow::save(bool saveAs)

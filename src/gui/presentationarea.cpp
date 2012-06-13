@@ -85,8 +85,9 @@ void PresentationArea::onRangeChanged(qint64 begin, qint64 end)
 {    
     foreach(Track *t, tracks) {
         t->setPlotRange(begin, end);
-    }    
-    unsavedChanges = true;
+    }
+    if (!tracks.isEmpty())
+        unsavedChanges = true;
 }
 
 void PresentationArea::onChangedWindowSize(QSize size)
