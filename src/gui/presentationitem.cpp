@@ -48,7 +48,7 @@ PresentationItem::PresentationItem(QScrollBar *hScrollBar, QGraphicsScene *paren
     hScrollBar->setMaximum(0);
 
     timer.setSingleShot(false);
-    timer.setInterval(20);
+    timer.setInterval(40);
 
     connect(selectedArea, SIGNAL(exportTriggered()), this, SIGNAL(exportTriggered()));
     connect(hScrollBar, SIGNAL(sliderMoved(int)), this, SLOT(horizontalScroll(int)));
@@ -158,6 +158,9 @@ void PresentationItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
         selectedArea->update(selectedArea->boundingRect());
         cursor->setVisible(false);        
 
+        /* TODO(domi):- Falls es TimeMgr Klasse gibt, kann man sich "value" sparen --> jeder Pixel
+                        bekommt festen Wert.
+                      - Berechnung neu machen, TIMEFRAME stimmt nichtmehr  */
         qint64 lowRange = hScrollBar->value() * 1000000;
         qint64 highRange = lowRange + TIMEFRAME;
         double value = (highRange - lowRange + 1)/(boundingRectangle.width() - ACTIONAREAOFFSET);
@@ -289,7 +292,7 @@ void PresentationItem::onNewMax(qint64 timestamp)
 
     if(autoScroll){
 
-        //TODO(domi) autoscroll auf neue grenzen bei rangeChanged() anpassen
+        //TODO(domi) autoscroll auf neue grenzen bei rangeChanged() anpassen TIMEFRAME wäre dann h-l
         hScrollBar->setValue(hScrollBar->maximum());
         qint64 lowerRange = timestamp <= TIMEFRAME ? 0 : timestamp - TIMEFRAME;
         emit rangeChanged(lowerRange, timestamp);
@@ -345,10 +348,10 @@ void PresentationItem::onTimeout()
     //TODO(domi): magic numbers entfernen    
     if(cursor->pos().x() < boundingRectangle.width() - 12){// cursor hasn't reached right border yet
         // determine position for currentTime + 20ms
-        currentTime += 20000;
+        currentTime += 40000;
         changeCursorPos(timeLine->convertTimeToPos(currentTime) + ACTIONAREAOFFSET);
     }else{
-        visRangeLow += 20000;
+        visRangeLow += 40000;
         emit rangeChanged(visRangeLow, timeLine->getUpperEnd(visRangeLow));
         timeLine->drawFrom(visRangeLow);
         hScrollBar->setValue(visRangeLow/1000000);
