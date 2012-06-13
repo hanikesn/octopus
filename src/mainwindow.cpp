@@ -186,7 +186,7 @@ void MainWindow::setUpView()
         pa->deleteLater();
 
 //     TODO(steffen) richtige datei öffnen kopieren etc.
-    dataProvider = new DataProvider(QDir::tempPath() + "/" + QDateTime::currentDateTime().toString("yyyyMMdd_hhmmsszzz"));
+    dataProvider = new DataProvider(QDir::tempPath() + "/Octopus-" + QDateTime::currentDateTime().toString("yyyyMMdd_hhmmsszzz"));
     trackScene = new TrackScene(this);
 
     pa = new PresentationArea(trackScene, *dataProvider, ui.hScrollBar, this);
