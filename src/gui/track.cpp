@@ -5,6 +5,8 @@
 #include "gui/interpolatinggraph.h"
 #include "gui/sourcedialog.h"
 
+#include "common.h"
+
 #include <cmath>
 
 #include <QDebug>
@@ -16,7 +18,9 @@ const QString Track::ICON_AS_BUTTON = QString(
 Track::Track(const DataProvider &dataProvider, QWidget *parent) :
     QWidget(parent),
     dataProvider(dataProvider),
-    offset(52)
+    offset(52),
+    lowRange(-1),
+    highRange(-1)
 {
     init();
 
@@ -70,12 +74,26 @@ void Track::setupButtons()
 void Track::setupPlot()
 {
     setPlotRange(0, 30);
+
+    ui.plot->legend->setVisible(true);
+    ui.plot->legend->setPositionStyle(QCPLegend::psTopLeft);
 }
 
 void Track::setPlotRange(qint64 begin, qint64 end)
 {
-    ui.plot->xAxis->setRange(begin, end);
-    ui.plot->replot();
+    if (lowRange != begin || highRange != end){
+        lowRange = begin;
+        highRange = end;
+		{
+			Measurement("setRange");
+			ui.plot->xAxis->setRange(begin, end);
+		}
+        ui.plot->setNotAntialiasedElements(QCP::aeAll);
+		{
+			Measurement("plot");
+			ui.plot->replot();
+		}
+    }
 }
 
 void Track::addData()

@@ -21,8 +21,8 @@ private:
     QCustomPlot *plot;
     QCPGraph *graph;
 
-    void configureAppearance();
-    void initialize();
+    void configureAppearance(QCPGraph *graph);
+    void initialize(QCPGraph *graph, const DoubleSeries &series);
 
 protected slots:
     void onNewData(qint64 timestamp);

@@ -107,7 +107,7 @@ private:
 
 signals:
     void verticalScroll(QRectF visibleRectangle);
-    void changedWindowSize(QSize size);
+    void changedViewSize(QSize size);
 
 };
 

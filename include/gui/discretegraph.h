@@ -24,9 +24,10 @@ private:
     QCustomPlot *plot;
     QCPGraph *graph;
 
-    void configureAppearance();
-    void initialize();
-    void internalAddPoint(qint64 timestamp, QString const& str);
+    void configureAppearance(QCPGraph *graph);
+    void initialize(QCPGraph *graph, const StringSeries &series);
+
+    void addData(qint64 timestamp, QString const& str);
     QCPItemTracer* addTracer(double graphKey, double size);
     QCPItemText* addLabel(const QString& text, QCPItemAnchor *parentAnchor);
 

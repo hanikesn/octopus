@@ -38,7 +38,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui.mainView->setAlignment(Qt::AlignTop | Qt::AlignLeft);
     ui.mainView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
     ui.mainView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    connect(ui.mainView, SIGNAL(resized(QSize)), this, SIGNAL(changedWindowSize(QSize)));
+    connect(ui.mainView, SIGNAL(resized(QSize)), this, SIGNAL(changedViewSize(QSize)));
     connect(ui.mainView, SIGNAL(verticalScroll()), this, SLOT(onVerticalScroll()));
 
     connect(saveAction, SIGNAL(triggered()), this, SLOT(onSave()));
@@ -186,18 +186,18 @@ void MainWindow::setUpView()
         pa->deleteLater();
 
 //     TODO(steffen) richtige datei öffnen kopieren etc.
-    dataProvider = new DataProvider(QDir::tempPath() + "/" + QDateTime::currentDateTime().toString("yyyyMMdd_hhmmsszzz"));
+    dataProvider = new DataProvider(QDir::tempPath() + "/Octopus-" + QDateTime::currentDateTime().toString("yyyyMMdd_hhmmsszzz"));
     trackScene = new TrackScene(this);
 
     pa = new PresentationArea(trackScene, *dataProvider, ui.hScrollBar, this);
     ui.mainView->setScene(trackScene);
-    // set new PA to current viewsize
 
-    pa->onChangedWindowSize(ui.mainView->size());
+    // set new PA to current viewsize
+    pa->onChangedViewSize(ui.mainView->size());
 
     connect(pa, SIGNAL(exportRange(qint64,qint64)), this, SLOT(onExportRange(qint64,qint64)));
     connect(this, SIGNAL(verticalScroll(QRectF)), pa, SIGNAL(verticalScroll(QRectF)));
-    connect(this, SIGNAL(changedWindowSize(QSize)), pa, SLOT(onChangedWindowSize(QSize)));
+    connect(this, SIGNAL(changedViewSize(QSize)), pa, SLOT(onChangedViewSize(QSize)));
     connect(&addTrackButton, SIGNAL(clicked()), pa, SLOT(onAddTrack()));
 
     connect(&networkAdapter, SIGNAL(onNewDataSeries(QString,QString,Data::Properties)), dataProvider, SLOT(onNewDataSeries(QString,QString,Data::Properties)));

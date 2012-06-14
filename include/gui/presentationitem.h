@@ -74,6 +74,8 @@ public:
 
     void load(QVariantMap *qvm);
 
+    bool isVisible(Track *t);
+
     enum Playstate {PLAYING, PAUSED, STOPPED};
 
 //    void setPlayState(const Playstate& p);
@@ -90,7 +92,7 @@ public slots:
       * TimeLine and selection are only resized in their height, not their width.
       * @param size The size of the visible track-area (mainView)
       */
-    void onChangedWindowSize(QSize size);
+    void onChangedViewSize(QSize size);
 
     /**
       * Repositions timeLine to the top of the visible area.
@@ -109,8 +111,7 @@ public slots:
 private slots:
     void horizontalScroll(int);
 
-    /**
-      * Updates timeLine to the visible range.
+    /**      
       * Saves current visible range in visRangeLow and visRangeHigh
       * @param begin Begin of the visible range
       * @param end End of the visible range
@@ -136,7 +137,7 @@ private:
     Cursor *cursor;
     Selection *selectedArea;
 
-    QRectF boundingRectangle;    
+    QRectF boundingRectangle, visRect;
 
     QScrollBar *hScrollBar;
 

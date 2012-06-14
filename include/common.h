@@ -3,6 +3,8 @@
 
 #include <QFlags>
 #include <QString>
+#include <boost/chrono.hpp>
+#include <QDebug>
 
 namespace Data
 {
@@ -25,5 +27,21 @@ inline std::string toStdString(QString const& str)
     auto const& data = str.toUtf8();
     return std::string(data.constData(), data.length());
 }
+
+class Measurement
+{
+	typedef boost::chrono::high_resolution_clock Clock;
+	Q_DISABLE_COPY(Measurement)
+public:
+	Measurement(QString const& name) : name(name), start(Clock::now()) {}
+	~Measurement()
+	{
+		qDebug() << name << ": " << boost::chrono::duration_cast<boost::chrono::nanoseconds>(Clock::now() - start).count() << "ns";
+	}
+
+private:
+	const QString name;
+	Clock::time_point start;
+};
 
 #endif // COMMON_H
