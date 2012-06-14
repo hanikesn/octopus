@@ -157,8 +157,9 @@ void PresentationItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
                 timeMgr->difference(0, begin - ACTIONAREAOFFSET);
         qint64 highRange = lowRange + timeMgr->difference(begin, begin + width);
         emit selection(lowRange, highRange);
-    } else if (playstate != PLAYING) {
+    } else {
         changeCursorPos(event->pos().x());
+        currentTime = timeMgr->convertPosToTime(event->pos().x() - ACTIONAREAOFFSET);
         showCursor();
     }
 }
