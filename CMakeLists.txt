@@ -62,6 +62,7 @@ set(Octopus_SOURCES
   src/sqlite.cpp
   src/stringseries.cpp
   src/value.cpp
+  src/timemanager.cpp
 )
 
 set(Octopus_HEADERS
@@ -91,6 +92,7 @@ set(Octopus_HEADERS
   include/stringseries.h
   include/value.h
   include/visitor.h
+  include/timemanager.h
 )
 
 set(Octopus_FORMS

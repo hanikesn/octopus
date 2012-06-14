@@ -7,6 +7,8 @@
 #include "gui/cursor.h"
 #include "gui/sourcedialog.h"
 #include "gui/track.h"
+#include "gui/timeline.h"
+#include "timemanager.h"
 
 PresentationArea::PresentationArea(QGraphicsScene *scene, const DataProvider &dataProvider,
                                    QScrollBar *hScrollBar, QObject *parent):
@@ -15,28 +17,31 @@ PresentationArea::PresentationArea(QGraphicsScene *scene, const DataProvider &da
     currentViewSize(949, 1),
     selectionBegin(-1),
     selectionEnd(-1),
-    lowRange(-1),
-    highRange(-1),
     unsavedChanges(false),
     playstate(PresentationItem::STOPPED)
 {
-    pi = new PresentationItem(hScrollBar, scene);
+    timeLine = new TimeLine(52, 0, 0);
+    timeManager = new TimeManager(hScrollBar, timeLine);
+    pi = new PresentationItem(hScrollBar, timeLine, timeManager, scene);
 
-    connect(this, SIGNAL(changedViewSize(QSize)), pi, SLOT(onChangedViewSize(QSize)));
-    connect(pi, SIGNAL(rangeChanged(qint64,qint64)), this, SLOT(onRangeChanged(qint64,qint64)));
-    connect(this, SIGNAL(verticalScroll(QRectF)), pi, SLOT(onVerticalScroll(QRectF)));
-    connect(pi, SIGNAL(selection(qint64,qint64)), this, SLOT(onSelection(qint64, qint64)));
-    connect(pi, SIGNAL(exportTriggered()), this, SLOT(onExportTriggered()));    
-    connect(this, SIGNAL(play()), pi, SLOT(onPlay()));
+
+    connect(this, SIGNAL(changedViewSize(QSize)),   pi, SLOT(onChangedViewSize(QSize)));
+    connect(this, SIGNAL(verticalScroll(QRectF)),   pi, SLOT(onVerticalScroll(QRectF)));
+    connect(this, SIGNAL(play()),                   pi, SLOT(onPlay()));
+    connect(pi, SIGNAL(selection(qint64,qint64)),   this, SLOT(onSelection(qint64, qint64)));
+    connect(pi, SIGNAL(exportTriggered()),          this, SLOT(onExportTriggered()));
+
+    connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)),
+            this, SLOT(onRangeChanged(qint64,qint64)));
 
     // TODO(domi): nicht vergessen :)
-//    connect(dataProvider, SIGNAL(newMax(qint64)), pi, SLOT(onNewMax(qint64)));
-
+//    connect(dataProvider, SIGNAL(newMax(qint64)), timeManager, SLOT(onNewMax(qint64)));
 }
 
 PresentationArea::~PresentationArea()
 {
     // Tracks werden über pi gelöscht, das über die TrackScene gelöscht wird.
+    timeManager->deleteLater();
 }
 
 void PresentationArea::addTrack(const QList<QString> &fullDataSeriesNames)
@@ -68,11 +73,10 @@ Track* PresentationArea::add(const QList<QString>& fullDataSeriesNames)
     connect(t, SIGNAL(del(Track*)), this, SLOT(onDelete(Track*)));
     pi->addTrack(t);
     t->resize(currentViewSize.width(), t->size().height());
-    if(lowRange != -1 && highRange != -1)
-        t->setPlotRange(lowRange, highRange);
+    t->setPlotRange(timeManager->getLowVisRange(), timeManager->getHighVisRange());
 
     //TODO(domi): entfernen, nur für debug-zwecke:
-    pi->onNewMax(tracks.size()*30000000);
+    timeManager->onNewMax(tracks.size()*30000000);
     unsavedChanges = true;
     return t;
 }
@@ -87,8 +91,6 @@ void PresentationArea::onDelete(Track *t)
 
 void PresentationArea::onRangeChanged(qint64 begin, qint64 end)
 {            
-    lowRange = begin;
-    highRange = end;
     foreach(Track *t, tracks) {
         if (pi->isVisible(t))
             t->setPlotRange(begin, end);
@@ -128,6 +130,7 @@ void PresentationArea::onSelection(qint64 begin, qint64 end)
 void PresentationArea::save(QVariantMap *qvm)
 {
     pi->save(qvm);
+    timeManager->save(qvm);
     // save tracks in array
     QVariantList trackList;
     foreach(Track *t, tracks){
@@ -155,6 +158,7 @@ void PresentationArea::load(QVariantMap *qvm)
         t->load(&trackMap);
     }
     pi->load(qvm);
+    timeManager->load(qvm);
 }
 
 void PresentationArea::setUnsavedChanges(bool uc)

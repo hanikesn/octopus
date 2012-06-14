@@ -15,12 +15,14 @@ class Selection;
 class Cursor;
 class TimeLine;
 class QScrollBar;
+class TimeManager;
 
 class PresentationItem : public QObject, public QGraphicsItem, public Serializable
 {
     Q_OBJECT
 public:
-    explicit PresentationItem(QScrollBar *hScrollBar, QGraphicsScene *parent = 0);
+    explicit PresentationItem(QScrollBar *hScrollBar, TimeLine *timeLine, TimeManager *timeManager,
+                              QGraphicsScene *parent = 0);
     ~PresentationItem();
 
     QRectF boundingRect() const;
@@ -78,8 +80,6 @@ public:
 
     enum Playstate {PLAYING, PAUSED, STOPPED};
 
-//    void setPlayState(const Playstate& p);
-
 public slots:
     /**
       * Calculates the current size of the bounding rectangle.
@@ -100,33 +100,20 @@ public slots:
       */
     void onVerticalScroll(QRectF visibleRectangle);
 
-    /**
-      * Updates the timeLine, hScrollBar and the tracks to the new maximum timestamp.
-      * @param timestamp New maximum timestamp
-      */
-    void onNewMax(qint64);
-
     void onPlay();
 
 private slots:
-    void horizontalScroll(int);
-
-    /**      
-      * Saves current visible range in visRangeLow and visRangeHigh
-      * @param begin Begin of the visible range
-      * @param end End of the visible range
-      */
-    void onRangeChanged(qint64 begin, qint64 end);
-
-
     void onTimeout();
+
+    /**
+      * Makes sure no selection is visible while
+      */
+    void onHorizontalScroll();
 
 signals:
     void selection(qint64 begin, qint64 end);
 
     void exportTriggered();
-
-    void rangeChanged(qint64 begin, qint64 end);
 
 private:
     QGraphicsScene *parent;
@@ -147,12 +134,14 @@ private:
 
     bool createSelection;
     int selectionStart, selectionEnd;
-    qint64 visRangeLow, visRangeHigh, currentTime;
+    qint64 currentTime;
 
     // minmal height to cover the full presentationArea
     int minCoverHeight;
 
     Playstate playstate;
+
+    TimeManager *timeMgr;
 
     static const int ACTIONAREAOFFSET;
 
