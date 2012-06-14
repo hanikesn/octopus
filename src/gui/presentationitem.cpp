@@ -297,19 +297,17 @@ bool PresentationItem::isVisible(Track *t)
                 return true;
             else
                 return false;
-
         }
     }
 }
 
 void PresentationItem::onTimeout()
-{
-    //TODO(domi): Auf Rundungsfehler achten
+{    
     //TODO(domi): magic numbers entfernen    
     if(cursor->pos().x() < boundingRectangle.width() - 12){// cursor hasn't reached right border yet
         // determine position for currentTime + 40ms
         currentTime += 40000;
-        changeCursorPos(timeLine->convertTimeToPos(currentTime) + ACTIONAREAOFFSET);
+        changeCursorPos(timeLine->convertTimeToPos(currentTime) + ACTIONAREAOFFSET);        
     } else {
         timeMgr->addRange(40000);
     }

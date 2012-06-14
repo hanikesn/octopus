@@ -86,8 +86,8 @@ void Track::setPlotRange(qint64 begin, qint64 end)
         highRange = end;
 		{
 			Measurement("setRange");
-			ui.plot->xAxis->setRange(begin, end);
-		}
+            ui.plot->xAxis->setRange(begin, end);
+        }
         ui.plot->setNotAntialiasedElements(QCP::aeAll);
 		{
 			Measurement("plot");

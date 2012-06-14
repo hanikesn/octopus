@@ -1,8 +1,6 @@
 #include "timemanager.h"
 
 
-//TODO(domi): drawFrom in TimeLine rauswerfen und mit signal rangeChanged() verbinden.
-
 TimeManager::TimeManager(QScrollBar *hScrollBar, TimeLine *timeLine):
     lowVisRange(0),
     highVisRange(0),
