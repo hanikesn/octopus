@@ -67,6 +67,9 @@ QCPItemTracer* DiscreteGraph::addTracer(double graphKey, double size)
     tracer->setStyle(QCPItemTracer::tsCircle);
     tracer->setSize(size);
 
+    // make sure the tracer gets deleted with its graph
+    tracer->setParent(graph);
+
     return tracer;
 }
 
@@ -82,8 +85,11 @@ QCPItemText* DiscreteGraph::addLabel(const QString& text, QCPItemAnchor *parentA
     label->setRotation(315);
     label->setPositionAlignment(Qt::AlignVCenter | Qt::AlignLeft);
     label->position->setParentAnchor(parentAnchor);
-    // (0, 0) is exactly on top of the parent anchor (see documentation to QCPItemPosition).
+    // (0, 0) is exactly on top of the parent anchor (see documentation on QCPItemPosition).
     label->position->setCoords(0, -7);
+
+    // make sure the label gets deleted with its graph
+    label->setParent(graph);
 
     return label;
 }

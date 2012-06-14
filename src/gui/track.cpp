@@ -6,6 +6,7 @@
 #include "gui/sourcedialog.h"
 
 #include "common.h"
+#include "measure.h"
 
 #include <cmath>
 
@@ -85,12 +86,12 @@ void Track::setPlotRange(qint64 begin, qint64 end)
         lowRange = begin;
         highRange = end;
 		{
-			Measurement("setRange");
-            ui.plot->xAxis->setRange(begin, end);
-        }
+            MEASURE("setRange");
+			ui.plot->xAxis->setRange(begin, end);
+		}
         ui.plot->setNotAntialiasedElements(QCP::aeAll);
 		{
-			Measurement("plot");
+            MEASURE("plot");
 			ui.plot->replot();
 		}
     }
@@ -187,6 +188,8 @@ void Track::onSources()
         foreach (QString source, sources.first()) {
             addSource(source);
         }
+        // only show the legend if the track is not empty
+        ui.plot->legend->setVisible(!sources.first().isEmpty());
         ui.plot->replot();
     }
 }
