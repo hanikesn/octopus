@@ -41,20 +41,19 @@ public:
 
     qint64 difference(int pos1, int pos2);
 
-
 signals:
     void rangeChanged(qint64 begin, qint64 end);
 
     void horizontalScroll();
 
 public slots:
-    void onRangeChanged(qint64 begin, qint64 end);
-
     void onNewMax(qint64 timestamp);
 
 
 private slots:
     void horizontalScroll(int pos);
+
+    void onRangeChanged(qint64 begin, qint64 end);
 
 private:
     // low and high limit of the visible range

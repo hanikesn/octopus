@@ -16,8 +16,9 @@ TimeManager::TimeManager(QScrollBar *hScrollBar, TimeLine *timeLine):
     hScrollBar->setMinimum(0);
     hScrollBar->setMaximum(0);
 
-    connect(hScrollBar, SIGNAL(sliderMoved(int)), this, SLOT(horizontalScroll(int)));
-    connect(hScrollBar, SIGNAL(valueChanged(int)), this, SLOT(horizontalScroll(int)));
+    connect(hScrollBar, SIGNAL(sliderMoved(int)),       this, SLOT(horizontalScroll(int)));
+    connect(hScrollBar, SIGNAL(valueChanged(int)),      this, SLOT(horizontalScroll(int)));
+    connect(this, SIGNAL(rangeChanged(qint64,qint64)),  this, SLOT(onRangeChanged(qint64,qint64)));
 
     highVisRange = timeLine->getUpperEnd(0);    
 }
@@ -47,19 +48,15 @@ int TimeManager::convertTimeToPos(qint64 time)
 void TimeManager::addRange(qint64 delta)
 {
     if (delta <= 0) return;
-    lowVisRange += delta;
-    highVisRange += delta;
-    emit rangeChanged(lowVisRange, highVisRange);
+    emit rangeChanged(lowVisRange + delta, highVisRange + delta);
 
     hScrollBar->setValue(lowVisRange/1000000);
-    timeLine->drawFrom(lowVisRange);
 }
 
 void TimeManager::updateRange()
 {
     highVisRange = getUpperEnd(lowVisRange);
     emit rangeChanged(lowVisRange, highVisRange);
-    timeLine->drawFrom(lowVisRange);
 }
 
 void TimeManager::load(QVariantMap *qvm)
@@ -69,7 +66,6 @@ void TimeManager::load(QVariantMap *qvm)
     highVisRange = visibleArea["high"].toLongLong();
 
     emit rangeChanged(lowVisRange, highVisRange);
-    timeLine->drawFrom(lowVisRange);
 
     // step-size of scrollbar is 1 second --> left border of timeline is always a full second
     // so we can set the value of the scrollbars slider to the second visRangeLow represents
@@ -98,7 +94,6 @@ void TimeManager::onRangeChanged(qint64 begin, qint64 end)
 {
     lowVisRange = begin;
     highVisRange = end;
-
     timeLine->drawFrom(begin);
 }
 
@@ -123,7 +118,6 @@ void TimeManager::horizontalScroll(int pos)
     lowVisRange = pos*1000000;
     highVisRange = getUpperEnd(lowVisRange);
     emit rangeChanged(lowVisRange, highVisRange);
-    timeLine->drawFrom(lowVisRange);
 
     emit horizontalScroll();
 }
