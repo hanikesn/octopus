@@ -50,7 +50,7 @@ MainWindow::MainWindow(QWidget *parent) :
     setUpButtonBars();
     setUpMenu();
 
-    setUpView();
+    onNew();
 }
 
 MainWindow::~MainWindow()
@@ -242,7 +242,7 @@ void MainWindow::save(bool saveAs)
 
 int MainWindow::checkForUnsavedChanges()
 {
-    if(!pa->hasUnsavedChanges())
+    if(!pa || !pa->hasUnsavedChanges())
         return -1;
 
     QMessageBox msg;
