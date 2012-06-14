@@ -13,6 +13,8 @@ class QGraphicsScene;
 class QGraphicsWidget;
 class Cursor;
 class QScrollBar;
+class TimeLine;
+class TimeManager;
 
 class PresentationArea : public QObject, public Serializable
 {
@@ -75,12 +77,15 @@ private:
     QList<Track*> tracks;
 
     QSize currentViewSize;
-    //TODO(domi): low- highRange löschen wenns timemgr gibt
-    qint64 selectionBegin, selectionEnd, lowRange, highRange;
+
+    qint64 selectionBegin, selectionEnd;
 
     bool unsavedChanges;
 
     PresentationItem::Playstate playstate;
+
+    TimeLine *timeLine;
+    TimeManager *timeManager;
 
     void addTrack(const QList<QString>& fullDataSeriesNames);
     void addTracks(const QList<QString>& fullDataSeriesNames);

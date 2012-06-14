@@ -69,8 +69,7 @@ void TimeLine::drawTicks(QPainter *painter)
       */
     double output  = 0.0;
     while (currentPos < geometry().width()) {
-        if (currentTime % LARGETICKAMOUNT == 0) {
-            // large tick
+        if (currentTime % LARGETICKAMOUNT == 0) {           
             output = currentTime/1000000;
             // large tick
             painter->drawLine(currentPos + offset, bottom, currentPos + offset,
@@ -116,6 +115,8 @@ qint64 TimeLine::convertPosToTime(int pos)
 
 void TimeLine::drawFrom(qint64 time)
 {
+//    if (rangeOffset == time) return;
+
     rangeOffset = time;
     update(boundingRect());
 }

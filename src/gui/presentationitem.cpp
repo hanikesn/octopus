@@ -9,31 +9,32 @@
 #include "gui/selection.h"
 #include "gui/cursor.h"
 #include "gui/timeline.h"
+#include "timemanager.h"
 
 const int PresentationItem::ACTIONAREAOFFSET = 52;
 const int PresentationItem::TIMEFRAME = 30000000;
 
-PresentationItem::PresentationItem(QScrollBar *hScrollBar, QGraphicsScene *parent) :
+PresentationItem::PresentationItem(QScrollBar *hScrollBar, TimeLine *timeLine,
+                                   TimeManager *timeManager, QGraphicsScene *parent) :
     QGraphicsItem(0, parent),
-    parent(parent),
+    parent(parent),    
+    timeLine(timeLine),
     boundingRectangle(0, 0, 0, 0),
     visRect(0, 0, 100, 672),
     hScrollBar(hScrollBar),
     autoScroll(false),
-    createSelection(false),
-    visRangeLow(0),
-    visRangeHigh(TIMEFRAME),
+    createSelection(false),        
     minCoverHeight(672),
-    playstate(STOPPED)
+    playstate(STOPPED),
+    timeMgr(timeManager)
 {
-    timeLine = new TimeLine(ACTIONAREAOFFSET, this, 0);
-    timeLine->setZValue(1.0);
-    timeLine->drawFrom(0);
+    timeLine->setParentItem(this);
+    timeLine->setZValue(0.9);
 
-    cursor = new Cursor(ACTIONAREAOFFSET, parent);    
+    cursor = new Cursor(ACTIONAREAOFFSET, 0);
     cursor->setParentItem(this);
     cursor->setPos(ACTIONAREAOFFSET, 0);
-    cursor->setZValue(1.1);
+    cursor->setZValue(1.0);
     cursor->resize(1, minCoverHeight);
 
     selectedArea = new Selection(parent);
@@ -43,19 +44,12 @@ PresentationItem::PresentationItem(QScrollBar *hScrollBar, QGraphicsScene *paren
     boundingRectangle.setWidth(timeLine->size().width());
     boundingRectangle.setHeight(timeLine->size().height());
 
-    hScrollBar->setSingleStep(1);
-    hScrollBar->setPageStep(30);
-    hScrollBar->setMinimum(0);
-    hScrollBar->setMaximum(0);
-
     timer.setSingleShot(false);
     timer.setInterval(40);
 
-    connect(selectedArea, SIGNAL(exportTriggered()), this, SIGNAL(exportTriggered()));
-    connect(hScrollBar, SIGNAL(sliderMoved(int)), this, SLOT(horizontalScroll(int)));
-    connect(hScrollBar, SIGNAL(valueChanged(int)), this, SLOT(horizontalScroll(int)));
-    connect(this, SIGNAL(rangeChanged(qint64,qint64)), this, SLOT(onRangeChanged(qint64,qint64)));
-    connect(&timer, SIGNAL(timeout()), this, SLOT(onTimeout()));    
+    connect(selectedArea, SIGNAL(exportTriggered()),    this, SIGNAL(exportTriggered()));
+    connect(&timer, SIGNAL(timeout()),                  this, SLOT(onTimeout()));
+    connect(timeMgr, SIGNAL(horizontalScroll()),        this, SLOT(onHorizontalScroll()));
 
     recalcBoundingRec();
 }
@@ -82,7 +76,7 @@ void PresentationItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *
 
 void PresentationItem::addTrack(Track *t)
 {    
-    t->setPlotRange(hScrollBar->value()*1000000, (hScrollBar->value()+30)*1000000);
+    t->setPlotRange(timeMgr->getLowVisRange(), timeMgr->getHighVisRange());
     t->setOffset(ACTIONAREAOFFSET);
 
     boundingRectangle.setHeight(boundingRectangle.height() + t->size().height());
@@ -157,27 +151,12 @@ void PresentationItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
         selectedArea->setWidth(width);        
         selectedArea->setPos(begin, 0);
         selectedArea->update(selectedArea->boundingRect());
-        cursor->setVisible(false);        
+        cursor->setVisible(false);
 
-        /* TODO(domi):- Falls es TimeMgr Klasse gibt, kann man sich "value" sparen --> jeder Pixel
-                        bekommt festen Wert.
-                      - Berechnung neu machen, TIMEFRAME stimmt nichtmehr  */
-        qint64 lowRange = hScrollBar->value() * 1000000;
-        qint64 highRange = lowRange + TIMEFRAME;
-        double value = (highRange - lowRange + 1)/(boundingRectangle.width() - ACTIONAREAOFFSET);
-
-        // delta1 is the distance between the left side of the selection and the begin of the graph.
-        qint64 delta1 = (begin - ACTIONAREAOFFSET) * value;
-        lowRange += delta1;
-
-        // delta2 is the length of the selection
-        qint64 delta2 = width*value;
-        highRange = lowRange + delta2;
-
-        selectionStart = lowRange;
-        selectionEnd = highRange;
-
-        emit selection(selectionStart, selectionEnd);
+        qint64 lowRange = timeMgr->getLowVisRange() +
+                timeMgr->difference(0, begin - ACTIONAREAOFFSET);
+        qint64 highRange = lowRange + timeMgr->difference(begin, begin + width);
+        emit selection(lowRange, highRange);
     } else if (playstate != PLAYING) {
         changeCursorPos(event->pos().x());
         showCursor();
@@ -261,21 +240,15 @@ void PresentationItem::onChangedViewSize(QSize size)
     }
 
     recalcBoundingRec();
-    emit rangeChanged(visRangeLow, timeLine->getUpperEnd(visRangeLow));
-}
-
-void PresentationItem::onRangeChanged(qint64 begin, qint64 end)
-{
-    visRangeLow = begin;
-    visRangeHigh = end;
+    timeMgr->updateRange();
 }
 
 void PresentationItem::onVerticalScroll(QRectF visibleRectangle)
 {    
     timeLine->setPos(0, visibleRectangle.y()-1);    
     visRect = visibleRectangle;
-    // emit a rangeChange() with current range, so the previously invisible tracks get updated
-    emit rangeChanged(visRangeLow, visRangeHigh);
+    // will trigger a rangeChanged() --> previously invisible tracks will update their range
+    timeMgr->updateRange();
 }
 
 void PresentationItem::resizeCursorAndSelection()
@@ -285,32 +258,6 @@ void PresentationItem::resizeCursorAndSelection()
         cursor->resize(1, boundingRectangle.height());
         selectedArea->setHeight(boundingRectangle.height());
     }
-}
-
-void PresentationItem::onNewMax(qint64 timestamp)
-{
-    int max = timestamp/1000000; // max in seconds
-    int min = 0;
-
-    hScrollBar->setMaximum(max - hScrollBar->pageStep());
-    hScrollBar->setMinimum(min);
-
-    if(autoScroll){
-
-        //TODO(domi) autoscroll auf neue grenzen bei rangeChanged() anpassen TIMEFRAME wäre dann h-l
-        hScrollBar->setValue(hScrollBar->maximum());
-        qint64 lowerRange = timestamp <= TIMEFRAME ? 0 : timestamp - TIMEFRAME;
-        emit rangeChanged(lowerRange, timestamp);
-    }
-}
-
-void PresentationItem::horizontalScroll(int pos)
-{
-    qint64 lowerRange = pos*1000000;
-    emit rangeChanged(lowerRange, timeLine->getUpperEnd(lowerRange));
-    timeLine->drawFrom(lowerRange);
-    // remove selection:
-    showCursor();
 }
 
 void PresentationItem::showCursor()
@@ -326,40 +273,31 @@ void PresentationItem::showCursor()
 void PresentationItem::save(QVariantMap *qvm)
 {
     qvm->insert("cursorPos", cursor->pos().toPoint().x());
-    QVariantMap visibleArea;
-    visibleArea.insert("low", visRangeLow);
-    visibleArea.insert("high", visRangeHigh);
-    qvm->insert("visibleArea", visibleArea);
 }
 
 void PresentationItem::load(QVariantMap *qvm)
 {
     cursor->setPos(qvm->find("cursorPos").value().toInt(), 0);
-
-    QVariantMap visibleArea = qvm->find("visibleArea").value().toMap();
-    visRangeHigh = visibleArea["high"].toLongLong();
-    visRangeLow = visibleArea["low"].toLongLong();
-
-    emit rangeChanged(visRangeLow, visRangeHigh);
-
-    // step-size of scrollbar is 1 second --> left border of timeline is always a full second
-    // so we can set the value of the scrollbars slider to the second visRangeLow represents
-    hScrollBar->setValue(visRangeLow/1000000);
 }
 
 bool PresentationItem::isVisible(Track *t)
 {
     int minYPos = visRect.y();
     int maxYPos = visRect.y() + minCoverHeight;
+    int trackMinY = 0;
+    int trackMaxY = 0;
 
     foreach (QGraphicsProxyWidget *gpw, tracks){
         if(gpw->widget() == t){
-            if((gpw->pos().y() >= minYPos) &&
-                    (gpw->pos().y() <= maxYPos)){
+            trackMinY = gpw->pos().y();
+            trackMaxY = trackMinY + gpw->size().height();
+
+            if (((trackMinY >= minYPos) && (trackMinY <= maxYPos)) || // top of the track is visible
+                    ((trackMaxY >= minYPos) && (trackMaxY <= maxYPos)))  // or bottom visible
                 return true;
-            } else {
+            else
                 return false;
-            }
+
         }
     }
 }
@@ -369,15 +307,17 @@ void PresentationItem::onTimeout()
     //TODO(domi): Auf Rundungsfehler achten
     //TODO(domi): magic numbers entfernen    
     if(cursor->pos().x() < boundingRectangle.width() - 12){// cursor hasn't reached right border yet
-        // determine position for currentTime + 20ms
+        // determine position for currentTime + 40ms
         currentTime += 40000;
         changeCursorPos(timeLine->convertTimeToPos(currentTime) + ACTIONAREAOFFSET);
-    }else{
-        visRangeLow += 40000;
-        emit rangeChanged(visRangeLow, timeLine->getUpperEnd(visRangeLow));
-        timeLine->drawFrom(visRangeLow);
-        hScrollBar->setValue(visRangeLow/1000000);
+    } else {
+        timeMgr->addRange(40000);
     }
+}
+
+void PresentationItem::onHorizontalScroll()
+{
+    showCursor();
 }
 
 void PresentationItem::onPlay()
@@ -400,8 +340,3 @@ void PresentationItem::onPlay()
         break;
     }
 }
-
-//void PresentationItem::setPlayState(const Playstate& p)
-//{
-////    playstate = p;
-//}
