@@ -6,6 +6,7 @@
 #include "gui/sourcedialog.h"
 
 #include "common.h"
+#include "measure.h"
 
 #include <cmath>
 
@@ -85,12 +86,12 @@ void Track::setPlotRange(qint64 begin, qint64 end)
         lowRange = begin;
         highRange = end;
 		{
-			Measurement("setRange");
+            MEASURE("setRange");
 			ui.plot->xAxis->setRange(begin, end);
 		}
         ui.plot->setNotAntialiasedElements(QCP::aeAll);
 		{
-			Measurement("plot");
+            MEASURE("plot");
 			ui.plot->replot();
 		}
     }

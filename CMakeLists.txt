@@ -84,6 +84,7 @@ set(Octopus_HEADERS
   include/gui/track.h
   include/gui/trackscene.h
   include/mainwindow.h
+  include/measure.h
   include/networkadapter.h
   include/serializable.h
   include/sqlite.h
