@@ -134,7 +134,7 @@ private:
 
     bool createSelection;
     int selectionStart, selectionEnd;
-    qint64 currentTime;
+    qint64 currentTime, currCursorTime;
 
     // minmal height to cover the full presentationArea
     int minCoverHeight;

@@ -112,7 +112,7 @@ void TimeManager::onNewMax(qint64 timestamp)
 }
 
 void TimeManager::horizontalScroll(int pos)
-{    
+{
     lowVisRange = pos*1000000;
     highVisRange = getUpperEnd(lowVisRange);
     emit rangeChanged(lowVisRange, highVisRange);

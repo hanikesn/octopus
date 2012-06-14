@@ -219,8 +219,10 @@ void PresentationItem::recalcBoundingRec()
 
 void PresentationItem::changeCursorPos(int pos)
 {
+    currCursorTime = timeMgr->convertPosToTime(cursor->pos().x() - ACTIONAREAOFFSET);
     if(pos < ACTIONAREAOFFSET) return;
-    cursor->setPos(pos, 0);
+    cursor->setVisible(true);
+    cursor->setPos(pos, 0);    
 }
 
 void PresentationItem::onChangedViewSize(QSize size)
@@ -317,6 +319,15 @@ void PresentationItem::onTimeout()
 void PresentationItem::onHorizontalScroll()
 {
     showCursor();
+    if (playstate == PLAYING){
+        int pos = timeMgr->convertTimeToPos(currCursorTime);
+        if (pos == -1) {
+            // dont show cursor
+            cursor->setVisible(false);
+        } else if (pos + ACTIONAREAOFFSET < visRect.width()) {
+            changeCursorPos(pos + ACTIONAREAOFFSET);
+        }
+    }
 }
 
 void PresentationItem::onPlay()
