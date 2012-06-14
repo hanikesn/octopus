@@ -5,6 +5,8 @@
 #include "gui/interpolatinggraph.h"
 #include "gui/sourcedialog.h"
 
+#include "common.h"
+
 #include <cmath>
 
 #include <QDebug>
@@ -82,9 +84,15 @@ void Track::setPlotRange(qint64 begin, qint64 end)
     if (lowRange != begin || highRange != end){
         lowRange = begin;
         highRange = end;
-        ui.plot->xAxis->setRange(begin, end);
+		{
+			Measurement("setRange");
+			ui.plot->xAxis->setRange(begin, end);
+		}
         ui.plot->setNotAntialiasedElements(QCP::aeAll);
-        ui.plot->replot();
+		{
+			Measurement("plot");
+			ui.plot->replot();
+		}
     }
 }
 

@@ -50,7 +50,7 @@ MainWindow::MainWindow(QWidget *parent) :
     setUpButtonBars();
     setUpMenu();
 
-    setUpView();
+    onNew();
 }
 
 MainWindow::~MainWindow()
@@ -186,7 +186,7 @@ void MainWindow::setUpView()
         pa->deleteLater();
 
 //     TODO(steffen) richtige datei öffnen kopieren etc.
-    dataProvider = new DataProvider(QDir::tempPath() + "/" + QDateTime::currentDateTime().toString("yyyyMMdd_hhmmsszzz"));
+    dataProvider = new DataProvider(QDir::tempPath() + "/Octopus-" + QDateTime::currentDateTime().toString("yyyyMMdd_hhmmsszzz"));
     trackScene = new TrackScene(this);
 
     pa = new PresentationArea(trackScene, *dataProvider, ui.hScrollBar, this);
@@ -242,7 +242,7 @@ void MainWindow::save(bool saveAs)
 
 int MainWindow::checkForUnsavedChanges()
 {
-    if(!pa->hasUnsavedChanges())
+    if(!pa || !pa->hasUnsavedChanges())
         return -1;
 
     QMessageBox msg;
