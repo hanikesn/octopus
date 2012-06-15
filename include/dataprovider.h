@@ -16,7 +16,8 @@ class DataProvider : public QObject
 {
     Q_OBJECT
 public:
-    DataProvider(QString const& filename);
+    DataProvider(QString const& filename, QObject*);
+    ~DataProvider();
 
     /**
      * @return The full name of each known data series.
@@ -41,6 +42,8 @@ public:
 
     DatabaseAdapter const& getDB() const;
 
+    void closeDB();
+
 signals:
     void unknownDataSeries();
 
@@ -52,6 +55,8 @@ public slots:
     void onNewData(qint64 timestamp, QString fullDataSeriesName, Value value);
 
 private:
+    void addSeries(QString const& device_name, QString const& name, EI::DataSeriesInfo const& info);
+
     QMap<QString, AbstractDataSeries*> dataSeries;
 
     std::unique_ptr<DatabaseAdapter> db;

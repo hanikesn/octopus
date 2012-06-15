@@ -2,6 +2,8 @@
 #include "value.h"
 #include "common.h"
 
+#include <QPair>
+
 DatabaseAdapter::DatabaseAdapter(const QString &file)
     : db(file.toLocal8Bit().data())
 {
@@ -168,28 +170,42 @@ QList<EI::Description> DatabaseAdapter::getSenders()
     stmtSelectSender.reset();
     auto result = stmtSelectSender.execute();
 
-    QList<EI::Description> list;
+
+    QList<QPair<std::string, std::string>> senders;
     std::for_each(result, stmtSelectSender.done(),
-                  [this, &list](Sqlite::Row r)
+                  [&senders](Sqlite::Row r)
     {
-        // name TEXT, type TEXT, properties INT, misc TEXT, min FLOAT, max FLOAT, sender TEXT
         std::string name, device_type;
         r >> name >> device_type;
+        senders.append(QPair<std::string, std::string>(name, device_type));
+    });
+
+    QList<EI::Description> list;
+
+    foreach(auto const& p, senders)
+    {
+        // name TEXT, type TEXT, properties INT, misc TEXT, min FLOAT, max FLOAT, sender TEXT
         stmtSelectSeries.reset();
-        stmtSelectSeries << name;
-        EI::Description desc(name, device_type);
-        auto result = stmtSelectSender.execute();
-        std::for_each(result, stmtSelectSender.done(),
+        stmtSelectSeries << p.first;
+        EI::Description desc(p.first, p.second);
+        auto series_result = stmtSelectSeries.execute();
+        std::for_each(series_result, stmtSelectSeries.done(),
                       [&list, &desc](Sqlite::Row r)
         {
-            std::string name, type, misc;
+            std::string name, type, misc, muell;
             sqlite3_int64 props;
             double min, max;
-            r >> name >> type >> props >> misc >> min >> max;
+            r >> name
+              >> type
+              >> props
+              >> misc
+              >> min
+              >> max
+              >> muell;
             desc.addDataSeries(name, EI::DataSeriesInfo(convertType(type),props, misc, min, max));
         });
         list.append(desc);
-    });
+    }
 
     return std::move(list);
 }

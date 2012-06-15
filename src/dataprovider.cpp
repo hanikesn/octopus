@@ -5,13 +5,34 @@
 #include "stringseries.h"
 #include "value.h"
 
-#include <QDebug>
 #include <QDir>
 #include <cmath>
 
-DataProvider::DataProvider(QString const& filename) :
-    db(new DatabaseAdapter(filename)), filename(filename), currentMax(0)
+DataProvider::DataProvider(QString const& filename, QObject *parent) :
+    QObject(parent), db(new DatabaseAdapter(filename)), filename(filename), currentMax(0)
 {
+    QList<EI::Description> list = db->getSenders();
+
+    foreach(EI::Description const& d, list)
+    {
+        foreach(EI::DataSeriesInfoMap::value_type const& info, d.getDataSeries())
+        {
+            addSeries(fromStdString(d.getSender()), fromStdString(info.first), info.second);
+        }
+    }
+}
+
+DataProvider::~DataProvider()
+{
+    foreach(AbstractDataSeries* d, dataSeries)
+    {
+        d->deleteLater();
+    }
+}
+
+void DataProvider::closeDB()
+{
+    db.reset();
 }
 
 QList<QString> DataProvider::getDataSeriesList() const
@@ -50,6 +71,8 @@ AbstractDataSeries* DataProvider::getDataSeries(const QString &fullName) const
 
 void DataProvider::onNewSender(EIDescriptionWrapper desc)
 {
+    if(!db)
+        return;
     const QString deviceName = fromStdString(desc.d.getSender());
     db->addSender(desc.d);
 
@@ -58,20 +81,27 @@ void DataProvider::onNewSender(EIDescriptionWrapper desc)
     std::for_each(series.begin(), series.end(),
             [this, &deviceName](EI::DataSeriesInfoMap::value_type p)
     {
-      AbstractDataSeries* series;
-      EI::DataSeriesInfo::Properties props = p.second.getProperties();
-      if (props & EI::DataSeriesInfo::INTERPOLATABLE) {
-          series = new DoubleSeries(*this, deviceName, fromStdString(p.first), convert(props));
-      } else {
-          series = new StringSeries(*this, deviceName, fromStdString(p.first), convert(props));
-      }
-
-      dataSeries.insert(deviceName + "." + fromStdString(p.first), series);
+        addSeries(deviceName, fromStdString(p.first), p.second);
     });
+}
+
+void DataProvider::addSeries(QString const& device_name, QString const& name, EI::DataSeriesInfo const& info)
+{
+    AbstractDataSeries* series;
+    EI::DataSeriesInfo::Properties props = info.getProperties();
+    if (props & EI::DataSeriesInfo::INTERPOLATABLE) {
+        series = new DoubleSeries(*this, device_name, name, convert(props));
+    } else {
+        series = new StringSeries(*this, device_name, name, convert(props));
+    }
+
+    dataSeries.insert(device_name + "." + name, series);
 }
 
 void DataProvider::onNewData(qint64 timestamp, QString fullDataSeriesName, Value value)
 {
+    if(!db)
+        return;
     db->add(fullDataSeriesName, timestamp, value);
 
     if (dataSeries.contains(fullDataSeriesName)) {

@@ -51,12 +51,6 @@ MainWindow::MainWindow(QWidget *parent) :
     onNew();
 }
 
-MainWindow::~MainWindow()
-{
-    dataProvider->deleteLater();
-    trackScene->deleteLater();
-}
-
 void MainWindow::onImportAction()
 {
     // TODO:
@@ -150,7 +144,7 @@ void MainWindow::onLoad()
     QString dbfile = result["dbfile"].toString();
     // load the db might fail
     try {
-        dataProvider = new DataProvider(dbfile);
+        dataProvider = new DataProvider(dbfile, this);
     } catch(std::exception& e) {
         qDebug() << "Loading of DB failed.";
         return;
@@ -159,8 +153,10 @@ void MainWindow::onLoad()
     // at this point loading was successful --> delete old presentationArea and create new one.
     projectPath = fileName;
 
-    if(olddataProvider)
+    if(olddataProvider) {
+        olddataProvider->closeDB();
         olddataProvider->deleteLater();
+    }
 
     setUpView();
     setTitle(QFileInfo(projectPath).completeBaseName().remove(".oct"));
@@ -195,10 +191,12 @@ void MainWindow::onNew()
 {
     if(checkForUnsavedChanges() == QMessageBox::Abort) return;
 
-    if(dataProvider)
+    if(dataProvider) {
+        dataProvider->closeDB();
         dataProvider->deleteLater();
+    }
     // create a temporary file for the db
-    dataProvider = new DataProvider(QDir::tempPath() + "/Octopus-" + QDateTime::currentDateTime().toString("yyyyMMdd_hhmmsszzz"));
+    dataProvider = new DataProvider(QDir::tempPath() + "/Octopus-" + QDateTime::currentDateTime().toString("yyyyMMdd_hhmmsszzz"), this);
     addData(*dataProvider);
 
     setUpView();
@@ -272,7 +270,7 @@ void MainWindow::save(bool saveAs)
         }
     }
     QVariantMap pName;
-    pName.insert("dbfilename", dataProvider->getDBFileName());
+    pName.insert("dbfile", dataProvider->getDBFileName());
     pa->save(&pName);
 
     QJson::Serializer serializer;
