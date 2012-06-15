@@ -323,6 +323,9 @@ void PresentationItem::onTimeout()
     if (cursor->pos().x() < getRightBorder()) { // cursor hasn't reached right border yet
         // determine position for currentTime + updateIntervall
         changeCursorPos(timeLine->convertTimeToPos(currentTime) + ACTIONAREAOFFSET);        
+    } else if (currentTime > timeMgr->getHighVisRange()) {
+        // currentTime is further then the currently visible range
+        cursor->setVisible(false);
     } else {
         timeMgr->addRange(timeMgr->getTimeoutUpdateIntervall());
     }
