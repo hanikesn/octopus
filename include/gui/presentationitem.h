@@ -21,7 +21,7 @@ class PresentationItem : public QObject, public QGraphicsItem, public Serializab
 {
     Q_OBJECT
 public:
-    explicit PresentationItem(QScrollBar *hScrollBar, TimeLine *timeLine, TimeManager *timeManager,
+    explicit PresentationItem(TimeLine *timeLine, TimeManager *timeManager,
                               QGraphicsScene *parent = 0);
     ~PresentationItem();
 
@@ -87,9 +87,8 @@ public slots:
     void recalcBoundingRec();
 
     /**
-      * Resizes cursor, timeLine and selection to new size.
-      * Tracks won't get more height instead they are adjusted in their width.
-      * TimeLine and selection are only resized in their height, not their width.
+      * Resizes cursor, timeLine and selection to new size.      
+      * Cursor and selection are only resized in their height, not their width.
       * @param size The size of the visible track-area (mainView)
       */
     void onChangedViewSize(QSize size);
@@ -124,9 +123,7 @@ private:
     Cursor *cursor;
     Selection *selectedArea;
 
-    QRectF boundingRectangle, visRect;
-
-    QScrollBar *hScrollBar;
+    QRectF boundingRectangle, visRect;    
 
     bool autoScroll;
 
@@ -134,7 +131,9 @@ private:
 
     bool createSelection;
     int selectionStart, selectionEnd;
-    qint64 currentTime, currCursorTime;
+
+    // currentTime is the point of time, which is represented by the cursor.
+    qint64 currentTime;
 
     // minmal height to cover the full presentationArea
     int minCoverHeight;
@@ -168,6 +167,8 @@ private:
       * Emits selection(-1, -1) to update every objects selection-parameters.
       */
     void showCursor();
+
+    int getRightBorder();
 };
 
 #endif // PRESENTATIONITEM_H

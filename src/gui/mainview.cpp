@@ -19,7 +19,7 @@ void MainView::scrollContentsBy(int dx, int dy)
     if(dx == 0){
         QGraphicsView::scrollContentsBy(dx, dy);
         emit verticalScroll();
-    }
+    }    
 }
 
 void MainView::resizeEvent(QResizeEvent *event)

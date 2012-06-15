@@ -22,7 +22,7 @@ PresentationArea::PresentationArea(QGraphicsScene *scene, const DataProvider &da
 {
     timeLine = new TimeLine(52, 0, 0);
     timeManager = new TimeManager(hScrollBar, timeLine);
-    pi = new PresentationItem(hScrollBar, timeLine, timeManager, scene);
+    pi = new PresentationItem(timeLine, timeManager, scene);
 
 
     connect(this, SIGNAL(changedViewSize(QSize)),   pi, SLOT(onChangedViewSize(QSize)));

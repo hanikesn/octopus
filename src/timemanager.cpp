@@ -1,15 +1,16 @@
 #include "timemanager.h"
 
+#include <QDebug>
 
 TimeManager::TimeManager(QScrollBar *hScrollBar, TimeLine *timeLine):
     lowVisRange(0),
     highVisRange(0),
-    hScrollBar(hScrollBar),
-    timeLine(timeLine),
     timePerPx(40000),
     timeoutUpdateIntervall(40000),
     timeoutIntervall(40),
-    autoScroll(false)
+    autoScroll(false),
+    hScrollBar(hScrollBar),
+    timeLine(timeLine)
 {
     hScrollBar->setSingleStep(1);
     hScrollBar->setPageStep(30);
@@ -29,7 +30,8 @@ TimeManager::~TimeManager()
 
 qint64 TimeManager::convertPosToTime(int pos)
 {
-    return lowVisRange + (pos * timePerPx);
+    qint64 result = lowVisRange + (pos * timePerPx);
+    return result;
 }
 
 int TimeManager::convertTimeToPos(qint64 time)
@@ -50,7 +52,10 @@ void TimeManager::addRange(qint64 delta)
     if (delta <= 0) return;
     emit rangeChanged(lowVisRange + delta, highVisRange + delta);
 
+    // no signals necessary if we trigger them ourselves
+    hScrollBar->blockSignals(true);
     hScrollBar->setValue(lowVisRange/1000000);
+    hScrollBar->blockSignals(false);
 }
 
 void TimeManager::updateRange()
@@ -69,6 +74,7 @@ void TimeManager::load(QVariantMap *qvm)
 
     // step-size of scrollbar is 1 second --> left border of timeline is always a full second
     // so we can set the value of the scrollbars slider to the second visRangeLow represents
+    disconnect(this, SIGNAL(horizontalScroll(int)));
     hScrollBar->setValue(lowVisRange/1000000);
 }
 
