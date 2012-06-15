@@ -45,7 +45,7 @@ PresentationItem::PresentationItem(QScrollBar *hScrollBar, TimeLine *timeLine,
     boundingRectangle.setHeight(timeLine->size().height());
 
     timer.setSingleShot(false);
-    timer.setInterval(40);
+    timer.setInterval(timeMgr->getTimeoutIntervall());
 
     connect(selectedArea, SIGNAL(exportTriggered()),    this, SIGNAL(exportTriggered()));
     connect(&timer, SIGNAL(timeout()),                  this, SLOT(onTimeout()));
@@ -308,11 +308,11 @@ void PresentationItem::onTimeout()
 {    
     //TODO(domi): magic numbers entfernen    
     if(cursor->pos().x() < boundingRectangle.width() - 12){// cursor hasn't reached right border yet
-        // determine position for currentTime + 40ms
-        currentTime += 40000;
+        // determine position for currentTime + updateIntervall
+        currentTime += timeMgr->getTimeoutUpdateIntervall();
         changeCursorPos(timeLine->convertTimeToPos(currentTime) + ACTIONAREAOFFSET);        
     } else {
-        timeMgr->addRange(40000);
+        timeMgr->addRange(timeMgr->getTimeoutUpdateIntervall());
     }
 }
 

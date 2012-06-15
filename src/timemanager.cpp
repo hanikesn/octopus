@@ -7,6 +7,8 @@ TimeManager::TimeManager(QScrollBar *hScrollBar, TimeLine *timeLine):
     hScrollBar(hScrollBar),
     timeLine(timeLine),
     timePerPx(40000),
+    timeoutUpdateIntervall(40000),
+    timeoutIntervall(40),
     autoScroll(false)
 {
     hScrollBar->setSingleStep(1);

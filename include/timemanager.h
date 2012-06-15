@@ -18,6 +18,17 @@ public:
     qint64 getHighVisRange() {return highVisRange;}
 //    qint64 getTimePerPx() {return timePerPx;}
 
+    /**
+      * Returns the amount of time the range is changed during playing
+      * (every 'timeoutIntervall' msecs)
+      */
+    qint64 getTimeoutUpdateIntervall() {return timeoutUpdateIntervall;}
+
+    /**
+      * Returns the intervall (in milliseconds) after which the range should be updated.
+      */
+    int getTimeoutIntervall() {return timeoutIntervall;}
+
     qint64 getUpperEnd(qint64 lowerEnd) {return timeLine->getUpperEnd(lowerEnd);}
 
     qint64 convertPosToTime(int pos);
@@ -61,6 +72,11 @@ private:
 
     // amount of time which one pixel represents
     qint64 timePerPx;
+
+    // this is the amount of time the range is changed during playing
+    // (every timeoutIntervall msecs)
+    qint64 timeoutUpdateIntervall;
+    int timeoutIntervall;
 
     bool autoScroll;
 
