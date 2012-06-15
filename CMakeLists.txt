@@ -121,7 +121,7 @@ set(Octopus_LIBRARIES EIToolkit qjson ${Boost_LIBRARIES} ${SQLITE3_LIBRARIES} ${
 
 target_link_libraries(Octopus ${Octopus_LIBRARIES})
 
-if(NOT WIN32)
+if(FALSE)
 enable_testing()
 
 # set(<BINARY_NAME> <TEST_FILE_PATHS>)

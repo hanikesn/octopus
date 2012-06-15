@@ -18,9 +18,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     pa(0),
     dataProvider(0),
-    trackScene(0),
-    projectName(QString::fromUtf8("projectName")),
-    projectPath(QString::fromUtf8(""))
+    trackScene(0)
 {    
     ui.setupUi(this);
 
@@ -148,22 +146,64 @@ void MainWindow::onLoad()
         qDebug() << "Could not parse config file! Aborting...";
         return;
     }
-    projectPath = fileName;
+    DataProvider* olddataProvider = dataProvider;
+    QString dbfile = result["dbfile"].toString();
+    // load the db might fail
+    try {
+        dataProvider = new DataProvider(dbfile);
+    } catch(std::exception& e) {
+        qDebug() << "Loading of DB failed.";
+        return;
+    }
+
     // at this point loading was successful --> delete old presentationArea and create new one.
+    projectPath = fileName;
+
+    if(olddataProvider)
+        olddataProvider->deleteLater();
+
     setUpView();
-    projectName = result["projectName"].toString();
-    setTitle(projectName);
+    setTitle(QFileInfo(projectPath).completeBaseName().remove(".oct"));
 
     pa->load(&result);
     pa->setUnsavedChanges(false);
 }
 
+static void addData(DataProvider& dp)
+{
+    EI::Description desc1("Dummy", "dum");
+    desc1.addDataSeries("Interpolatable.x", EI::DataSeriesInfo(EI::Value::DOUBLE, EI::DataSeriesInfo::INTERPOLATABLE,""));
+    desc1.addDataSeries("Interpolatable.y", EI::DataSeriesInfo(EI::Value::DOUBLE, EI::DataSeriesInfo::INTERPOLATABLE,""));
+    desc1.addDataSeries("Discrete", EI::DataSeriesInfo(EI::Value::DOUBLE, EI::DataSeriesInfo::STATEFUL,""));
+    dp.onNewSender(desc1);
+
+    EI::Description desc2("Dummy-2", "dum");
+    desc2.addDataSeries("Interpolatable.x", EI::DataSeriesInfo(EI::Value::DOUBLE, EI::DataSeriesInfo::INTERPOLATABLE,""));
+    desc2.addDataSeries("Interpolatable.y", EI::DataSeriesInfo(EI::Value::DOUBLE, EI::DataSeriesInfo::INTERPOLATABLE,""));
+    dp.onNewSender(desc2);
+
+     for (int j=0; j<500; ++j)
+    {
+      double d = j/15.0 * 5*3.14 + 0.01;
+      dp.onNewData(d*1000000, "Dummy.Interpolatable.x", Value(7*sin(d)/d));
+      dp.onNewData(d*1000000, "Dummy.Interpolatable.y", Value(-7*sin(d)/d));
+      dp.onNewData(d*1000000, "Dummy.Discrete", Value("ping"));
+    }
+}
+
 void MainWindow::onNew()
 {
     if(checkForUnsavedChanges() == QMessageBox::Abort) return;
+
+    if(dataProvider)
+        dataProvider->deleteLater();
+    // create a temporary file for the db
+    dataProvider = new DataProvider(QDir::tempPath() + "/Octopus-" + QDateTime::currentDateTime().toString("yyyyMMdd_hhmmsszzz"));
+    addData(*dataProvider);
+
     setUpView();
-    projectName = "";
-    setTitle(projectName);
+    projectPath = "";
+    setTitle("");
 }
 
 void MainWindow::setTitle(QString pName)
@@ -178,15 +218,11 @@ void MainWindow::setTitle(QString pName)
 
 void MainWindow::setUpView()
 {
-    if(dataProvider)
-        dataProvider->deleteLater();
     if(trackScene)
         trackScene->deleteLater();
     if(pa)
         pa->deleteLater();
 
-//     TODO(steffen) richtige datei öffnen kopieren etc.
-    dataProvider = new DataProvider(QDir::tempPath() + "/Octopus-" + QDateTime::currentDateTime().toString("yyyyMMdd_hhmmsszzz"));
     trackScene = new TrackScene(this);
 
     pa = new PresentationArea(trackScene, *dataProvider, ui.hScrollBar, this);
@@ -200,8 +236,12 @@ void MainWindow::setUpView()
     connect(this, SIGNAL(changedViewSize(QSize)), pa, SLOT(onChangedViewSize(QSize)));
     connect(&addTrackButton, SIGNAL(clicked()), pa, SLOT(onAddTrack()));
 
-    connect(&networkAdapter, SIGNAL(onNewDataSeries(QString,QString,Data::Properties)), dataProvider, SLOT(onNewDataSeries(QString,QString,Data::Properties)));
-    connect(&networkAdapter, SIGNAL(onNewData(qint64,QString,Value)),                   dataProvider, SLOT(onNewData(qint64,QString,Value)));
+    qRegisterMetaType<EIDescriptionWrapper>("EIDescriptionWrapper");
+    qRegisterMetaType<Value>("Value");
+    connect(&networkAdapter, SIGNAL(onNewSender(EIDescriptionWrapper)), dataProvider, SLOT(onNewSender(EIDescriptionWrapper)), Qt::QueuedConnection);
+    connect(&networkAdapter, SIGNAL(onNewData(qint64,QString,Value)),      dataProvider, SLOT(onNewData(qint64,QString,Value)), Qt::QueuedConnection);
+
+    networkAdapter.discoverSenders();
 
     connect(&playButton, SIGNAL(clicked()), pa, SLOT(onPlay()));    
 }
@@ -209,6 +249,7 @@ void MainWindow::setUpView()
 void MainWindow::save(bool saveAs)
 {
     QString caption = saveAs ? tr("Save as") : tr("Save");
+
     if (projectPath.isEmpty() || saveAs) {
         QString fileName = QFileDialog::getSaveFileName(this, caption,
                                                         projectPath, "Octopus (*.oct)");
@@ -217,14 +258,21 @@ void MainWindow::save(bool saveAs)
         if (fileName.endsWith(".oct") == false)
             fileName += ".oct";
 
+        if(projectPath.isEmpty()) {
+            // The db lies in a temporary file. We need too move it.
+            QString dbname = fileName;
+            dbname.remove(QRegExp(".oct$"));
+            dataProvider->moveDB(dbname + ".db");
+        }
+
         projectPath = fileName;
+
         if (!saveAs){
-            projectName = QFileInfo(fileName).completeBaseName().remove(".oct");
-            setTitle(projectName);
+            setTitle(QFileInfo(fileName).completeBaseName().remove(".oct"));
         }
     }
     QVariantMap pName;
-    pName.insert("projectName", projectName);
+    pName.insert("dbfilename", dataProvider->getDBFileName());
     pa->save(&pName);
 
     QJson::Serializer serializer;

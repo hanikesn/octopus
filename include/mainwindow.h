@@ -78,7 +78,7 @@ private:
 
     HorizontalScrollBar *hScrollBar;
 
-    QString projectName, projectPath;
+    QString projectPath;
 
     const static QString TITLE;
 

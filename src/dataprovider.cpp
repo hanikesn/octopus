@@ -5,29 +5,13 @@
 #include "stringseries.h"
 #include "value.h"
 
+#include <QDebug>
+#include <QDir>
 #include <cmath>
 
 DataProvider::DataProvider(QString const& filename) :
-    db(filename), currentMax(0)
+    db(new DatabaseAdapter(filename)), filename(filename), currentMax(0)
 {
-    addData();
-}
-
-void DataProvider::addData()
-{
-    onNewDataSeries("Dummy", "Interpolatable.x", Data::INTERPOLATABLE);
-    onNewDataSeries("Dummy", "Interpolatable.y", Data::INTERPOLATABLE);
-    onNewDataSeries("Dummy-2", "Interpolatable.x", Data::INTERPOLATABLE);
-    onNewDataSeries("Dummy-2", "Interpolatable.y", Data::INTERPOLATABLE);
-    onNewDataSeries("Dummy", "Discrete", Data::STATEFUL);
-
-    for (int j=0; j<500; ++j)
-    {
-      double d = j/15.0 * 5*3.14 + 0.01;
-      onNewData(d*1000000, "Dummy.Interpolatable.x", Value(7*sin(d)/d));
-      onNewData(d*1000000, "Dummy.Interpolatable.y", Value(-7*sin(d)/d));
-      onNewData(d*1000000, "Dummy.Discrete", Value("ping"));
-    }
 }
 
 QList<QString> DataProvider::getDataSeriesList() const
@@ -35,26 +19,60 @@ QList<QString> DataProvider::getDataSeriesList() const
     return dataSeries.keys();
 }
 
+QString DataProvider::getDBFileName()
+{
+    return filename;
+}
+
+const DatabaseAdapter &DataProvider::getDB() const
+{
+    return *db;
+}
+
+void DataProvider::moveDB(QString const& newFilename)
+{
+    // delete the dbadapter so that the db connection is closed
+    db.reset();
+
+    if(QDir().rename(filename, newFilename)) {
+        QDir().remove(filename + "-wal");
+        QDir().remove(filename + "-shm");
+        filename = newFilename;
+    }
+
+    db = std::unique_ptr<DatabaseAdapter>(new DatabaseAdapter(filename));
+}
+
 AbstractDataSeries* DataProvider::getDataSeries(const QString &fullName) const
 {
     return dataSeries.value(fullName);
 }
 
-void DataProvider::onNewDataSeries(QString deviceName, QString dataSeriesName, Data::Properties properties)
+void DataProvider::onNewSender(EIDescriptionWrapper desc)
 {
-    AbstractDataSeries *series;
-    if (properties & Data::INTERPOLATABLE) {
-        series = new DoubleSeries(db, deviceName, dataSeriesName, properties);
-    } else {
-        series = new StringSeries(db, deviceName, dataSeriesName, properties);
-    }
+    const QString deviceName = fromStdString(desc.d.getSender());
+    db->addSender(desc.d);
 
-    dataSeries.insert(deviceName + "." + dataSeriesName, series);
+    auto const& series = desc.d.getDataSeries();
+
+    std::for_each(series.begin(), series.end(),
+            [this, &deviceName](EI::DataSeriesInfoMap::value_type p)
+    {
+      AbstractDataSeries* series;
+      EI::DataSeriesInfo::Properties props = p.second.getProperties();
+      if (props & EI::DataSeriesInfo::INTERPOLATABLE) {
+          series = new DoubleSeries(*this, deviceName, fromStdString(p.first), convert(props));
+      } else {
+          series = new StringSeries(*this, deviceName, fromStdString(p.first), convert(props));
+      }
+
+      dataSeries.insert(deviceName + "." + fromStdString(p.first), series);
+    });
 }
 
 void DataProvider::onNewData(qint64 timestamp, QString fullDataSeriesName, Value value)
 {
-    db.add(fullDataSeriesName, timestamp, value);
+    db->add(fullDataSeriesName, timestamp, value);
 
     if (dataSeries.contains(fullDataSeriesName)) {
         dataSeries.value(fullDataSeriesName)->addData(timestamp, value);
