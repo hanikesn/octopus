@@ -1,7 +1,7 @@
 #ifndef ABSTRACTDATASERIES_H
 #define ABSTRACTDATASERIES_H
 
-#include "common.h"
+#include "metadata.h"
 #include "visitor.h"
 #include "value.h"
 #include "databaseadapter.h"
