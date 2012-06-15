@@ -20,7 +20,7 @@ DatabaseAdapter::DatabaseAdapter(const QString &file)
     if(db.execute("CREATE INDEX IF NOT EXISTS name_idx on senders(name);") != Sqlite::DB::Done)
         throw std::exception();
 
-    if(db.execute("CREATE TABLE IF NOT EXISTS series (sender TEXT, name TEXT, type TEXT, properties INT, misc TEXT, min FLOAT, max FLOAT, FOREIGN KEY(sender) REFERENCES senders(name));") != Sqlite::DB::Done)
+    if(db.execute("CREATE TABLE IF NOT EXISTS series (name TEXT, type TEXT, properties INT, misc TEXT, min FLOAT, max FLOAT, sender TEXT, FOREIGN KEY(sender) REFERENCES senders(name));") != Sqlite::DB::Done)
         throw std::exception();
     if(db.execute("CREATE INDEX IF NOT EXISTS sender_name_idx on series(sender, name);") != Sqlite::DB::Done)
         throw std::exception();
@@ -33,7 +33,7 @@ DatabaseAdapter::DatabaseAdapter(const QString &file)
     stmtSelectSender = db.prepare("SELECT * from senders");
 
     stmtAddSeries = db.prepare("INSERT OR REPLACE INTO series VALUES (?,?,?,?,?,?,?)");
-    stmtSelectSeries = db.prepare("SELECT * from series");
+    stmtSelectSeries = db.prepare("SELECT * from series where sender=?");
 }
 
 template QMap<qint64, double> DatabaseAdapter::getData<double>(QString const& key) const;
@@ -95,8 +95,9 @@ static Sqlite::PreparedStatement& operator <<(Sqlite::PreparedStatement& stmt, V
         stmt << value.asDouble();
         break;
     case Value::STRING:
-        auto const& val = value.asString().toUtf8();
-        stmt << std::string(val.constData(), val.length());
+        stmt << toStdString(value.asString());
+        break;
+    case Value::EMPTY:
         break;
     }
 
@@ -112,29 +113,83 @@ void DatabaseAdapter::add(QString const& key, qint64 timestamp, T const& value)
         throw std::exception();
 }
 
-void DatabaseAdapter::addSender(QString const& name, QString const& device_type)
+static std::string convert(EI::Value::Type t)
 {
-    stmtAddSender.reset();
-    stmtAddSender << toStdString(name) << toStdString(device_type);
-    if(stmtAddSender.execute() != stmtAddSender.done())
-        throw std::exception();
+    switch(t)
+    {
+    case EI::Value::DOUBLE:
+        return "DOUBLE";
+        break;
+    case EI::Value::STRING:
+        return "STRING";
+        break;
+    case EI::Value::EMPTY:
+        return "EMPTY";
+        break;
+    }
+
+    return "EMPTY";
 }
 
-QMap<QString, QString> DatabaseAdapter::getSenders()
+static EI::Value::Type convertType(std::string const& str)
+{
+    if(str == "DOUBLE")
+        return EI::Value::DOUBLE;
+    else if(str == "STRING")
+        return EI::Value::STRING;
+    return EI::Value::EMPTY;
+}
+
+void DatabaseAdapter::addSender(EI::Description const& desc)
+{
+    stmtAddSender.reset();
+    stmtAddSender << desc.getSender() << desc.getDeviceType();
+    if(stmtAddSender.execute() != stmtAddSender.done())
+        throw std::exception();
+
+    foreach(EI::DataSeriesInfoMap::value_type series, desc.getDataSeries())
+    {
+        //name TEXT, type TEXT, properties INT, misc TEXT, min FLOAT, max FLOAT, sender TEXT
+        stmtAddSeries.reset();
+        stmtAddSeries << series.first
+                      << convert(series.second.getType())
+                      << (sqlite3_int64)series.second.getProperties()
+                      << series.second.getMisc()
+                      << series.second.getMin()
+                      << series.second.getMax()
+                      << desc.getSender();
+        if(stmtAddSeries.execute() != stmtAddSeries.done())
+            throw std::exception();
+    }
+}
+
+QList<EI::Description> DatabaseAdapter::getSenders()
 {
     stmtSelectSender.reset();
-
     auto result = stmtSelectSender.execute();
 
-    QMap<QString, QString> map;
+    QList<EI::Description> list;
     std::for_each(result, stmtSelectSender.done(),
-                  [&map](Sqlite::Row r)
+                  [this, &list](Sqlite::Row r)
     {
-        QString name;
-        QString device_type;
+        // name TEXT, type TEXT, properties INT, misc TEXT, min FLOAT, max FLOAT, sender TEXT
+        std::string name, device_type;
         r >> name >> device_type;
-        map.insert(name, device_type);
+        stmtSelectSeries.reset();
+        stmtSelectSeries << name;
+        EI::Description desc(name, device_type);
+        auto result = stmtSelectSender.execute();
+        std::for_each(result, stmtSelectSender.done(),
+                      [&list, &desc](Sqlite::Row r)
+        {
+            std::string name, type, misc;
+            sqlite3_int64 props;
+            double min, max;
+            r >> name >> type >> props >> misc >> min >> max;
+            desc.addDataSeries(name, EI::DataSeriesInfo(convertType(type),props, misc, min, max));
+        });
+        list.append(desc);
     });
 
-    return std::move(map);
+    return std::move(list);
 }

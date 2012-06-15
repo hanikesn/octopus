@@ -24,7 +24,7 @@ QString DataProvider::getDBFileName()
     return filename;
 }
 
-void DataProvider::moveDB(QString newFilename)
+void DataProvider::moveDB(QString const& newFilename)
 {
     // delete the dbadapter so that the db connection is closed
     db.reset();
@@ -46,7 +46,7 @@ AbstractDataSeries* DataProvider::getDataSeries(const QString &fullName) const
 void DataProvider::onNewSender(EIDescriptionWrapper desc)
 {
     const QString deviceName = fromStdString(desc.d.getSender());
-    db->addSender(deviceName, fromStdString(desc.d.getDeviceType()));
+    db->addSender(desc.d);
 
     auto const& series = desc.d.getDataSeries();
 

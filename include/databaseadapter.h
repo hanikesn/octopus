@@ -16,17 +16,13 @@ public:
     template<typename T>
     void add(QString const& key, qint64 timestamp, T const& value);
 
-
     template<typename T>
     QMap<qint64, T> getData(QString const& key) const;
     template<typename T>
     QMap<qint64, T> getData(QString const& key, qint64 start, qint64 end) const;
 
-    void addSender(QString const& name, QString const& device_type);
-    QMap<QString, QString> getSenders();
-
-    void addSeries(QString const& sender, QString const& name, Value::Type type, Data::Properties properties, QString const& misc, double min, double max);
-    QMap<QString, QString> getSeries();
+    void addSender(EI::Description const& desc);
+    QList<EI::Description> getSenders();
 
 private:
     Sqlite::DB db;

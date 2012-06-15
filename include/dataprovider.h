@@ -36,7 +36,7 @@ public:
     /**
      * @brief Moves the database to a new location
      */
-    void moveDB(QString newFilename);
+    void moveDB(QString const& newFilename);
 
 signals:
     void unknownDataSeries();
