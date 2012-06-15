@@ -2,11 +2,11 @@
 
 #include "value.h"
 
-AbstractDataSeries::AbstractDataSeries(const DatabaseAdapter &db, const QString &deviceName, const QString &name, Data::Properties properties):
+AbstractDataSeries::AbstractDataSeries(const DataProvider &dp, const QString &deviceName, const QString &name, Data::Properties properties):
     deviceName(deviceName),
     dataSeriesName(name),
     props(properties),
-    db(db)
+    dp(dp)
 {
 }
 

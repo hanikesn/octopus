@@ -4,8 +4,8 @@
 
 #include <QDebug>
 
-DoubleSeries::DoubleSeries(const DatabaseAdapter &db, const QString &deviceName, const QString &name, Data::Properties properties) :
-    AbstractDataSeries(db, deviceName, name, properties)
+DoubleSeries::DoubleSeries(const DataProvider &dp, const QString &deviceName, const QString &name, Data::Properties properties) :
+    AbstractDataSeries(dp, deviceName, name, properties)
 {
 }
 
@@ -31,10 +31,10 @@ double DoubleSeries::getData(qint64 timestamp) const
 
 QMap<qint64, double> DoubleSeries::getData() const
 {
-    return db.getData<double>(fullName());
+    return dp.getDB().getData<double>(fullName());
 }
 
 QMap<qint64, double> DoubleSeries::getData(qint64 begin, qint64 end) const
 {
-    return db.getData<double>(fullName(), begin, end);
+    return dp.getDB().getData<double>(fullName(), begin, end);
 }

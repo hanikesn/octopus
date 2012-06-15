@@ -2,8 +2,8 @@
 
 #include "value.h"
 
-StringSeries::StringSeries(const DatabaseAdapter &db, const QString &deviceName, const QString &name, Data::Properties properties) :
-    AbstractDataSeries(db, deviceName, name, properties)
+StringSeries::StringSeries(const DataProvider &dp, const QString &deviceName, const QString &name, Data::Properties properties) :
+    AbstractDataSeries(dp, deviceName, name, properties)
 {
 }
 
@@ -29,10 +29,10 @@ QString StringSeries::getData(qint64 timestamp) const
 
 QMap<qint64, QString> StringSeries::getData() const
 {
-    return db.getData<QString>(fullName());
+    return dp.getDB().getData<QString>(fullName());
 }
 
 QMap<qint64, QString> StringSeries::getData(qint64 begin, qint64 end) const
 {
-    return db.getData<QString>(fullName(), begin, end);
+    return dp.getDB().getData<QString>(fullName(), begin, end);
 }

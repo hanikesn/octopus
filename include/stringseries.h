@@ -10,7 +10,7 @@ class StringSeries : public AbstractDataSeries
 {
     Q_OBJECT
 public:
-    StringSeries(const DatabaseAdapter &db, const QString& deviceName, const QString& dataSeriesName, Data::Properties properties);
+    StringSeries(const DataProvider &dp, const QString& deviceName, const QString& dataSeriesName, Data::Properties properties);
 
     /**
      * Visitor pattern.

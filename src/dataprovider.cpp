@@ -24,6 +24,11 @@ QString DataProvider::getDBFileName()
     return filename;
 }
 
+const DatabaseAdapter &DataProvider::getDB() const
+{
+    return *db;
+}
+
 void DataProvider::moveDB(QString const& newFilename)
 {
     // delete the dbadapter so that the db connection is closed
@@ -56,9 +61,9 @@ void DataProvider::onNewSender(EIDescriptionWrapper desc)
       AbstractDataSeries* series;
       EI::DataSeriesInfo::Properties props = p.second.getProperties();
       if (props & EI::DataSeriesInfo::INTERPOLATABLE) {
-          series = new DoubleSeries(*db, deviceName, fromStdString(p.first), convert(props));
+          series = new DoubleSeries(*this, deviceName, fromStdString(p.first), convert(props));
       } else {
-          series = new StringSeries(*db, deviceName, fromStdString(p.first), convert(props));
+          series = new StringSeries(*this, deviceName, fromStdString(p.first), convert(props));
       }
 
       dataSeries.insert(deviceName + "." + fromStdString(p.first), series);

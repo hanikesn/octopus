@@ -1,7 +1,6 @@
 #ifndef DATAPROVIDER_H
 #define DATAPROVIDER_H
 
-#include "abstractdataseries.h"
 #include "common.h"
 #include "databaseadapter.h"
 
@@ -10,6 +9,8 @@
 #include <QObject>
 #include <QtGlobal>
 #include <memory>
+
+class AbstractDataSeries;
 
 class DataProvider : public QObject
 {
@@ -37,6 +38,8 @@ public:
      * @brief Moves the database to a new location
      */
     void moveDB(QString const& newFilename);
+
+    DatabaseAdapter const& getDB() const;
 
 signals:
     void unknownDataSeries();
