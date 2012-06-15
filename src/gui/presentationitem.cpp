@@ -26,7 +26,6 @@ PresentationItem::PresentationItem(TimeLine *timeLine, TimeManager *timeManager,
     createSelection(false),
     currentTime(0),
     minCoverHeight(672),
-    scrollBarWidth(scrollBarWidth),
     playstate(STOPPED),
     timeMgr(timeManager)
 {
