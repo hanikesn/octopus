@@ -96,6 +96,18 @@ qint64 TimeManager::difference(int pos1, int pos2)
     return (pos2 - pos1) * timePerPx;
 }
 
+void TimeManager::center(qint64 timestamp)
+{
+    qint64 range = highVisRange - lowVisRange;
+
+    lowVisRange = timestamp - range/2;
+    highVisRange = timestamp + range/2;
+    emit rangeChanged(timestamp - range/2, timestamp + range/2);
+    hScrollBar->blockSignals(true);
+    hScrollBar->setValue(lowVisRange/1000000);
+    hScrollBar->blockSignals(false);
+}
+
 void TimeManager::onRangeChanged(qint64 begin, qint64 end)
 {
     lowVisRange = begin;

@@ -52,6 +52,8 @@ public:
 
     qint64 difference(int pos1, int pos2);
 
+    void center(qint64 timestamp);
+
 signals:
     void rangeChanged(qint64 begin, qint64 end);
 

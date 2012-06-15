@@ -328,6 +328,7 @@ void PresentationItem::onTimeout()
         cursor->setVisible(false);
     } else {
         timeMgr->addRange(timeMgr->getTimeoutUpdateIntervall());
+        cursor->setVisible(true);
     }
 }
 
@@ -361,7 +362,12 @@ void PresentationItem::onPlay()
         break;
     case PAUSED:
         playstate = PLAYING;
-        currentTime = timeLine->convertPosToTime(cursor->pos().x());
+//        currentTime = timeLine->convertPosToTime(cursor->pos().x());
+        if (currentTime > timeMgr->getHighVisRange() || currentTime < timeMgr->getLowVisRange()) {
+            timeMgr->center(currentTime);
+            changeCursorPos(timeMgr->convertTimeToPos(currentTime) + ACTIONAREAOFFSET);
+
+        }
         timer.start();        
         break;
     case STOPPED:
