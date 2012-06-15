@@ -157,8 +157,9 @@ void PresentationItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
                 timeMgr->difference(0, begin - ACTIONAREAOFFSET);
         qint64 highRange = lowRange + timeMgr->difference(begin, begin + width);
         emit selection(lowRange, highRange);
-    } else if (playstate != PLAYING) {
+    } else {
         changeCursorPos(event->pos().x());
+        currentTime = timeMgr->convertPosToTime(event->pos().x() - ACTIONAREAOFFSET);
         showCursor();
     }
 }
@@ -218,8 +219,10 @@ void PresentationItem::recalcBoundingRec()
 
 void PresentationItem::changeCursorPos(int pos)
 {
+    currCursorTime = timeMgr->convertPosToTime(cursor->pos().x() - ACTIONAREAOFFSET);
     if(pos < ACTIONAREAOFFSET) return;
-    cursor->setPos(pos, 0);
+    cursor->setVisible(true);
+    cursor->setPos(pos, 0);    
 }
 
 void PresentationItem::onChangedViewSize(QSize size)
@@ -297,19 +300,17 @@ bool PresentationItem::isVisible(Track *t)
                 return true;
             else
                 return false;
-
         }
     }
 }
 
 void PresentationItem::onTimeout()
-{
-    //TODO(domi): Auf Rundungsfehler achten
+{    
     //TODO(domi): magic numbers entfernen    
     if(cursor->pos().x() < boundingRectangle.width() - 12){// cursor hasn't reached right border yet
         // determine position for currentTime + 40ms
         currentTime += 40000;
-        changeCursorPos(timeLine->convertTimeToPos(currentTime) + ACTIONAREAOFFSET);
+        changeCursorPos(timeLine->convertTimeToPos(currentTime) + ACTIONAREAOFFSET);        
     } else {
         timeMgr->addRange(40000);
     }
@@ -318,6 +319,15 @@ void PresentationItem::onTimeout()
 void PresentationItem::onHorizontalScroll()
 {
     showCursor();
+    if (playstate == PLAYING){
+        int pos = timeMgr->convertTimeToPos(currCursorTime);
+        if (pos == -1) {
+            // dont show cursor
+            cursor->setVisible(false);
+        } else if (pos + ACTIONAREAOFFSET < visRect.width()) {
+            changeCursorPos(pos + ACTIONAREAOFFSET);
+        }
+    }
 }
 
 void PresentationItem::onPlay()

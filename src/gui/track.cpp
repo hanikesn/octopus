@@ -188,6 +188,8 @@ void Track::onSources()
         foreach (QString source, sources.first()) {
             addSource(source);
         }
+        // only show the legend if the track is not empty
+        ui.plot->legend->setVisible(!sources.first().isEmpty());
         ui.plot->replot();
     }
 }
