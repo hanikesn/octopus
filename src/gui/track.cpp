@@ -18,8 +18,8 @@ const QString Track::ICON_AS_BUTTON = QString(
 
 Track::Track(const DataProvider &dataProvider, QWidget *parent) :
     QWidget(parent),
-    dataProvider(dataProvider),
     optPlotMarginLeft(0),
+    dataProvider(dataProvider),
     lowRange(-1),
     highRange(-1)
 {
@@ -33,8 +33,8 @@ Track::Track(const DataProvider &dataProvider, QWidget *parent) :
 
 Track::Track(const DataProvider &dataProvider, const QString &fullDataSeriesName, QWidget *parent) :
     QWidget(parent),
-    dataProvider(dataProvider),
-    optPlotMarginLeft(0)
+    optPlotMarginLeft(0),
+    dataProvider(dataProvider)
 {
     init();
 
@@ -43,8 +43,8 @@ Track::Track(const DataProvider &dataProvider, const QString &fullDataSeriesName
 
 Track::Track(const DataProvider &dataProvider, const QStringList &fullDataSeriesNames, QWidget *parent) :
     QWidget(parent),
-    dataProvider(dataProvider),
-    optPlotMarginLeft(0)
+    optPlotMarginLeft(0),
+    dataProvider(dataProvider)
 {
     init();
 
