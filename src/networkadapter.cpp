@@ -3,21 +3,27 @@
 #include "value.h"
 
 #include <algorithm>
+#include <iostream>
+#include <QDebug>
 
 NetworkAdapter::NetworkAdapter()
     : receiver(EI::StringMap())
 {
+    knownSenders.insert("Receiver");
     receiver.addCommunicationListener(this);
     receiver.addDataListener(this);
-
-    receiver.discoverSenders();
-    lastDiscoverSent = startTime = Clock::now();
 }
 
 NetworkAdapter::~NetworkAdapter()
 {
     receiver.removeDataListener(this);
     receiver.removeCommunicationListener(this);
+}
+
+void NetworkAdapter::discoverSenders()
+{
+    receiver.discoverSenders();
+    lastDiscoverSent = startTime = Clock::now();
 }
 
 void NetworkAdapter::onMessage(EI::DataMessage msg)
@@ -32,24 +38,11 @@ void NetworkAdapter::onMessage(EI::DataMessage msg)
 
     qint64 timestamp = boost::chrono::duration_cast<boost::chrono::microseconds>(now - startTime).count();
 
-    auto const& prefix = QString::fromUtf8(msg.getSender().c_str()) + ".";
+    const QString prefix = fromStdString(msg.getSender()) + ".";
 
     foreach(auto const& p, msg.getContent()) {
-        emit onNewData(timestamp, prefix + fromStdString(p.first), Value(p.second));
+        emit onNewData(timestamp, QString(prefix +  fromStdString(p.first)), Value(p.second));
     }
-}
-
-static Data::Properties convert(EI::DataSeriesInfo::Properties prop)
-{
-    Data::Properties result;
-
-    if(prop & EI::DataSeriesInfo::INTERPOLATABLE)
-        result |= Data::INTERPOLATABLE;
-
-    if(prop & EI::DataSeriesInfo::STATEFUL)
-        result |= Data::STATEFUL;
-
-    return result;
 }
 
 void NetworkAdapter::onMessage(EI::Message const& msg)
@@ -57,17 +50,8 @@ void NetworkAdapter::onMessage(EI::Message const& msg)
     if(msg.getMsgType()==EI::DescriptionMessage::IDENTIFIER)
     {
         auto const& d = dynamic_cast<EI::DescriptionMessage const&>(msg);
-        auto const& c = d.getDescription().getDataSeries();
-        auto const& sender = fromStdString(d.getSender());
-        std::for_each(c.begin(), c.end(),
-            [this, &sender](EI::DataSeriesInfoMap::value_type const& p)
-        {
-            emit onNewDataSeries(
-                          sender,
-                          fromStdString(p.first.c_str()),
-                          convert(p.second.getProperties())
-                );
-        });
+        auto const& desc = d.getDescription();
+        emit onNewSender(desc);
         knownSenders.insert(d.getSender());
     }
 }

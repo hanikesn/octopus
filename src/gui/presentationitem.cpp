@@ -4,6 +4,7 @@
 #include <QGraphicsItem>
 #include <QGraphicsSceneMouseEvent>
 #include <QScrollBar>
+#include <QGraphicsView>
 
 #include "gui/track.h"
 #include "gui/selection.h"
@@ -14,16 +15,16 @@
 const int PresentationItem::ACTIONAREAOFFSET = 52;
 const int PresentationItem::TIMEFRAME = 30000000;
 
-PresentationItem::PresentationItem(QScrollBar *hScrollBar, TimeLine *timeLine,
-                                   TimeManager *timeManager, QGraphicsScene *parent) :
+PresentationItem::PresentationItem(TimeLine *timeLine, TimeManager *timeManager,
+                                   QGraphicsScene *parent) :
     QGraphicsItem(0, parent),
     parent(parent),    
     timeLine(timeLine),
     boundingRectangle(0, 0, 0, 0),
-    visRect(0, 0, 100, 672),
-    hScrollBar(hScrollBar),
+    visRect(0, 0, 100, 672),    
     autoScroll(false),
-    createSelection(false),        
+    createSelection(false),
+    currentTime(0),
     minCoverHeight(672),
     playstate(STOPPED),
     timeMgr(timeManager)
@@ -45,7 +46,7 @@ PresentationItem::PresentationItem(QScrollBar *hScrollBar, TimeLine *timeLine,
     boundingRectangle.setHeight(timeLine->size().height());
 
     timer.setSingleShot(false);
-    timer.setInterval(40);
+    timer.setInterval(timeMgr->getTimeoutIntervall());
 
     connect(selectedArea, SIGNAL(exportTriggered()),    this, SIGNAL(exportTriggered()));
     connect(&timer, SIGNAL(timeout()),                  this, SLOT(onTimeout()));
@@ -156,7 +157,8 @@ void PresentationItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
                 timeMgr->difference(0, begin - ACTIONAREAOFFSET);
         qint64 highRange = lowRange + timeMgr->difference(begin, begin + width);
         emit selection(lowRange, highRange);
-    } else if (playstate != PLAYING) {
+    } else if (event->pos().x() >= ACTIONAREAOFFSET) {
+        currentTime = timeMgr->convertPosToTime(event->pos().x()- ACTIONAREAOFFSET);
         changeCursorPos(event->pos().x());
         showCursor();
     }
@@ -217,7 +219,8 @@ void PresentationItem::recalcBoundingRec()
 
 void PresentationItem::changeCursorPos(int pos)
 {
-    if(pos < ACTIONAREAOFFSET) return;
+    if (pos < ACTIONAREAOFFSET) return;
+    cursor->setVisible(true);
     cursor->setPos(pos, 0);
 }
 
@@ -226,6 +229,7 @@ void PresentationItem::onChangedViewSize(QSize size)
     //TODO(domi): damit erscheint am Anfang kein vertikaler Scrollbalken --> Ursache finden!
     minCoverHeight = size.height()-2;
     visRect.setHeight(size.height());
+    visRect.setWidth(size.width());
 
     // resize cursor, timeLine, selectedArea
     if(boundingRectangle.height() > minCoverHeight){
@@ -238,7 +242,7 @@ void PresentationItem::onChangedViewSize(QSize size)
         timeLine->resize(size.width(), timeLine->size().height());
     }
 
-    recalcBoundingRec();
+    recalcBoundingRec();        
     timeMgr->updateRange();
 }
 
@@ -269,6 +273,17 @@ void PresentationItem::showCursor()
     emit selection(-1, -1);
 }
 
+int PresentationItem::getRightBorder()
+{
+    if (parent->views().at(0)->verticalScrollBar()->isVisible()) { // there is a scrollbar
+        // subtract size of scrollbar
+        return boundingRectangle.width() -
+                parent->views().at(0)->verticalScrollBar()->size().width() - 6;
+    }
+    else
+        return boundingRectangle.width() - 3;
+}
+
 void PresentationItem::save(QVariantMap *qvm)
 {
     qvm->insert("cursorPos", cursor->pos().toPoint().x());
@@ -287,7 +302,7 @@ bool PresentationItem::isVisible(Track *t)
     int trackMaxY = 0;
 
     foreach (QGraphicsProxyWidget *gpw, tracks){
-        if(gpw->widget() == t){
+        if (gpw->widget() == t) {
             trackMinY = gpw->pos().y();
             trackMaxY = trackMinY + gpw->size().height();
 
@@ -296,27 +311,44 @@ bool PresentationItem::isVisible(Track *t)
                 return true;
             else
                 return false;
-
         }
     }
+    return false;
 }
 
 void PresentationItem::onTimeout()
 {
-    //TODO(domi): Auf Rundungsfehler achten
-    //TODO(domi): magic numbers entfernen    
-    if(cursor->pos().x() < boundingRectangle.width() - 12){// cursor hasn't reached right border yet
-        // determine position for currentTime + 40ms
-        currentTime += 40000;
-        changeCursorPos(timeLine->convertTimeToPos(currentTime) + ACTIONAREAOFFSET);
+    currentTime += timeMgr->getTimeoutUpdateIntervall();
+    if (cursor->pos().x() < getRightBorder()) { // cursor hasn't reached right border yet
+        // determine position for currentTime + updateIntervall
+        changeCursorPos(timeLine->convertTimeToPos(currentTime) + ACTIONAREAOFFSET);        
+    } else if (currentTime > timeMgr->getHighVisRange()) {
+        // currentTime is further then the currently visible range
+        cursor->setVisible(false);
     } else {
-        timeMgr->addRange(40000);
+        timeMgr->addRange(timeMgr->getTimeoutUpdateIntervall());
+        cursor->setVisible(true);
     }
 }
 
 void PresentationItem::onHorizontalScroll()
 {
     showCursor();
+    if (playstate == PLAYING) {
+        int pos = timeMgr->convertTimeToPos(currentTime);
+        if (pos == -1)
+            // dont show cursor
+            cursor->setVisible(false);
+        else if (pos + ACTIONAREAOFFSET < visRect.width())
+            changeCursorPos(pos + ACTIONAREAOFFSET);
+    } else {
+        // keep cursor at its current point of time, not the current position/coordinate
+        int newPos = timeMgr->convertTimeToPos(currentTime);
+        if (newPos == -1)
+            cursor->setVisible(false);
+        else
+            changeCursorPos(newPos + ACTIONAREAOFFSET);
+    }
 }
 
 void PresentationItem::onPlay()
@@ -329,7 +361,12 @@ void PresentationItem::onPlay()
         break;
     case PAUSED:
         playstate = PLAYING;
-        currentTime = timeLine->convertPosToTime(cursor->pos().x());
+//        currentTime = timeLine->convertPosToTime(cursor->pos().x());
+        if (currentTime > timeMgr->getHighVisRange() || currentTime < timeMgr->getLowVisRange()) {
+            timeMgr->center(currentTime);
+            changeCursorPos(timeMgr->convertTimeToPos(currentTime) + ACTIONAREAOFFSET);
+
+        }
         timer.start();        
         break;
     case STOPPED:

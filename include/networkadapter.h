@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "value.h"
+#include "metadata.h"
 
 #include <EIToolkit.h>
 #include <QObject>
@@ -20,11 +21,13 @@ public:
     NetworkAdapter();
     ~NetworkAdapter();
 
+    void discoverSenders();
+
     virtual void onMessage(EI::DataMessage msg);
     virtual void onMessage(EI::Message const& msg);
 
 signals:
-    void onNewDataSeries(QString deviceName, QString dataSeriesName, Data::Properties properties);
+    void onNewSender(EIDescriptionWrapper);
 
     void onNewData(qint64 timestamp, QString fullDataSeriesName, Value value);
 

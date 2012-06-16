@@ -1,23 +1,25 @@
 #include "timemanager.h"
 
-
-//TODO(domi): drawFrom in TimeLine rauswerfen und mit signal rangeChanged() verbinden.
+#include <QDebug>
 
 TimeManager::TimeManager(QScrollBar *hScrollBar, TimeLine *timeLine):
     lowVisRange(0),
     highVisRange(0),
-    hScrollBar(hScrollBar),
-    timeLine(timeLine),
     timePerPx(40000),
-    autoScroll(false)
+    timeoutUpdateIntervall(40000),
+    timeoutIntervall(40),
+    autoScroll(false),
+    hScrollBar(hScrollBar),
+    timeLine(timeLine)
 {
     hScrollBar->setSingleStep(1);
     hScrollBar->setPageStep(30);
     hScrollBar->setMinimum(0);
     hScrollBar->setMaximum(0);
 
-    connect(hScrollBar, SIGNAL(sliderMoved(int)), this, SLOT(horizontalScroll(int)));
-    connect(hScrollBar, SIGNAL(valueChanged(int)), this, SLOT(horizontalScroll(int)));
+    connect(hScrollBar, SIGNAL(sliderMoved(int)),       this, SLOT(horizontalScroll(int)));
+    connect(hScrollBar, SIGNAL(valueChanged(int)),      this, SLOT(horizontalScroll(int)));
+    connect(this, SIGNAL(rangeChanged(qint64,qint64)),  this, SLOT(onRangeChanged(qint64,qint64)));
 
     highVisRange = timeLine->getUpperEnd(0);    
 }
@@ -28,7 +30,8 @@ TimeManager::~TimeManager()
 
 qint64 TimeManager::convertPosToTime(int pos)
 {
-    return lowVisRange + (pos * timePerPx);
+    qint64 result = lowVisRange + (pos * timePerPx);
+    return result;
 }
 
 int TimeManager::convertTimeToPos(qint64 time)
@@ -47,19 +50,18 @@ int TimeManager::convertTimeToPos(qint64 time)
 void TimeManager::addRange(qint64 delta)
 {
     if (delta <= 0) return;
-    lowVisRange += delta;
-    highVisRange += delta;
-    emit rangeChanged(lowVisRange, highVisRange);
+    emit rangeChanged(lowVisRange + delta, highVisRange + delta);
 
+    // no signals necessary if we trigger them ourselves
+    hScrollBar->blockSignals(true);
     hScrollBar->setValue(lowVisRange/1000000);
-    timeLine->drawFrom(lowVisRange);
+    hScrollBar->blockSignals(false);
 }
 
 void TimeManager::updateRange()
 {
     highVisRange = getUpperEnd(lowVisRange);
     emit rangeChanged(lowVisRange, highVisRange);
-    timeLine->drawFrom(lowVisRange);
 }
 
 void TimeManager::load(QVariantMap *qvm)
@@ -69,10 +71,10 @@ void TimeManager::load(QVariantMap *qvm)
     highVisRange = visibleArea["high"].toLongLong();
 
     emit rangeChanged(lowVisRange, highVisRange);
-    timeLine->drawFrom(lowVisRange);
 
     // step-size of scrollbar is 1 second --> left border of timeline is always a full second
     // so we can set the value of the scrollbars slider to the second visRangeLow represents
+    disconnect(this, SIGNAL(horizontalScroll(int)));
     hScrollBar->setValue(lowVisRange/1000000);
 }
 
@@ -94,11 +96,22 @@ qint64 TimeManager::difference(int pos1, int pos2)
     return (pos2 - pos1) * timePerPx;
 }
 
+void TimeManager::center(qint64 timestamp)
+{
+    qint64 range = highVisRange - lowVisRange;
+
+    lowVisRange = timestamp - range/2;
+    highVisRange = timestamp + range/2;
+    emit rangeChanged(timestamp - range/2, timestamp + range/2);
+    hScrollBar->blockSignals(true);
+    hScrollBar->setValue(lowVisRange/1000000);
+    hScrollBar->blockSignals(false);
+}
+
 void TimeManager::onRangeChanged(qint64 begin, qint64 end)
 {
     lowVisRange = begin;
     highVisRange = end;
-
     timeLine->drawFrom(begin);
 }
 
@@ -119,11 +132,10 @@ void TimeManager::onNewMax(qint64 timestamp)
 }
 
 void TimeManager::horizontalScroll(int pos)
-{    
+{
     lowVisRange = pos*1000000;
     highVisRange = getUpperEnd(lowVisRange);
     emit rangeChanged(lowVisRange, highVisRange);
-    timeLine->drawFrom(lowVisRange);
 
     emit horizontalScroll();
 }

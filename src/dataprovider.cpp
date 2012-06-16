@@ -5,29 +5,34 @@
 #include "stringseries.h"
 #include "value.h"
 
+#include <QDir>
 #include <cmath>
 
-DataProvider::DataProvider(QString const& filename) :
-    db(filename), currentMax(0)
+DataProvider::DataProvider(QString const& filename, QObject *parent) :
+    QObject(parent), db(new DatabaseAdapter(filename)), filename(filename), currentMax(0)
 {
-    addData();
+    QList<EI::Description> list = db->getSenders();
+
+    foreach(EI::Description const& d, list)
+    {
+        foreach(EI::DataSeriesInfoMap::value_type const& info, d.getDataSeries())
+        {
+            addSeries(fromStdString(d.getSender()), fromStdString(info.first), info.second);
+        }
+    }
 }
 
-void DataProvider::addData()
+DataProvider::~DataProvider()
 {
-    onNewDataSeries("Dummy", "Interpolatable.x", Data::INTERPOLATABLE);
-    onNewDataSeries("Dummy", "Interpolatable.y", Data::INTERPOLATABLE);
-    onNewDataSeries("Dummy-2", "Interpolatable.x", Data::INTERPOLATABLE);
-    onNewDataSeries("Dummy-2", "Interpolatable.y", Data::INTERPOLATABLE);
-    onNewDataSeries("Dummy", "Discrete", Data::STATEFUL);
-
-    for (int j=0; j<500; ++j)
+    foreach(AbstractDataSeries* d, dataSeries)
     {
-      double d = j/15.0 * 5*3.14 + 0.01;
-      onNewData(d*1000000, "Dummy.Interpolatable.x", Value(7*sin(d)/d));
-      onNewData(d*1000000, "Dummy.Interpolatable.y", Value(-7*sin(d)/d));
-      onNewData(d*1000000, "Dummy.Discrete", Value("ping"));
+        d->deleteLater();
     }
+}
+
+void DataProvider::closeDB()
+{
+    db.reset();
 }
 
 QList<QString> DataProvider::getDataSeriesList() const
@@ -35,26 +40,69 @@ QList<QString> DataProvider::getDataSeriesList() const
     return dataSeries.keys();
 }
 
+QString DataProvider::getDBFileName()
+{
+    return filename;
+}
+
+const DatabaseAdapter &DataProvider::getDB() const
+{
+    return *db;
+}
+
+void DataProvider::moveDB(QString const& newFilename)
+{
+    // delete the dbadapter so that the db connection is closed
+    db.reset();
+
+    if(QDir().rename(filename, newFilename)) {
+        QDir().remove(filename + "-wal");
+        QDir().remove(filename + "-shm");
+        filename = newFilename;
+    }
+
+    db = std::unique_ptr<DatabaseAdapter>(new DatabaseAdapter(filename));
+}
+
 AbstractDataSeries* DataProvider::getDataSeries(const QString &fullName) const
 {
     return dataSeries.value(fullName);
 }
 
-void DataProvider::onNewDataSeries(QString deviceName, QString dataSeriesName, Data::Properties properties)
+void DataProvider::onNewSender(EIDescriptionWrapper desc)
 {
-    AbstractDataSeries *series;
-    if (properties & Data::INTERPOLATABLE) {
-        series = new DoubleSeries(db, deviceName, dataSeriesName, properties);
+    if(!db)
+        return;
+    const QString deviceName = fromStdString(desc.d.getSender());
+    db->addSender(desc.d);
+
+    auto const& series = desc.d.getDataSeries();
+
+    std::for_each(series.begin(), series.end(),
+            [this, &deviceName](EI::DataSeriesInfoMap::value_type p)
+    {
+        addSeries(deviceName, fromStdString(p.first), p.second);
+    });
+}
+
+void DataProvider::addSeries(QString const& device_name, QString const& name, EI::DataSeriesInfo const& info)
+{
+    AbstractDataSeries* series;
+    EI::DataSeriesInfo::Properties props = info.getProperties();
+    if (props & EI::DataSeriesInfo::INTERPOLATABLE) {
+        series = new DoubleSeries(*this, device_name, name, convert(props));
     } else {
-        series = new StringSeries(db, deviceName, dataSeriesName, properties);
+        series = new StringSeries(*this, device_name, name, convert(props));
     }
 
-    dataSeries.insert(deviceName + "." + dataSeriesName, series);
+    dataSeries.insert(device_name + "." + name, series);
 }
 
 void DataProvider::onNewData(qint64 timestamp, QString fullDataSeriesName, Value value)
 {
-    db.add(fullDataSeriesName, timestamp, value);
+    if(!db)
+        return;
+    db->add(fullDataSeriesName, timestamp, value);
 
     if (dataSeries.contains(fullDataSeriesName)) {
         dataSeries.value(fullDataSeriesName)->addData(timestamp, value);

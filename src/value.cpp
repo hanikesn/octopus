@@ -1,6 +1,12 @@
 #include "value.h"
 #include <EIValue.h>
 
+Value::Value()
+    : type(EMPTY)
+{
+
+}
+
 Value::Value(EI::Value const& value)
 {
     auto t = value.getType();

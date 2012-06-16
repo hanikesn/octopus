@@ -27,7 +27,6 @@ class MainWindow : public QMainWindow
     
 public:
     explicit MainWindow(QWidget *parent = 0);
-    ~MainWindow();
 
 protected:
     void closeEvent(QCloseEvent *ce);
@@ -78,7 +77,7 @@ private:
 
     HorizontalScrollBar *hScrollBar;
 
-    QString projectName, projectPath;
+    QString projectPath;
 
     const static QString TITLE;
 

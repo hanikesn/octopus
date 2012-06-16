@@ -10,8 +10,9 @@ namespace EI {
 class Value
 {
 public:
-    enum Type {DOUBLE, STRING};
+    enum Type {DOUBLE, STRING, EMPTY};
 
+    Value();
     explicit Value(EI::Value const& value);
     explicit Value(const QString& value);
     explicit Value(double value);
@@ -22,7 +23,6 @@ public:
     double asDouble() const;
 
 private:
-    Value();
 
     Type type;
     double d;

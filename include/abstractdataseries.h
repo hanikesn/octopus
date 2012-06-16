@@ -1,10 +1,10 @@
 #ifndef ABSTRACTDATASERIES_H
 #define ABSTRACTDATASERIES_H
 
-#include "common.h"
+#include "metadata.h"
 #include "visitor.h"
 #include "value.h"
-#include "databaseadapter.h"
+#include "dataprovider.h"
 
 #include <QMap>
 #include <QObject>
@@ -14,7 +14,7 @@ class AbstractDataSeries : public QObject, public Visitable
     Q_OBJECT
 public:
     virtual ~AbstractDataSeries() {}
-    AbstractDataSeries(const DatabaseAdapter &db, const QString &deviceName, const QString &dataSeriesName, Data::Properties properties);
+    AbstractDataSeries(const DataProvider &dp, const QString &deviceName, const QString &dataSeriesName, Data::Properties properties);
 
     /**
      * Visitor pattern.
@@ -50,7 +50,7 @@ private:
 
 
 protected:
-    const DatabaseAdapter &db;
+    const DataProvider &dp;
 };
 
 #endif // ABSTRACTDATASERIES_H
