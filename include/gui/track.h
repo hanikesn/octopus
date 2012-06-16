@@ -18,6 +18,8 @@ class Track : public QWidget, public DataSeriesVisitor, public Serializable
 {
     Q_OBJECT
 public:
+    int optPlotMarginLeft;
+
     Track(const DataProvider &dataProvider, QWidget *parent = 0);
     Track(const DataProvider &dataProvider, const QString &fullDataSeriesName, QWidget *parent = 0);
     Track(const DataProvider &dataProvider, const QStringList &fullDataSeriesNames, QWidget *parent = 0);
@@ -28,12 +30,13 @@ public:
     void addGraph(const DoubleSeries &s);
     void addGraph(const StringSeries &s);
 
-    void setOffset(int pixel);
+    void setOffset(int offset);
 
     void save(QVariantMap *qvm);
     void load(QVariantMap *qvm);
 
 signals:
+    void optPlotMarginsChanged();
     void del(Track*);
 
 public slots:
@@ -45,8 +48,6 @@ private:
 
     const DataProvider &dataProvider;
     QList<Graph*> graphs;
-
-    int offset;
 
     qint64 lowRange, highRange;
 
@@ -64,6 +65,7 @@ private slots:
     void onDelete();
     void onSources();
     void onPlotSettings();
+    void onOptPlotMarginsChanged(int left, int /*right*/, int /*top*/, int /*bottom*/);
 };
 
 #endif // Track_H

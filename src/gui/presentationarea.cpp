@@ -69,8 +69,12 @@ void PresentationArea::onAddTrack()
 Track* PresentationArea::add(const QList<QString>& fullDataSeriesNames)
 {    
     Track *t = new Track(dataProvider, fullDataSeriesNames);
-    tracks.append(t);
+    connect(t, SIGNAL(optPlotMarginsChanged()), this, SLOT(updatePlotMargins()));
     connect(t, SIGNAL(del(Track*)), this, SLOT(onDelete(Track*)));
+
+    tracks.append(t);
+    updatePlotMargins();
+
     pi->addTrack(t);
     t->resize(currentViewSize.width(), t->size().height());
     t->setPlotRange(timeManager->getLowVisRange(), timeManager->getHighVisRange());
@@ -91,12 +95,32 @@ void PresentationArea::onDelete(Track *t)
 
 void PresentationArea::onRangeChanged(qint64 begin, qint64 end)
 {            
-    foreach(Track *t, tracks) {
+    foreach (Track *t, tracks) {
         if (pi->isVisible(t))
             t->setPlotRange(begin, end);
     }
     if (!tracks.isEmpty())
         unsavedChanges = true;
+}
+
+void PresentationArea::updatePlotMargins()
+{
+    // determine the optimal plot margin over all tracks
+    int optMargin = 0;
+    foreach (Track *t, tracks) {
+        if (optMargin < t->optPlotMarginLeft) {
+            optMargin = t->optPlotMarginLeft;
+        }
+    }
+
+    setPlotMargins(optMargin);
+}
+
+void PresentationArea::setPlotMargins(int newMargin)
+{
+    foreach (Track *t, tracks) {
+        t->setOffset(newMargin);
+    }
 }
 
 void PresentationArea::onChangedViewSize(QSize size)

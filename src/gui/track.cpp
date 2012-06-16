@@ -19,7 +19,7 @@ const QString Track::ICON_AS_BUTTON = QString(
 Track::Track(const DataProvider &dataProvider, QWidget *parent) :
     QWidget(parent),
     dataProvider(dataProvider),
-    offset(52),
+    optPlotMarginLeft(0),
     lowRange(-1),
     highRange(-1)
 {
@@ -33,7 +33,8 @@ Track::Track(const DataProvider &dataProvider, QWidget *parent) :
 
 Track::Track(const DataProvider &dataProvider, const QString &fullDataSeriesName, QWidget *parent) :
     QWidget(parent),
-    dataProvider(dataProvider)
+    dataProvider(dataProvider),
+    optPlotMarginLeft(0)
 {
     init();
 
@@ -42,7 +43,8 @@ Track::Track(const DataProvider &dataProvider, const QString &fullDataSeriesName
 
 Track::Track(const DataProvider &dataProvider, const QStringList &fullDataSeriesNames, QWidget *parent) :
     QWidget(parent),
-    dataProvider(dataProvider)
+    dataProvider(dataProvider),
+    optPlotMarginLeft(0)
 {
     init();
 
@@ -74,7 +76,8 @@ void Track::setupButtons()
 
 void Track::setupPlot()
 {
-    setPlotRange(0, 30);
+    ui.plot->setAutoMargin(false);
+    connect(ui.plot, SIGNAL(optMarginsChanged(int,int,int,int)), this, SLOT(onOptPlotMarginsChanged(int,int,int,int)));
 
     ui.plot->legend->setVisible(true);
     ui.plot->legend->setPositionStyle(QCPLegend::psTopLeft);
@@ -190,6 +193,9 @@ void Track::onSources()
         }
         // only show the legend if the track is not empty
         ui.plot->legend->setVisible(!sources.first().isEmpty());
+
+        // TODO(Steffi): Remove
+        ui.plot->setMarginLeft(ui.plot->marginLeft() + 10);
         ui.plot->replot();
     }
 }
@@ -200,9 +206,18 @@ void Track::onPlotSettings()
     // TODO(Steffi)
 }
 
-void Track::setOffset(int pixel)
+void Track::onOptPlotMarginsChanged(int left, int /*right*/, int /*top*/, int /*bottom*/)
 {
-    offset = pixel;
+    optPlotMarginLeft = left;
+    emit optPlotMarginsChanged();
+}
+
+void Track::setOffset(int offset)
+{
+    if (offset != ui.plot->marginLeft()) {
+        ui.plot->setMarginLeft(offset);
+    }
+    ui.plot->replot();
 }
 
 void Track::save(QVariantMap *qvm)

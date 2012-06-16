@@ -70,6 +70,8 @@ private slots:
       */
     void onRangeChanged(qint64 begin, qint64 end);
 
+    void updatePlotMargins();
+
 private:    
     PresentationItem *pi;
 
@@ -90,6 +92,8 @@ private:
     void addTrack(const QList<QString>& fullDataSeriesNames);
     void addTracks(const QList<QString>& fullDataSeriesNames);
     Track* add(const QList<QString>& fullDataSeriesNames);
+
+    void setPlotMargins(int newMargin);
 };
 
 #endif // PRESENTATIONAREA_H

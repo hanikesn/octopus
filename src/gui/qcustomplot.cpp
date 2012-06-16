@@ -5725,6 +5725,14 @@ int QCPAxis::calculateMargin() const
   \see setInteractions, QCPAbstractPlottable::selectionChanged, QCPAxis::selectionChanged
 */
 
+/*! \fn void QCustomPlot::optMarginsChanged(int left, int right, int top, int bottom)
+
+  This signal is emitted when the optimal value for at least one of the plot's margins has changed
+  and \ref setAutoMargin is set to false (margins are calculated by \ref calculateMargins in \ref draw).
+
+  \see calculateMargins, draw
+*/
+
 /*! \fn void QCustomPlot::beforeReplot()
   
   This signal is emitted immediately before a replot takes place (caused by a call to the slot \ref
@@ -8034,13 +8042,26 @@ void QCustomPlot::draw(QCPPainter *painter)
   xAxis2->setupTickVectors();
   yAxis2->setupTickVectors();
   // set auto margin such that tick/axis labels etc. are not clipped:
+  int optMarginLeft = yAxis->calculateMargin();
+  int optMarginRight = yAxis2->calculateMargin();
+  int optMarginTop = xAxis2->calculateMargin() + mTitleBoundingBox.height();
+  int optMarginBottom = xAxis->calculateMargin();
+
+  if (optMarginLeft != mMarginLeft
+          || optMarginRight != mMarginRight
+          || optMarginTop != mMarginTop
+          || optMarginBottom != mMarginBottom) {
+      emit optMarginsChanged(optMarginLeft, optMarginRight, optMarginTop, optMarginBottom);
+  }
+
   if (mAutoMargin)
   {
-    setMargin(yAxis->calculateMargin(),
-              yAxis2->calculateMargin(),
-              xAxis2->calculateMargin()+mTitleBoundingBox.height(),
-              xAxis->calculateMargin());
+    setMargin(optMarginLeft,
+              optMarginRight,
+              optMarginTop,
+              optMarginBottom);
   }
+
   // position legend:
   legend->reArrange();
   

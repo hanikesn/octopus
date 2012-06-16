@@ -77,7 +77,6 @@ void PresentationItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *
 void PresentationItem::addTrack(Track *t)
 {    
     t->setPlotRange(timeMgr->getLowVisRange(), timeMgr->getHighVisRange());
-    t->setOffset(ACTIONAREAOFFSET);
 
     boundingRectangle.setHeight(boundingRectangle.height() + t->size().height());
     if(t->size().width() > boundingRectangle.width())
