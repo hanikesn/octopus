@@ -30,7 +30,8 @@ public:
     void addGraph(const DoubleSeries &s);
     void addGraph(const StringSeries &s);
 
-    void setOffset(int offset);
+    int getPlotOffset();
+    void setPlotMarginLeft(int margin);
 
     void save(QVariantMap *qvm);
     void load(QVariantMap *qvm);

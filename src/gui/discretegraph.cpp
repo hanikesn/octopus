@@ -6,6 +6,7 @@ const QCPRange RANGE(0.0, 1.0);
 const double IMPULSE_HEIGHT = RANGE.lower + 0.4 * RANGE.size();
 
 DiscreteGraph::DiscreteGraph(QCustomPlot *plot, const StringSeries &s) :
+    Graph(plot),
     series(s),
     plot(plot)
 {
@@ -20,11 +21,9 @@ DiscreteGraph::DiscreteGraph(QCustomPlot *plot, const StringSeries &s) :
     plot->replot();
 }
 
-DiscreteGraph::~DiscreteGraph()
+QCPGraph* DiscreteGraph::getGraph()
 {
-    // graph is deleted by plot upon removal
-    plot->removeGraph(graph);
-    plot->replot();
+    return graph;
 }
 
 QString DiscreteGraph::dataSeriesName()

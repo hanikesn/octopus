@@ -15,7 +15,8 @@ class DiscreteGraph : public Graph
     Q_OBJECT
 public:
     explicit DiscreteGraph(QCustomPlot *plot, const StringSeries &s);
-    ~DiscreteGraph();
+
+    QCPGraph* getGraph();
 
     QString dataSeriesName();
 

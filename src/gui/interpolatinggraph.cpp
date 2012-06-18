@@ -3,6 +3,7 @@
 #include "gui/qcustomplot.h"
 
 InterpolatingGraph::InterpolatingGraph(QCustomPlot *plot, const DoubleSeries &d) :
+    Graph(plot),
     series(d),
     plot(plot)
 {
@@ -16,11 +17,9 @@ InterpolatingGraph::InterpolatingGraph(QCustomPlot *plot, const DoubleSeries &d)
     plot->replot();
 }
 
-InterpolatingGraph::~InterpolatingGraph()
+QCPGraph* InterpolatingGraph::getGraph()
 {
-    // graph is deleted by plot upon removal
-    plot->removeGraph(graph);
-    plot->replot();
+    return graph;
 }
 
 QString InterpolatingGraph::dataSeriesName()
