@@ -161,7 +161,8 @@ private:
     void recalcPositions();
 
     /**
-      * Sets the cursor to a specified coordinate.
+      * Sets the cursor to a specified coordinate and calls 'setVisible(true)'.
+      * If pos < leftOffset this function has no effect.
       * @param pos The position to which the cursor is set.
       */
     void changeCursorPos(int pos);
@@ -169,10 +170,10 @@ private:
     void resizeCursorAndSelection();
 
     /**
-      * Sets the selection invisible and shows the cursor.
+      * Sets the selection invisible.
       * Emits selection(-1, -1) to update every objects selection-parameters.
       */
-    void showCursor();
+    void hideSelection();
 
     int getRightBorder();
 };

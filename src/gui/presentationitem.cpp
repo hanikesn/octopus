@@ -121,8 +121,10 @@ void PresentationItem::recalcPositions()
 
 void PresentationItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
-    if((event->button() == Qt::LeftButton) &&
-            (QApplication::keyboardModifiers() == Qt::ShiftModifier) && (event->pos().x() >= ACTIONAREAOFFSET)){
+    if ((event->button() == Qt::LeftButton) &&
+            (QApplication::keyboardModifiers() == Qt::ShiftModifier) &&
+            (event->pos().x() >= ACTIONAREAOFFSET) &&
+            (playstate != PLAYING)) {
         createSelection = true;
         selectionStart = event->pos().x();
         int selectionHeight = boundingRectangle.height() > minCoverHeight ?
@@ -160,7 +162,7 @@ void PresentationItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
     } else if (event->pos().x() >= ACTIONAREAOFFSET) {
         currentTime = timeMgr->convertPosToTime(event->pos().x()- ACTIONAREAOFFSET);
         changeCursorPos(event->pos().x());
-        showCursor();
+        hideSelection();
     }
 }
 
@@ -220,6 +222,7 @@ void PresentationItem::recalcBoundingRec()
 void PresentationItem::changeCursorPos(int pos)
 {
     if (pos < ACTIONAREAOFFSET) return;
+    hideSelection();
     cursor->setVisible(true);
     cursor->setPos(pos, 0);
 }
@@ -263,12 +266,12 @@ void PresentationItem::resizeCursorAndSelection()
     }
 }
 
-void PresentationItem::showCursor()
+void PresentationItem::hideSelection()
 {
+    if (!selectedArea->isVisible()) return; // if selection is already invisible there is nothing to do.
     selectedArea->setVisible(false);
     selectedArea->setWidth(0);
-    selectedArea->setHeight(0);
-    cursor->setVisible(true);
+    selectedArea->setHeight(0);    
     // others need to know that there is no selection active any more
     emit selection(-1, -1);
 }
@@ -334,6 +337,7 @@ void PresentationItem::onTimeout()
 
 void PresentationItem::onHorizontalScroll()
 {
+    hideSelection();
     int pos = timeMgr->convertTimeToPos(currentTime);
     if (pos == -1) {
         cursor->setVisible(false);
