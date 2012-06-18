@@ -65,7 +65,7 @@ private slots:
     void onDelete();
     void onSources();
     void onPlotSettings();
-    void onOptPlotMarginsChanged(int left, int /*right*/, int /*top*/, int /*bottom*/);
+    void onOptPlotMarginsRecalculated(int left, int /*right*/, int /*top*/, int /*bottom*/);
 };
 
 #endif // Track_H
