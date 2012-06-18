@@ -50,8 +50,6 @@ private:
     const DataProvider &dataProvider;
     QList<Graph*> graphs;
 
-    qint64 lowRange, highRange;
-
     void init();
     void setupButtons();
     void setupPlot();
