@@ -89,6 +89,8 @@ public:
       */
     bool isVisible(Track *t);
 
+    int getMinCoverHeight()  {return minCoverHeight;}
+
     enum Playstate {PLAYING, PAUSED, STOPPED};
 
 public slots:
@@ -125,6 +127,8 @@ signals:
 
     void exportTriggered();
 
+    void update();
+
 private:
     QGraphicsScene *parent;
     QList<QGraphicsProxyWidget*> tracks;    
@@ -157,13 +161,6 @@ private:
       * Makes sure that no gaps exist between tracks (for example after deleting a track).
       */
     void recalcPositions();
-
-    /**
-      * Sets the cursor to a specified coordinate and calls 'setVisible(true)'.
-      * If pos < leftOffset this function has no effect.
-      * @param pos The position to which the cursor is set.
-      */
-    void changeCursorPos(int pos);
 
     void resizeCursorAndSelection();
 
