@@ -313,7 +313,7 @@ bool PresentationItem::isVisible(Track *t)
                 return false;
         }
     }
-    return false;
+    return false; // return false in case there are no tracks or the specified track couldn't be found
 }
 
 void PresentationItem::onTimeout()
@@ -365,7 +365,6 @@ void PresentationItem::onPlay()
         if (currentTime > timeMgr->getHighVisRange() || currentTime < timeMgr->getLowVisRange()) {
             timeMgr->center(currentTime);
             changeCursorPos(timeMgr->convertTimeToPos(currentTime) + ACTIONAREAOFFSET);
-
         }
         timer.start();        
         break;

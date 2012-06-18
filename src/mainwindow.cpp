@@ -216,9 +216,9 @@ void MainWindow::setTitle(QString pName)
 
 void MainWindow::setUpView()
 {
-    if(trackScene)
+    if (trackScene)
         trackScene->deleteLater();
-    if(pa)
+    if (pa)
         pa->deleteLater();
 
     trackScene = new TrackScene(this);
