@@ -31,7 +31,7 @@ void NetworkAdapter::onMessage(EI::DataMessage msg)
     Clock::time_point now = Clock::now();
 
     if(knownSenders.find(msg.getSender()) == knownSenders.end()
-            && (now - lastDiscoverSent) < boost::chrono::seconds(5)) {
+            && (now - lastDiscoverSent) > boost::chrono::seconds(5)) {
         receiver.discoverSenders();
         lastDiscoverSent = now;
     }
