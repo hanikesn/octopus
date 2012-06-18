@@ -31,7 +31,7 @@ MainWindow::MainWindow(QWidget *parent) :
     newAction = new QAction(tr("&New"), this);
     newAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_N));
     quitAction = new QAction(tr("&Quit"), this);
-    newAction->setShortcut(QKeySequence(QKeySequence::Quit));
+    quitAction->setShortcut(QKeySequence(QKeySequence::Quit));
 
     ui.mainView->setAlignment(Qt::AlignTop | Qt::AlignLeft);
     ui.mainView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
