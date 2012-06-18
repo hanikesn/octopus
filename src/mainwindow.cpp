@@ -241,7 +241,7 @@ void MainWindow::setUpView()
 
     networkAdapter.discoverSenders();
 
-    connect(&playButton, SIGNAL(clicked()), pa, SLOT(onPlay()));    
+    connect(&playButton, SIGNAL(clicked()), pa, SLOT(onPlay()));
 }
 
 void MainWindow::save(bool saveAs)
