@@ -122,7 +122,6 @@ signals:
 
 private:
     QGraphicsScene *parent;
-    QGraphicsProxyWidget *trackToAdd;
     QList<QGraphicsProxyWidget*> tracks;    
 
     TimeLine *timeLine;
