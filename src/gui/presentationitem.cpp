@@ -82,7 +82,7 @@ void PresentationItem::addTrack(Track *t)
         boundingRectangle.setWidth(t->size().width());
 
     int yPos = timeLine->size().height() + 5; // + 5 for border
-    trackToAdd = parent->addWidget(t);
+    QGraphicsProxyWidget *trackToAdd = parent->addWidget(t);
     trackToAdd->setPos(0, yPos + (tracks.size())*t->height());
     trackToAdd->setParentItem(this);
     tracks.append(trackToAdd);

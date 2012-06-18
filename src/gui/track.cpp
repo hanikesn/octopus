@@ -19,16 +19,9 @@ const QString Track::ICON_AS_BUTTON = QString(
 Track::Track(const DataProvider &dataProvider, QWidget *parent) :
     QWidget(parent),
     optPlotMarginLeft(0),
-    dataProvider(dataProvider),
-    lowRange(-1),
-    highRange(-1)
+    dataProvider(dataProvider)
 {
     init();
-
-    // TODO(Steffi): Remove (dummy func)
-//    addData();
-    addSource("Dummy.Interpolatable");
-    addSource("Dummy.Discrete");
 }
 
 Track::Track(const DataProvider &dataProvider, const QString &fullDataSeriesName, QWidget *parent) :
@@ -85,9 +78,8 @@ void Track::setupPlot()
 
 void Track::setPlotRange(qint64 begin, qint64 end)
 {
-    if (lowRange != begin || highRange != end){
-        lowRange = begin;
-        highRange = end;
+    if (ui.plot->xAxis->range().lower != begin
+            || ui.plot->xAxis->range().lower != end) {
 		{
             MEASURE("setRange");
 			ui.plot->xAxis->setRange(begin, end);
@@ -98,52 +90,6 @@ void Track::setPlotRange(qint64 begin, qint64 end)
 			ui.plot->replot();
 		}
     }
-}
-
-void Track::addData()
-{
-    QPen pen;
-
-    // add interpolating graph
-    ui.plot->addGraph();
-    ui.plot->graph()->setName("Interpolating");
-    ui.plot->graph()->setLineStyle(QCPGraph::lsLine);
-    ui.plot->graph()->setScatterStyle(QCP::ssDisc);
-    ui.plot->graph()->setScatterSize(4);
-    pen.setColor(QColor(sin(1+1.2)*80+80, sin(1*0.3+0)*80+80, sin(1*0.3+1.5)*80+80));
-    ui.plot->graph()->setPen(pen);
-
-    // generate data:
-    QVector<double> x(500), y(500);
-    for (int j=0; j<500; ++j)
-    {
-      double d = j/15.0 * 5*3.14 + 0.01;
-      x[j] = d*1000000;
-      y[j] = 7*sin(d)/d + 2;
-    }
-    ui.plot->graph()->setData(x, y);
-
-    // rescale yAxis
-    ui.plot->graph()->rescaleValueAxis(true);
-
-    // add discrete graph
-    ui.plot->addGraph();
-    ui.plot->graph()->setName("Discrete");
-    ui.plot->graph()->setLineStyle(QCPGraph::lsImpulse);
-    ui.plot->graph()->setScatterStyle(QCP::ssTriangleInverted);
-    ui.plot->graph()->setScatterSize(4);
-    pen.setColor(QColor(sin(2+1.2)*80+80, sin(2*0.3+0)*80+80, sin(2*0.3+1.5)*80+80));
-    ui.plot->graph()->setPen(pen);
-
-    // generate data:
-    for (int j=0; j<500; ++j)
-    {
-      x[j] = (j/10.0 * 5*3.14 + 0.01)*1000000;
-      y[j] = ui.plot->yAxis->range().size() * 0.4;
-    }
-    ui.plot->graph()->setData(x, y);
-
-    ui.plot->legend->setVisible(true);
 }
 
 void Track::addSource(const QString &fullDataSeriesName)

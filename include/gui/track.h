@@ -50,14 +50,10 @@ private:
     const DataProvider &dataProvider;
     QList<Graph*> graphs;
 
-    qint64 lowRange, highRange;
-
     void init();
     void setupButtons();
     void setupPlot();
 
-    // TODO(Steffi): Remove (dummy func)
-    void addData();
     void addSource(const QString &fullDataSeriesName);
 
     QStringList getFullDataSeriesNames();
