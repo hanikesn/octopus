@@ -2100,7 +2100,7 @@ signals:
   void titleDoubleClick(QMouseEvent *event);
   
   void selectionChangedByUser();
-  void optMarginsChanged(int left, int right, int top, int bottom);
+  void optMarginsRecalculated(int left, int right, int top, int bottom);
   void beforeReplot();
   void afterReplot();
   

@@ -67,7 +67,7 @@ void PresentationArea::onAddTrack()
 }
 
 Track* PresentationArea::add(const QList<QString>& fullDataSeriesNames)
-{    
+{
     Track *t = new Track(dataProvider, fullDataSeriesNames);
     connect(t, SIGNAL(optPlotMarginsChanged()), this, SLOT(updatePlotMargins()));
     connect(t, SIGNAL(del(Track*)), this, SLOT(onDelete(Track*)));

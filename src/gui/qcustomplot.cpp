@@ -5725,10 +5725,10 @@ int QCPAxis::calculateMargin() const
   \see setInteractions, QCPAbstractPlottable::selectionChanged, QCPAxis::selectionChanged
 */
 
-/*! \fn void QCustomPlot::optMarginsChanged(int left, int right, int top, int bottom)
+/*! \fn void QCustomPlot::optMarginsRecalculated(int left, int right, int top, int bottom)
 
-  This signal is emitted when the optimal value for at least one of the plot's margins has changed
-  and \ref setAutoMargin is set to false (margins are calculated by \ref calculateMargins in \ref draw).
+  This signal is emitted when the optimal values for the plot's margins have been recalculated
+  (margins are calculated by \ref calculateMargins in \ref draw).
 
   \see calculateMargins, draw
 */
@@ -8047,12 +8047,7 @@ void QCustomPlot::draw(QCPPainter *painter)
   int optMarginTop = xAxis2->calculateMargin() + mTitleBoundingBox.height();
   int optMarginBottom = xAxis->calculateMargin();
 
-  if (optMarginLeft != mMarginLeft
-          || optMarginRight != mMarginRight
-          || optMarginTop != mMarginTop
-          || optMarginBottom != mMarginBottom) {
-      emit optMarginsChanged(optMarginLeft, optMarginRight, optMarginTop, optMarginBottom);
-  }
+  emit optMarginsRecalculated(optMarginLeft, optMarginRight, optMarginTop, optMarginBottom);
 
   if (mAutoMargin)
   {
