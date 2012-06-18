@@ -39,9 +39,9 @@ public:
     /**
       * Looks for the corresponding QGraphicsProxyWidget and removes it from the scene.
       * Updates the bounding rectangle and resizes cursor and selection.
-      * @param t The track to be deleted
+      * @param t The track to be removed
       */
-    void deleteTrack(Track *t);
+    void removeTrack(Track *t);
 
     /**
       * If shift-button is pressed, a selection is started. Otherwise nothing happens.

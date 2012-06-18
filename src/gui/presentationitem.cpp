@@ -94,7 +94,7 @@ void PresentationItem::addTrack(Track *t)
     resizeCursorAndSelection();
 }
 
-void PresentationItem::deleteTrack(Track *t)
+void PresentationItem::removeTrack(Track *t)
 {
     boundingRectangle.setHeight(boundingRectangle.height() - t->size().height());
     parent->setSceneRect(boundingRectangle);
@@ -103,7 +103,9 @@ void PresentationItem::deleteTrack(Track *t)
     foreach (del, tracks){
         if(del->widget() == t){     
             tracks.removeAll(del);            
-            parent->removeItem(del);                        
+            parent->removeItem(del);
+            // We should quit the loop, because we have modified the list
+            break;
         }
     }    
     recalcPositions();

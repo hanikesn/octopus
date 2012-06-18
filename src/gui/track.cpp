@@ -186,8 +186,11 @@ void Track::onSources()
                                                           getFullDataSeriesNames());
     if (!sources.isEmpty()) {
         while (!graphs.isEmpty()) {
-            graphs.takeFirst()->deleteLater();
+            Graph* graph = graphs.takeFirst();
+            ui.plot->removeGraph(graph->getGraph());
+            graph->deleteLater();
         }
+
         foreach (QString source, sources.first()) {
             addSource(source);
         }
