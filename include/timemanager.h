@@ -58,6 +58,12 @@ public:
     void load(QVariantMap *qvm);
     void save(QVariantMap *qvm);
 
+    /**
+      * Calculates the amount of time between two points in the view.
+      * @param pos1 First position
+      * @param pos2 Second position
+      * @return The result will always be positive (e.g. if pos1 > pos2 the values will be swapped)
+      */
     qint64 difference(int pos1, int pos2);
 
     void center(qint64 timestamp);
