@@ -155,11 +155,6 @@ private:
     TimeManager *timeMgr;
 
     /**
-      * Determines how far the range should go back in time (in microseconds)
-      */
-    static const int TIMEFRAME;
-
-    /**
       * Makes sure that no gaps exist between tracks (for example after deleting a track).
       */
     void recalcPositions();

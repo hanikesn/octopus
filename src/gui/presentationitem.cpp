@@ -12,8 +12,6 @@
 #include "gui/timeline.h"
 #include "timemanager.h"
 
-const int PresentationItem::TIMEFRAME = 30000000;
-
 PresentationItem::PresentationItem(TimeLine *timeLine, TimeManager *timeManager,
                                    QGraphicsScene *parent) :
     QGraphicsItem(0, parent),
@@ -305,8 +303,8 @@ void PresentationItem::save(QVariantMap *qvm)
 }
 
 void PresentationItem::load(QVariantMap *qvm)
-{
-    cursor->setPos(qvm->find("cursorPos").value().toInt(), 0);
+{    
+    changeCursorPos(qvm->find("cursorPos").value().toInt());
 }
 
 bool PresentationItem::isVisible(Track *t)
