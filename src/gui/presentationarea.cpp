@@ -88,7 +88,7 @@ Track* PresentationArea::add(const QList<QString>& fullDataSeriesNames)
 void PresentationArea::onDelete(Track *t)
 {
     tracks.removeAll(t);
-    pi->deleteTrack(t);
+    pi->removeTrack(t);
     t->deleteLater();
     unsavedChanges = true;
 }

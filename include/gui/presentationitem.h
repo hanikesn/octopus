@@ -39,9 +39,9 @@ public:
     /**
       * Looks for the corresponding QGraphicsProxyWidget and removes it from the scene.
       * Updates the bounding rectangle and resizes cursor and selection.
-      * @param t The track to be deleted
+      * @param t The track to be removed
       */
-    void deleteTrack(Track *t);
+    void removeTrack(Track *t);
 
     /**
      * Sets the left offset of the time line to the given value and updates time line and cursor.

@@ -89,12 +89,12 @@ void Track::setPlotRange(qint64 begin, qint64 end)
         lowRange = begin;
         highRange = end;
 		{
-//            MEASURE("setRange");
+            MEASURE("setRange");
 			ui.plot->xAxis->setRange(begin, end);
 		}
         ui.plot->setNotAntialiasedElements(QCP::aeAll);
 		{
-//            MEASURE("plot");
+            MEASURE("plot");
 			ui.plot->replot();
 		}
     }
@@ -186,8 +186,11 @@ void Track::onSources()
                                                           getFullDataSeriesNames());
     if (!sources.isEmpty()) {
         while (!graphs.isEmpty()) {
-            graphs.takeFirst()->deleteLater();
+            Graph* graph = graphs.takeFirst();
+            ui.plot->removeGraph(graph->getGraph());
+            graph->deleteLater();
         }
+
         foreach (QString source, sources.first()) {
             addSource(source);
         }
