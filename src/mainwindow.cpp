@@ -295,8 +295,8 @@ int MainWindow::checkForUnsavedChanges()
     msg.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Abort);
     msg.setIcon(QMessageBox::Information);
     msg.setButtonText(QMessageBox::Save, tr("Save"));
-    msg.setButtonText(QMessageBox::Discard, tr("Ignore"));
-    msg.setButtonText(QMessageBox::Abort, tr("Abort"));
+    msg.setButtonText(QMessageBox::Discard, tr("Discard"));
+    msg.setButtonText(QMessageBox::Abort, tr("Cancel"));
     msg.setDefaultButton(QMessageBox::Save);
     msg.setText(tr("There are some unsaved changes in this project. Do you wish to save these?"));
     int result = msg.exec();
