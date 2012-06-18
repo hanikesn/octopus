@@ -102,7 +102,7 @@ void TimeManager::center(qint64 timestamp)
 
     lowVisRange = timestamp - range/2;
     highVisRange = timestamp + range/2;
-    emit rangeChanged(timestamp - range/2, timestamp + range/2);
+    emit rangeChanged(lowVisRange, highVisRange);
     hScrollBar->blockSignals(true);
     hScrollBar->setValue(lowVisRange/1000000);
     hScrollBar->blockSignals(false);

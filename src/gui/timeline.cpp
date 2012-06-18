@@ -94,25 +94,6 @@ void TimeLine::drawTicks(QPainter *painter)
     }
 }
 
-int TimeLine::convertTimeToPos(qint64 time)
-{
-    if(time < beginRange) return -1;
-
-    int position = 0;
-    qint64 currentTime = beginRange;
-    while(currentTime < time){
-        currentTime += TIMEPERPX;
-        position++;
-    }
-    return position;
-}
-
-qint64 TimeLine::convertPosToTime(int pos)
-{
-    // since every pixel represents a defined amount of time we only need to multiply TIMEPERPX
-    return ((pos - offset)*TIMEPERPX) + beginRange;
-}
-
 void TimeLine::drawFrom(qint64 time)
 {
 //    if (rangeOffset == time) return;

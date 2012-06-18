@@ -319,9 +319,10 @@ bool PresentationItem::isVisible(Track *t)
 void PresentationItem::onTimeout()
 {
     currentTime += timeMgr->getTimeoutUpdateIntervall();
-    if (cursor->pos().x() < getRightBorder()) { // cursor hasn't reached right border yet
+    int cursorPos = timeMgr->convertTimeToPos(currentTime) + ACTIONAREAOFFSET;
+    if (cursorPos <= getRightBorder()) {
         // determine position for currentTime + updateIntervall
-        changeCursorPos(timeLine->convertTimeToPos(currentTime) + ACTIONAREAOFFSET);        
+        changeCursorPos(cursorPos);
     } else if (currentTime > timeMgr->getHighVisRange()) {
         // currentTime is further then the currently visible range
         cursor->setVisible(false);
@@ -361,16 +362,19 @@ void PresentationItem::onPlay()
         break;
     case PAUSED:
         playstate = PLAYING;
-//        currentTime = timeLine->convertPosToTime(cursor->pos().x());
         if (currentTime > timeMgr->getHighVisRange() || currentTime < timeMgr->getLowVisRange()) {
             timeMgr->center(currentTime);
-            changeCursorPos(timeMgr->convertTimeToPos(currentTime) + ACTIONAREAOFFSET);
+            changeCursorPos(timeMgr->convertTimeToPos(currentTime) + ACTIONAREAOFFSET);            
         }
         timer.start();        
         break;
     case STOPPED:
         playstate = PLAYING;
-        currentTime = timeLine->convertPosToTime(cursor->pos().x());
+        if (currentTime > timeMgr->getHighVisRange() || currentTime < timeMgr->getLowVisRange()) {
+            timeMgr->center(currentTime);
+            changeCursorPos(timeMgr->convertTimeToPos(currentTime) + ACTIONAREAOFFSET);
+        } else
+            currentTime = timeMgr->convertPosToTime(cursor->pos().x() - ACTIONAREAOFFSET);
         timer.start();        
         break;
     }

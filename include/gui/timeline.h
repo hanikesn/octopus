@@ -18,20 +18,6 @@ public:
 
     QRectF boundingRect() const;
 
-    /**
-      * Converts a point in time to the according x-position on the screen (subtracts the offset
-      * specified in the constructor)
-      * @param time The point in time to be converted
-      */
-    int convertTimeToPos(qint64 time);
-
-    /**
-      * Converts a position on the view into the corresponting point in time.
-      * @param pos The position in the view to be converted. The position needs to be absolute, no
-      *            offset subtracted beforehand.
-      */
-    qint64 convertPosToTime(int pos);
-
     void drawFrom(qint64 time);
 
     qint64 getUpperEnd(qint64 lowerEnd);
