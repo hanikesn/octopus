@@ -212,10 +212,15 @@ void Track::onOptPlotMarginsRecalculated(int left, int /*right*/, int /*top*/, i
     }
 }
 
-void Track::setOffset(int offset)
+int Track::getPlotOffset()
 {
-    if (offset != ui.plot->marginLeft()) {
-        ui.plot->setMarginLeft(offset);
+    return ui.plot->pos().x();
+}
+
+void Track::setPlotMarginLeft(int margin)
+{
+    if (margin != ui.plot->marginLeft()) {
+        ui.plot->setMarginLeft(margin);
     }
     ui.plot->replot();
 }

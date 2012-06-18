@@ -121,6 +121,12 @@ void TimeLine::drawFrom(qint64 time)
     update(boundingRect());
 }
 
+void TimeLine::setOffset(int offset)
+{
+    this->offset = offset;
+    update(boundingRect());
+}
+
 qint64 TimeLine::getUpperEnd(qint64 lowerEnd)
 {
     beginRange = lowerEnd;

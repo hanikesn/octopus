@@ -12,7 +12,6 @@
 #include "gui/timeline.h"
 #include "timemanager.h"
 
-const int PresentationItem::ACTIONAREAOFFSET = 52;
 const int PresentationItem::TIMEFRAME = 30000000;
 
 PresentationItem::PresentationItem(TimeLine *timeLine, TimeManager *timeManager,
@@ -21,7 +20,8 @@ PresentationItem::PresentationItem(TimeLine *timeLine, TimeManager *timeManager,
     parent(parent),    
     timeLine(timeLine),
     boundingRectangle(0, 0, 0, 0),
-    visRect(0, 0, 100, 672),    
+    visRect(0, 0, 100, 672),
+    offsetLeft(52),
     autoScroll(false),
     createSelection(false),
     currentTime(0),
@@ -32,9 +32,9 @@ PresentationItem::PresentationItem(TimeLine *timeLine, TimeManager *timeManager,
     timeLine->setParentItem(this);
     timeLine->setZValue(0.9);
 
-    cursor = new Cursor(ACTIONAREAOFFSET, 0);
+    cursor = new Cursor(offsetLeft, 0);
     cursor->setParentItem(this);
-    cursor->setPos(ACTIONAREAOFFSET, 0);
+    cursor->setPos(offsetLeft, 0);
     cursor->setZValue(1.0);
     cursor->resize(1, minCoverHeight);
 
@@ -110,6 +110,16 @@ void PresentationItem::deleteTrack(Track *t)
     resizeCursorAndSelection();
 }
 
+void PresentationItem::setOffsetLeft(int offset)
+{
+    qint64 cursorTime = timeMgr->convertPosToTime(cursor->pos().x() + offsetLeft);
+
+    timeLine->setOffset(offset);
+    cursor->setPos(offset, timeMgr->convertTimeToPos(cursorTime));
+
+    offsetLeft = offset;
+}
+
 void PresentationItem::recalcPositions()
 {
     int yPos = timeLine->size().height() + 5; // + 5 for border
@@ -122,7 +132,7 @@ void PresentationItem::recalcPositions()
 void PresentationItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
     if((event->button() == Qt::LeftButton) &&
-            (QApplication::keyboardModifiers() == Qt::ShiftModifier) && (event->pos().x() >= ACTIONAREAOFFSET)){
+            (QApplication::keyboardModifiers() == Qt::ShiftModifier) && (event->pos().x() >= offsetLeft)){
         createSelection = true;
         selectionStart = event->pos().x();
         int selectionHeight = boundingRectangle.height() > minCoverHeight ?
@@ -136,7 +146,7 @@ void PresentationItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
     if(createSelection){        
         createSelection = false;
-        selectionEnd = event->pos().x() < ACTIONAREAOFFSET ? ACTIONAREAOFFSET : event->pos().x();
+        selectionEnd = event->pos().x() < offsetLeft ? offsetLeft : event->pos().x();
 
         int width = 0;
         int begin = 0;
@@ -154,11 +164,11 @@ void PresentationItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
         cursor->setVisible(false);
 
         qint64 lowRange = timeMgr->getLowVisRange() +
-                timeMgr->difference(0, begin - ACTIONAREAOFFSET);
+                timeMgr->difference(0, begin - offsetLeft);
         qint64 highRange = lowRange + timeMgr->difference(begin, begin + width);
         emit selection(lowRange, highRange);
-    } else if (event->pos().x() >= ACTIONAREAOFFSET) {
-        currentTime = timeMgr->convertPosToTime(event->pos().x()- ACTIONAREAOFFSET);
+    } else if (event->pos().x() >= offsetLeft) {
+        currentTime = timeMgr->convertPosToTime(event->pos().x()- offsetLeft);
         changeCursorPos(event->pos().x());
         showCursor();
     }
@@ -168,7 +178,7 @@ void PresentationItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
     if((QApplication::keyboardModifiers() != Qt::ShiftModifier)){
         createSelection = false;
-    } else if(event->pos().x() >= ACTIONAREAOFFSET) {
+    } else if(event->pos().x() >= offsetLeft) {
         selectionEnd = event->pos().x();
         int width = 0;
         int begin = 0;
@@ -219,7 +229,7 @@ void PresentationItem::recalcBoundingRec()
 
 void PresentationItem::changeCursorPos(int pos)
 {
-    if (pos < ACTIONAREAOFFSET) return;
+    if (pos < offsetLeft) return;
     cursor->setVisible(true);
     cursor->setPos(pos, 0);
 }
@@ -321,7 +331,7 @@ void PresentationItem::onTimeout()
     currentTime += timeMgr->getTimeoutUpdateIntervall();
     if (cursor->pos().x() < getRightBorder()) { // cursor hasn't reached right border yet
         // determine position for currentTime + updateIntervall
-        changeCursorPos(timeLine->convertTimeToPos(currentTime) + ACTIONAREAOFFSET);        
+        changeCursorPos(timeLine->convertTimeToPos(currentTime) + offsetLeft);
     } else if (currentTime > timeMgr->getHighVisRange()) {
         // currentTime is further then the currently visible range
         cursor->setVisible(false);
@@ -339,15 +349,15 @@ void PresentationItem::onHorizontalScroll()
         if (pos == -1)
             // dont show cursor
             cursor->setVisible(false);
-        else if (pos + ACTIONAREAOFFSET < visRect.width())
-            changeCursorPos(pos + ACTIONAREAOFFSET);
+        else if (pos + offsetLeft < visRect.width())
+            changeCursorPos(pos + offsetLeft);
     } else {
         // keep cursor at its current point of time, not the current position/coordinate
         int newPos = timeMgr->convertTimeToPos(currentTime);
         if (newPos == -1)
             cursor->setVisible(false);
         else
-            changeCursorPos(newPos + ACTIONAREAOFFSET);
+            changeCursorPos(newPos + offsetLeft);
     }
 }
 
@@ -364,7 +374,7 @@ void PresentationItem::onPlay()
 //        currentTime = timeLine->convertPosToTime(cursor->pos().x());
         if (currentTime > timeMgr->getHighVisRange() || currentTime < timeMgr->getLowVisRange()) {
             timeMgr->center(currentTime);
-            changeCursorPos(timeMgr->convertTimeToPos(currentTime) + ACTIONAREAOFFSET);
+            changeCursorPos(timeMgr->convertTimeToPos(currentTime) + offsetLeft);
 
         }
         timer.start();        

@@ -118,8 +118,11 @@ void PresentationArea::updatePlotMargins()
 
 void PresentationArea::setPlotMargins(int newMargin)
 {
-    foreach (Track *t, tracks) {
-        t->setOffset(newMargin);
+    if (!tracks.isEmpty()) {
+        foreach (Track *t, tracks) {
+            t->setPlotMarginLeft(newMargin);
+        }
+        pi->setOffsetLeft(tracks.first()->getPlotOffset() + newMargin);
     }
 }
 

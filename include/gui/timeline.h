@@ -33,6 +33,7 @@ public:
     qint64 convertPosToTime(int pos);
 
     void drawFrom(qint64 time);
+    void setOffset(int offset);
 
     qint64 getUpperEnd(qint64 lowerEnd);
 

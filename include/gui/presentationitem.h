@@ -44,6 +44,11 @@ public:
     void deleteTrack(Track *t);
 
     /**
+     * Sets the left offset of the time line to the given value and updates time line and cursor.
+     */
+    void setOffsetLeft(int offset);
+
+    /**
       * If shift-button is pressed, a selection is started. Otherwise nothing happens.
       * @param event The mousePressEvent to be processed.
       */
@@ -124,6 +129,7 @@ private:
     Selection *selectedArea;
 
     QRectF boundingRectangle, visRect;    
+    int offsetLeft;
 
     bool autoScroll;
 
@@ -141,8 +147,6 @@ private:
     Playstate playstate;
 
     TimeManager *timeMgr;
-
-    static const int ACTIONAREAOFFSET;
 
     /**
       * Determines how far the range should go back in time (in microseconds)
