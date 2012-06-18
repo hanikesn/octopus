@@ -323,18 +323,19 @@ bool PresentationItem::isVisible(Track *t)
                 return false;
         }
     }
-    return false;
+    return false; // return false in case there are no tracks or the specified track couldn't be found
 }
 
 void PresentationItem::onTimeout()
 {
     currentTime += timeMgr->getTimeoutUpdateIntervall();
-    if (cursor->pos().x() < getRightBorder()) { // cursor hasn't reached right border yet
+    int cursorPos = timeMgr->convertTimeToPos(currentTime) + offsetLeft;
+    if (cursorPos <= getRightBorder()) {
         // determine position for currentTime + updateIntervall
-        changeCursorPos(timeLine->convertTimeToPos(currentTime) + offsetLeft);
+        changeCursorPos(cursorPos);
     } else if (currentTime > timeMgr->getHighVisRange()) {
         // currentTime is further then the currently visible range
-        cursor->setVisible(false);
+        if (cursor->isVisible()) cursor->setVisible(false);
     } else {
         timeMgr->addRange(timeMgr->getTimeoutUpdateIntervall());
         cursor->setVisible(true);
@@ -343,21 +344,16 @@ void PresentationItem::onTimeout()
 
 void PresentationItem::onHorizontalScroll()
 {
-    showCursor();
-    if (playstate == PLAYING) {
-        int pos = timeMgr->convertTimeToPos(currentTime);
-        if (pos == -1)
-            // dont show cursor
-            cursor->setVisible(false);
-        else if (pos + offsetLeft < visRect.width())
-            changeCursorPos(pos + offsetLeft);
-    } else {
-        // keep cursor at its current point of time, not the current position/coordinate
-        int newPos = timeMgr->convertTimeToPos(currentTime);
-        if (newPos == -1)
-            cursor->setVisible(false);
-        else
-            changeCursorPos(newPos + offsetLeft);
+    int pos = timeMgr->convertTimeToPos(currentTime);
+    if (pos == -1) {
+        cursor->setVisible(false);
+        return;
+    }
+
+    if (playstate != PLAYING) {
+        changeCursorPos(pos + offsetLeft);
+    } else if (pos + offsetLeft < visRect.width()) { // if cursor is within the visible range
+        changeCursorPos(pos + offsetLeft);
     }
 }
 
@@ -371,17 +367,19 @@ void PresentationItem::onPlay()
         break;
     case PAUSED:
         playstate = PLAYING;
-//        currentTime = timeLine->convertPosToTime(cursor->pos().x());
         if (currentTime > timeMgr->getHighVisRange() || currentTime < timeMgr->getLowVisRange()) {
             timeMgr->center(currentTime);
             changeCursorPos(timeMgr->convertTimeToPos(currentTime) + offsetLeft);
-
         }
         timer.start();        
         break;
     case STOPPED:
         playstate = PLAYING;
-        currentTime = timeLine->convertPosToTime(cursor->pos().x());
+        if (currentTime > timeMgr->getHighVisRange() || currentTime < timeMgr->getLowVisRange()) {
+            timeMgr->center(currentTime);
+            changeCursorPos(timeMgr->convertTimeToPos(currentTime) + offsetLeft);
+        } else
+            currentTime = timeMgr->convertPosToTime(cursor->pos().x() - offsetLeft);
         timer.start();        
         break;
     }

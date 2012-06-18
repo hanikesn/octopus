@@ -81,6 +81,12 @@ public:
 
     void load(QVariantMap *qvm);
 
+    /**
+      * Determines whether the specified track is currently visible.
+      * @param t The track whose visibility is identified.
+      * @return True if 't' is visible. False if either the track is not visible or the track is not
+      *         in PresentationItems list of widgets (for example if the list ist empty).
+      */
     bool isVisible(Track *t);
 
     enum Playstate {PLAYING, PAUSED, STOPPED};

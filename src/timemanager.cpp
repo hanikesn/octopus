@@ -74,7 +74,6 @@ void TimeManager::load(QVariantMap *qvm)
 
     // step-size of scrollbar is 1 second --> left border of timeline is always a full second
     // so we can set the value of the scrollbars slider to the second visRangeLow represents
-    disconnect(this, SIGNAL(horizontalScroll(int)));
     hScrollBar->setValue(lowVisRange/1000000);
 }
 
@@ -102,7 +101,7 @@ void TimeManager::center(qint64 timestamp)
 
     lowVisRange = timestamp - range/2;
     highVisRange = timestamp + range/2;
-    emit rangeChanged(timestamp - range/2, timestamp + range/2);
+    emit rangeChanged(lowVisRange, highVisRange);
     hScrollBar->blockSignals(true);
     hScrollBar->setValue(lowVisRange/1000000);
     hScrollBar->blockSignals(false);

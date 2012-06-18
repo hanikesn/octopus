@@ -31,9 +31,17 @@ public:
 
     qint64 getUpperEnd(qint64 lowerEnd) {return timeLine->getUpperEnd(lowerEnd);}
 
+    /**
+      * Converts a position on the view into the corresponting point in time.
+      * @param pos The x-position in the view to be converted.
+      */
     qint64 convertPosToTime(int pos);
-    int convertTimeToPos(qint64 time);
 
+    /**
+      * Converts a point in time to the according x-position on the screen.
+      * @param time The point in time to be converted
+      */
+    int convertTimeToPos(qint64 time);
 
     /**
       * Adds 'delta' to current high- and lowVisRange.
@@ -50,6 +58,12 @@ public:
     void load(QVariantMap *qvm);
     void save(QVariantMap *qvm);
 
+    /**
+      * Calculates the amount of time between two points in the view.
+      * @param pos1 First position
+      * @param pos2 Second position
+      * @return The result will always be positive (e.g. if pos1 > pos2 the values will be swapped)
+      */
     qint64 difference(int pos1, int pos2);
 
     void center(qint64 timestamp);

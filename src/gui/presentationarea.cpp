@@ -195,19 +195,7 @@ void PresentationArea::setUnsavedChanges(bool uc)
 
 void PresentationArea::onPlay()
 {
-    //TODO(domi): getter in PI?
-    switch(playstate)
-    {
-    case PresentationItem::PLAYING:
-        playstate = PresentationItem::PAUSED;
-        break;
-    case PresentationItem::PAUSED:
-        playstate = PresentationItem::PLAYING;
-        break;
-    case PresentationItem::STOPPED:
-        playstate = PresentationItem::PLAYING;
-        break;
-    }
-    emit play();
+    /* Do stuff */
+    emit play();  // propagate signal
 }
 
