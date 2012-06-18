@@ -340,11 +340,9 @@ void PresentationItem::onHorizontalScroll()
         return;
     }
 
-    if (playstate == PLAYING) {
-        if (pos + ACTIONAREAOFFSET < visRect.width())
-            changeCursorPos(pos + ACTIONAREAOFFSET);
-    } else {
-        // keep cursor at its current point of time, not the current position/coordinate
+    if (playstate != PLAYING) {
+        changeCursorPos(pos + ACTIONAREAOFFSET);
+    } else if (pos + ACTIONAREAOFFSET < visRect.width()) { // if cursor is within the visible range
         changeCursorPos(pos + ACTIONAREAOFFSET);
     }
 }
