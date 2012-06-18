@@ -113,11 +113,11 @@ void PresentationItem::removeTrack(Track *t)
 }
 
 void PresentationItem::setOffsetLeft(int offset)
-{
-    qint64 cursorTime = timeMgr->convertPosToTime(cursor->pos().x() + offsetLeft);
+{    
+    qint64 cursorTime = timeMgr->convertPosToTime(cursor->pos().x() - offsetLeft);
 
     timeLine->setOffset(offset);
-    cursor->setPos(offset, timeMgr->convertTimeToPos(cursorTime));
+    cursor->setPos(timeMgr->convertTimeToPos(cursorTime) + offset, 0);
 
     offsetLeft = offset;
 }
