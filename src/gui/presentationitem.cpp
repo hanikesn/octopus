@@ -325,7 +325,7 @@ void PresentationItem::onTimeout()
         changeCursorPos(cursorPos);
     } else if (currentTime > timeMgr->getHighVisRange()) {
         // currentTime is further then the currently visible range
-        cursor->setVisible(false);
+        if (cursor->isVisible()) cursor->setVisible(false);
     } else {
         timeMgr->addRange(timeMgr->getTimeoutUpdateIntervall());
         cursor->setVisible(true);
@@ -334,21 +334,18 @@ void PresentationItem::onTimeout()
 
 void PresentationItem::onHorizontalScroll()
 {
-    showCursor();
+    int pos = timeMgr->convertTimeToPos(currentTime);
+    if (pos == -1) {
+        cursor->setVisible(false);
+        return;
+    }
+
     if (playstate == PLAYING) {
-        int pos = timeMgr->convertTimeToPos(currentTime);
-        if (pos == -1)
-            // dont show cursor
-            cursor->setVisible(false);
-        else if (pos + ACTIONAREAOFFSET < visRect.width())
+        if (pos + ACTIONAREAOFFSET < visRect.width())
             changeCursorPos(pos + ACTIONAREAOFFSET);
     } else {
         // keep cursor at its current point of time, not the current position/coordinate
-        int newPos = timeMgr->convertTimeToPos(currentTime);
-        if (newPos == -1)
-            cursor->setVisible(false);
-        else
-            changeCursorPos(newPos + ACTIONAREAOFFSET);
+        changeCursorPos(pos + ACTIONAREAOFFSET);
     }
 }
 
