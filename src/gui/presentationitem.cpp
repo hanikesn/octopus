@@ -50,9 +50,9 @@ PresentationItem::PresentationItem(TimeLine *timeLine, TimeManager *timeManager,
     connect(&timer, SIGNAL(timeout()),                  this, SLOT(onTimeout()));
     connect(timeMgr, SIGNAL(horizontalScroll()),        this, SLOT(onHorizontalScroll()));
 
-    connect(this, SIGNAL(update(QSize)),                     cursor, SLOT(onUpdate(QSize)));
-    connect(this, SIGNAL(update(QSize)),                     timeLine, SLOT(onUpdate(QSize)));
-    connect(this, SIGNAL(update(QSize)),                     selectedArea, SLOT(onUpdate(QSize)));
+    connect(this, SIGNAL(update(QSize)),                cursor, SLOT(onUpdate(QSize)));
+    connect(this, SIGNAL(update(QSize)),                timeLine, SLOT(onUpdate(QSize)));
+    connect(this, SIGNAL(update(QSize)),                selectedArea, SLOT(onUpdate(QSize)));
 
     recalcBoundingRec();
 }
@@ -63,10 +63,7 @@ PresentationItem::~PresentationItem()
 
 QRectF PresentationItem::boundingRect() const
 {
-    if(childItems().isEmpty())
-        return QRectF(0, 0, 100, 100);
-    else
-        return boundingRectangle;    
+    return boundingRectangle;
 }
 
 void PresentationItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
@@ -214,8 +211,8 @@ void PresentationItem::recalcBoundingRec()
     // If there are no tracks height/width are the size of the timeLine
     if(tracks.isEmpty()){        
         boundingRectangle.setHeight(minCoverHeight);
-        boundingRectangle.setWidth(timeLine->size().width());        
-        parent->setSceneRect(boundingRectangle);
+        boundingRectangle.setWidth(visRect.width());
+        parent->setSceneRect(boundingRectangle);        
         return;
     }
 
@@ -231,7 +228,7 @@ void PresentationItem::recalcBoundingRec()
 
     boundingRectangle.setHeight(height);
     boundingRectangle.setWidth(width);
-    parent->setSceneRect(boundingRectangle);    
+    parent->setSceneRect(boundingRectangle);        
 }
 
 void PresentationItem::onChangedViewSize(QSize size)
