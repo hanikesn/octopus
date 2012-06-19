@@ -11,6 +11,7 @@
 #include "gui/mainview.h"
 #include "serializer.h"
 #include "parser.h"
+#include "gui/startscreen.h"
 
 const QString MainWindow::TITLE = "Octopus 0.1";
 
@@ -49,6 +50,10 @@ MainWindow::MainWindow(QWidget *parent) :
     setUpMenu();
 
     onNew();
+    //TODO(domi): Kommentare wegmachen
+//    StartScreen *s = new StartScreen(this);
+//    if (s->showScreen() == StartScreen::LOAD)
+//        onLoad();
 }
 
 void MainWindow::onImportAction()
