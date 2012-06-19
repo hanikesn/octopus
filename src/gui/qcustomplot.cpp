@@ -7324,6 +7324,21 @@ void QCustomPlot::rescaleAxes()
 }
 
 /*!
+  Rescales the value axes such that all plottables (e.g. graphs) are fully visible in their height.
+  It does this by calling \ref QCPAbstractPlottable::rescaleValueAxis on all plottables.
+
+  \see QCPAbstractPlottable::rescaleValueAxis
+*/
+void QCustomPlot::rescaleValueAxes()
+{
+  if (mPlottables.isEmpty()) return;
+
+  mPlottables.at(0)->rescaleValueAxis(false); // onlyEnlarge disabled on first plottable
+  for (int i=1; i<mPlottables.size(); ++i)
+    mPlottables.at(i)->rescaleValueAxis(true);  // onlyEnlarge enabled on all other plottables
+}
+
+/*!
   Saves a PDF with the vectorized plot to the file \a fileName. The axis ratio as well as the scale
   of texts and lines will be derived from the specified \a width and \a height. This means, the
   output will look like the normal on-screen output of a QCustomPlot widget with the corresponding

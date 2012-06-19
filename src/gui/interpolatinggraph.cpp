@@ -11,10 +11,12 @@ InterpolatingGraph::InterpolatingGraph(QCustomPlot *plot, const DoubleSeries &d)
     connect(&series, SIGNAL(newData(qint64)), this, SLOT(onNewData(qint64)));
 
     graph = plot->addGraph();
+    plot->yAxis->setVisible(true);
 
     configureAppearance(graph);
     initialize(graph, series);
 
+    plot->rescaleValueAxes();
     plot->replot();
 }
 
@@ -43,9 +45,6 @@ void InterpolatingGraph::initialize(QCPGraph *graph, const DoubleSeries &series)
     for (auto i = data.constBegin(); i != data.constEnd(); ++i) {
 	    graph->addData(i.key(), i.value());
     }
-
-    // TODO(Steffi): Rescale muss auch die anderen Graphen in der Spur berücksichtigen
-    graph->rescaleValueAxis(true);
 }
 
 void InterpolatingGraph::onNewData(qint64 timestamp)
@@ -57,5 +56,6 @@ void InterpolatingGraph::onNewData(qint64 timestamp)
     }
 
     lastUpdate = timestamp;
+    plot->rescaleValueAxes();
     plot->replot();
 }
