@@ -11,6 +11,7 @@ InterpolatingGraph::InterpolatingGraph(QCustomPlot *plot, const DoubleSeries &d)
     connect(&series, SIGNAL(newData(qint64)), this, SLOT(onNewData(qint64)));
 
     graph = plot->addGraph();
+    plot->yAxis->setVisible(true);
 
     configureAppearance(graph);
     initialize(graph, series);
