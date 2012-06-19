@@ -302,8 +302,15 @@ bool PresentationItem::isVisible(Track *t)
 }
 
 void PresentationItem::onTimeout()
-{
+{    
+
     currentTime += timeMgr->getTimeoutUpdateIntervall();
+    if (currentTime > timeMgr->getMaximum()) { // stop playing
+        playstate = PAUSED;
+        timer.stop();
+        return;
+    }
+
     int cursorPos = timeMgr->convertTimeToPos(currentTime) + offsetLeft;
     if (cursorPos <= getRightBorder()) {
         // determine position for currentTime + updateIntervall

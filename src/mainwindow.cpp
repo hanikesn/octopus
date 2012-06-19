@@ -197,9 +197,9 @@ void MainWindow::onNew()
     }
     // create a temporary file for the db
     dataProvider = new DataProvider(QDir::tempPath() + "/Octopus-" + QDateTime::currentDateTime().toString("yyyyMMdd_hhmmsszzz"), this);
-    addData(*dataProvider);
 
     setUpView();
+    addData(*dataProvider);
     projectPath = "";
     setTitle("");
 }
