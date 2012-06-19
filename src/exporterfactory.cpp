@@ -27,5 +27,8 @@ Exporter& ExporterFactory::getExporter(const QString &name)
         return exp->getFileType() == name;
     });
 
+    if(i == factories.end())
+        throw std::exception();
+
     return **i;
 }

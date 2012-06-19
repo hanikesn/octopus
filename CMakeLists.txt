@@ -42,6 +42,7 @@ include_directories(${SQLITE3_INCLUDE_DIR})
 
 set(Octopus_SOURCES
   src/abstractdataseries.cpp
+  src/CVSExporter.cpp
   src/databaseadapter.cpp
   src/dataprovider.cpp
   src/doubleseries.cpp
@@ -69,6 +70,7 @@ set(Octopus_SOURCES
 set(Octopus_HEADERS
   include/abstractdataseries.h
   include/common.h
+  include/CVSExporter.h
   include/exporter.h
   include/exporterfactory.h
   include/databaseadapter.h

@@ -12,6 +12,8 @@ class Exporter
 {
     Q_DISABLE_COPY(Exporter)
 public:
+    Exporter() {}
+    virtual ~Exporter() {}
     /**
      * @brief getFileType
      * @return a String to identify the Export in the save dialog
