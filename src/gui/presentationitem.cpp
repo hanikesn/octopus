@@ -36,8 +36,7 @@ PresentationItem::PresentationItem(TimeLine *timeLine, TimeManager *timeManager,
     cursor->setZValue(1.0);
     cursor->resize(1, minCoverHeight);
 
-//    selectedArea = new Selection(parent);
-        selectedArea = new Selection(this);
+    selectedArea = new Selection(this);
     selectedArea->setZValue(1.0);
     selectedArea->setHeight(minCoverHeight);
 
@@ -257,10 +256,7 @@ void PresentationItem::onVerticalScroll(QRectF visibleRectangle)
 
 void PresentationItem::hideSelection()
 {
-    if (!selectedArea->isVisible()) return; // if selection is already invisible there is nothing to do.
-    selectedArea->setVisible(false);
-    selectedArea->setWidth(0);
-    selectedArea->setHeight(0);    
+    selectedArea->hide();
     // others need to know that there is no selection active any more
     emit selection(-1, -1);
 }

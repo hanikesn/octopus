@@ -59,6 +59,14 @@ void Selection::setWidth(int w)
     width = w;
 }
 
+void Selection::hide()
+{
+    if (!isVisible()) return; // if selection is already invisible there is nothing to do.
+    setVisible(false);
+    setWidth(0);
+    setHeight(0);
+}
+
 void Selection::onUpdate(QSize size)
 {
     Q_UNUSED(size)

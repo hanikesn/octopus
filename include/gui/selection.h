@@ -28,6 +28,8 @@ public:
     int getHeight() { return height; }
     int getWidth() { return width; }
 
+    void hide();
+
 public slots:
     void onUpdate(QSize size);
 
