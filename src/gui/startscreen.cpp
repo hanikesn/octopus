@@ -6,6 +6,9 @@ StartScreen::StartScreen(QWidget *parent) :
     QDialog(parent)
 {
     ui.setupUi(this);
+    setStyleSheet("background-color:#ffffff;");
+    ui.loadButton->setFlat(true);
+    ui.newButton->setFlat(true);
 }
 
 StartScreen::Type StartScreen::showScreen()
