@@ -35,7 +35,7 @@ public:
     qint64 getCurrentTime();
 
 public slots:
-    void onUpdate();
+    void onUpdate(QSize size);
 
 private:    
     QPen pen;    

@@ -114,4 +114,9 @@ qint64 TimeLine::getUpperEnd(qint64 lowerEnd)
     return beginRange + ((geometry().width()-offset)*TIMEPERPX);
 }
 
+void TimeLine::onUpdate(QSize size)
+{
+    resize(size.width(), this->size().height());
+}
+
 //TODO(domi): %LARGETI... geht nur mit Zahlen die vielfache von LARGETICKAMOUNT sind

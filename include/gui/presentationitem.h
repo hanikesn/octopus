@@ -127,7 +127,7 @@ signals:
 
     void exportTriggered();
 
-    void update();
+    void update(QSize size);
 
 private:
     QGraphicsScene *parent;

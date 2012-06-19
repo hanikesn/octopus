@@ -36,7 +36,8 @@ PresentationItem::PresentationItem(TimeLine *timeLine, TimeManager *timeManager,
     cursor->setZValue(1.0);
     cursor->resize(1, minCoverHeight);
 
-    selectedArea = new Selection(parent);
+//    selectedArea = new Selection(parent);
+        selectedArea = new Selection(this);
     selectedArea->setZValue(1.0);
     selectedArea->setHeight(minCoverHeight);
 
@@ -50,8 +51,9 @@ PresentationItem::PresentationItem(TimeLine *timeLine, TimeManager *timeManager,
     connect(&timer, SIGNAL(timeout()),                  this, SLOT(onTimeout()));
     connect(timeMgr, SIGNAL(horizontalScroll()),        this, SLOT(onHorizontalScroll()));
 
-    // TODO(domi): update auch mit timeline verbinden!
-    connect(this, SIGNAL(update()),                     cursor, SLOT(onUpdate()));
+    connect(this, SIGNAL(update(QSize)),                     cursor, SLOT(onUpdate(QSize)));
+    connect(this, SIGNAL(update(QSize)),                     timeLine, SLOT(onUpdate(QSize)));
+    connect(this, SIGNAL(update(QSize)),                     selectedArea, SLOT(onUpdate(QSize)));
 
     recalcBoundingRec();
 }
@@ -115,12 +117,10 @@ void PresentationItem::removeTrack(Track *t)
 
 void PresentationItem::setOffsetLeft(int offset)
 {    
-//    qint64 cursorTime = timeMgr->convertPosToTime(cursor->pos().x() - offsetLeft);
     qint64 cursorTime = cursor->getCurrentTime();
 
     timeLine->setOffset(offset);
     cursor->setOffset(offset);
-//    cursor->setPos(timeMgr->convertTimeToPos(cursorTime) + offset, 0);
     cursor->moveToTime(cursorTime);
 
     offsetLeft = offset;
@@ -240,20 +240,11 @@ void PresentationItem::onChangedViewSize(QSize size)
     //TODO(domi): damit erscheint am Anfang kein vertikaler Scrollbalken --> Ursache finden!
     minCoverHeight = size.height()-2;
     visRect.setHeight(size.height());
-    visRect.setWidth(size.width());
-
-    // resize cursor, timeLine, selectedArea
-    if(boundingRectangle.height() > minCoverHeight){
-        selectedArea->setHeight(boundingRectangle.height());
-        timeLine->resize(size.width(), timeLine->size().height());
-    }else{
-        selectedArea->setHeight(minCoverHeight);
-        timeLine->resize(size.width(), timeLine->size().height());
-    }
+    visRect.setWidth(size.width());    
 
     recalcBoundingRec();        
     timeMgr->updateRange();
-    emit update();
+    emit update(size);  // triggers the resize in cursor, timeLine, selectedArea
 }
 
 void PresentationItem::onVerticalScroll(QRectF visibleRectangle)

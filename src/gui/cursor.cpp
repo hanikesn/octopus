@@ -61,8 +61,9 @@ qint64 Cursor::getCurrentTime()
     return timeMgr->convertPosToTime(pos().x() - offsetLeft);
 }
 
-void Cursor::onUpdate()
+void Cursor::onUpdate(QSize size)
 {
+    Q_UNUSED(size)
     if (presentationItem->getMinCoverHeight() > presentationItem->boundingRect().height())
         resize(1, presentationItem->getMinCoverHeight());
     else

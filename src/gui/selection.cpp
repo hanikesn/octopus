@@ -6,14 +6,17 @@
 #include <QMenu>
 #include <QAction>
 
+#include "gui/presentationitem.h"
+
 #include <QDebug>
 
-Selection::Selection(QGraphicsScene *parent) :
-    QGraphicsItem(0, parent),
+Selection::Selection(PresentationItem *parent) :
+    QGraphicsItem(parent),
     height(0),
     width(0),
     pen(Qt::lightGray),
-    brush(Qt::lightGray)
+    brush(Qt::lightGray),
+    presentationItem(parent)
 {
     menu = new QMenu(0);
     exportAction = new QAction(tr("Export Range"), this);
@@ -54,6 +57,16 @@ void Selection::setWidth(int w)
 {
     prepareGeometryChange();
     width = w;
+}
+
+void Selection::onUpdate(QSize size)
+{
+    Q_UNUSED(size)
+
+    if (presentationItem->boundingRect().height() > presentationItem->getMinCoverHeight())
+        setHeight(presentationItem->boundingRect().height());
+    else
+        setHeight(presentationItem->getMinCoverHeight());
 }
 
 void Selection::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
