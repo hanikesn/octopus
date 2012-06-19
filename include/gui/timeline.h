@@ -6,13 +6,14 @@
 
 
 class QGraphicsItem;
+class PresentationItem;
 
 
 class TimeLine : public QGraphicsWidget
 {
     Q_OBJECT
 public:
-    explicit TimeLine(int offset, QGraphicsItem * parent = 0, Qt::WindowFlags wFlags = 0);
+    explicit TimeLine(int offset, QGraphicsItem *parent, Qt::WindowFlags wFlags = 0);
 
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 
@@ -23,7 +24,8 @@ public:
 
     qint64 getUpperEnd(qint64 lowerEnd);
 
-public slots:    
+public slots:
+    void onUpdate(QSize size);
 
 private:
     int offset;

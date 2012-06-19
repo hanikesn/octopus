@@ -25,6 +25,8 @@ private:
     QCustomPlot *plot;
     QCPGraph *graph;
 
+    qint64 lastUpdate;
+
     void configureAppearance(QCPGraph *graph);
     void initialize(QCPGraph *graph, const StringSeries &series);
 

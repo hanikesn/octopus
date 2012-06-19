@@ -36,7 +36,7 @@ PresentationItem::PresentationItem(TimeLine *timeLine, TimeManager *timeManager,
     cursor->setZValue(1.0);
     cursor->resize(1, minCoverHeight);
 
-    selectedArea = new Selection(parent);
+    selectedArea = new Selection(this);
     selectedArea->setZValue(1.0);
     selectedArea->setHeight(minCoverHeight);
 
@@ -50,8 +50,9 @@ PresentationItem::PresentationItem(TimeLine *timeLine, TimeManager *timeManager,
     connect(&timer, SIGNAL(timeout()),                  this, SLOT(onTimeout()));
     connect(timeMgr, SIGNAL(horizontalScroll()),        this, SLOT(onHorizontalScroll()));
 
-    // TODO(domi): update auch mit timeline verbinden!
-    connect(this, SIGNAL(update()),                     cursor, SLOT(onUpdate()));
+    connect(this, SIGNAL(update(QSize)),                cursor, SLOT(onUpdate(QSize)));
+    connect(this, SIGNAL(update(QSize)),                timeLine, SLOT(onUpdate(QSize)));
+    connect(this, SIGNAL(update(QSize)),                selectedArea, SLOT(onUpdate(QSize)));
 
     recalcBoundingRec();
 }
@@ -62,10 +63,7 @@ PresentationItem::~PresentationItem()
 
 QRectF PresentationItem::boundingRect() const
 {
-    if(childItems().isEmpty())
-        return QRectF(0, 0, 100, 100);
-    else
-        return boundingRectangle;    
+    return boundingRectangle;
 }
 
 void PresentationItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
@@ -92,7 +90,7 @@ void PresentationItem::addTrack(Track *t)
 
     parent->setSceneRect(boundingRectangle);
 
-    resizeCursorAndSelection();
+    emit update(QSize(visRect.width(), visRect.height()));
 }
 
 void PresentationItem::removeTrack(Track *t)
@@ -110,17 +108,15 @@ void PresentationItem::removeTrack(Track *t)
         }
     }    
     recalcPositions();
-    resizeCursorAndSelection();
+    emit update(QSize(visRect.width(), visRect.height()));
 }
 
 void PresentationItem::setOffsetLeft(int offset)
 {    
-//    qint64 cursorTime = timeMgr->convertPosToTime(cursor->pos().x() - offsetLeft);
     qint64 cursorTime = cursor->getCurrentTime();
 
     timeLine->setOffset(offset);
     cursor->setOffset(offset);
-//    cursor->setPos(timeMgr->convertTimeToPos(cursorTime) + offset, 0);
     cursor->moveToTime(cursorTime);
 
     offsetLeft = offset;
@@ -215,8 +211,8 @@ void PresentationItem::recalcBoundingRec()
     // If there are no tracks height/width are the size of the timeLine
     if(tracks.isEmpty()){        
         boundingRectangle.setHeight(minCoverHeight);
-        boundingRectangle.setWidth(timeLine->size().width());        
-        parent->setSceneRect(boundingRectangle);
+        boundingRectangle.setWidth(visRect.width());
+        parent->setSceneRect(boundingRectangle);        
         return;
     }
 
@@ -232,7 +228,7 @@ void PresentationItem::recalcBoundingRec()
 
     boundingRectangle.setHeight(height);
     boundingRectangle.setWidth(width);
-    parent->setSceneRect(boundingRectangle);    
+    parent->setSceneRect(boundingRectangle);        
 }
 
 void PresentationItem::onChangedViewSize(QSize size)
@@ -240,20 +236,11 @@ void PresentationItem::onChangedViewSize(QSize size)
     //TODO(domi): damit erscheint am Anfang kein vertikaler Scrollbalken --> Ursache finden!
     minCoverHeight = size.height()-2;
     visRect.setHeight(size.height());
-    visRect.setWidth(size.width());
-
-    // resize cursor, timeLine, selectedArea
-    if(boundingRectangle.height() > minCoverHeight){
-        selectedArea->setHeight(boundingRectangle.height());
-        timeLine->resize(size.width(), timeLine->size().height());
-    }else{
-        selectedArea->setHeight(minCoverHeight);
-        timeLine->resize(size.width(), timeLine->size().height());
-    }
+    visRect.setWidth(size.width());    
 
     recalcBoundingRec();        
     timeMgr->updateRange();
-    emit update();
+    emit update(size);  // triggers the resize in cursor, timeLine, selectedArea
 }
 
 void PresentationItem::onVerticalScroll(QRectF visibleRectangle)
@@ -264,21 +251,9 @@ void PresentationItem::onVerticalScroll(QRectF visibleRectangle)
     timeMgr->updateRange();
 }
 
-void PresentationItem::resizeCursorAndSelection()
-{
-    recalcBoundingRec();
-    if(boundingRectangle.height() > minCoverHeight){
-        cursor->resize(1, boundingRectangle.height());
-        selectedArea->setHeight(boundingRectangle.height());
-    }
-}
-
 void PresentationItem::hideSelection()
 {
-    if (!selectedArea->isVisible()) return; // if selection is already invisible there is nothing to do.
-    selectedArea->setVisible(false);
-    selectedArea->setWidth(0);
-    selectedArea->setHeight(0);    
+    selectedArea->hide();
     // others need to know that there is no selection active any more
     emit selection(-1, -1);
 }

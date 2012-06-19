@@ -21,12 +21,6 @@ void StringSeries::addData(qint64 timestamp, const Value& value)
     }
 }
 
-QString StringSeries::getData(qint64 timestamp) const
-{
-    // TODO(Steffi): Check! Was ist der Rückgabewert, wenn es den Wert nicht gibt? Sollte !=0 sein!
-    return getData(timestamp, timestamp).value(timestamp);
-}
-
 QMap<qint64, QString> StringSeries::getData() const
 {
     return dp.getDB().getData<QString>(fullName());

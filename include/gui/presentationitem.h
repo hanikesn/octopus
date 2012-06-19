@@ -127,7 +127,7 @@ signals:
 
     void exportTriggered();
 
-    void update();
+    void update(QSize size);
 
 private:
     QGraphicsScene *parent;
@@ -161,8 +161,6 @@ private:
       * Makes sure that no gaps exist between tracks (for example after deleting a track).
       */
     void recalcPositions();
-
-    void resizeCursorAndSelection();
 
     /**
       * Sets the selection invisible.

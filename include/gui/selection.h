@@ -7,12 +7,13 @@
 
 class QMenu;
 class QAction;
+class PresentationItem;
 
 class Selection : public QObject, public QGraphicsItem
 {
     Q_OBJECT
 public:
-    explicit Selection(QGraphicsScene *parent = 0);
+    explicit Selection(PresentationItem *parent = 0);
     ~Selection();
 
     QRectF boundingRect() const;
@@ -27,6 +28,11 @@ public:
     int getHeight() { return height; }
     int getWidth() { return width; }
 
+    void hide();
+
+public slots:
+    void onUpdate(QSize size);
+
 signals:
     void exportTriggered();
 
@@ -35,6 +41,7 @@ private:
     int height, width;
     QPen pen;
     QBrush brush;
+    PresentationItem *presentationItem;
 
     QMenu *menu;
     QAction *exportAction;

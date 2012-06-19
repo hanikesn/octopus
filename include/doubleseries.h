@@ -20,11 +20,6 @@ public:
     void addData(qint64 timeStamp, const Value &value);
 
     /**
-     * @return The value for the given timestamp.
-     */
-    double getData(qint64 timestamp) const;
-
-    /**
      * @return A map of all timestamps and the respective data.
      */
     QMap<qint64, double> getData() const;
