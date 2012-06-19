@@ -1,6 +1,8 @@
 #include "value.h"
 #include <EIValue.h>
 
+#include <limits>
+
 Value::Value()
     : type(EMPTY)
 {
@@ -40,8 +42,9 @@ QString Value::asString() const
 {
     if (type == STRING) {
         return s;
+    } if (type == DOUBLE) {
+        return QString::number(d, 'g', std::numeric_limits<double>::digits10);
     } else {
-        // TODO(Steffi)
         return "";
     }
 }
@@ -50,8 +53,9 @@ double Value::asDouble() const
 {
     if (type == DOUBLE) {
         return d;
+    } else if (type == STRING) {
+        return s.toDouble();
     } else {
-        // TODO(Steffi)
         return 0.0;
     }
 }

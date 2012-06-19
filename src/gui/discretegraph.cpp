@@ -2,13 +2,17 @@
 
 #include "gui/qcustomplot.h"
 
+//#include <QPair>
+#include <algorithm>
+
 const QCPRange RANGE(0.0, 1.0);
 const double IMPULSE_HEIGHT = RANGE.lower + 0.4 * RANGE.size();
 
 DiscreteGraph::DiscreteGraph(QCustomPlot *plot, const StringSeries &s) :
     Graph(plot),
     series(s),
-    plot(plot)
+    plot(plot),
+    lastUpdate(-1)
 {
     connect(&series, SIGNAL(newData(qint64)), this, SLOT(onNewData(qint64)));
 
@@ -95,6 +99,12 @@ QCPItemText* DiscreteGraph::addLabel(const QString& text, QCPItemAnchor *parentA
 
 void DiscreteGraph::onNewData(qint64 timestamp)
 {
-    addData(timestamp, series.getData(timestamp));
+    auto const& data = series.getData(lastUpdate, timestamp);
+
+    for (auto i = data.constBegin(); i != data.constEnd(); ++i) {
+	    addData(i.key(), i.value());
+    }
+
+    lastUpdate = timestamp;
     plot->replot();
 }

@@ -23,12 +23,6 @@ void DoubleSeries::addData(qint64 timestamp, const Value& value)
     }
 }
 
-double DoubleSeries::getData(qint64 timestamp) const
-{
-    // TODO(Steffi): Check! Was ist der Rückgabewert, wenn es den Wert nicht gibt? Sollte !=0 sein!
-    return getData(timestamp, timestamp).value(timestamp);
-}
-
 QMap<qint64, double> DoubleSeries::getData() const
 {
     return dp.getDB().getData<double>(fullName());
