@@ -94,7 +94,7 @@ void PresentationItem::addTrack(Track *t)
 
     parent->setSceneRect(boundingRectangle);
 
-    resizeCursorAndSelection();
+    emit update(QSize(visRect.width(), visRect.height()));
 }
 
 void PresentationItem::removeTrack(Track *t)
@@ -112,7 +112,7 @@ void PresentationItem::removeTrack(Track *t)
         }
     }    
     recalcPositions();
-    resizeCursorAndSelection();
+    emit update(QSize(visRect.width(), visRect.height()));
 }
 
 void PresentationItem::setOffsetLeft(int offset)
@@ -253,15 +253,6 @@ void PresentationItem::onVerticalScroll(QRectF visibleRectangle)
     visRect = visibleRectangle;
     // will trigger a rangeChanged() --> previously invisible tracks will update their range
     timeMgr->updateRange();
-}
-
-void PresentationItem::resizeCursorAndSelection()
-{
-    recalcBoundingRec();
-    if(boundingRectangle.height() > minCoverHeight){
-        cursor->resize(1, boundingRectangle.height());
-        selectedArea->setHeight(boundingRectangle.height());
-    }
 }
 
 void PresentationItem::hideSelection()

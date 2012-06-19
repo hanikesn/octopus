@@ -162,8 +162,6 @@ private:
       */
     void recalcPositions();
 
-    void resizeCursorAndSelection();
-
     /**
       * Sets the selection invisible.
       * Emits selection(-1, -1) to update every objects selection-parameters.
