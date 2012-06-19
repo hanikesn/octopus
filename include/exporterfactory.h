@@ -4,14 +4,15 @@
 #include <qglobal.h>
 #include <memory>
 #include <vector>
+#include "exporter.h"
 
-class Exporter;
 class QStringList;
 
 class ExporterFactory
 {
     Q_DISABLE_COPY(ExporterFactory)
 public:
+    ExporterFactory() {}
 
     void addExporter(std::unique_ptr<Exporter> exporter);
 

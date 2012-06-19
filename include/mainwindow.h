@@ -16,6 +16,7 @@
 #include <QWidget>
 #include <QMenu>
 #include <QAction>
+#include <exporterfactory.h>
 
 
 class PresentationArea;
@@ -70,6 +71,8 @@ private:
     DataProvider *dataProvider;
 
     NetworkAdapter networkAdapter;
+
+    ExporterFactory exporterFactory;
 
     Ui::MainWindow ui;
 

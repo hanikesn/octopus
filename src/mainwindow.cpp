@@ -6,11 +6,13 @@
 #include <sstream>
 #include <QDateTime>
 
+#include "gui/sourcedialog.h"
 #include "dataprovider.h"
 #include "gui/presentationarea.h"
 #include "gui/mainview.h"
 #include "serializer.h"
 #include "parser.h"
+#include "CVSExporter.h"
 #include "gui/startscreen.h"
 
 const QString MainWindow::TITLE = "Octopus 0.1";
@@ -45,6 +47,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(loadAction, SIGNAL(triggered()), this, SLOT(onLoad()));
     connect(newAction, SIGNAL(triggered()), this, SLOT(onNew()));
     connect(quitAction, SIGNAL(triggered()), this, SLOT(close()));
+
+    exporterFactory.addExporter(std::unique_ptr<Exporter>(new CVSExporter()));
 
     setUpButtonBars();
     setUpMenu();
@@ -104,7 +108,27 @@ void MainWindow::onVerticalScroll()
 
 void MainWindow::onExportRange(qint64 begin, qint64 end)
 {
-    qDebug() << "MainWindow::onExportRange " << begin << ":" << end;
+    QFileDialog dialog(this, tr("Export"));
+    dialog.setFileMode(QFileDialog::AnyFile);
+    dialog.setAcceptMode(QFileDialog::AcceptSave);
+
+    dialog.setNameFilters(exporterFactory.names());
+    QStringList fileNames;
+    if (dialog.exec())
+        fileNames = dialog.selectedFiles();
+
+    if(fileNames.isEmpty())
+        return;
+
+    QFile file(fileNames.first());
+    if(!file.open(QIODevice::WriteOnly))
+        return; // TODO Fehlermeldung
+
+    QStringList sources = SourceDialog::getSources(*dataProvider, tr("Export"), false, QStringList(), this).front();
+
+    exporterFactory.getExporter(dialog.selectedNameFilter()).write(file, *dataProvider, sources, begin, end);
+
+    qDebug() << "MainWindow::onExportRange " << begin << ":" << end << fileNames << sources;
 }
 
 void MainWindow::setUpMenu()
