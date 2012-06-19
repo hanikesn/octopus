@@ -45,6 +45,7 @@ set(Octopus_SOURCES
   src/databaseadapter.cpp
   src/dataprovider.cpp
   src/doubleseries.cpp
+  src/exporterfactory.cpp
   src/gui/cursor.cpp
   src/gui/discretegraph.cpp
   src/gui/interpolatinggraph.cpp
@@ -68,6 +69,8 @@ set(Octopus_SOURCES
 set(Octopus_HEADERS
   include/abstractdataseries.h
   include/common.h
+  include/exporter.h
+  include/exporterfactory.h
   include/databaseadapter.h
   include/dataprovider.h
   include/doubleseries.h
