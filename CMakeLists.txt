@@ -65,6 +65,7 @@ set(Octopus_SOURCES
   src/stringseries.cpp
   src/value.cpp
   src/timemanager.cpp
+  src/gui/startscreen.cpp
 )
 
 set(Octopus_HEADERS
@@ -98,12 +99,14 @@ set(Octopus_HEADERS
   include/value.h
   include/visitor.h
   include/timemanager.h
+  include/gui/startscreen.h
 )
 
 set(Octopus_FORMS
   ui/mainwindow.ui
   ui/sourcedialog.ui
   ui/track.ui
+  ui/startscreen.ui
 )
 set(Octopus_RESOURCES
   rc/resources.qrc

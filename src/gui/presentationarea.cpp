@@ -34,8 +34,7 @@ PresentationArea::PresentationArea(QGraphicsScene *scene, const DataProvider &da
     connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)),
             this, SLOT(onRangeChanged(qint64,qint64)));
 
-    // TODO(domi): nicht vergessen :)
-//    connect(dataProvider, SIGNAL(newMax(qint64)), timeManager, SLOT(onNewMax(qint64)));
+    connect(&dataProvider, SIGNAL(newMax(qint64)), timeManager, SLOT(onNewMax(qint64)));
 }
 
 PresentationArea::~PresentationArea()
@@ -79,8 +78,6 @@ Track* PresentationArea::add(const QList<QString>& fullDataSeriesNames)
     t->resize(currentViewSize.width(), t->size().height());
     t->setPlotRange(timeManager->getLowVisRange(), timeManager->getHighVisRange());
 
-    //TODO(domi): entfernen, nur für debug-zwecke:
-    timeManager->onNewMax(tracks.size()*30000000);
     unsavedChanges = true;
     return t;
 }

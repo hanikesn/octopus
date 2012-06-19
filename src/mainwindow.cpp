@@ -13,6 +13,7 @@
 #include "serializer.h"
 #include "parser.h"
 #include "CVSExporter.h"
+#include "gui/startscreen.h"
 
 const QString MainWindow::TITLE = "Octopus 0.1";
 
@@ -53,6 +54,10 @@ MainWindow::MainWindow(QWidget *parent) :
     setUpMenu();
 
     onNew();
+    //TODO(domi): Kommentare wegmachen
+//    StartScreen *s = new StartScreen(this);
+//    if (s->showScreen() == StartScreen::LOAD)
+//        onLoad();
 }
 
 void MainWindow::onImportAction()
@@ -221,9 +226,9 @@ void MainWindow::onNew()
     }
     // create a temporary file for the db
     dataProvider = new DataProvider(QDir::tempPath() + "/Octopus-" + QDateTime::currentDateTime().toString("yyyyMMdd_hhmmsszzz"), this);
-    addData(*dataProvider);
 
     setUpView();
+    addData(*dataProvider);
     projectPath = "";
     setTitle("");
 }

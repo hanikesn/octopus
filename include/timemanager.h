@@ -16,6 +16,7 @@ public:
 
     qint64 getLowVisRange() {return lowVisRange;}
     qint64 getHighVisRange() {return highVisRange;}
+    qint64 getMaximum() {return maximum;}
 //    qint64 getTimePerPx() {return timePerPx;}
 
     /**
@@ -88,6 +89,9 @@ private:
 
     // amount of time which one pixel represents
     qint64 timePerPx;
+
+    // highest timestamp ever seen
+    qint64 maximum;
 
     // this is the amount of time the range is changed during playing
     // (every timeoutIntervall msecs)

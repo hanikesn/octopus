@@ -3,6 +3,7 @@
 #include <QPainter>
 #include <QPen>
 
+
 #include <QDebug>
 
 const qint64 TimeLine::LARGETICKAMOUNT = 2000000;  // two seconds in µs
@@ -56,7 +57,7 @@ QRectF TimeLine::boundingRect() const
 }
 
 void TimeLine::drawTicks(QPainter *painter)
-{
+{    
     currentPos = 0;
     qint64 currentTime = rangeOffset;
     currentTime -= currentTime%TIMEPERPX;
@@ -96,7 +97,7 @@ void TimeLine::drawTicks(QPainter *painter)
 
 void TimeLine::drawFrom(qint64 time)
 {
-//    if (rangeOffset == time) return;
+    if (rangeOffset == time) return;
 
     rangeOffset = time;
     update(boundingRect());
@@ -118,5 +119,3 @@ void TimeLine::onUpdate(QSize size)
 {
     resize(size.width(), this->size().height());
 }
-
-//TODO(domi): %LARGETI... geht nur mit Zahlen die vielfache von LARGETICKAMOUNT sind

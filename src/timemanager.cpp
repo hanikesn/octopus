@@ -6,6 +6,7 @@ TimeManager::TimeManager(QScrollBar *hScrollBar, TimeLine *timeLine):
     lowVisRange(0),
     highVisRange(0),
     timePerPx(40000),
+    maximum(0),
     timeoutUpdateIntervall(40000),
     timeoutIntervall(40),
     autoScroll(false),
@@ -118,6 +119,8 @@ void TimeManager::onRangeChanged(qint64 begin, qint64 end)
 
 void TimeManager::onNewMax(qint64 timestamp)
 {
+    if (timestamp > maximum)
+        maximum = timestamp;
     int max = timestamp/1000000; // max in seconds
     int min = 0;
 
