@@ -143,6 +143,7 @@ void Track::onSources()
         // only show the legend if the track is not empty
         ui.plot->legend->setVisible(!sources.first().isEmpty());
 
+        ui.plot->rescaleValueAxes();
         ui.plot->replot();
     }
 }

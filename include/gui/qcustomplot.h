@@ -2080,6 +2080,7 @@ public slots:
   void deselectAll();
   void replot();
   void rescaleAxes();
+  void rescaleValueAxes();
   
 signals:
   void mouseDoubleClick(QMouseEvent *event);
