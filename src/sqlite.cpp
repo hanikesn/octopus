@@ -49,6 +49,8 @@ PreparedStatement DB::prepare(const std::string& query) const
     if(ret != SQLITE_OK)
         throw Exception(ret);
 
+    std::cerr << sqlite3_bind_parameter_count(stmt) << "\n";
+
     return std::move(PreparedStatement(stmt));
 }
 
@@ -78,7 +80,7 @@ PreparedStatement::QueryIterator DB::execute(std::string const& query)
 
 
 PreparedStatement::PreparedStatement(sqlite3_stmt* stmt) :
-    stmt(stmt)
+    stmt(stmt), index(0)
 {
 }
 
@@ -223,6 +225,11 @@ int Row::columnCount()
 }
 
 int Row::getType(int index)
+{
+    return sqlite3_column_type(stmt.stmt, index);
+}
+
+int Row::getType()
 {
     return sqlite3_column_type(stmt.stmt, index);
 }

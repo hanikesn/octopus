@@ -34,6 +34,8 @@ public:
 
     std::string getText(int index);
 
+    int getType();
+
     Row& operator>>(std::string& value);
     Row& operator>>(double& value);
     Row& operator>>(sqlite3_int64& value);
