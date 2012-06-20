@@ -67,13 +67,19 @@ void MainWindow::onExportAction()
 }
 
 void MainWindow::setUpButtonBars()
-{
-    addTrackButton.setIcon(QIcon(":/buttons/toolbar/icons/add_16.png"));
+{    
+    addTrackButton.setIcon(QIcon(":/buttons/toolbar/icons/add_16.png"));    
     loadButton.setIcon(QIcon(":/buttons/toolbar/icons/document-open-3_16.png"));
     exportButton.setIcon(QIcon(":/buttons/toolbar/icons/document-export-4_16.png"));
     zoomInButton.setIcon(QIcon(":/buttons/toolbar/icons/zoom-in_16.png"));
     zoomOutButton.setIcon(QIcon(":/buttons/toolbar/icons/zoom-out_16.png"));
-    playButton.setIcon(QIcon(":/buttons/toolbar/icons/play_16.png"));
+
+    playButtonIcon.addPixmap(QPixmap(":/buttons/toolbar/icons/play_16.png"), QIcon::Normal,
+                             QIcon::Off);
+    playButtonIcon.addPixmap(QPixmap(":/buttons/toolbar/icons/pause_16.png"), QIcon::Normal,
+                             QIcon::On);
+    playButton.setCheckable(true);
+    playButton.setIcon(playButtonIcon);
 
     // add buttons to the horizontal layout in the toolbar
     layout.addWidget(&addTrackButton);
