@@ -107,6 +107,8 @@ private:
 
     TimeLine *timeLine;
 
+    qint64 getZoomFactor(bool zoomOut);
+
 };
 
 #endif // TIMEMANAGER_H

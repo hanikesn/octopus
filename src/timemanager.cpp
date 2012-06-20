@@ -124,6 +124,25 @@ void TimeManager::onRangeChanged(qint64 begin, qint64 end)
     timeLine->drawFrom(begin);
 }
 
+qint64 TimeManager::getZoomFactor(bool zoomOut)
+{
+    qint64 currentStepSize = timeLine->getStepSize();
+    if (currentStepSize <= 200000) { // <= 200ms stepsize: 25ms
+        if (currentStepSize == 200000 && zoomOut)
+            return 50000;
+        return 25000;
+    } else if (currentStepSize <= 1000000) { // <= 1000ms stepsize 50ms
+        if (currentStepSize == 1000000  && zoomOut)
+            return 200000;
+        return 50000;
+    } else if (currentStepSize <= 5000000) { // <= 5000ms stepsize 200ms
+        if (currentStepSize == 5000000 && zoomOut)
+            return 1000000;
+        return 200000;
+    } else // > 5000ms stepsize 1000ms
+        return 1000000;
+}
+
 void TimeManager::onNewMax(qint64 timestamp)
 {
     if (timestamp > maximum)
@@ -144,7 +163,7 @@ void TimeManager::onNewMax(qint64 timestamp)
 
 void TimeManager::onZoomIn()
 {
-    qint64 newStepSize = timeLine->getStepSize() - 50000;
+    qint64 newStepSize = timeLine->getStepSize() - getZoomFactor(false);
     if (newStepSize <= 0) return;
 
     timeLine->setStepSize(newStepSize);
@@ -154,7 +173,7 @@ void TimeManager::onZoomIn()
 
 void TimeManager::onZoomOut()
 {
-    qint64 newStepSize = timeLine->getStepSize() + 50000;
+    qint64 newStepSize = timeLine->getStepSize() + getZoomFactor(true);
     timeLine->setStepSize(newStepSize);
     timePerPx = newStepSize / 50;
     emit rangeChanged(lowVisRange, getUpperEnd(lowVisRange));
