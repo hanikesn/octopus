@@ -176,6 +176,59 @@
 
 #include "gui/qcustomplot.h"
 
+#include "measure.h"
+
+inline bool operator ==(const TextCacheKey& left, const TextCacheKey& right)
+{
+    return left.font == right.font
+            && left.rect == right.rect
+            && left.flags == right.flags
+            && left.text == right.text;
+}
+
+inline uint qHash(const QRect & r)
+{
+    return qHash(r.left() ^ r.top() ^ r.right() ^ r.bottom());
+}
+
+inline int qHash(const QFont &font)
+{
+    int hashCode = font.pixelSize();
+    hashCode = hashCode * 31 + font.weight();
+    hashCode = hashCode * 31 + int(font.style());
+    hashCode = hashCode * 31 + font.stretch();
+    hashCode = hashCode * 31 + int(font.styleHint());
+    hashCode = hashCode * 31 + int(font.styleStrategy());
+    hashCode = hashCode * 31 + int(font.fixedPitch());
+    hashCode = hashCode * 31 + qHash(font.family());
+    hashCode = hashCode * 31 + qHash(font.pointSize());
+    hashCode = hashCode * 31 + int(font.underline());
+    hashCode = hashCode * 31 + int(font.overline());
+    hashCode = hashCode * 31 + int(font.strikeOut());
+    hashCode = hashCode * 31 + int(font.kerning());
+    return hashCode;
+}
+
+inline int qHash(const TextCacheKey &key)
+{
+    return qHash(key.font) ^ qHash(key.rect) ^ qHash(key.flags) ^  qHash(key.text);
+}
+
+static QRect fromCache(const QPainter& painter, QCache<TextCacheKey, QRect>& cache, const QRect& rect, const int flags, const QString& text)
+{
+    TextCacheKey key = {painter.font(), rect, flags, text};
+
+    QRect* r = cache[key];
+    if(r)
+        return *r;
+
+    r = new QRect(painter.fontMetrics().boundingRect(rect, flags, text));
+
+    cache.insert(key, r);
+
+    return *r;
+}
+
 // ================================================================================
 // =================== QCPData
 // ================================================================================
@@ -4946,7 +4999,7 @@ void QCPAxis::draw(QCPPainter *painter)
     margin += mLabelPadding;
     painter->setFont(getLabelFont());
     painter->setPen(QPen(getLabelColor()));
-    labelBounds = painter->fontMetrics().boundingRect(0, 0, 0, 0, Qt::TextDontClip, mLabel);
+    labelBounds = fromCache(*painter, getCache(), QRect(), Qt::TextDontClip, mLabel);
     if (mAxisType == atLeft)
     {
       QTransform oldTransform = painter->transform();
@@ -5767,7 +5820,8 @@ QCustomPlot::QCustomPlot(QWidget *parent) :
   QWidget(parent),
   mDragging(false),
   mReplotting(false),
-  mPlottingHints(QCP::phNone)
+  mPlottingHints(QCP::phNone),
+  mTextCache(1000)
 {
   setAttribute(Qt::WA_NoMousePropagation);
   setAttribute(Qt::WA_OpaquePaintEvent);
@@ -8047,7 +8101,7 @@ void QCustomPlot::draw(QCPPainter *painter)
   if (!mTitle.isEmpty())
   {
     painter->setFont(titleSelected() ? mSelectedTitleFont : mTitleFont);
-    mTitleBoundingBox = painter->fontMetrics().boundingRect(mViewport, Qt::TextDontClip | Qt::AlignHCenter, mTitle);
+    mTitleBoundingBox = fromCache(*painter, mTextCache, mViewport, Qt::TextDontClip | Qt::AlignHCenter, mTitle);
   } else
     mTitleBoundingBox = QRect();
   
@@ -9139,7 +9193,7 @@ void QCPPlottableLegendItem::draw(QCPPainter *painter, const QRect &rect) const
   if (mTextWrap)
   {
     // take width from rect since our text should wrap there (only icon must fit at least):
-    textRect = painter->fontMetrics().boundingRect(0, 0, rect.width()-iconTextPadding-iconSize.width(), rect.height(), Qt::TextDontClip | Qt::TextWordWrap, mPlottable->name());
+    textRect = fromCache(*painter, mPlottable->getCache(), QRect(0, 0, rect.width()-iconTextPadding-iconSize.width(), rect.height()), Qt::TextDontClip | Qt::TextWordWrap, mPlottable->name());
     if (textRect.height() < iconSize.height()) // text smaller than icon, center text vertically in icon height
     {
       painter->drawText(rect.x()+iconSize.width()+iconTextPadding, rect.y(), rect.width()-iconTextPadding-iconSize.width(), iconSize.height(), Qt::TextDontClip | Qt::TextWordWrap, mPlottable->name());
@@ -9150,7 +9204,7 @@ void QCPPlottableLegendItem::draw(QCPPainter *painter, const QRect &rect) const
   } else
   {
     // text can't wrap (except with explicit newlines), center at current item size (icon size)
-    textRect = painter->fontMetrics().boundingRect(0, 0, 0, rect.height(), Qt::TextDontClip, mPlottable->name());
+    textRect = fromCache(*painter, mPlottable->getCache(), QRect(0, 0, 0, rect.height()), Qt::TextDontClip, mPlottable->name());
     if (textRect.height() < iconSize.height()) // text smaller than icon, center text vertically in icon height
     {
       painter->drawText(rect.x()+iconSize.width()+iconTextPadding, rect.y(), rect.width(), iconSize.height(), Qt::TextDontClip, mPlottable->name());
@@ -12994,7 +13048,7 @@ void QCPItemText::draw(QCPPainter *painter)
   if (!qFuzzyIsNull(mRotation))
     transform.rotate(mRotation);
   painter->setFont(mainFont());
-  QRect textRect = painter->fontMetrics().boundingRect(0, 0, 0, 0, Qt::TextDontClip|mTextAlignment, mText);
+  QRect textRect = fromCache(*painter, getCache(), QRect(), Qt::TextDontClip|mTextAlignment, mText);
   QRect textBoxRect = textRect.adjusted(-mPadding.left(), -mPadding.top(), mPadding.right(), mPadding.bottom());
   QPointF textPos = getTextDrawPoint(QPointF(0, 0), textBoxRect, mPositionAlignment); // 0, 0 because the transform does the translation
   textRect.moveTopLeft(textPos.toPoint()+QPoint(mPadding.left(), mPadding.top()));
@@ -14037,6 +14091,11 @@ QCPLayerable::~QCPLayerable()
     mLayer->removeChild(this);
     mLayer = 0;
   }
+}
+
+QCache<TextCacheKey, QRect>& QCPLayerable::getCache()
+{
+    return mParentPlot->getCache();
 }
 
 /*!

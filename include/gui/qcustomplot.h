@@ -41,6 +41,7 @@
 #include <QDebug>
 #include <QVector2D>
 #include <QStack>
+#include <QCache>
 #include <qmath.h>
 #include <limits>
 
@@ -62,11 +63,20 @@ class QCPItemPosition;
 class QCPAxis;
 class QCPData;
 
+struct TextCacheKey
+{
+    const QFont font;
+    const QRect rect;
+    const int flags;
+    const QString text;
+};
+
 /*!
   The QCP Namespace contains general enums and QFlags 
 */
 namespace QCP
 {
+
 /*!
   Defines the symbol used for scatter points.
   
@@ -329,6 +339,7 @@ public:
   QCustomPlot *parentPlot() const { return mParentPlot; }
   QCPLayer *layer() const { return mLayer; }
   bool antialiased() const { return mAntialiased; }
+  QCache<TextCacheKey, QRect> &getCache();
   
   // setters:
   void setVisible(bool on);
@@ -2073,6 +2084,8 @@ public:
   bool saveBmp(const QString &fileName, int width=0, int height=0, double scale=1.0);
   bool saveRastered(const QString &fileName, int width, int height, double scale, const char *format, int quality=-1);
 
+  QCache<TextCacheKey, QRect>& getCache() {return mTextCache;}
+
   QCPAxis *xAxis, *yAxis, *xAxis2, *yAxis2;
   QCPLegend *legend;
   
@@ -2141,6 +2154,8 @@ protected:
   QCPLayer *mCurrentLayer;
   QCP::PlottingHints mPlottingHints;
   Qt::KeyboardModifier mMultiSelectModifier;
+
+  QCache<TextCacheKey, QRect> mTextCache;
   
   // reimplemented methods:
   virtual QSize minimumSizeHint() const;
