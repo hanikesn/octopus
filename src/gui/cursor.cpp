@@ -8,15 +8,15 @@
 
 #include <QDebug>
 
-Cursor::Cursor(int offsetLeft, TimeManager *timeManager, PresentationItem *presentationItem,
-               QGraphicsItem *parent) :
+Cursor::Cursor(TimeManager *timeManager, QGraphicsItem *parent) :
     QGraphicsWidget(parent),
     pen(Qt::red),
     brush(Qt::red),
-    offsetLeft(offsetLeft),
+    offsetLeft(0),
     currentTime(0),
     timeMgr(timeManager),
-    presentationItem(presentationItem)
+    coverHeight(0),
+    maxHeight(0)
 
 {
     setZValue(1.0);
@@ -40,7 +40,7 @@ void Cursor::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QW
     painter->drawRect(frame);
 }
 
-void Cursor::onOffsetChanged(int offset)
+void Cursor::updateOffset(int offset)
 {
     offsetLeft = offset;
     update();
@@ -51,14 +51,6 @@ QRectF Cursor::boundingRect() const
     return QRectF(0, 0, geometry().width(), geometry().height());
 }
 
-void Cursor::changePos(int pos)
-{
-    if (pos < offsetLeft) return;
-    setVisible(true);
-    setPos(pos, 0);
-    currentTime = timeMgr->convertPosToTime(pos - offsetLeft);
-}
-
 void Cursor::setTime(qint64 time)
 {
     currentTime = time;
@@ -67,12 +59,14 @@ void Cursor::setTime(qint64 time)
 
 void Cursor::update()
 {
+    resize(1.0,qMin(coverHeight, maxHeight));
+
     int newPos = timeMgr->convertTimeToPos(currentTime);
     if(newPos == -1)
         setVisible(false);
     else
         setVisible(true);
-    changePos(newPos + offsetLeft);
+    setPos(newPos + offsetLeft, 0);
 }
 
 qint64 Cursor::getTime()
@@ -80,13 +74,13 @@ qint64 Cursor::getTime()
     return currentTime;
 }
 
-// TODO richtige größe bekommen
-void Cursor::onUpdateSize(QSize size)
+
+void Cursor::updateCoverHeight(int height)
 {
-    Q_UNUSED(size)
-    if (presentationItem->getMinCoverHeight() > presentationItem->boundingRect().height())
-        resize(1, presentationItem->getMinCoverHeight());
-    else
-        resize(1, presentationItem->boundingRect().height());
+    coverHeight = height;
 }
 
+void Cursor::updateMaxHeight(int height)
+{
+    maxHeight = height;
+}

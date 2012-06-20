@@ -29,7 +29,11 @@ PresentationItem::PresentationItem(TimeLine *timeLine, TimeManager *timeManager,
     timeLine->setParentItem(this);
     timeLine->setZValue(0.9);
 
-    cursor = new Cursor(offsetLeft, timeManager, this, this);
+    cursor = new Cursor(timeManager, this);
+
+    // TODO hardcoded weg
+    cursor->updateCoverHeight(100);
+    cursor->updateMaxHeight(100);
 
     selectedArea = new Selection(this);
     selectedArea->setZValue(1.0);
@@ -45,21 +49,19 @@ PresentationItem::PresentationItem(TimeLine *timeLine, TimeManager *timeManager,
     connect(&timer, SIGNAL(timeout()),                  this, SLOT(onTimeout()));
     connect(timeMgr, SIGNAL(horizontalScroll()),        this, SLOT(onHorizontalScroll()));
 
-    connect(timeMgr, SIGNAL(zoomed()),                  cursor, SLOT(update()));
-    connect(this, SIGNAL(update(QSize)),                cursor, SLOT(onUpdateSize(QSize)));
-    connect(this, SIGNAL(update(QSize)),                timeLine, SLOT(onUpdate(QSize)));
-    connect(this, SIGNAL(update(QSize)),                selectedArea, SLOT(onUpdate(QSize)));
+    connect(timeMgr, SIGNAL(rangeChanged(qint64,qint64)), cursor, SLOT(update()));
+    connect(this, SIGNAL(update(QSize)),                  timeLine, SLOT(onUpdate(QSize)));
+    connect(this, SIGNAL(update(QSize)),                  selectedArea, SLOT(onUpdate(QSize)));
 
     recalcBoundingRec();
+    recalcPositions();
 
-    emit update(QSize(visRect.width(), visRect.height()));
+    setOffsetLeft(52);
 }
 
 PresentationItem::~PresentationItem()
 {
 }
-
-
 
 QRectF PresentationItem::boundingRect() const
 {
@@ -82,15 +84,13 @@ void PresentationItem::addTrack(Track *t)
     if(t->size().width() > boundingRectangle.width())
         boundingRectangle.setWidth(t->size().width());
 
-    int yPos = timeLine->size().height() + 5; // + 5 for border
     QGraphicsProxyWidget *trackToAdd = parent->addWidget(t);
-    trackToAdd->setPos(0, yPos + (tracks.size())*t->height());
     trackToAdd->setParentItem(this);
     tracks.append(trackToAdd);
 
     parent->setSceneRect(boundingRectangle);
 
-    emit update(QSize(visRect.width(), visRect.height()));
+    recalcPositions();
 }
 
 void PresentationItem::removeTrack(Track *t)
@@ -108,13 +108,12 @@ void PresentationItem::removeTrack(Track *t)
         }
     }    
     recalcPositions();
-    emit update(QSize(visRect.width(), visRect.height()));
 }
 
 void PresentationItem::setOffsetLeft(int offset)
 {    
     timeLine->setOffset(offset);
-    cursor->onOffsetChanged(offset);
+    cursor->updateOffset(offset);
     offsetLeft = offset;
 }
 
@@ -125,6 +124,9 @@ void PresentationItem::recalcPositions()
         proxyTrack->setPos(0, yPos);
         yPos += proxyTrack->widget()->height();
     }
+
+    cursor->updateCoverHeight(getMinCoverHeight());
+    emit update(QSize(visRect.width(), visRect.height()));
 }
 
 void PresentationItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
@@ -205,7 +207,7 @@ void PresentationItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
 void PresentationItem::recalcBoundingRec()
 {
     // If there are no tracks height/width are the size of the timeLine
-    if(tracks.isEmpty()){        
+    if(tracks.isEmpty()){
         boundingRectangle.setHeight(minCoverHeight);
         boundingRectangle.setWidth(visRect.width());
         parent->setSceneRect(boundingRectangle);        
@@ -224,7 +226,7 @@ void PresentationItem::recalcBoundingRec()
 
     boundingRectangle.setHeight(height);
     boundingRectangle.setWidth(width);
-    parent->setSceneRect(boundingRectangle);        
+    parent->setSceneRect(boundingRectangle);
 }
 
 void PresentationItem::onChangedViewSize(QSize size)
@@ -316,7 +318,6 @@ void PresentationItem::onTimeout()
 void PresentationItem::onHorizontalScroll()
 {
     hideSelection();
-    cursor->update();
 }
 
 void PresentationItem::onPlay()

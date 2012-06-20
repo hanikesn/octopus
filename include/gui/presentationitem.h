@@ -129,6 +129,8 @@ signals:
 
     void update(QSize size);
 
+    void updateVisibleSize(QSize size);
+
 private:
     QGraphicsScene *parent;
     QList<QGraphicsProxyWidget*> tracks;    
