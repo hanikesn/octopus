@@ -13,6 +13,7 @@ Cursor::Cursor(int offsetLeft, TimeManager *timeManager, PresentationItem *prese
     pen(Qt::red),
     brush(Qt::red),
     offsetLeft(offsetLeft),
+    currentTime(0),
     timeMgr(timeManager),
     presentationItem(presentationItem)
 {
@@ -47,6 +48,7 @@ void Cursor::changePos(int pos)
     if (pos < offsetLeft) return;
     setVisible(true);
     setPos(pos, 0);
+    currentTime = timeMgr->convertPosToTime(pos - offsetLeft);
 }
 
 void Cursor::moveToTime(qint64 time)
@@ -54,11 +56,12 @@ void Cursor::moveToTime(qint64 time)
     int newPos = timeMgr->convertTimeToPos(time);
     if (newPos != -1)
         changePos(newPos + offsetLeft);
+    currentTime = time;
 }
 
 qint64 Cursor::getCurrentTime()
 {
-    return timeMgr->convertPosToTime(pos().x() - offsetLeft);
+    return currentTime;
 }
 
 void Cursor::onUpdate(QSize size)
@@ -70,7 +73,8 @@ void Cursor::onUpdate(QSize size)
         resize(1, presentationItem->boundingRect().height());
 }
 
-void Cursor::onRangeChanged(qint64 begin, qint64 end)
+void Cursor::onZoomed()
 {
-
+    moveToTime(currentTime);
 }
+

@@ -115,6 +115,7 @@ void TimeManager::changeTimeStep(int milliSeconds)
     qint64 microSeconds = milliSeconds * 1000;
     timeLine->setStepSize(microSeconds);
     timePerPx = microSeconds / 50;
+    emit zoomed();
 }
 
 void TimeManager::onRangeChanged(qint64 begin, qint64 end)
@@ -169,6 +170,7 @@ void TimeManager::onZoomIn()
     timeLine->setStepSize(newStepSize);
     timePerPx = newStepSize / 50;
     emit rangeChanged(lowVisRange, getUpperEnd(lowVisRange));
+    emit zoomed();
 }
 
 void TimeManager::onZoomOut()
@@ -177,6 +179,7 @@ void TimeManager::onZoomOut()
     timeLine->setStepSize(newStepSize);
     timePerPx = newStepSize / 50;
     emit rangeChanged(lowVisRange, getUpperEnd(lowVisRange));
+    emit zoomed();
 }
 
 void TimeManager::horizontalScroll(int pos)

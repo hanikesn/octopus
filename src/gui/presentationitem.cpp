@@ -48,9 +48,8 @@ PresentationItem::PresentationItem(TimeLine *timeLine, TimeManager *timeManager,
     connect(selectedArea, SIGNAL(exportTriggered()),    this, SIGNAL(exportTriggered()));
     connect(&timer, SIGNAL(timeout()),                  this, SLOT(onTimeout()));
     connect(timeMgr, SIGNAL(horizontalScroll()),        this, SLOT(onHorizontalScroll()));
-
-//    connect(timeMgr, SIGNAL(rangeChanged(qint64,qint64)), cursor,
-//            SLOT(onRangeChanged(qint64,qint64)));
+    // redraws cursor at the point of time it was before zooming
+    connect(timeMgr, SIGNAL(zoomed()),                  cursor, SLOT(onZoomed()));
 
     connect(this, SIGNAL(update(QSize)),                cursor, SLOT(onUpdate(QSize)));
     connect(this, SIGNAL(update(QSize)),                timeLine, SLOT(onUpdate(QSize)));

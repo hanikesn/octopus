@@ -37,12 +37,14 @@ public:
 public slots:
     void onUpdate(QSize size);
 
-    void onRangeChanged(qint64 begin, qint64 end);
+    void onZoomed();
 
 private:    
     QPen pen;    
     QBrush brush;
     int offsetLeft;
+
+    qint64 currentTime;
 
     TimeManager *timeMgr;
     PresentationItem *presentationItem;
