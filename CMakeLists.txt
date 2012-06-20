@@ -73,6 +73,7 @@ set(Octopus_HEADERS
   include/common.h
   include/CVSExporter.h
   include/exporter.h
+  include/DBUtil.h
   include/exporterfactory.h
   include/databaseadapter.h
   include/dataprovider.h

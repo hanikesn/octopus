@@ -78,7 +78,7 @@ PreparedStatement::QueryIterator DB::execute(std::string const& query)
 
 
 PreparedStatement::PreparedStatement(sqlite3_stmt* stmt) :
-    stmt(stmt)
+    stmt(stmt), index(0)
 {
 }
 
@@ -223,6 +223,11 @@ int Row::columnCount()
 }
 
 int Row::getType(int index)
+{
+    return sqlite3_column_type(stmt.stmt, index);
+}
+
+int Row::getType()
 {
     return sqlite3_column_type(stmt.stmt, index);
 }

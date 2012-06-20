@@ -20,7 +20,10 @@ public:
     template<typename T>
     QMap<qint64, T> getData(QString const& key, qint64 start, qint64 end) const;
 
-    Sqlite::PreparedStatement::QueryIterator getData(QStringList const& keys, qint64 start, qint64 end) const;
+    /**
+     * Returns a query iterator for (name, time, value) from the db, the caller has to check the type of third column
+     */
+    Sqlite::PreparedStatement getData(QStringList const& keys, qint64 start, qint64 end) const;
 
     void addSender(EI::Description const& desc);
     QList<EI::Description> getSenders();

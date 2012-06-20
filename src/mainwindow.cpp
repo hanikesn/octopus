@@ -106,6 +106,8 @@ void MainWindow::onVerticalScroll()
 
 void MainWindow::onExportRange(qint64 begin, qint64 end)
 {
+    QStringList sources = SourceDialog::getSources(*dataProvider, tr("Export"), false, QStringList(), this).front();
+
     QFileDialog dialog(this, tr("Export"));
     dialog.setFileMode(QFileDialog::AnyFile);
     dialog.setAcceptMode(QFileDialog::AcceptSave);
@@ -119,10 +121,10 @@ void MainWindow::onExportRange(qint64 begin, qint64 end)
         return;
 
     QFile file(fileNames.first());
-    if(!file.open(QIODevice::WriteOnly))
-        return; // TODO Fehlermeldung
-
-    QStringList sources = SourceDialog::getSources(*dataProvider, tr("Export"), false, QStringList(), this).front();
+    if(!file.open(QIODevice::WriteOnly)) {
+        QMessageBox::critical(this,tr("Error"), tr("Could not safe file."));
+        return;
+    }
 
     exporterFactory.getExporter(dialog.selectedNameFilter()).write(file, *dataProvider, sources, begin, end);
 
