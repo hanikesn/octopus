@@ -49,8 +49,6 @@ PreparedStatement DB::prepare(const std::string& query) const
     if(ret != SQLITE_OK)
         throw Exception(ret);
 
-    std::cerr << sqlite3_bind_parameter_count(stmt) << "\n";
-
     return std::move(PreparedStatement(stmt));
 }
 
