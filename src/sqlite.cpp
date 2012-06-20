@@ -41,7 +41,7 @@ DB::~DB()
 
 const PreparedStatement::QueryIterator DB::Done;
 
-PreparedStatement DB::prepare(const std::string& query)
+PreparedStatement DB::prepare(const std::string& query) const
 {
     sqlite3_stmt* stmt;
     const char* unused;

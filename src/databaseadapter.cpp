@@ -3,6 +3,7 @@
 #include "common.h"
 
 #include <QPair>
+#include <QStringList>
 
 DatabaseAdapter::DatabaseAdapter(const QString &file)
     : db(file.toLocal8Bit().data())
@@ -12,9 +13,14 @@ DatabaseAdapter::DatabaseAdapter(const QString &file)
     db.execute("PRAGMA synchronous=OFF;");
     db.execute("PRAGMA foreign_keys = ON;");
 
-    if(db.execute("CREATE TABLE IF NOT EXISTS data (name TEXT, time INT, value BLOB);") != Sqlite::DB::Done)
+    if(db.execute("CREATE TABLE IF NOT EXISTS data_string (name TEXT, time INT, value TEXT);") != Sqlite::DB::Done)
         throw std::exception();
-    if(db.execute("CREATE INDEX IF NOT EXISTS time_name_idx on data(name,time);") != Sqlite::DB::Done)
+    if(db.execute("CREATE INDEX IF NOT EXISTS time_name_idx on data_string(name,time);") != Sqlite::DB::Done)
+        throw std::exception();
+
+    if(db.execute("CREATE TABLE IF NOT EXISTS data_float (name TEXT, time INT, value FLOAT);") != Sqlite::DB::Done)
+        throw std::exception();
+    if(db.execute("CREATE INDEX IF NOT EXISTS time_name_idx on data_float(name,time);") != Sqlite::DB::Done)
         throw std::exception();
 
     if(db.execute("CREATE TABLE IF NOT EXISTS senders (name TEXT PRIMARY KEY, devicetype TEXT);") != Sqlite::DB::Done)
@@ -27,9 +33,12 @@ DatabaseAdapter::DatabaseAdapter(const QString &file)
     if(db.execute("CREATE INDEX IF NOT EXISTS sender_name_idx on series(sender, name);") != Sqlite::DB::Done)
         throw std::exception();
 
-    stmtAddData = db.prepare("INSERT INTO data VALUES (?,?,?);");
-    stmtSelectDataWithTime = db.prepare("SELECT time, value FROM data WHERE name=? and time<=? and time>=?;");
-    stmtSelectData = db.prepare("SELECT time, value FROM data WHERE name=?;");
+    stmtAddDataFloat = db.prepare("INSERT INTO data_float VALUES (?,?,?);");
+    stmtAddDataString = db.prepare("INSERT INTO data_string VALUES (?,?,?);");
+    stmtSelectDataWithTimeFloat = db.prepare("SELECT time, value FROM data_float WHERE name=? and time<=? and time>=?;");
+    stmtSelectDataWithTimeString = db.prepare("SELECT time, value FROM data_string WHERE name=? and time<=? and time>=?;");
+    stmtSelectDataFloat = db.prepare("SELECT time, value FROM data_float WHERE name=?;");
+    stmtSelectDataString = db.prepare("SELECT time, value FROM data_string WHERE name=?;");
 
     stmtAddSender = db.prepare("INSERT OR REPLACE INTO senders VALUES (?,?)");
     stmtSelectSender = db.prepare("SELECT * from senders");
@@ -37,9 +46,6 @@ DatabaseAdapter::DatabaseAdapter(const QString &file)
     stmtAddSeries = db.prepare("INSERT OR REPLACE INTO series VALUES (?,?,?,?,?,?,?)");
     stmtSelectSeries = db.prepare("SELECT * from series where sender=?");
 }
-
-template QMap<qint64, double> DatabaseAdapter::getData<double>(QString const& key) const;
-template QMap<qint64, QString> DatabaseAdapter::getData<QString>(QString const& key) const;
 
 static Sqlite::Row& operator >>(Sqlite::Row& row, QString& value)
 {
@@ -66,28 +72,47 @@ static QMap<qint64, T> fillMap(Sqlite::PreparedStatement& stmt)
     return std::move(map);
 }
 
-template<typename T>
-QMap<qint64, T> DatabaseAdapter::getData(QString const& key) const
+template<>
+QMap<qint64, double> DatabaseAdapter::getData(QString const& key) const
 {
-    stmtSelectData.reset();
-    stmtSelectData << toStdString(key);
+    stmtSelectDataFloat.reset();
+    stmtSelectDataFloat << toStdString(key);
 
-    return fillMap<T>(stmtSelectData);
+    return fillMap<double>(stmtSelectDataFloat);
+}
+
+template<>
+QMap<qint64, QString> DatabaseAdapter::getData(QString const& key) const
+{
+    stmtSelectDataString.reset();
+    stmtSelectDataString << toStdString(key);
+
+    return fillMap<QString>(stmtSelectDataString);
+}
+
+template QMap<qint64, double> DatabaseAdapter::getData<double>(QString const& key) const;
+template QMap<qint64, QString> DatabaseAdapter::getData<QString>(QString const& key) const;
+
+template<>
+QMap<qint64, double> DatabaseAdapter::getData(QString const& key, qint64 start, qint64 end) const
+{
+    stmtSelectDataWithTimeFloat.reset();
+    stmtSelectDataWithTimeFloat << toStdString(key) << start << end;
+
+    return fillMap<double>(stmtSelectDataWithTimeFloat);
+}
+
+template<>
+QMap<qint64, QString> DatabaseAdapter::getData(QString const& key, qint64 start, qint64 end) const
+{
+    stmtSelectDataWithTimeString.reset();
+    stmtSelectDataWithTimeString << toStdString(key) << start << end;
+
+    return fillMap<QString>(stmtSelectDataWithTimeString);
 }
 
 template QMap<qint64, double> DatabaseAdapter::getData<double>(QString const& key, qint64 start, qint64 end) const;
 template QMap<qint64, QString> DatabaseAdapter::getData<QString>(QString const& key, qint64 start, qint64 end) const;
-
-template<typename T>
-QMap<qint64, T> DatabaseAdapter::getData(QString const& key, qint64 start, qint64 end) const
-{
-    stmtSelectDataWithTime.reset();
-    stmtSelectDataWithTime << toStdString(key) << start << end;
-
-    return fillMap<T>(stmtSelectDataWithTime);
-}
-
-template void DatabaseAdapter::add<Value>(QString const& key, qint64 timestamp, Value const& value);
 
 static Sqlite::PreparedStatement& operator <<(Sqlite::PreparedStatement& stmt, Value const& value)
 {
@@ -106,12 +131,24 @@ static Sqlite::PreparedStatement& operator <<(Sqlite::PreparedStatement& stmt, V
     return stmt;
 }
 
-template<typename T>
-void DatabaseAdapter::add(QString const& key, qint64 timestamp, T const& value)
+void DatabaseAdapter::add(QString const& key, qint64 timestamp, Value const& value)
 {
-    stmtAddData.reset();
-    stmtAddData << toStdString(key) << timestamp << value;
-    if(stmtAddData.execute() != stmtAddData.done())
+    Sqlite::PreparedStatement* stmt;
+    switch(value.getType()) {
+    case Value::DOUBLE:
+        stmt = &stmtAddDataFloat;
+        break;
+    case Value::STRING:
+        stmt = &stmtAddDataString;
+        break;
+    case Value::EMPTY:
+        return;
+    }
+
+    stmt->reset();
+
+    *stmt << toStdString(key) << timestamp << value;
+    if(stmt->execute() != stmt->done())
         throw std::exception();
 }
 
@@ -131,6 +168,27 @@ static std::string convert(EI::Value::Type t)
     }
 
     return "EMPTY";
+}
+
+Sqlite::PreparedStatement::QueryIterator DatabaseAdapter::getData(QStringList const& keys, qint64 start, qint64 end) const
+{
+    QString query = "SELECT name, time, value FROM data";
+
+    if(keys.length() > 0) {
+        query += " WHERE name=?";
+    }
+
+    for(int i = 1; i < keys.length(); i++) {
+        query += " OR name=?";
+    }
+
+    Sqlite::PreparedStatement stmt = db.prepare(toStdString(query));
+
+    foreach(QString key, keys) {
+        stmt << toStdString(key);
+    }
+
+    return stmt.execute();
 }
 
 static EI::Value::Type convertType(std::string const& str)
