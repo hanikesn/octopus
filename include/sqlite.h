@@ -110,7 +110,7 @@ public:
 
     PreparedStatement::QueryIterator execute(std::string const& query);
 
-    PreparedStatement prepare(const std::string& query);
+    PreparedStatement prepare(const std::string& query) const;
 
     static const PreparedStatement::QueryIterator Done;
 
