@@ -32,8 +32,7 @@ public:
 protected:
     void closeEvent(QCloseEvent *ce);
     
-private slots:
-    void onImportAction();
+private slots:    
     void onExportAction();
     void onSave();
     void onSaveAs();
@@ -49,7 +48,7 @@ private:
     QWidget toolBarWidget;
     QVBoxLayout layout;
     QPushButton addTrackButton;
-    QPushButton importButton;
+    QPushButton loadButton;
     QPushButton exportButton;
     QPushButton playButton;    
 
