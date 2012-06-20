@@ -37,6 +37,8 @@ public:
 public slots:
     void onUpdate(QSize size);
 
+    void onRangeChanged(qint64 begin, qint64 end);
+
 private:    
     QPen pen;    
     QBrush brush;

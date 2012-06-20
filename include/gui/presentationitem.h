@@ -140,8 +140,6 @@ private:
     QRectF boundingRectangle, visRect;    
     int offsetLeft;
 
-    bool autoScroll;
-
     QTimer timer;
 
     bool createSelection;
