@@ -84,9 +84,6 @@ QMap<qint64, QString> DatabaseAdapter::getData(QString const& key) const
     return fillMap<QString>(stmtSelectDataString);
 }
 
-template QMap<qint64, double> DatabaseAdapter::getData<double>(QString const& key) const;
-template QMap<qint64, QString> DatabaseAdapter::getData<QString>(QString const& key) const;
-
 template<>
 QMap<qint64, double> DatabaseAdapter::getData(QString const& key, qint64 start, qint64 end) const
 {
@@ -104,9 +101,6 @@ QMap<qint64, QString> DatabaseAdapter::getData(QString const& key, qint64 start,
 
     return fillMap<QString>(stmtSelectDataWithTimeString);
 }
-
-template QMap<qint64, double> DatabaseAdapter::getData<double>(QString const& key, qint64 start, qint64 end) const;
-template QMap<qint64, QString> DatabaseAdapter::getData<QString>(QString const& key, qint64 start, qint64 end) const;
 
 void DatabaseAdapter::add(QString const& key, qint64 timestamp, Value const& value)
 {

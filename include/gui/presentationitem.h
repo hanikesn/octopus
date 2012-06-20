@@ -129,6 +129,8 @@ signals:
 
     void update(QSize size);
 
+    void updateVisibleSize(QSize size);
+
 private:
     QGraphicsScene *parent;
     QList<QGraphicsProxyWidget*> tracks;    
@@ -139,8 +141,6 @@ private:
 
     QRectF boundingRectangle, visRect;    
     int offsetLeft;
-
-    bool autoScroll;
 
     QTimer timer;
 

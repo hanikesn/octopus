@@ -75,6 +75,8 @@ signals:
 
     void horizontalScroll();
 
+    void zoomed();
+
 public slots:
     void onNewMax(qint64 timestamp);
     void onZoomIn();
@@ -106,6 +108,8 @@ private:
     QScrollBar *hScrollBar;
 
     TimeLine *timeLine;
+
+    qint64 getZoomFactor(bool zoomOut);
 
 };
 

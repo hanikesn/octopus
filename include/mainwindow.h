@@ -53,6 +53,7 @@ private:
     QPushButton zoomInButton;
     QPushButton zoomOutButton;
     QPushButton playButton;    
+    QIcon playButtonIcon;
 
     // Spacer item to center the play button (in the bottomButtonBar)
     QSpacerItem *spacerLeft;

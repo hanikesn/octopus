@@ -8,16 +8,19 @@
 
 #include <QDebug>
 
-Cursor::Cursor(int offsetLeft, TimeManager *timeManager, PresentationItem *presentationItem,
-               QGraphicsScene *parent) :
+Cursor::Cursor(TimeManager *timeManager, QGraphicsItem *parent) :
+    QGraphicsWidget(parent),
     pen(Qt::red),
     brush(Qt::red),
-    offsetLeft(offsetLeft),
+    offsetLeft(0),
+    currentTime(0),
     timeMgr(timeManager),
-    presentationItem(presentationItem)
+    coverHeight(0),
+    maxHeight(0)
+
 {
-    Q_UNUSED(parent)
-    setGeometry(0, 0, 1, 42);
+    setZValue(1.0);
+    update();
 }
 
 Cursor::~Cursor()
@@ -37,35 +40,47 @@ void Cursor::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QW
     painter->drawRect(frame);
 }
 
+void Cursor::updateOffset(int offset)
+{
+    offsetLeft = offset;
+    update();
+}
+
 QRectF Cursor::boundingRect() const
 {    
     return QRectF(0, 0, geometry().width(), geometry().height());
 }
 
-void Cursor::changePos(int pos)
+void Cursor::setTime(qint64 time)
 {
-    if (pos < offsetLeft) return;
-    setVisible(true);
-    setPos(pos, 0);
+    currentTime = time;
+    update();
 }
 
-void Cursor::moveToTime(qint64 time)
+void Cursor::update()
 {
-    int newPos = timeMgr->convertTimeToPos(time);
-    if (newPos != -1)
-        changePos(newPos + offsetLeft);
-}
+    resize(1.0,qMin(coverHeight, maxHeight));
 
-qint64 Cursor::getCurrentTime()
-{
-    return timeMgr->convertPosToTime(pos().x() - offsetLeft);
-}
-
-void Cursor::onUpdate(QSize size)
-{
-    Q_UNUSED(size)
-    if (presentationItem->getMinCoverHeight() > presentationItem->boundingRect().height())
-        resize(1, presentationItem->getMinCoverHeight());
+    int newPos = timeMgr->convertTimeToPos(currentTime);
+    if(newPos == -1)
+        setVisible(false);
     else
-        resize(1, presentationItem->boundingRect().height());
+        setVisible(true);
+    setPos(newPos + offsetLeft, 0);
+}
+
+qint64 Cursor::getTime()
+{
+    return currentTime;
+}
+
+
+void Cursor::updateCoverHeight(int height)
+{
+    coverHeight = height;
+}
+
+void Cursor::updateMaxHeight(int height)
+{
+    maxHeight = height;
 }
