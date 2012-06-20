@@ -1,8 +1,10 @@
 #include "gui/track.h"
 
 #include "abstractdataseries.h"
+#include "plotsettings.h"
 #include "gui/discretegraph.h"
 #include "gui/interpolatinggraph.h"
+#include "gui/plotsettingsdialog.h"
 #include "gui/sourcedialog.h"
 
 #include "common.h"
@@ -150,8 +152,9 @@ void Track::onSources()
 
 void Track::onPlotSettings()
 {
-    qDebug() << "Pretending to show plot settings dialog.";
     // TODO(Steffi)
+
+    PlotSettings settings = PlotSettingsDialog::getSettings(getFullDataSeriesNames());
 }
 
 void Track::onOptPlotMarginsRecalculated(int left, int /*right*/, int /*top*/, int /*bottom*/)
