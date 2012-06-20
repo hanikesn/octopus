@@ -49,6 +49,9 @@ PresentationItem::PresentationItem(TimeLine *timeLine, TimeManager *timeManager,
     connect(&timer, SIGNAL(timeout()),                  this, SLOT(onTimeout()));
     connect(timeMgr, SIGNAL(horizontalScroll()),        this, SLOT(onHorizontalScroll()));
 
+//    connect(timeMgr, SIGNAL(rangeChanged(qint64,qint64)), cursor,
+//            SLOT(onRangeChanged(qint64,qint64)));
+
     connect(this, SIGNAL(update(QSize)),                cursor, SLOT(onUpdate(QSize)));
     connect(this, SIGNAL(update(QSize)),                timeLine, SLOT(onUpdate(QSize)));
     connect(this, SIGNAL(update(QSize)),                selectedArea, SLOT(onUpdate(QSize)));
@@ -237,9 +240,9 @@ void PresentationItem::onChangedViewSize(QSize size)
     visRect.setHeight(size.height());
     visRect.setWidth(size.width());    
 
-    recalcBoundingRec();        
-    timeMgr->updateRange();
+    recalcBoundingRec();
     emit update(size);  // triggers the resize in cursor, timeLine, selectedArea
+    timeMgr->updateRange();    
 }
 
 void PresentationItem::onVerticalScroll(QRectF visibleRectangle)
