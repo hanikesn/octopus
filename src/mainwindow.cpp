@@ -55,9 +55,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     onNew();
     //TODO(domi): Kommentare wegmachen
-    StartScreen *s = new StartScreen(this);
-    if (s->showScreen() == StartScreen::LOAD)
-        onLoad();
+//    StartScreen *s = new StartScreen(this);
+//    if (s->showScreen() == StartScreen::LOAD)
+//        onLoad();
 }
 
 void MainWindow::onExportAction()
