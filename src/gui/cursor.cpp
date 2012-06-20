@@ -69,3 +69,8 @@ void Cursor::onUpdate(QSize size)
     else
         resize(1, presentationItem->boundingRect().height());
 }
+
+void Cursor::onRangeChanged(qint64 begin, qint64 end)
+{
+
+}
