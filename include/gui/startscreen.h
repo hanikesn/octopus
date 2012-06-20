@@ -15,6 +15,7 @@ public:
 
     Type showScreen();
 
+    void closeEvent(QCloseEvent *ce);
 
 public slots:
 
