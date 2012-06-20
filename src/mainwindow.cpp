@@ -60,12 +60,6 @@ MainWindow::MainWindow(QWidget *parent) :
 //        onLoad();
 }
 
-void MainWindow::onImportAction()
-{
-    // TODO:
-    qDebug() << "Import";
-}
-
 void MainWindow::onExportAction()
 {
     // TODO:
