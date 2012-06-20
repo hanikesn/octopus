@@ -339,7 +339,7 @@ public:
   QCustomPlot *parentPlot() const { return mParentPlot; }
   QCPLayer *layer() const { return mLayer; }
   bool antialiased() const { return mAntialiased; }
-  QCache<TextCacheKey, QRect> &getCache();
+  QCache<TextCacheKey, QRect> &getCache() const;
   
   // setters:
   void setVisible(bool on);
@@ -2084,7 +2084,7 @@ public:
   bool saveBmp(const QString &fileName, int width=0, int height=0, double scale=1.0);
   bool saveRastered(const QString &fileName, int width, int height, double scale, const char *format, int quality=-1);
 
-  QCache<TextCacheKey, QRect>& getCache() {return mTextCache;}
+  QCache<TextCacheKey, QRect>& getCache() const {return mTextCache;}
 
   QCPAxis *xAxis, *yAxis, *xAxis2, *yAxis2;
   QCPLegend *legend;
@@ -2155,7 +2155,7 @@ protected:
   QCP::PlottingHints mPlottingHints;
   Qt::KeyboardModifier mMultiSelectModifier;
 
-  QCache<TextCacheKey, QRect> mTextCache;
+  mutable QCache<TextCacheKey, QRect> mTextCache;
   
   // reimplemented methods:
   virtual QSize minimumSizeHint() const;
