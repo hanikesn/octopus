@@ -15,8 +15,6 @@ public:
 
     Type showScreen();
 
-    void closeEvent(QCloseEvent *ce);
-
 public slots:
 
 private:
@@ -24,9 +22,8 @@ private:
     Type type;
 
 private slots:
-
     void on_newButton_clicked();
-    void on_loadButton_clicked();
+    void on_loadButton_clicked();    
 };
 
 #endif // STARTSCREEN_H

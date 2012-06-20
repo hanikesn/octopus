@@ -17,13 +17,12 @@ public:
     qint64 getLowVisRange() {return lowVisRange;}
     qint64 getHighVisRange() {return highVisRange;}
     qint64 getMaximum() {return maximum;}
-//    qint64 getTimePerPx() {return timePerPx;}
 
     /**
       * Returns the amount of time the range is changed during playing
       * (every 'timeoutIntervall' msecs)
       */
-    qint64 getTimeoutUpdateIntervall() {return timeoutUpdateIntervall;}
+    qint64 getTimePerPx() {return timePerPx;}
 
     /**
       * Returns the intervall (in milliseconds) after which the range should be updated.
@@ -69,6 +68,8 @@ public:
 
     void center(qint64 timestamp);
 
+    void changeTimeStep(int milliSeconds);
+
 signals:
     void rangeChanged(qint64 begin, qint64 end);
 
@@ -76,6 +77,8 @@ signals:
 
 public slots:
     void onNewMax(qint64 timestamp);
+    void onZoomIn();
+    void onZoomOut();
 
 
 private slots:

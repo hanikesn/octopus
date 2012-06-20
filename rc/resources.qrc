@@ -9,5 +9,7 @@
         <file>icons/add_16.png</file>
         <file>icons/pause_16.png</file>
         <file>icons/play_16.png</file>
+        <file>icons/zoom-in_16.png</file>
+        <file>icons/zoom-out_16.png</file>
     </qresource>
 </RCC>

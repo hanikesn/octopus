@@ -304,7 +304,7 @@ bool PresentationItem::isVisible(Track *t)
 void PresentationItem::onTimeout()
 {    
 
-    currentTime += timeMgr->getTimeoutUpdateIntervall();
+    currentTime += timeMgr->getTimePerPx();
     if (currentTime > timeMgr->getMaximum()) { // stop playing
         playstate = PAUSED;
         timer.stop();
@@ -319,7 +319,7 @@ void PresentationItem::onTimeout()
         // currentTime is further then the currently visible range
         if (cursor->isVisible()) cursor->setVisible(false);
     } else {
-        timeMgr->addRange(timeMgr->getTimeoutUpdateIntervall());
+        timeMgr->addRange(timeMgr->getTimePerPx());
         cursor->setVisible(true);
     }
 }

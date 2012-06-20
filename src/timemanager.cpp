@@ -110,6 +110,13 @@ void TimeManager::center(qint64 timestamp)
     hScrollBar->blockSignals(false);
 }
 
+void TimeManager::changeTimeStep(int milliSeconds)
+{
+    qint64 microSeconds = milliSeconds * 1000;
+    timeLine->setStepSize(microSeconds);
+    timePerPx = microSeconds / 50;
+}
+
 void TimeManager::onRangeChanged(qint64 begin, qint64 end)
 {
     lowVisRange = begin;
@@ -133,6 +140,24 @@ void TimeManager::onNewMax(qint64 timestamp)
         qint64 lowerRange = timestamp < timeFrame ? 0 : timestamp - timeFrame;
         emit rangeChanged(lowerRange, timestamp);
     }
+}
+
+void TimeManager::onZoomIn()
+{
+    qint64 newStepSize = timeLine->getStepSize() - 50000;
+    if (newStepSize <= 0) return;
+
+    timeLine->setStepSize(newStepSize);
+    timePerPx = newStepSize / 50;
+    emit rangeChanged(lowVisRange, getUpperEnd(lowVisRange));
+}
+
+void TimeManager::onZoomOut()
+{
+    qint64 newStepSize = timeLine->getStepSize() + 50000;
+    timeLine->setStepSize(newStepSize);
+    timePerPx = newStepSize / 50;
+    emit rangeChanged(lowVisRange, getUpperEnd(lowVisRange));
 }
 
 void TimeManager::horizontalScroll(int pos)

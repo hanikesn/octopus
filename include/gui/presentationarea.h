@@ -35,10 +35,12 @@ signals:
     void verticalScroll(QRectF visibleRectangle);
     void exportRange(qint64 begin, qint64 end);
     void play();
+    void zoomIn();
+    void zoomOut();
 
 public slots:
     void onAddTrack();
-    void onDelete(Track *t);
+    void onDelete(Track *t);    
 
     /**
       * Resizes tracks to new view length.

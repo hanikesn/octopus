@@ -1,10 +1,11 @@
 #include "gui/startscreen.h"
 
-#include <QCloseEvent>
+#include <QSpinBox>
 #include <QDebug>
 
 StartScreen::StartScreen(QWidget *parent) :
-    QDialog(parent)
+    QDialog(parent),
+    type(NEW)
 {
     ui.setupUi(this);
 
@@ -21,12 +22,6 @@ StartScreen::Type StartScreen::showScreen()
     return type;
 }
 
-void StartScreen::closeEvent(QCloseEvent *ce)
-{
-    ce->accept();
-    type = NEW;
-}
-
 void StartScreen::on_newButton_clicked()
 {
     type = NEW;
@@ -38,5 +33,4 @@ void StartScreen::on_loadButton_clicked()
     type = LOAD;
     close();
 }
-
 

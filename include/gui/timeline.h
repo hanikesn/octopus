@@ -12,7 +12,7 @@ class PresentationItem;
 class TimeLine : public QGraphicsWidget
 {
     Q_OBJECT
-public:
+public:    
     explicit TimeLine(int offset, QGraphicsItem *parent, Qt::WindowFlags wFlags = 0);
 
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
@@ -23,6 +23,9 @@ public:
     void setOffset(int offset);
 
     qint64 getUpperEnd(qint64 lowerEnd);
+
+    void setStepSize(qint64 microSeconds);
+    qint64 getStepSize() {return largeTickAmount;}
 
 public slots:
     void onUpdate(QSize size);
@@ -43,11 +46,13 @@ private:
     int largeTickHeight;
     QPen pen;
 
+    qint64 largeTickAmount;
+    qint64 mediumTickAmount;
+    qint64 smallTickAmount;
+    qint64 timePerPx;
 
-    static const qint64 LARGETICKAMOUNT;
-    static const qint64 MEDIUMTICKAMOUNT;
-    static const qint64 SMALLTICKAMOUNT;
-    static const qint64 TIMEPERPX;
+    enum TimeRepresentation {SECOND_PART, SECOND_FULL, MILLISECOND};
+    TimeRepresentation timeRepresentation;
 
     void drawTicks(QPainter *painter);
 };

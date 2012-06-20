@@ -50,6 +50,8 @@ private:
     QPushButton addTrackButton;
     QPushButton loadButton;
     QPushButton exportButton;
+    QPushButton zoomInButton;
+    QPushButton zoomOutButton;
     QPushButton playButton;    
 
     // Spacer item to center the play button (in the bottomButtonBar)
@@ -109,7 +111,7 @@ private:
 signals:
     void verticalScroll(QRectF visibleRectangle);
     void changedViewSize(QSize size);
-
+    void timeStepChanged(int);
 };
 
 #endif // MAINWINDOW_H

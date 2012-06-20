@@ -55,9 +55,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     onNew();
     //TODO(domi): Kommentare wegmachen
-//    StartScreen *s = new StartScreen(this);
-//    if (s->showScreen() == StartScreen::LOAD)
-//        onLoad();
+    StartScreen *s = new StartScreen(this);
+    if (s->showScreen() == StartScreen::LOAD)
+        onLoad();
 }
 
 void MainWindow::onExportAction()
@@ -71,12 +71,16 @@ void MainWindow::setUpButtonBars()
     addTrackButton.setIcon(QIcon(":/buttons/toolbar/icons/add_16.png"));
     loadButton.setIcon(QIcon(":/buttons/toolbar/icons/document-open-3_16.png"));
     exportButton.setIcon(QIcon(":/buttons/toolbar/icons/document-export-4_16.png"));
+    zoomInButton.setIcon(QIcon(":/buttons/toolbar/icons/zoom-in_16.png"));
+    zoomOutButton.setIcon(QIcon(":/buttons/toolbar/icons/zoom-out_16.png"));
     playButton.setIcon(QIcon(":/buttons/toolbar/icons/play_16.png"));
 
     // add buttons to the horizontal layout in the toolbar
     layout.addWidget(&addTrackButton);
     layout.addWidget(&loadButton);
     layout.addWidget(&exportButton);
+    layout.addWidget(&zoomInButton);
+    layout.addWidget(&zoomOutButton);
 
     // buttonBar at the bottom:
     // set up spacers so they get as much space as possible (button between is then centered)
@@ -89,7 +93,7 @@ void MainWindow::setUpButtonBars()
     toolBarWidget.setLayout(&layout);
 
     connect(&loadButton, SIGNAL(clicked()), this, SLOT(onLoad()));
-    connect(&exportButton, SIGNAL(clicked()), this, SLOT(onExportAction()));
+    connect(&exportButton, SIGNAL(clicked()), this, SLOT(onExportAction()));    
 
     ui.mainToolBar->addWidget(&toolBarWidget);
     addToolBar(Qt::LeftToolBarArea, ui.mainToolBar);
@@ -254,7 +258,9 @@ void MainWindow::setUpView()
 
     connect(pa, SIGNAL(exportRange(qint64,qint64)), this, SLOT(onExportRange(qint64,qint64)));
     connect(this, SIGNAL(verticalScroll(QRectF)), pa, SIGNAL(verticalScroll(QRectF)));
-    connect(this, SIGNAL(changedViewSize(QSize)), pa, SLOT(onChangedViewSize(QSize)));
+    connect(this, SIGNAL(changedViewSize(QSize)), pa, SLOT(onChangedViewSize(QSize)));    
+    connect(&zoomInButton, SIGNAL(clicked()), pa, SIGNAL(zoomIn()));
+    connect(&zoomOutButton, SIGNAL(clicked()), pa, SIGNAL(zoomOut()));
     connect(&addTrackButton, SIGNAL(clicked()), pa, SLOT(onAddTrack()));
 
     qRegisterMetaType<EIDescriptionWrapper>("EIDescriptionWrapper");

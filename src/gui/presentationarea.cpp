@@ -28,6 +28,8 @@ PresentationArea::PresentationArea(QGraphicsScene *scene, const DataProvider &da
     connect(this, SIGNAL(changedViewSize(QSize)),   pi, SLOT(onChangedViewSize(QSize)));
     connect(this, SIGNAL(verticalScroll(QRectF)),   pi, SLOT(onVerticalScroll(QRectF)));
     connect(this, SIGNAL(play()),                   pi, SLOT(onPlay()));
+    connect(this, SIGNAL(zoomIn()),                 timeManager, SLOT(onZoomIn()));
+    connect(this, SIGNAL(zoomOut()),                timeManager, SLOT(onZoomOut()));
     connect(pi, SIGNAL(selection(qint64,qint64)),   this, SLOT(onSelection(qint64, qint64)));
     connect(pi, SIGNAL(exportTriggered()),          this, SLOT(onExportTriggered()));
 
