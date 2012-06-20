@@ -29,11 +29,7 @@ PresentationItem::PresentationItem(TimeLine *timeLine, TimeManager *timeManager,
     timeLine->setParentItem(this);
     timeLine->setZValue(0.9);
 
-    cursor = new Cursor(offsetLeft, timeManager, this, 0);
-    cursor->setParentItem(this);
-    cursor->setPos(offsetLeft, 0);
-    cursor->setZValue(1.0);
-    cursor->resize(1, minCoverHeight);
+    cursor = new Cursor(offsetLeft, timeManager, this, this);
 
     selectedArea = new Selection(this);
     selectedArea->setZValue(1.0);
@@ -48,19 +44,22 @@ PresentationItem::PresentationItem(TimeLine *timeLine, TimeManager *timeManager,
     connect(selectedArea, SIGNAL(exportTriggered()),    this, SIGNAL(exportTriggered()));
     connect(&timer, SIGNAL(timeout()),                  this, SLOT(onTimeout()));
     connect(timeMgr, SIGNAL(horizontalScroll()),        this, SLOT(onHorizontalScroll()));
-    // redraws cursor at the point of time it was before zooming
-    connect(timeMgr, SIGNAL(zoomed()),                  cursor, SLOT(onZoomed()));
 
-    connect(this, SIGNAL(update(QSize)),                cursor, SLOT(onUpdate(QSize)));
+    connect(timeMgr, SIGNAL(zoomed()),                  cursor, SLOT(update()));
+    connect(this, SIGNAL(update(QSize)),                cursor, SLOT(onUpdateSize(QSize)));
     connect(this, SIGNAL(update(QSize)),                timeLine, SLOT(onUpdate(QSize)));
     connect(this, SIGNAL(update(QSize)),                selectedArea, SLOT(onUpdate(QSize)));
 
     recalcBoundingRec();
+
+    emit update(QSize(visRect.width(), visRect.height()));
 }
 
 PresentationItem::~PresentationItem()
 {
 }
+
+
 
 QRectF PresentationItem::boundingRect() const
 {
@@ -114,12 +113,8 @@ void PresentationItem::removeTrack(Track *t)
 
 void PresentationItem::setOffsetLeft(int offset)
 {    
-    qint64 cursorTime = cursor->getCurrentTime();
-
     timeLine->setOffset(offset);
-    cursor->setOffset(offset);
-    cursor->moveToTime(cursorTime);
-
+    cursor->onOffsetChanged(offset);
     offsetLeft = offset;
 }
 
@@ -174,7 +169,7 @@ void PresentationItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
         emit selection(lowRange, highRange);
     } else if (event->pos().x() >= offsetLeft) {
         currentTime = timeMgr->convertPosToTime(event->pos().x()- offsetLeft);
-        cursor->changePos(event->pos().x());
+        cursor->setTime(currentTime);
         hideSelection();
     }
 }
@@ -272,12 +267,12 @@ int PresentationItem::getRightBorder()
 
 void PresentationItem::save(QVariantMap *qvm)
 {
-    qvm->insert("cursorPos", cursor->pos().toPoint().x());
+    qvm->insert("cursorPos", cursor->getTime());
 }
 
 void PresentationItem::load(QVariantMap *qvm)
 {    
-    cursor->changePos(qvm->find("cursorPos").value().toInt());
+    cursor->setTime(qvm->find("cursorPos").value().toLongLong());
 }
 
 bool PresentationItem::isVisible(Track *t)
@@ -312,33 +307,16 @@ void PresentationItem::onTimeout()
         return;
     }
 
-    int cursorPos = timeMgr->convertTimeToPos(currentTime) + offsetLeft;
-    if (cursorPos <= getRightBorder()) {
-        // determine position for currentTime + updateIntervall
-        cursor->changePos(cursorPos);
-    } else if (currentTime > timeMgr->getHighVisRange()) {
-        // currentTime is further then the currently visible range
-        if (cursor->isVisible()) cursor->setVisible(false);
-    } else {
+    cursor->setTime(currentTime);
+    if (cursor->getTime() >= timeMgr->getHighVisRange()) {
         timeMgr->addRange(timeMgr->getTimePerPx());
-        cursor->setVisible(true);
     }
 }
 
 void PresentationItem::onHorizontalScroll()
 {
     hideSelection();
-    int pos = timeMgr->convertTimeToPos(currentTime);
-    if (pos == -1) {
-        cursor->setVisible(false);
-        return;
-    }
-
-    if (playstate != PLAYING) {
-        cursor->changePos(pos + offsetLeft);
-    } else if (pos + offsetLeft < visRect.width()) { // if cursor is within the visible range
-        cursor->changePos(pos + offsetLeft);
-    }
+    cursor->update();
 }
 
 void PresentationItem::onPlay()
@@ -353,7 +331,7 @@ void PresentationItem::onPlay()
         playstate = PLAYING;
         if (currentTime > timeMgr->getHighVisRange() || currentTime < timeMgr->getLowVisRange()) {
             timeMgr->center(currentTime);
-            cursor->moveToTime(currentTime);
+            cursor->setTime(currentTime);
         }
         timer.start();        
         break;
@@ -361,9 +339,9 @@ void PresentationItem::onPlay()
         playstate = PLAYING;
         if (currentTime > timeMgr->getHighVisRange() || currentTime < timeMgr->getLowVisRange()) {
             timeMgr->center(currentTime);
-            cursor->moveToTime(currentTime);
+            cursor->setTime(currentTime);
         } else
-            currentTime = cursor->getCurrentTime();
+            currentTime = cursor->getTime();
         timer.start();        
         break;
     }

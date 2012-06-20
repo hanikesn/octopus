@@ -9,16 +9,18 @@
 #include <QDebug>
 
 Cursor::Cursor(int offsetLeft, TimeManager *timeManager, PresentationItem *presentationItem,
-               QGraphicsScene *parent) :
+               QGraphicsItem *parent) :
+    QGraphicsWidget(parent),
     pen(Qt::red),
     brush(Qt::red),
     offsetLeft(offsetLeft),
     currentTime(0),
     timeMgr(timeManager),
     presentationItem(presentationItem)
+
 {
-    Q_UNUSED(parent)
-    setGeometry(0, 0, 1, 42);
+    setZValue(1.0);
+    update();
 }
 
 Cursor::~Cursor()
@@ -38,6 +40,12 @@ void Cursor::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QW
     painter->drawRect(frame);
 }
 
+void Cursor::onOffsetChanged(int offset)
+{
+    offsetLeft = offset;
+    update();
+}
+
 QRectF Cursor::boundingRect() const
 {    
     return QRectF(0, 0, geometry().width(), geometry().height());
@@ -51,30 +59,34 @@ void Cursor::changePos(int pos)
     currentTime = timeMgr->convertPosToTime(pos - offsetLeft);
 }
 
-void Cursor::moveToTime(qint64 time)
+void Cursor::setTime(qint64 time)
 {
-    int newPos = timeMgr->convertTimeToPos(time);
-    if (newPos != -1)
-        changePos(newPos + offsetLeft);
     currentTime = time;
+    update();
 }
 
-qint64 Cursor::getCurrentTime()
+void Cursor::update()
+{
+    int newPos = timeMgr->convertTimeToPos(currentTime);
+    if(newPos == -1)
+        setVisible(false);
+    else
+        setVisible(true);
+    changePos(newPos + offsetLeft);
+}
+
+qint64 Cursor::getTime()
 {
     return currentTime;
 }
 
-void Cursor::onUpdate(QSize size)
+// TODO richtige größe bekommen
+void Cursor::onUpdateSize(QSize size)
 {
     Q_UNUSED(size)
     if (presentationItem->getMinCoverHeight() > presentationItem->boundingRect().height())
         resize(1, presentationItem->getMinCoverHeight());
     else
         resize(1, presentationItem->boundingRect().height());
-}
-
-void Cursor::onZoomed()
-{
-    moveToTime(currentTime);
 }
 
