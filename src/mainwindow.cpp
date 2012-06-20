@@ -74,14 +74,14 @@ void MainWindow::onExportAction()
 
 void MainWindow::setUpButtonBars()
 {
-    addTrackButton.setIcon(QIcon(":/buttons/toolbar/icons/add.png"));
-    importButton.setIcon(QIcon(":/buttons/toolbar/icons/import.png"));
-    exportButton.setIcon(QIcon(":/buttons/toolbar/icons/export.png"));
-    playButton.setIcon(QIcon(":/buttons/toolbar/icons/play.png"));
+    addTrackButton.setIcon(QIcon(":/buttons/toolbar/icons/add_16.png"));
+    loadButton.setIcon(QIcon(":/buttons/toolbar/icons/document-open-3_16.png"));
+    exportButton.setIcon(QIcon(":/buttons/toolbar/icons/document-export-4_16.png"));
+    playButton.setIcon(QIcon(":/buttons/toolbar/icons/play_16.png"));
 
     // add buttons to the horizontal layout in the toolbar
     layout.addWidget(&addTrackButton);
-    layout.addWidget(&importButton);
+    layout.addWidget(&loadButton);
     layout.addWidget(&exportButton);
 
     // buttonBar at the bottom:
@@ -94,7 +94,7 @@ void MainWindow::setUpButtonBars()
 
     toolBarWidget.setLayout(&layout);
 
-    connect(&importButton, SIGNAL(clicked()), this, SLOT(onImportAction()));
+    connect(&loadButton, SIGNAL(clicked()), this, SLOT(onLoad()));
     connect(&exportButton, SIGNAL(clicked()), this, SLOT(onExportAction()));
 
     ui.mainToolBar->addWidget(&toolBarWidget);
