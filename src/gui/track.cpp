@@ -120,12 +120,6 @@ void Track::addGraph(const StringSeries &s) {
     graphs.append(new DiscreteGraph(ui.plot, s));
 }
 
-void Track::mousePressEvent(QMouseEvent * event)
-{
-    QWidget::mousePressEvent(event);
-    qDebug() << "press" << event->isAccepted();
-}
-
 void Track::onDelete()
 {
     emit del(this);

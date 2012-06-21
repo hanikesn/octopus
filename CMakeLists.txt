@@ -48,6 +48,7 @@ set(Octopus_SOURCES
   src/doubleseries.cpp
   src/plotsettings.cpp
   src/exporterfactory.cpp
+  src/gui/TrackHolder.cpp
   src/gui/cursor.cpp
   src/gui/discretegraph.cpp
   src/gui/interpolatinggraph.cpp
@@ -79,6 +80,7 @@ set(Octopus_HEADERS
   include/dataprovider.h
   include/doubleseries.h
   include/plotsettings.h
+  include/gui/TrackHolder.h
   include/gui/cursor.h
   include/gui/discretegraph.h
   include/gui/graph.h

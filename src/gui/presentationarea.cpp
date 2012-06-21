@@ -12,6 +12,7 @@
 #include "gui/track.h"
 #include "gui/timeline.h"
 #include "timemanager.h"
+#include "gui/TrackHolder.h"
 
 PresentationArea::PresentationArea(const DataProvider &dataProvider,
                                    QScrollBar *hScrollBar, QWidget *parent):
@@ -22,11 +23,13 @@ PresentationArea::PresentationArea(const DataProvider &dataProvider,
     unsavedChanges(false)
 {
     setObjectName("PresentationArea");
-    setLayout(new QVBoxLayout());
     timeLine = new TimeLine(52, this);
     timeManager = new TimeManager(hScrollBar, timeLine, this);
     selection = new Selection(timeManager, this);
-    cursor = new Cursor(timeManager, this);;
+    cursor = new Cursor(timeManager, this);
+
+    setWidget(new TrackHolder(*timeManager, *cursor, *selection, this));
+    setWidgetResizable(true);
 
     // TODO hardcoded weg
     cursor->updateCoverHeight(100);
@@ -82,14 +85,10 @@ Track* PresentationArea::add(const QList<QString>& fullDataSeriesNames)
     tracks.append(t);
     updatePlotMargins();
 
-    layout()->addWidget(t);
+    widget()->layout()->addWidget(t);
 
     t->resize(currentViewSize.width(), t->size().height());
     t->setPlotRange(timeManager->getLowVisRange(), timeManager->getHighVisRange());
-
-    timeLine->raise();
-    cursor->raise();
-    selection->raise();
 
     unsavedChanges = true;
     return t;
@@ -188,46 +187,3 @@ void PresentationArea::onPlay()
     /* Do stuff */
     emit play();  // propagate signal
 }
-
-void PresentationArea::mousePressEvent(QMouseEvent *event)
-{
-    if ((event->button() == Qt::LeftButton) &&
-            (QApplication::keyboardModifiers() == Qt::ShiftModifier) &&
-            (event->pos().x() >= offsetLeft) &&
-            (timeManager->getPlaystate() != TimeManager::PLAYING)) {
-        createSelection = true;
-        selection->show();
-        selection->setSelectionBegin(timeManager->convertPosToTime(event->pos().x()));
-    }
-}
-
-void PresentationArea::mouseReleaseEvent(QMouseEvent *event)
-{
-    if(createSelection){
-        createSelection = false;
-        int selectionEnd = event->pos().x() < offsetLeft ? offsetLeft : event->pos().x();
-
-        selection->setSelectionEnd(timeManager->convertPosToTime(selectionEnd));
-        cursor->setVisible(false);
-    } else if (event->pos().x() >= offsetLeft) {
-        qint64 currentTime = timeManager->convertPosToTime(event->pos().x()- offsetLeft);
-        timeManager->setTime(currentTime);
-        selection->hide();
-    }
-}
-
-void PresentationArea::mouseMoveEvent(QMouseEvent *event)
-{
-    if((QApplication::keyboardModifiers() != Qt::ShiftModifier)){
-        createSelection = false;
-    } else if(event->pos().x() >= offsetLeft) {
-        selection->setSelectionEnd(timeManager->convertPosToTime(event->pos().x()));
-    }
-}
-
-void PresentationArea::mouseDoubleClickEvent(QMouseEvent *event)
-{
-    Q_UNUSED(event)
-    // Nothing to do...
-}
-
