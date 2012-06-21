@@ -91,8 +91,6 @@ public:
 
     int getMinCoverHeight()  {return minCoverHeight;}
 
-    enum Playstate {PLAYING, PAUSED, STOPPED};
-
 public slots:
     /**
       * Calculates the current size of the bounding rectangle.
@@ -111,16 +109,6 @@ public slots:
       * @param visibleRectangle Current size and position of the visible track-area
       */
     void onVerticalScroll(QRectF visibleRectangle);
-
-    void onPlay();
-
-private slots:
-    void onTimeout();
-
-    /**
-      * Makes sure no selection is visible while
-      */
-    void onHorizontalScroll();
 
 signals:
     void selection(qint64 begin, qint64 end);
@@ -142,8 +130,6 @@ private:
     QRectF boundingRectangle, visRect;    
     int offsetLeft;
 
-    QTimer timer;
-
     bool createSelection;
     int selectionStart, selectionEnd;
 
@@ -152,8 +138,6 @@ private:
 
     // minmal height to cover the full presentationArea
     int minCoverHeight;
-
-    Playstate playstate;
 
     TimeManager *timeMgr;
 

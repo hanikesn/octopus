@@ -17,8 +17,7 @@ PresentationArea::PresentationArea(QGraphicsScene *scene, const DataProvider &da
     currentViewSize(949, 1),
     selectionBegin(-1),
     selectionEnd(-1),
-    unsavedChanges(false),
-    playstate(PresentationItem::STOPPED)
+    unsavedChanges(false)
 {
     timeLine = new TimeLine(52, 0, 0);
     timeManager = new TimeManager(hScrollBar, timeLine);
@@ -27,7 +26,7 @@ PresentationArea::PresentationArea(QGraphicsScene *scene, const DataProvider &da
 
     connect(this, SIGNAL(changedViewSize(QSize)),   pi, SLOT(onChangedViewSize(QSize)));
     connect(this, SIGNAL(verticalScroll(QRectF)),   pi, SLOT(onVerticalScroll(QRectF)));
-    connect(this, SIGNAL(play()),                   pi, SLOT(onPlay()));
+    connect(this, SIGNAL(play()),                   timeManager, SLOT(onPlay()));
     connect(this, SIGNAL(zoomIn()),                 timeManager, SLOT(onZoomIn()));
     connect(this, SIGNAL(zoomOut()),                timeManager, SLOT(onZoomOut()));
     connect(pi, SIGNAL(selection(qint64,qint64)),   this, SLOT(onSelection(qint64, qint64)));

@@ -86,8 +86,6 @@ private:
 
     bool unsavedChanges;
 
-    PresentationItem::Playstate playstate;
-
     TimeLine *timeLine;
     TimeManager *timeManager;
 

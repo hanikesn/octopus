@@ -2,10 +2,12 @@
 #define TIMEMANAGER_H
 
 #include <QObject>
-#include <QScrollBar>
 
 #include "gui/timeline.h"
 #include "serializable.h"
+
+class QScrollBar;
+class QTimer;
 
 class TimeManager : public QObject, public Serializable
 {
@@ -23,11 +25,6 @@ public:
       * (every 'timeoutIntervall' msecs)
       */
     qint64 getTimePerPx() {return timePerPx;}
-
-    /**
-      * Returns the intervall (in milliseconds) after which the range should be updated.
-      */
-    int getTimeoutIntervall() {return timeoutIntervall;}
 
     qint64 getUpperEnd(qint64 lowerEnd) {return timeLine->getUpperEnd(lowerEnd);}
 
@@ -70,20 +67,27 @@ public:
 
     void changeTimeStep(int milliSeconds);
 
+    enum Playstate {PLAYING, PAUSED};
+
+    Playstate getPlaystate() {return playstate;}
+
 signals:
     void rangeChanged(qint64 begin, qint64 end);
 
-    void horizontalScroll();
-
-    void zoomed();
+    void currentTimeChanged(qint64 time);
 
 public slots:
     void onNewMax(qint64 timestamp);
     void onZoomIn();
     void onZoomOut();
 
+    void setTime(qint64);
 
+
+    void onPlay();
 private slots:
+    void onTimeout();
+
     void horizontalScroll(int pos);
 
     void onRangeChanged(qint64 begin, qint64 end);
@@ -103,11 +107,18 @@ private:
     qint64 timeoutUpdateIntervall;
     int timeoutIntervall;
 
+    qint64 currentTime;
+
+    Playstate playstate;
+
     bool autoScroll;
 
     QScrollBar *hScrollBar;
 
+    QTimer* timer;
+
     TimeLine *timeLine;
+
 
     qint64 getZoomFactor(bool zoomOut);
 

@@ -1,6 +1,8 @@
 #include "timemanager.h"
 
 #include <QDebug>
+#include <QScrollBar>
+#include <QTimer>
 
 TimeManager::TimeManager(QScrollBar *hScrollBar, TimeLine *timeLine):
     lowVisRange(0),
@@ -9,14 +11,20 @@ TimeManager::TimeManager(QScrollBar *hScrollBar, TimeLine *timeLine):
     maximum(0),
     timeoutUpdateIntervall(40000),
     timeoutIntervall(40),
+    playstate(PAUSED),
     autoScroll(false),
     hScrollBar(hScrollBar),
+    timer(new QTimer(this)),
     timeLine(timeLine)
 {
     hScrollBar->setSingleStep(1);
     hScrollBar->setPageStep(30);
     hScrollBar->setMinimum(0);
     hScrollBar->setMaximum(0);
+
+    timer->setSingleShot(false);
+    timer->setInterval(timeoutIntervall);
+    connect(timer, SIGNAL(timeout()),                  this, SLOT(onTimeout()));
 
     connect(hScrollBar, SIGNAL(sliderMoved(int)),       this, SLOT(horizontalScroll(int)));
     connect(hScrollBar, SIGNAL(valueChanged(int)),      this, SLOT(horizontalScroll(int)));
@@ -115,7 +123,7 @@ void TimeManager::changeTimeStep(int milliSeconds)
     qint64 microSeconds = milliSeconds * 1000;
     timeLine->setStepSize(microSeconds);
     timePerPx = microSeconds / 50;
-    emit zoomed();
+    // TODO on rangeChanged
 }
 
 void TimeManager::onRangeChanged(qint64 begin, qint64 end)
@@ -123,6 +131,12 @@ void TimeManager::onRangeChanged(qint64 begin, qint64 end)
     lowVisRange = begin;
     highVisRange = end;
     timeLine->drawFrom(begin);
+}
+
+void TimeManager::setTime(qint64 time)
+{
+    currentTime = time;
+    emit currentTimeChanged(time);
 }
 
 qint64 TimeManager::getZoomFactor(bool zoomOut)
@@ -170,7 +184,6 @@ void TimeManager::onZoomIn()
     timeLine->setStepSize(newStepSize);
     timePerPx = newStepSize / 50;
     emit rangeChanged(lowVisRange, getUpperEnd(lowVisRange));
-    emit zoomed();
 }
 
 void TimeManager::onZoomOut()
@@ -179,7 +192,6 @@ void TimeManager::onZoomOut()
     timeLine->setStepSize(newStepSize);
     timePerPx = newStepSize / 50;
     emit rangeChanged(lowVisRange, getUpperEnd(lowVisRange));
-    emit zoomed();
 }
 
 void TimeManager::horizontalScroll(int pos)
@@ -187,6 +199,36 @@ void TimeManager::horizontalScroll(int pos)
     lowVisRange = pos*1000000;
     highVisRange = getUpperEnd(lowVisRange);
     emit rangeChanged(lowVisRange, highVisRange);
-
-    emit horizontalScroll();
 }
+
+void TimeManager::onTimeout()
+{
+    currentTime += getTimePerPx();
+    if (currentTime > getMaximum()) { // stop playing
+        playstate = PAUSED;
+        timer->stop();
+        return;
+    }
+
+    emit currentTimeChanged(currentTime);
+}
+
+void TimeManager::onPlay()
+{
+    switch(playstate)
+    {
+    case PLAYING:
+        playstate = PAUSED;
+        timer->stop();
+        break;
+    case PAUSED:
+        playstate = PLAYING;
+        if (currentTime > getHighVisRange() || currentTime < getLowVisRange()) {
+            center(currentTime);
+            emit currentTimeChanged(currentTime);
+        }
+        timer->start();
+        break;
+    }
+}
+

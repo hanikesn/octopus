@@ -23,7 +23,6 @@ PresentationItem::PresentationItem(TimeLine *timeLine, TimeManager *timeManager,
     createSelection(false),
     currentTime(0),
     minCoverHeight(672),
-    playstate(STOPPED),
     timeMgr(timeManager)
 {
     timeLine->setParentItem(this);
@@ -42,12 +41,9 @@ PresentationItem::PresentationItem(TimeLine *timeLine, TimeManager *timeManager,
     boundingRectangle.setWidth(timeLine->size().width());
     boundingRectangle.setHeight(timeLine->size().height());
 
-    timer.setSingleShot(false);
-    timer.setInterval(timeMgr->getTimeoutIntervall());
-
     connect(selectedArea, SIGNAL(exportTriggered()),    this, SIGNAL(exportTriggered()));
-    connect(&timer, SIGNAL(timeout()),                  this, SLOT(onTimeout()));
-    connect(timeMgr, SIGNAL(horizontalScroll()),        this, SLOT(onHorizontalScroll()));
+
+    connect(timeMgr, SIGNAL(currentTimeChanged(qint64)), cursor, SLOT(setTime(qint64)));
 
     connect(timeMgr, SIGNAL(rangeChanged(qint64,qint64)), cursor, SLOT(update()));
     connect(this, SIGNAL(update(QSize)),                  timeLine, SLOT(onUpdate(QSize)));
@@ -134,7 +130,7 @@ void PresentationItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
     if ((event->button() == Qt::LeftButton) &&
             (QApplication::keyboardModifiers() == Qt::ShiftModifier) &&
             (event->pos().x() >= offsetLeft) &&
-            (playstate != PLAYING)) {
+            (timeMgr->getPlaystate() != TimeManager::PLAYING)) {
         createSelection = true;
         selectionStart = event->pos().x();
         int selectionHeight = boundingRectangle.height() > minCoverHeight ?
@@ -171,7 +167,7 @@ void PresentationItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
         emit selection(lowRange, highRange);
     } else if (event->pos().x() >= offsetLeft) {
         currentTime = timeMgr->convertPosToTime(event->pos().x()- offsetLeft);
-        cursor->setTime(currentTime);
+        timeMgr->setTime(currentTime);
         hideSelection();
     }
 }
@@ -274,6 +270,7 @@ void PresentationItem::save(QVariantMap *qvm)
 
 void PresentationItem::load(QVariantMap *qvm)
 {    
+    // TODO über timemgr?
     cursor->setTime(qvm->find("cursorPos").value().toLongLong());
 }
 
@@ -297,53 +294,4 @@ bool PresentationItem::isVisible(Track *t)
         }
     }
     return false; // return false in case there are no tracks or the specified track couldn't be found
-}
-
-void PresentationItem::onTimeout()
-{    
-
-    currentTime += timeMgr->getTimePerPx();
-    if (currentTime > timeMgr->getMaximum()) { // stop playing
-        playstate = PAUSED;
-        timer.stop();
-        return;
-    }
-
-    cursor->setTime(currentTime);
-    if (cursor->getTime() >= timeMgr->getHighVisRange()) {
-        timeMgr->addRange(timeMgr->getTimePerPx());
-    }
-}
-
-void PresentationItem::onHorizontalScroll()
-{
-    hideSelection();
-}
-
-void PresentationItem::onPlay()
-{
-    switch(playstate)
-    {
-    case PLAYING:
-        playstate = PAUSED;
-        timer.stop();
-        break;
-    case PAUSED:
-        playstate = PLAYING;
-        if (currentTime > timeMgr->getHighVisRange() || currentTime < timeMgr->getLowVisRange()) {
-            timeMgr->center(currentTime);
-            cursor->setTime(currentTime);
-        }
-        timer.start();        
-        break;
-    case STOPPED:
-        playstate = PLAYING;
-        if (currentTime > timeMgr->getHighVisRange() || currentTime < timeMgr->getLowVisRange()) {
-            timeMgr->center(currentTime);
-            cursor->setTime(currentTime);
-        } else
-            currentTime = cursor->getTime();
-        timer.start();        
-        break;
-    }
 }
