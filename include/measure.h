@@ -25,7 +25,7 @@ private:
 #define LOKI_CONCATENATE(s1, s2)         LOKI_CONCATENATE_DIRECT(s1, s2)
 #define LOKI_ANONYMOUS_VARIABLE(str)     LOKI_CONCATENATE(str, __LINE__)
 
-#if 1
+#if 0
     #define MEASURE(name)      ::Measurement LOKI_ANONYMOUS_VARIABLE(Measurement)(name)
 #else
     #define MEASURE(name)

@@ -19,16 +19,24 @@ public:
 
     QRectF boundingRect() const;
 
-    void drawFrom(qint64 time);
-    void setOffset(int offset);
+    void drawFrom(qint64 time);    
 
     qint64 getUpperEnd(qint64 lowerEnd);
 
-    void setStepSize(qint64 microSeconds);
     qint64 getStepSize() {return largeTickAmount;}
 
 public slots:
     void onUpdate(QSize size);
+
+    void onOffsetChanged(int offset);
+
+    void onStepSizeChanged(qint64 microSeconds);
+
+signals:
+    void newUpperEnd(qint64);
+
+protected:
+    void resizeEvent(QGraphicsSceneResizeEvent *event);
 
 private:
     int offset;

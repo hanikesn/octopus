@@ -76,6 +76,8 @@ signals:
 
     void currentTimeChanged(qint64 time);
 
+    void stepSizeChanged(qint64 microSeconds);
+
 public slots:
     void onNewMax(qint64 timestamp);
     void onZoomIn();
@@ -83,8 +85,10 @@ public slots:
 
     void setTime(qint64);
 
-
     void onPlay();
+
+    void onNewUpperEnd(qint64 max);
+
 private slots:
     void onTimeout();
 

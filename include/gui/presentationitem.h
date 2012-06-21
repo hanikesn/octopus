@@ -42,11 +42,6 @@ public:
     void removeTrack(Track *t);
 
     /**
-     * Sets the left offset of the time line to the given value and updates time line and cursor.
-     */
-    void setOffsetLeft(int offset);
-
-    /**
       * If shift-button is pressed, a selection is started. Otherwise nothing happens.
       * @param event The mousePressEvent to be processed.
       */
@@ -108,6 +103,12 @@ public slots:
       */
     void onVerticalScroll(QRectF visibleRectangle);
 
+
+    /**
+     * Sets the left offset of the time line to the given value and updates time line and cursor.
+     */
+    void onOffsetChanged(int offset);
+
 signals:
     void selection(qint64 begin, qint64 end);
 
@@ -116,6 +117,8 @@ signals:
     void update(QSize size);
 
     void updateVisibleSize(QSize size);
+
+    void offsetChanged(int);
 
 private:
     QGraphicsScene *parent;

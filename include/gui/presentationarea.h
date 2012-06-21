@@ -39,6 +39,7 @@ signals:
     void play();
     void zoomIn();
     void zoomOut();
+    void offsetChanged(int);
 
 public slots:
     void onAddTrack();

@@ -116,10 +116,16 @@ void TimeLine::drawFrom(qint64 time)
     update(boundingRect());
 }
 
-void TimeLine::setOffset(int offset)
+void TimeLine::onOffsetChanged(int offset)
 {
     this->offset = offset;
     update(boundingRect());
+}
+
+void TimeLine::resizeEvent(QGraphicsSceneResizeEvent *event)
+{
+    qint64 max = beginRange + ((geometry().width()-offset)*timePerPx);
+    emit newUpperEnd(max);
 }
 
 qint64 TimeLine::getUpperEnd(qint64 lowerEnd)
@@ -128,7 +134,7 @@ qint64 TimeLine::getUpperEnd(qint64 lowerEnd)
     return beginRange + ((geometry().width()-offset)*timePerPx);
 }
 
-void TimeLine::setStepSize(qint64 microSeconds)
+void TimeLine::onStepSizeChanged(qint64 microSeconds)
 {
     largeTickAmount = microSeconds;
     mediumTickAmount = microSeconds/2;

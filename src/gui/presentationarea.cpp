@@ -31,11 +31,15 @@ PresentationArea::PresentationArea(QGraphicsScene *scene, const DataProvider &da
     connect(this, SIGNAL(play()),                   timeManager, SLOT(onPlay()));
     connect(this, SIGNAL(zoomIn()),                 timeManager, SLOT(onZoomIn()));
     connect(this, SIGNAL(zoomOut()),                timeManager, SLOT(onZoomOut()));
+    connect(this, SIGNAL(offsetChanged(int)),       pi, SIGNAL(offsetChanged(int)));
     connect(pi, SIGNAL(selection(qint64,qint64)),   this, SLOT(onSelection(qint64, qint64)));
     connect(pi, SIGNAL(exportTriggered()),          this, SLOT(onExportTriggered()));
 
     connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)),
             this, SLOT(onRangeChanged(qint64,qint64)));
+    connect(timeManager, SIGNAL(stepSizeChanged(qint64)), timeLine, SLOT(onStepSizeChanged(qint64)));
+
+    connect(timeLine, SIGNAL(newUpperEnd(qint64)), timeManager, SLOT(onNewUpperEnd(qint64)));
 
     connect(&dataProvider, SIGNAL(newMax(qint64)), timeManager, SLOT(onNewMax(qint64)));
 }
@@ -122,7 +126,8 @@ void PresentationArea::setPlotMargins(int newMargin)
         foreach (Track *t, tracks) {
             t->setPlotMarginLeft(newMargin);
         }
-        pi->setOffsetLeft(tracks.first()->getPlotOffset() + newMargin);
+//        pi->setOffsetLeft(tracks.first()->getPlotOffset() + newMargin);
+        emit offsetChanged(tracks.first()->getPlotOffset() + newMargin);
     }
 }
 

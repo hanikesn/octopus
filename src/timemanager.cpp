@@ -123,7 +123,7 @@ void TimeManager::center(qint64 timestamp)
 void TimeManager::changeTimeStep(int milliSeconds)
 {
     qint64 microSeconds = milliSeconds * 1000;
-    timeLine->setStepSize(microSeconds);
+    emit stepSizeChanged(microSeconds);
     timePerPx = microSeconds / 50;
     // TODO on rangeChanged
 }
@@ -183,7 +183,7 @@ void TimeManager::onZoomIn()
     qint64 newStepSize = timeLine->getStepSize() - getZoomFactor(false);
     if (newStepSize <= 0) return;
 
-    timeLine->setStepSize(newStepSize);
+    emit stepSizeChanged(newStepSize);
     timePerPx = newStepSize / 50;
     emit rangeChanged(lowVisRange, getUpperEnd(lowVisRange));
 }
@@ -191,7 +191,7 @@ void TimeManager::onZoomIn()
 void TimeManager::onZoomOut()
 {
     qint64 newStepSize = timeLine->getStepSize() + getZoomFactor(true);
-    timeLine->setStepSize(newStepSize);
+    emit stepSizeChanged(newStepSize);
     timePerPx = newStepSize / 50;
     emit rangeChanged(lowVisRange, getUpperEnd(lowVisRange));
 }
@@ -218,6 +218,7 @@ void TimeManager::onTimeout()
 qint64 TimeManager::getUpperEnd(qint64 lowerEnd)
 {
     return timeLine->getUpperEnd(lowerEnd);
+//    return highVisRange;
 }
 
 void TimeManager::onPlay()
@@ -237,5 +238,10 @@ void TimeManager::onPlay()
         timer->start();
         break;
     }
+}
+
+void TimeManager::onNewUpperEnd(qint64 max)
+{
+    highVisRange = max;
 }
 
