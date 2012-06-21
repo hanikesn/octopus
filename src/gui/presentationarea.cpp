@@ -3,6 +3,7 @@
 #include <QGraphicsScene>
 #include <QGraphicsWidget>
 #include <QScrollBar>
+#include <QMessageBox>
 
 #include "gui/presentationitem.h"
 #include "dataprovider.h"
@@ -17,7 +18,11 @@ PresentationArea::PresentationArea(QGraphicsScene *scene, const DataProvider &da
     QObject(parent),
     dataProvider(dataProvider),
     currentViewSize(949, 1),
-    unsavedChanges(false)
+    unsavedChanges(false),
+    recording(false),
+    recordStart(0),
+    recordEnd(0),
+    currentMax(0)
 {
     timeLine = new TimeLine(52, 0, 0);
     timeManager = new TimeManager(hScrollBar, this);
@@ -44,6 +49,7 @@ PresentationArea::PresentationArea(QGraphicsScene *scene, const DataProvider &da
     connect(timeLine, SIGNAL(newUpperEnd(qint64)), timeManager, SLOT(onNewUpperEnd(qint64)));
 
     connect(&dataProvider, SIGNAL(newMax(qint64)), timeManager, SLOT(onNewMax(qint64)));
+    connect(&dataProvider, SIGNAL(newMax(qint64)), this, SLOT(onNewMax(qint64)));
 }
 
 PresentationArea::~PresentationArea()
@@ -120,6 +126,11 @@ void PresentationArea::updatePlotMargins()
     setPlotMargins(optMargin);
 }
 
+void PresentationArea::onNewMax(qint64 max)
+{
+    currentMax = max;
+}
+
 void PresentationArea::setPlotMargins(int newMargin)
 {
     if (!tracks.isEmpty()) {
@@ -129,6 +140,20 @@ void PresentationArea::setPlotMargins(int newMargin)
 //        pi->setOffsetLeft(tracks.first()->getPlotOffset() + newMargin);
         emit offsetChanged(tracks.first()->getPlotOffset() + newMargin);
     }
+}
+
+int PresentationArea::showRecordDialog()
+{
+    QMessageBox msg;
+    msg.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Ok);
+    msg.setIcon(QMessageBox::Information);
+    msg.setButtonText(QMessageBox::Save, tr("Export"));
+    msg.setButtonText(QMessageBox::Discard, tr("Discard"));
+    msg.setButtonText(QMessageBox::Ok, tr("Continue"));
+    msg.setDefaultButton(QMessageBox::Save);
+    msg.setText(tr("Do you wish to export the currently recorded data, discard the complete recording or continue the recording?"));
+    int result = msg.exec();
+    return result;
 }
 
 void PresentationArea::onChangedViewSize(QSize size)
@@ -183,5 +208,25 @@ void PresentationArea::onPlay()
 {
     /* Do stuff */
     emit play();  // propagate signal
+}
+
+void PresentationArea::onRecord()
+{
+    if (recording) {
+        recordEnd = currentMax;
+        // end recording, dialog n stuff
+        int result = showRecordDialog();
+        if (result == QMessageBox::Save) {
+            //TODO: speichern, nicht nur exportieren.
+            exportRange(recordStart, recordEnd);
+        } else if (result == QMessageBox::Discard) // discard recording
+            recording = false;
+        else if (result == QMessageBox::Ok) // go on with the recording
+            recording = true;
+    } else {
+        recordStart = currentMax;
+        recording = true;
+    }
+
 }
 

@@ -82,6 +82,13 @@ void MainWindow::setUpButtonBars()
     playButton.setCheckable(true);
     playButton.setIcon(playButtonIcon);
 
+    recButtonIcon.addPixmap(QPixmap(":/buttons/toolbar/icons/record_16.png"), QIcon::Normal,
+                             QIcon::Off);
+    recButtonIcon.addPixmap(QPixmap(":/buttons/toolbar/icons/record_16.png"), QIcon::Normal,
+                             QIcon::On);
+    recButton.setCheckable(true);
+    recButton.setIcon(recButtonIcon);
+
     // add buttons to the horizontal layout in the toolbar
     layout.addWidget(&addTrackButton);
     layout.addWidget(&loadButton);
@@ -95,6 +102,7 @@ void MainWindow::setUpButtonBars()
     spacerRight = new QSpacerItem(100, 1, QSizePolicy::MinimumExpanding, QSizePolicy::Maximum);
     ui.bottomButtonBar->addSpacerItem(spacerLeft);
     ui.bottomButtonBar->addWidget(&playButton);
+    ui.bottomButtonBar->addWidget(&recButton);
     ui.bottomButtonBar->addSpacerItem(spacerRight);
 
     toolBarWidget.setLayout(&layout);
@@ -112,7 +120,7 @@ void MainWindow::onVerticalScroll()
 }
 
 void MainWindow::onExportRange(qint64 begin, qint64 end)
-{
+{    
     QStringList sources = SourceDialog::getSources(*dataProvider, tr("Export"), false, QStringList(), this).front();
 
     QFileDialog dialog(this, tr("Export"));
@@ -129,7 +137,7 @@ void MainWindow::onExportRange(qint64 begin, qint64 end)
 
     QFile file(fileNames.first());
     if(!file.open(QIODevice::WriteOnly)) {
-        QMessageBox::critical(this,tr("Error"), tr("Could not safe file."));
+        QMessageBox::critical(this,tr("Error"), tr("Could not save file."));
         return;
     }
 
@@ -280,6 +288,8 @@ void MainWindow::setUpView()
     networkAdapter.discoverSenders();
 
     connect(&playButton, SIGNAL(clicked()), pa, SLOT(onPlay()));
+    connect(&recButton, SIGNAL(clicked()), pa, SLOT(onRecord()));
+    connect(&recButton, SIGNAL(clicked()), this, SLOT(onRecord()));
 }
 
 void MainWindow::save(bool saveAs)
@@ -350,4 +360,13 @@ void MainWindow::closeEvent(QCloseEvent *ce)
 //        QMainWindow::closeEvent(ce);
 //    else
 //        ce->ignore();
+}
+
+void MainWindow::onRecord()
+{
+    // change buttons according to pa.isrecording
+    if (pa->isRecording())
+        recButton.setChecked(true);
+    else
+        recButton.setChecked(false);
 }

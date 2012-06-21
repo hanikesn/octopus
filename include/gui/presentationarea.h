@@ -32,6 +32,8 @@ public:
     bool hasUnsavedChanges(){return unsavedChanges;}
     void setUnsavedChanges(bool uc);
 
+    bool isRecording() {return recording;}
+
 signals:
     void changedViewSize(QSize size);
     void verticalScroll(QRectF visibleRectangle);
@@ -54,6 +56,8 @@ public slots:
 
     void onPlay();
 
+    void onRecord();
+
 private slots:
     /**
       * Is called when the signal rangeChange(qint64, qint64) is emitted.
@@ -65,6 +69,8 @@ private slots:
 
     void updatePlotMargins();
 
+    void onNewMax(qint64 max);
+
 private:    
     PresentationItem *pi;
 
@@ -74,15 +80,20 @@ private:
     QSize currentViewSize;
 
     bool unsavedChanges;
+    bool recording;
 
     TimeLine *timeLine;
     TimeManager *timeManager;
+
+    qint64 recordStart, recordEnd, currentMax;
 
     void addTrack(const QList<QString>& fullDataSeriesNames);
     void addTracks(const QList<QString>& fullDataSeriesNames);
     Track* add(const QList<QString>& fullDataSeriesNames);
 
     void setPlotMargins(int newMargin);
+
+    int showRecordDialog();
 };
 
 #endif // PRESENTATIONAREA_H
