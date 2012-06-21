@@ -48,35 +48,6 @@ public:
     void setOffsetLeft(int offset);
 
     /**
-      * If shift-button is pressed, a selection is started. Otherwise nothing happens.
-      * @param event The mousePressEvent to be processed.
-      */
-    void mousePressEvent(QGraphicsSceneMouseEvent *event);
-
-    /**
-      * If a selection has been started at 'mousePressEvent()' it ends at the current position of
-      * the event (x-position). The corresponding timestamps are calculated and the
-      * 'selection()'-signal is emitted.
-      * If no new selection has been started this shows the cursor at the events position.
-      * @param event The mouseReleaseEvent to be processed.
-      */
-    void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
-
-    /**
-      * If a selection has been started at 'mousePressEvent()' and the shift-button is pressed
-      * the selected area is increased in size to the events position (x-position).
-      * Otherwise, nothing happens.
-      * @param event The mouseMoveEvent to be processed.
-      */
-    void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
-
-    /**
-      * As we have no interaction for the double click, this function does nothing.
-      * @param event The mouseDoubleClickEvent to be processed.
-      */
-    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event);
-
-    /**
       * Determines whether the specified track is currently visible.
       * @param t The track whose visibility is identified.
       * @return True if 't' is visible. False if either the track is not visible or the track is not
@@ -116,8 +87,6 @@ private:
     QList<Track*> tracks;
 
     TimeLine *timeLine;
-    Cursor *cursor;
-    Selection *selectedArea;
 
     QRectF boundingRectangle, visRect;    
     int offsetLeft;

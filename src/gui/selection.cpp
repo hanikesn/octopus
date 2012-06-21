@@ -23,6 +23,8 @@ Selection::Selection(TimeManager* timeManager, QWidget *parent):
     brush(Qt::lightGray),
     timeManager(timeManager)
 {
+    setObjectName("Selection");
+
     menu = new QMenu();
     exportAction = new QAction(tr("Export Range"), this);
     menu->addAction(exportAction);
@@ -64,17 +66,14 @@ void Selection::exportTriggered()
     emit onExport(begin, end);
 }
 
-void Selection::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
-                      QWidget *widget)
+void Selection::paintEvent(QPaintEvent *)
 {
-    Q_UNUSED(widget);
-    Q_UNUSED(option);
-
+    QPainter painter(this);
     QRectF frame(0, 0, width, height);
-    painter->setPen(pen);
-    painter->setBrush(brush);
-    painter->setOpacity(0.5);
-    painter->drawRoundedRect(frame, 5, 5);
+    painter.setPen(pen);
+    painter.setBrush(brush);
+    painter.setOpacity(0.5);
+    painter.drawRoundedRect(frame, 5, 5);
 }
 
 void Selection::setHeight(int h)

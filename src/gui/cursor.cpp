@@ -19,6 +19,8 @@ Cursor::Cursor(TimeManager *timeManager, QWidget *parent) :
     maxHeight(0)
 
 {
+    setObjectName("Cursor");
+    setAttribute(Qt::WA_TransparentForMouseEvents);
     update();
 }
 
@@ -26,17 +28,16 @@ Cursor::~Cursor()
 {
 }
 
-void Cursor::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+void Cursor::paintEvent(QPaintEvent *)
 {    
-    Q_UNUSED(option)
-    Q_UNUSED(widget)
+    QPainter painter(this);
 
-    painter->setClipRect(boundingRect());
+    painter.setClipRect(boundingRect());
 
     QRectF frame(QPointF(0, 0), geometry().size());
-    painter->setPen(pen);
-    painter->setBrush(brush);
-    painter->drawRect(frame);
+    painter.setPen(pen);
+    painter.setBrush(brush);
+    painter.drawRect(frame);
 }
 
 void Cursor::updateOffset(int offset)
@@ -66,8 +67,7 @@ void Cursor::update()
     else
         setVisible(true);
 
-    // TODO REF
-    //setPos(newPos + offsetLeft, 0);
+    move(newPos + offsetLeft, 0);
 }
 
 qint64 Cursor::getTime()

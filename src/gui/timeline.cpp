@@ -5,8 +5,8 @@
 
 #include <QDebug>
 
-TimeLine::TimeLine(int offset, QGraphicsItem * parent, Qt::WindowFlags wFlags):
-    QGraphicsWidget(parent, wFlags),
+TimeLine::TimeLine(int offset, QWidget * parent):
+    QWidget(parent),
     offset(offset),
     beginRange(0),    
     textBoxWidth(50),
@@ -21,15 +21,15 @@ TimeLine::TimeLine(int offset, QGraphicsItem * parent, Qt::WindowFlags wFlags):
     timePerPx(40000), // Amount of time which one pixel represents 40 milliseconds in µs
     timeRepresentation(SECOND_FULL)
 {
-    setGeometry(0, 0, 946, 50);
+    setObjectName("TimeLine");
+    setAttribute(Qt::WA_TransparentForMouseEvents);
+    resize(946, 50);
 }
 
-void TimeLine::paint(QPainter *painter,
-    const QStyleOptionGraphicsItem *option, QWidget *widget)
+void TimeLine::paintEvent(QPaintEvent *)
 {
-    painter->setClipRect(boundingRect());
-    Q_UNUSED(widget);
-    Q_UNUSED(option);
+    QPainter painter(this);
+    painter.setClipRect(boundingRect());
 
     QRectF frame(QPointF(0,0), geometry().size());
     QGradientStops stops;
@@ -41,16 +41,16 @@ void TimeLine::paint(QPainter *painter,
     stops << QGradientStop(1.0, QColor(215, 215, 215));
     gradient.setStops(stops);
 
-    painter->setBrush(QBrush(gradient));
-    painter->setPen(pen);
-    painter->drawRect(frame);
+    painter.setBrush(QBrush(gradient));
+    painter.setPen(pen);
+    painter.drawRect(frame);
 
     // draw ticks:
-    drawTicks(painter);
+    drawTicks(&painter);
 
     QRect rect = QRect(5, geometry().height() - 15, 50, 15);
     QString text = timeRepresentation == MILLISECOND ? "ms" : "sec";
-    painter->drawText(rect, text);
+    painter.drawText(rect, text);
 }
 
 QRectF TimeLine::boundingRect() const
@@ -113,13 +113,13 @@ void TimeLine::drawFrom(qint64 time)
     if (rangeOffset == time) return;
 
     rangeOffset = time;
-    update(boundingRect());
+    //update(boundingRect());
 }
 
 void TimeLine::setOffset(int offset)
 {
     this->offset = offset;
-    update(boundingRect());
+    //update(boundingRect());
 }
 
 qint64 TimeLine::getUpperEnd(qint64 lowerEnd)
@@ -142,7 +142,7 @@ void TimeLine::setStepSize(qint64 microSeconds)
     else
         timeRepresentation = MILLISECOND;
 
-    update(boundingRect());
+    //update(boundingRect());
 }
 
 void TimeLine::onUpdate(QSize size)

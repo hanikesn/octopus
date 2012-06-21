@@ -18,6 +18,8 @@ class Cursor;
 class QScrollBar;
 class TimeLine;
 class TimeManager;
+class Cursor;
+class Selection;
 
 class PresentationArea : public QScrollArea, public Serializable
 {
@@ -32,6 +34,35 @@ public:
 
     bool hasUnsavedChanges(){return unsavedChanges;}
     void setUnsavedChanges(bool uc);
+
+    /**
+      * If shift-button is pressed, a selection is started. Otherwise nothing happens.
+      * @param event The mousePressEvent to be processed.
+      */
+    void mousePressEvent(QMouseEvent *event);
+
+    /**
+      * If a selection has been started at 'mousePressEvent()' it ends at the current position of
+      * the event (x-position). The corresponding timestamps are calculated and the
+      * 'selection()'-signal is emitted.
+      * If no new selection has been started this shows the cursor at the events position.
+      * @param event The mouseReleaseEvent to be processed.
+      */
+    void mouseReleaseEvent(QMouseEvent *event);
+
+    /**
+      * If a selection has been started at 'mousePressEvent()' and the shift-button is pressed
+      * the selected area is increased in size to the events position (x-position).
+      * Otherwise, nothing happens.
+      * @param event The mouseMoveEvent to be processed.
+      */
+    void mouseMoveEvent(QMouseEvent *event);
+
+    /**
+      * As we have no interaction for the double click, this function does nothing.
+      * @param event The mouseDoubleClickEvent to be processed.
+      */
+    void mouseDoubleClickEvent(QMouseEvent *event);
 
 signals:
     void changedViewSize(QSize size);
@@ -66,16 +97,21 @@ private slots:
     void updatePlotMargins();
 
 private:    
-    PresentationItem *pi;
-
     const DataProvider &dataProvider;
     QList<Track*> tracks;
 
     QSize currentViewSize;
 
+    int offsetLeft;
+
+    bool createSelection;
+
     bool unsavedChanges;
 
     TimeLine *timeLine;
+    Cursor *cursor;
+    Selection *selection;
+
     TimeManager *timeManager;
 
     void addTrack(const QList<QString>& fullDataSeriesNames);

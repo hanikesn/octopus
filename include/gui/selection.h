@@ -19,7 +19,7 @@ public:
 
     QRectF boundingRect() const;
 
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+    void paintEvent(QPaintEvent *);
 
     void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
 

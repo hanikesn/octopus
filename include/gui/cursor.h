@@ -17,7 +17,7 @@ public:
     explicit Cursor(TimeManager *timeManager, QWidget *parent);
     ~Cursor();
 
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+    void paintEvent(QPaintEvent *);
 
     QRectF boundingRect() const;
 

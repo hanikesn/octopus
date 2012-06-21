@@ -4,18 +4,19 @@
 #include <QGraphicsWidget>
 #include <QPen>
 
+#include <QWidget>
 
 class QGraphicsItem;
 class PresentationItem;
 
 
-class TimeLine : public QGraphicsWidget
+class TimeLine : public QWidget
 {
     Q_OBJECT
 public:    
-    explicit TimeLine(int offset, QGraphicsItem *parent, Qt::WindowFlags wFlags = 0);
+    explicit TimeLine(int offset, QWidget *parent);
 
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+    void paintEvent(QPaintEvent *);
 
     QRectF boundingRect() const;
 

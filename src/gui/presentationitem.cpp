@@ -23,24 +23,8 @@ PresentationItem::PresentationItem(TimeLine *timeLine, TimeManager *timeManager,
     minCoverHeight(672),
     timeMgr(timeManager)
 {
-    cursor = new Cursor(timeManager, this);
-
-    // TODO hardcoded weg
-    cursor->updateCoverHeight(100);
-    cursor->updateMaxHeight(100);
-
-    selectedArea = new Selection(timeMgr, this);
-
     boundingRectangle.setWidth(timeLine->size().width());
     boundingRectangle.setHeight(timeLine->size().height());
-
-    connect(selectedArea, SIGNAL(onExport(qint64,qint64)),    this, SIGNAL(onExport(qint64,qint64)));
-    connect(timeMgr, SIGNAL(rangeChanged(qint64,qint64)), selectedArea, SLOT(update()));
-
-    connect(timeMgr, SIGNAL(currentTimeChanged(qint64)), cursor, SLOT(setTime(qint64)));
-    connect(timeMgr, SIGNAL(rangeChanged(qint64,qint64)), cursor, SLOT(update()));
-    connect(this, SIGNAL(update(QSize)),                  timeLine, SLOT(onUpdate(QSize)));
-    connect(this, SIGNAL(update(QSize)),                  selectedArea, SLOT(update()));
 
     recalcBoundingRec();
     recalcPositions();
@@ -92,7 +76,6 @@ void PresentationItem::removeTrack(Track *t)
 void PresentationItem::setOffsetLeft(int offset)
 {    
     timeLine->setOffset(offset);
-    cursor->updateOffset(offset);
     offsetLeft = offset;
 }
 
@@ -106,48 +89,6 @@ void PresentationItem::recalcPositions()
 
     cursor->updateCoverHeight(getMinCoverHeight());
     emit update(QSize(visRect.width(), visRect.height()));*/
-}
-
-void PresentationItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
-{
-    if ((event->button() == Qt::LeftButton) &&
-            (QApplication::keyboardModifiers() == Qt::ShiftModifier) &&
-            (event->pos().x() >= offsetLeft) &&
-            (timeMgr->getPlaystate() != TimeManager::PLAYING)) {
-        createSelection = true;
-        selectedArea->show();
-        selectedArea->setSelectionBegin(timeMgr->convertPosToTime(event->pos().x()));
-    }
-}
-
-void PresentationItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
-{
-    if(createSelection){        
-        createSelection = false;
-        selectionEnd = event->pos().x() < offsetLeft ? offsetLeft : event->pos().x();
-
-        selectedArea->setSelectionEnd(timeMgr->convertPosToTime(selectionEnd));
-        cursor->setVisible(false);
-    } else if (event->pos().x() >= offsetLeft) {
-        qint64 currentTime = timeMgr->convertPosToTime(event->pos().x()- offsetLeft);
-        timeMgr->setTime(currentTime);
-        selectedArea->hide();
-    }
-}
-
-void PresentationItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
-{
-    if((QApplication::keyboardModifiers() != Qt::ShiftModifier)){
-        createSelection = false;
-    } else if(event->pos().x() >= offsetLeft) {
-        selectedArea->setSelectionEnd(timeMgr->convertPosToTime(event->pos().x()));
-    }
-}
-
-void PresentationItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
-{
-    Q_UNUSED(event)
-    // Nothing to do...
 }
 
 void PresentationItem::recalcBoundingRec()
@@ -189,7 +130,7 @@ void PresentationItem::onChangedViewSize(QSize size)
 
 void PresentationItem::onVerticalScroll(QRectF visibleRectangle)
 {    
-    timeLine->setPos(0, visibleRectangle.y()-1);    
+    timeLine->move(0, visibleRectangle.y()-1);
     visRect = visibleRectangle;
     // will trigger a rangeChanged() --> previously invisible tracks will update their range
     timeMgr->updateRange();
