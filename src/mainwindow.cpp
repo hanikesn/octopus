@@ -80,7 +80,8 @@ void MainWindow::setUpButtonBars()
     playButtonIcon.addPixmap(QPixmap(":/buttons/toolbar/icons/pause_16.png"), QIcon::Normal,
                              QIcon::On);
     playButton.setCheckable(true);
-    playButton.setIcon(playButtonIcon);
+    playButton.setIcon(playButtonIcon);    
+    playButton.setShortcut(QKeySequence(Qt::Key_Space));
 
     recButtonIcon.addPixmap(QPixmap(":/buttons/toolbar/icons/record_16.png"), QIcon::Normal,
                              QIcon::Off);
