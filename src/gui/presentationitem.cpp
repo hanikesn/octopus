@@ -28,8 +28,7 @@ PresentationItem::PresentationItem(TimeLine *timeLine, TimeManager *timeManager,
 
     recalcBoundingRec();
     recalcPositions();
-
-    setOffsetLeft(52);
+    emit offsetChanged(52);
 }
 
 PresentationItem::~PresentationItem()
@@ -73,9 +72,9 @@ void PresentationItem::removeTrack(Track *t)
     recalcPositions();
 }
 
-void PresentationItem::setOffsetLeft(int offset)
-{    
-    timeLine->setOffset(offset);
+
+void PresentationItem::onOffsetChanged(int offset)
+{
     offsetLeft = offset;
 }
 

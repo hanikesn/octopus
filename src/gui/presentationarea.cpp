@@ -3,6 +3,7 @@
 #include <QGraphicsScene>
 #include <QGraphicsWidget>
 #include <QScrollBar>
+#include <QMessageBox>
 
 #include "gui/selection.h"
 #include "gui/presentationitem.h"
@@ -20,11 +21,15 @@ PresentationArea::PresentationArea(const DataProvider &dataProvider,
     dataProvider(dataProvider),
     currentViewSize(949, 1),
     offsetLeft(0),
-    unsavedChanges(false)
+    unsavedChanges(false),
+    recording(false),
+    recordStart(0),
+    recordEnd(0),
+    currentMax(0)
 {
     setObjectName("PresentationArea");
     timeLine = new TimeLine(52, this);
-    timeManager = new TimeManager(hScrollBar, timeLine, this);
+    timeManager = new TimeManager(hScrollBar, this);
     selection = new Selection(timeManager, this);
     cursor = new Cursor(timeManager, this);
 
@@ -42,12 +47,20 @@ PresentationArea::PresentationArea(const DataProvider &dataProvider,
     connect(this, SIGNAL(play()),                   timeManager, SLOT(onPlay()));
     connect(this, SIGNAL(zoomIn()),                 timeManager, SLOT(onZoomIn()));
     connect(this, SIGNAL(zoomOut()),                timeManager, SLOT(onZoomOut()));
+
     connect(selection, SIGNAL(onExport(qint64,qint64)),          this, SIGNAL(exportRange(qint64,qint64)));
+
 
     connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)),
             this, SLOT(onRangeChanged(qint64,qint64)));
+    connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)),
+            timeLine, SLOT(onRangeChanged(qint64,qint64)));
+    connect(timeManager, SIGNAL(stepSizeChanged(qint64)), timeLine, SLOT(onStepSizeChanged(qint64)));
+
+    connect(timeLine, SIGNAL(newUpperEnd(qint64)), timeManager, SLOT(onNewUpperEnd(qint64)));
 
     connect(&dataProvider, SIGNAL(newMax(qint64)), timeManager, SLOT(onNewMax(qint64)));
+    connect(&dataProvider, SIGNAL(newMax(qint64)), this, SLOT(onNewMax(qint64)));
 }
 
 PresentationArea::~PresentationArea()
@@ -124,6 +137,11 @@ void PresentationArea::updatePlotMargins()
     setPlotMargins(optMargin);
 }
 
+void PresentationArea::onNewMax(qint64 max)
+{
+    currentMax = max;
+}
+
 void PresentationArea::setPlotMargins(int newMargin)
 {
     /*if (!tracks.isEmpty()) {
@@ -131,7 +149,22 @@ void PresentationArea::setPlotMargins(int newMargin)
             t->setPlotMarginLeft(newMargin);
         }
         pi->setOffsetLeft(tracks.first()->getPlotOffset() + newMargin);
+        emit offsetChanged(tracks.first()->getPlotOffset() + newMargin);
     }*/
+}
+
+int PresentationArea::showRecordDialog()
+{
+    QMessageBox msg;
+    msg.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Ok);
+    msg.setIcon(QMessageBox::Information);
+    msg.setButtonText(QMessageBox::Save, tr("Save"));
+    msg.setButtonText(QMessageBox::Discard, tr("Discard"));
+    msg.setButtonText(QMessageBox::Ok, tr("Continue"));
+    msg.setDefaultButton(QMessageBox::Save);
+    msg.setText(tr("Do you wish to save the currently recorded data, discard the complete recording or continue the recording?"));
+    int result = msg.exec();
+    return result;
 }
 
 void PresentationArea::onChangedViewSize(QSize size)
@@ -186,4 +219,24 @@ void PresentationArea::onPlay()
 {
     /* Do stuff */
     emit play();  // propagate signal
+}
+
+void PresentationArea::onRecord()
+{
+    if (recording) {
+        recordEnd = currentMax;
+        // end recording, dialog n stuff
+        int result = showRecordDialog();
+        if (result == QMessageBox::Save) {
+            //TODO: speichern, nicht nur exportieren.
+            emit saveProject(recordStart, recordEnd);
+        } else if (result == QMessageBox::Discard) // discard recording
+            recording = false;
+        else if (result == QMessageBox::Ok) // go on with the recording
+            recording = true;
+    } else {
+        recordStart = currentMax;
+        recording = true;
+    }
+
 }

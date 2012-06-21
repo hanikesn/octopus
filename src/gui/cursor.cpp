@@ -24,10 +24,6 @@ Cursor::Cursor(TimeManager *timeManager, QWidget *parent) :
     update();
 }
 
-Cursor::~Cursor()
-{
-}
-
 void Cursor::paintEvent(QPaintEvent *)
 {    
     QPainter painter(this);
@@ -40,7 +36,7 @@ void Cursor::paintEvent(QPaintEvent *)
     painter.drawRect(frame);
 }
 
-void Cursor::updateOffset(int offset)
+void Cursor::onOffsetChanged(int offset)
 {
     offsetLeft = offset;
     update();

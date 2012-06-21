@@ -13,7 +13,8 @@ class TimeManager : public QObject, public Serializable
 {
     Q_OBJECT
 public:
-    TimeManager(QScrollBar *hScrollBar, TimeLine *timeLine, QObject* parent);
+    TimeManager(QScrollBar *hScrollBar, QObject* parent);
+
     ~TimeManager();
 
     qint64 getLowVisRange() {return lowVisRange;}
@@ -76,6 +77,8 @@ signals:
 
     void currentTimeChanged(qint64 time);
 
+    void stepSizeChanged(qint64 microSeconds);
+
 public slots:
     void onNewMax(qint64 timestamp);
     void onZoomIn();
@@ -83,14 +86,18 @@ public slots:
 
     void setTime(qint64);
 
-
     void onPlay();
+
+    void onNewUpperEnd(qint64 max);
+
 private slots:
     void onTimeout();
 
     void horizontalScroll(int pos);
 
     void onRangeChanged(qint64 begin, qint64 end);
+
+    void onStepSizeChanged(qint64 size);
 
 private:
     // low and high limit of the visible range
@@ -108,6 +115,9 @@ private:
     int timeoutIntervall;
 
     qint64 currentTime;
+
+    // determines how much time should be between 2 big ticks in the timeline (in microseconds)
+    qint64 stepSize;
 
     Playstate playstate;
 

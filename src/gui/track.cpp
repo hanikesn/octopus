@@ -153,7 +153,7 @@ void Track::onPlotSettings()
 {
     // TODO(Steffi)
 
-    PlotSettings settings = PlotSettingsDialog::getSettings(getFullDataSeriesNames());
+    PlotSettings settings = PlotSettingsDialog::getSettings(getFullDataSeriesNames(), true, false);
 }
 
 void Track::onOptPlotMarginsRecalculated(int left, int /*right*/, int /*top*/, int /*bottom*/)

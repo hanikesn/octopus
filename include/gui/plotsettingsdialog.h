@@ -16,15 +16,21 @@ class PlotSettingsDialog : public QDialog
     Q_OBJECT
     
 public:
-    explicit PlotSettingsDialog(const QStringList &dataSeriesNames, QWidget *parent = 0);
+    explicit PlotSettingsDialog(const QStringList &dataSeriesNames,
+                                bool showScalingOption,
+                                bool offsetsEditable,
+                                QWidget *parent);
     ~PlotSettingsDialog();
     
-    static PlotSettings getSettings(const QStringList &dataSeriesNames, QWidget *parent = 0);
+    static PlotSettings getSettings(const QStringList &dataSeriesNames,
+                                    bool showScalingOption = false,
+                                    bool offsetsEditable = true,
+                                    QWidget *parent = 0);
 
 private:
     Ui::PlotSettingsDialog *ui;
 
-    void setupSourceTable(const QStringList &dataSeriesNames);
+    void setupSourceTable(const QStringList &dataSeriesNames, bool offsetsEditable);
 
 private slots:
     void onSameScaleStateChanged(int state);

@@ -15,7 +15,6 @@ class Cursor : public QWidget
 
 public:
     explicit Cursor(TimeManager *timeManager, QWidget *parent);
-    ~Cursor();
 
     void paintEvent(QPaintEvent *);
 
@@ -26,7 +25,7 @@ public:
 public slots:
     void setTime(qint64 time);
 
-    void updateOffset(int offset);
+    void onOffsetChanged(int offset);
 
     void updateCoverHeight(int height);
     void updateMaxHeight(int height);

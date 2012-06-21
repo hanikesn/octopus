@@ -43,11 +43,6 @@ public:
     void removeTrack(Track *t);
 
     /**
-     * Sets the left offset of the time line to the given value and updates time line and cursor.
-     */
-    void setOffsetLeft(int offset);
-
-    /**
       * Determines whether the specified track is currently visible.
       * @param t The track whose visibility is identified.
       * @return True if 't' is visible. False if either the track is not visible or the track is not
@@ -76,12 +71,20 @@ public slots:
       */
     void onVerticalScroll(QRectF visibleRectangle);
 
+
+    /**
+     * Sets the left offset of the time line to the given value and updates time line and cursor.
+     */
+    void onOffsetChanged(int offset);
+
 signals:
     void onExport(qint64,qint64);
 
     void update(QSize size);
 
     void updateVisibleSize(QSize size);
+
+    void offsetChanged(int);
 
 private:
     QList<Track*> tracks;

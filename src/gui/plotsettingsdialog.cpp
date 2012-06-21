@@ -7,18 +7,25 @@
 #include <QSpinBox>
 #include <limits>
 
-PlotSettingsDialog::PlotSettingsDialog(const QStringList &dataSeriesNames, QWidget *parent) :
+static const int SOURCENAMECOL = 0;
+static const int OFFSETCOL = 1;
+static const int SCALECOL = 2;
+static const int COLCOUNT = 3;
+
+PlotSettingsDialog::PlotSettingsDialog(const QStringList &dataSeriesNames,
+                                       bool showScalingOption,
+                                       bool offsetsEditable,
+                                       QWidget *parent) :
     QDialog(parent),
     ui(new Ui::PlotSettingsDialog)
 {
     ui->setupUi(this);
 
-    ui->sameScaleOption->setCheckState(Qt::Unchecked);
-    foreach (QAbstractButton *b, ui->scaleChoicesGroup->buttons()) {
-        b->setVisible(false);
-    }
-
-    setupSourceTable(dataSeriesNames);
+    setupSourceTable(dataSeriesNames, offsetsEditable);
+    ui->sameScaleOption->setVisible(showScalingOption);
+    ui->sourceTable->setColumnHidden(SCALECOL, showScalingOption);
+    ui->sameScaleOption->setChecked(showScalingOption);
+    ui->linChoice->setChecked(showScalingOption);
 
     connect(ui->sameScaleOption, SIGNAL(stateChanged(int)), this, SLOT(onSameScaleStateChanged(int)));
 }
@@ -28,21 +35,19 @@ PlotSettingsDialog::~PlotSettingsDialog()
     delete ui;
 }
 
-void PlotSettingsDialog::setupSourceTable(const QStringList &dataSeriesNames)
+void PlotSettingsDialog::setupSourceTable(const QStringList &dataSeriesNames, bool offsetsEditable)
 {
-    int sourceNameCol = 0;
-    int offsetCol = 1;
-    int scaleCol = 2;
-    ui->sourceTable->setColumnCount(3);
+    ui->sourceTable->setColumnCount(COLCOUNT);
 
-    ui->sourceTable->setHorizontalHeaderItem(sourceNameCol, new QTableWidgetItem(tr("Data Series Name")));
-    ui->sourceTable->setHorizontalHeaderItem(offsetCol, new QTableWidgetItem(tr("Offset")));
-    ui->sourceTable->setHorizontalHeaderItem(scaleCol, new QTableWidgetItem(tr("Scale Type")));
+    ui->sourceTable->setHorizontalHeaderItem(SOURCENAMECOL, new QTableWidgetItem(tr("Data Series Name")));
+    ui->sourceTable->setHorizontalHeaderItem(OFFSETCOL, new QTableWidgetItem(tr("Offset")));
+    ui->sourceTable->setHorizontalHeaderItem(SCALECOL, new QTableWidgetItem(tr("Scale Type")));
 
     QHeaderView *hHeader = ui->sourceTable->horizontalHeader();
-    hHeader->setResizeMode(sourceNameCol, QHeaderView::Stretch);
-    hHeader->setResizeMode(offsetCol, QHeaderView::ResizeToContents);
-    hHeader->setResizeMode(scaleCol, QHeaderView::ResizeToContents);
+    hHeader->setDefaultAlignment(Qt::AlignLeft);
+    hHeader->setResizeMode(SOURCENAMECOL, QHeaderView::Stretch);
+    hHeader->setResizeMode(OFFSETCOL, QHeaderView::ResizeToContents);
+    hHeader->setResizeMode(SCALECOL, QHeaderView::ResizeToContents);
 
     QHeaderView *vHeader = ui->sourceTable->verticalHeader();
     vHeader->setVisible(false);
@@ -54,22 +59,26 @@ void PlotSettingsDialog::setupSourceTable(const QStringList &dataSeriesNames)
         QTableWidgetItem *sourceItem = new QTableWidgetItem(name);
         // the item showing the data series name should not be editable
         sourceItem->setFlags(sourceItem->flags() & ~Qt::ItemIsEditable);
-        ui->sourceTable->setItem(row, sourceNameCol, sourceItem);
+        ui->sourceTable->setItem(row, SOURCENAMECOL, sourceItem);
 
         QSpinBox *offsetSpinner = new QSpinBox(ui->sourceTable);
         offsetSpinner->setValue(0);
         offsetSpinner->setMaximum(std::numeric_limits<int>::max());
-        ui->sourceTable->setCellWidget(row, offsetCol, offsetSpinner);
+        offsetSpinner->setEnabled(offsetsEditable);
+        ui->sourceTable->setCellWidget(row, OFFSETCOL, offsetSpinner);
 
         QComboBox *scaleCombo = new QComboBox();
         scaleCombo->addItems(QStringList() << "LOG" << "LIN");
-        ui->sourceTable->setCellWidget(row, scaleCol, scaleCombo);
+        ui->sourceTable->setCellWidget(row, SCALECOL, scaleCombo);
     }
 }
 
-PlotSettings PlotSettingsDialog::getSettings(const QStringList &dataSeriesNames, QWidget *parent)
+PlotSettings PlotSettingsDialog::getSettings(const QStringList &dataSeriesNames,
+                                             bool showScalingOption,
+                                             bool offsetsEditable,
+                                             QWidget *parent)
 {
-    PlotSettingsDialog *d = new PlotSettingsDialog(dataSeriesNames);
+    PlotSettingsDialog *d = new PlotSettingsDialog(dataSeriesNames, showScalingOption, offsetsEditable, parent);
     d->exec();
 
     // TODO(Steffi)
@@ -78,13 +87,9 @@ PlotSettings PlotSettingsDialog::getSettings(const QStringList &dataSeriesNames,
 
 void PlotSettingsDialog::onSameScaleStateChanged(int state)
 {
-    if (state == Qt::Unchecked) {
-        foreach (QAbstractButton *b, ui->scaleChoicesGroup->buttons()) {
-            b->setVisible(false);
-        }
-    } else if (state == Qt::Checked) {
-        foreach (QAbstractButton *b, ui->scaleChoicesGroup->buttons()) {
-            b->setVisible(true);
-        }
+    foreach (QAbstractButton *b, ui->scaleChoicesGroup->buttons()) {
+        b->setVisible(state == Qt::Checked);
     }
+    // show if unchecked (state == 0), hide otherwise
+    ui->sourceTable->setColumnHidden(SCALECOL, state);
 }

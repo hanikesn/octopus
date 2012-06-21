@@ -11,5 +11,6 @@
         <file>icons/play_16.png</file>
         <file>icons/zoom-in_16.png</file>
         <file>icons/zoom-out_16.png</file>
+        <file>icons/record_16.png</file>
     </qresource>
 </RCC>
