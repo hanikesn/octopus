@@ -42,7 +42,7 @@ signals:
     void zoomIn();
     void zoomOut();
     void offsetChanged(int);
-
+    void saveProject(qint64 start, qint64 end);
 public slots:
     void onAddTrack();
     void onDelete(Track *t);

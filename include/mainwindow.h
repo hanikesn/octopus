@@ -41,6 +41,7 @@ private slots:
     void onVerticalScroll();
     void onExportRange(qint64 begin, qint64 end);
     void onRecord();
+    void onSaveProject(qint64 start, qint64 end);
 
 private:
     QVBoxLayout *trackLayout;

@@ -275,6 +275,7 @@ void MainWindow::setUpView()
     pa->onChangedViewSize(ui.mainView->size());
 
     connect(pa, SIGNAL(exportRange(qint64,qint64)), this, SLOT(onExportRange(qint64,qint64)));
+    connect(pa, SIGNAL(saveProject(qint64,qint64)), this, SLOT(onSaveProject(qint64,qint64)));
     connect(this, SIGNAL(verticalScroll(QRectF)), pa, SIGNAL(verticalScroll(QRectF)));
     connect(this, SIGNAL(changedViewSize(QSize)), pa, SLOT(onChangedViewSize(QSize)));    
     connect(&zoomInButton, SIGNAL(clicked()), pa, SIGNAL(zoomIn()));
@@ -370,4 +371,11 @@ void MainWindow::onRecord()
         recButton.setChecked(true);
     else
         recButton.setChecked(false);
+}
+
+void MainWindow::onSaveProject(qint64 start, qint64 end)
+{
+    qDebug() << Q_FUNC_INFO << start << "|" << end;
+
+    //TODO(domi): Projekt speichern, in die DB nur Bereich aufnehmen
 }

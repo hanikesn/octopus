@@ -146,11 +146,11 @@ int PresentationArea::showRecordDialog()
     QMessageBox msg;
     msg.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Ok);
     msg.setIcon(QMessageBox::Information);
-    msg.setButtonText(QMessageBox::Save, tr("Export"));
+    msg.setButtonText(QMessageBox::Save, tr("Save"));
     msg.setButtonText(QMessageBox::Discard, tr("Discard"));
     msg.setButtonText(QMessageBox::Ok, tr("Continue"));
     msg.setDefaultButton(QMessageBox::Save);
-    msg.setText(tr("Do you wish to export the currently recorded data, discard the complete recording or continue the recording?"));
+    msg.setText(tr("Do you wish to save the currently recorded data, discard the complete recording or continue the recording?"));
     int result = msg.exec();
     return result;
 }
@@ -217,7 +217,7 @@ void PresentationArea::onRecord()
         int result = showRecordDialog();
         if (result == QMessageBox::Save) {
             //TODO: speichern, nicht nur exportieren.
-            exportRange(recordStart, recordEnd);
+            emit saveProject(recordStart, recordEnd);
         } else if (result == QMessageBox::Discard) // discard recording
             recording = false;
         else if (result == QMessageBox::Ok) // go on with the recording
