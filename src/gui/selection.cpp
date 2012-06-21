@@ -6,32 +6,66 @@
 #include <QMenu>
 #include <QAction>
 
+#include "timemanager.h"
+
 #include "gui/presentationitem.h"
 
 #include <QDebug>
 
-Selection::Selection(PresentationItem *parent) :
+Selection::Selection(TimeManager* timeManager, PresentationItem *parent) :
     QGraphicsItem(parent),
-    height(0),
-    width(0),
+    begin(0),
+    end(0),
+    visible(true),
+    height(100),
+    width(100),
     pen(Qt::lightGray),
     brush(Qt::lightGray),
-    presentationItem(parent)
+    timeManager(timeManager)
 {
-    menu = new QMenu(0);
+    menu = new QMenu();
     exportAction = new QAction(tr("Export Range"), this);
     menu->addAction(exportAction);
-    connect(exportAction, SIGNAL(triggered()), this, SIGNAL(exportTriggered()));
+    connect(exportAction, SIGNAL(triggered()), this, SLOT(exportTriggered()));
+
+    setObjectName("Selection");
+
+    hide();
+
+    setZValue(1.0);
 }
+
+void Selection::update()
+{
+    prepareGeometryChange();
+
+    qint64 begin_ = begin;
+    qint64 end_ = end;
+
+    if(begin_ > end_)
+        std::swap(begin_, end_);
+
+    int left = timeManager->convertTimeToPos(begin_);
+    int right = timeManager->convertTimeToPos(end_);
+
+    width = right - left;
+    setPos(left, 0.0);
+}
+
 
 Selection::~Selection()
 {
-    delete menu;
+    menu->deleteLater();
 }
 
 QRectF Selection::boundingRect() const
 {
-    return  QRectF(0, 0, width, height);
+    return QRectF(0, 0, width, height);
+}
+
+void Selection::exportTriggered()
+{
+    emit onExport(begin, end);
 }
 
 void Selection::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
@@ -49,32 +83,43 @@ void Selection::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
 
 void Selection::setHeight(int h)
 {
-    prepareGeometryChange();
     height = h;
+    update();
 }
 
-void Selection::setWidth(int w)
+void Selection::show()
 {
-    prepareGeometryChange();
-    width = w;
+    setVisible(true);
+    update();
+    emit selectionChanged(begin, end);
 }
 
 void Selection::hide()
 {
-    if (!isVisible()) return; // if selection is already invisible there is nothing to do.
+    if (!isVisible()) return;
+
     setVisible(false);
-    setWidth(0);
-    setHeight(0);
+
+    visible = false;
+
+    update();
+
+    emit selectionChanged(-1, -1);
 }
 
-void Selection::onUpdate(QSize size)
+void Selection::setSelectionBegin(qint64 time)
 {
-    Q_UNUSED(size)
+    begin = time;
+    end = time;
+    update();
+    emit selectionChanged(begin, end);
+}
 
-    if (presentationItem->boundingRect().height() > presentationItem->getMinCoverHeight())
-        setHeight(presentationItem->boundingRect().height());
-    else
-        setHeight(presentationItem->getMinCoverHeight());
+void Selection::setSelectionEnd(qint64 time)
+{
+    end = time;
+    update();
+    emit selectionChanged(begin, end);
 }
 
 void Selection::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)

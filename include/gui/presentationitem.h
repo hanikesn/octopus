@@ -105,9 +105,7 @@ public slots:
     void onVerticalScroll(QRectF visibleRectangle);
 
 signals:
-    void selection(qint64 begin, qint64 end);
-
-    void exportTriggered();
+    void onExport(qint64,qint64);
 
     void update(QSize size);
 
@@ -126,9 +124,6 @@ private:
 
     bool createSelection;
     int selectionStart, selectionEnd;
-
-    // currentTime is the point of time, which is represented by the cursor.
-    qint64 currentTime;
 
     // minmal height to cover the full presentationArea
     int minCoverHeight;
