@@ -17,9 +17,7 @@ public:
 
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 
-    QRectF boundingRect() const;
-
-    void drawFrom(qint64 time);    
+    QRectF boundingRect() const;    
 
     qint64 getUpperEnd(qint64 lowerEnd);
 
@@ -31,6 +29,8 @@ public slots:
     void onOffsetChanged(int offset);
 
     void onStepSizeChanged(qint64 microSeconds);
+
+    void onRangeChanged(qint64 begin, qint64 end);
 
 signals:
     void newUpperEnd(qint64);

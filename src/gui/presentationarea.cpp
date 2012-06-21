@@ -22,7 +22,7 @@ PresentationArea::PresentationArea(QGraphicsScene *scene, const DataProvider &da
     unsavedChanges(false)
 {
     timeLine = new TimeLine(52, 0, 0);
-    timeManager = new TimeManager(hScrollBar, timeLine);
+    timeManager = new TimeManager(hScrollBar);
     pi = new PresentationItem(timeLine, timeManager, scene);
 
 
@@ -37,6 +37,8 @@ PresentationArea::PresentationArea(QGraphicsScene *scene, const DataProvider &da
 
     connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)),
             this, SLOT(onRangeChanged(qint64,qint64)));
+    connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)),
+            timeLine, SLOT(onRangeChanged(qint64,qint64)));
     connect(timeManager, SIGNAL(stepSizeChanged(qint64)), timeLine, SLOT(onStepSizeChanged(qint64)));
 
     connect(timeLine, SIGNAL(newUpperEnd(qint64)), timeManager, SLOT(onNewUpperEnd(qint64)));

@@ -108,11 +108,12 @@ void TimeLine::drawTicks(QPainter *painter)
     }
 }
 
-void TimeLine::drawFrom(qint64 time)
+void TimeLine::onRangeChanged(qint64 begin, qint64 end)
 {
-    if (rangeOffset == time) return;
+    Q_UNUSED(end)
+    if (rangeOffset == begin) return;
 
-    rangeOffset = time;
+    rangeOffset = begin;
     update(boundingRect());
 }
 
@@ -149,6 +150,7 @@ void TimeLine::onStepSizeChanged(qint64 microSeconds)
         timeRepresentation = MILLISECOND;
 
     update(boundingRect());
+    emit newUpperEnd(getUpperEnd(beginRange));
 }
 
 void TimeLine::onUpdate(QSize size)

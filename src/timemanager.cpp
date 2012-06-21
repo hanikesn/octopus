@@ -6,18 +6,18 @@
 #include <QScrollBar>
 #include <QTimer>
 
-TimeManager::TimeManager(QScrollBar *hScrollBar, TimeLine *timeLine):
+TimeManager::TimeManager(QScrollBar *hScrollBar):
     lowVisRange(0),
     highVisRange(0),
     timePerPx(40000),
     maximum(0),
     timeoutUpdateIntervall(40000),
     timeoutIntervall(40),
+    stepSize(2000000), // 2 seconds
     playstate(PAUSED),
     autoScroll(false),
     hScrollBar(hScrollBar),
-    timer(new QTimer(this)),
-    timeLine(timeLine)
+    timer(new QTimer(this))
 {
     hScrollBar->setSingleStep(1);
     hScrollBar->setPageStep(30);
@@ -31,8 +31,7 @@ TimeManager::TimeManager(QScrollBar *hScrollBar, TimeLine *timeLine):
     connect(hScrollBar, SIGNAL(sliderMoved(int)),       this, SLOT(horizontalScroll(int)));
     connect(hScrollBar, SIGNAL(valueChanged(int)),      this, SLOT(horizontalScroll(int)));
     connect(this, SIGNAL(rangeChanged(qint64,qint64)),  this, SLOT(onRangeChanged(qint64,qint64)));
-
-    highVisRange = timeLine->getUpperEnd(0);    
+    connect(this, SIGNAL(stepSizeChanged(qint64)),      this, SLOT(onStepSizeChanged(qint64)));
 }
 
 TimeManager::~TimeManager()
@@ -126,13 +125,19 @@ void TimeManager::changeTimeStep(int milliSeconds)
     emit stepSizeChanged(microSeconds);
     timePerPx = microSeconds / 50;
     // TODO on rangeChanged
+
+    emit rangeChanged(lowVisRange, highVisRange);
 }
 
 void TimeManager::onRangeChanged(qint64 begin, qint64 end)
 {
     lowVisRange = begin;
     highVisRange = end;
-    timeLine->drawFrom(begin);
+}
+
+void TimeManager::onStepSizeChanged(qint64 size)
+{
+    stepSize = size;
 }
 
 void TimeManager::setTime(qint64 time)
@@ -143,7 +148,7 @@ void TimeManager::setTime(qint64 time)
 
 qint64 TimeManager::getZoomFactor(bool zoomOut)
 {
-    qint64 currentStepSize = timeLine->getStepSize();
+    qint64 currentStepSize = stepSize;
     if (currentStepSize <= 200000) { // <= 200ms stepsize: 25ms
         if (currentStepSize == 200000 && zoomOut)
             return 50000;
@@ -180,26 +185,31 @@ void TimeManager::onNewMax(qint64 timestamp)
 
 void TimeManager::onZoomIn()
 {
-    qint64 newStepSize = timeLine->getStepSize() - getZoomFactor(false);
+    qint64 newStepSize = stepSize - getZoomFactor(false);
     if (newStepSize <= 0) return;
 
+    // inform timeLine about new stepSize
     emit stepSizeChanged(newStepSize);
     timePerPx = newStepSize / 50;
-    emit rangeChanged(lowVisRange, getUpperEnd(lowVisRange));
+    // initiate redraw according to new range
+    emit rangeChanged(lowVisRange, highVisRange);
 }
 
 void TimeManager::onZoomOut()
 {
-    qint64 newStepSize = timeLine->getStepSize() + getZoomFactor(true);
+    qint64 newStepSize = stepSize + getZoomFactor(true);
+    // inform timeLine about new stepSize
     emit stepSizeChanged(newStepSize);
     timePerPx = newStepSize / 50;
-    emit rangeChanged(lowVisRange, getUpperEnd(lowVisRange));
+    // initiate redraw according to new range
+    emit rangeChanged(lowVisRange, highVisRange);
 }
 
 void TimeManager::horizontalScroll(int pos)
 {
+    qint64 range = highVisRange - lowVisRange;
     lowVisRange = pos*1000000;
-    highVisRange = getUpperEnd(lowVisRange);
+    highVisRange = lowVisRange + range;
     emit rangeChanged(lowVisRange, highVisRange);
 }
 
@@ -217,8 +227,7 @@ void TimeManager::onTimeout()
 
 qint64 TimeManager::getUpperEnd(qint64 lowerEnd)
 {
-    return timeLine->getUpperEnd(lowerEnd);
-//    return highVisRange;
+    return highVisRange;
 }
 
 void TimeManager::onPlay()
