@@ -1,7 +1,6 @@
 #ifndef SELECTION_H
 #define SELECTION_H
 
-#include <QGraphicsItem>
 #include <QPen>
 #include <QWidget>
 
@@ -17,11 +16,10 @@ public:
     explicit Selection(TimeManager *timeManager, QWidget *parent);
     ~Selection();
 
-    QRectF boundingRect() const;
-
     void paintEvent(QPaintEvent *);
 
-    void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
+    // TODO REF
+    //void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
 
     void hide();
     void show();

@@ -1,7 +1,7 @@
 #ifndef CURSOR_H
 #define CURSOR_H
 
-#include <QGraphicsWidget>
+#include <QWidget>
 #include <QWidget>
 #include <QPen>
 
@@ -17,8 +17,6 @@ public:
     explicit Cursor(TimeManager *timeManager, QWidget *parent);
 
     void paintEvent(QPaintEvent *);
-
-    QRectF boundingRect() const;
 
     qint64 getTime();
 

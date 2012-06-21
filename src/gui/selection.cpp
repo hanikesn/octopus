@@ -46,19 +46,14 @@ void Selection::update()
     int left = timeManager->convertTimeToPos(begin_);
     int right = timeManager->convertTimeToPos(end_);
 
-    width = right - left;
-    //setPos(left, 0.0);
+    setFixedWidth(right-left);
+    move(left, 0);
 }
 
 
 Selection::~Selection()
 {
     menu->deleteLater();
-}
-
-QRectF Selection::boundingRect() const
-{
-    return QRectF(0, 0, width, height);
 }
 
 void Selection::exportTriggered()
@@ -117,7 +112,7 @@ void Selection::setSelectionEnd(qint64 time)
     emit selectionChanged(begin, end);
 }
 
-void Selection::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
+/*void Selection::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 { 
     menu->popup(event->screenPos());
-}
+}*/

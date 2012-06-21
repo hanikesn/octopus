@@ -28,23 +28,15 @@ void Cursor::paintEvent(QPaintEvent *)
 {    
     QPainter painter(this);
 
-    painter.setClipRect(boundingRect());
-
-    QRectF frame(QPointF(0, 0), geometry().size());
     painter.setPen(pen);
     painter.setBrush(brush);
-    painter.drawRect(frame);
+    painter.drawRect(QRect(0,0, geometry().width(), geometry().height()));
 }
 
 void Cursor::onOffsetChanged(int offset)
 {
     offsetLeft = offset;
     update();
-}
-
-QRectF Cursor::boundingRect() const
-{    
-    return QRectF(0, 0, geometry().width(), geometry().height());
 }
 
 void Cursor::setTime(qint64 time)
