@@ -137,7 +137,6 @@ void PresentationArea::setPlotMargins(int newMargin)
         foreach (Track *t, tracks) {
             t->setPlotMarginLeft(newMargin);
         }
-//        pi->setOffsetLeft(tracks.first()->getPlotOffset() + newMargin);
         emit offsetChanged(tracks.first()->getPlotOffset() + newMargin);
     }
 }
