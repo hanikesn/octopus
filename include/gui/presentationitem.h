@@ -105,9 +105,7 @@ public slots:
     void onVerticalScroll(QRectF visibleRectangle);
 
 signals:
-    void selection(qint64 begin, qint64 end);
-
-    void exportTriggered();
+    void onExport(qint64,qint64);
 
     void update(QSize size);
 

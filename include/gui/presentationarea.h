@@ -42,7 +42,7 @@ signals:
 
 public slots:
     void onAddTrack();
-    void onDelete(Track *t);    
+    void onDelete(Track *t);
 
     /**
       * Resizes tracks to new view length.
@@ -54,18 +54,6 @@ public slots:
     void onPlay();
 
 private slots:
-    /**
-      * Transforms the position of the selection to timestamps and saves the it.
-      * @param begin Begin of the selection
-      * @param end End of the selection
-      */
-    void onSelection(qint64 begin, qint64 end);
-
-    /**
-      * Propagates export signal with the range of the current selection (if available)
-      */
-    void onExportTriggered();
-
     /**
       * Is called when the signal rangeChange(qint64, qint64) is emitted.
       * Updates the tracks to the new range.
@@ -83,8 +71,6 @@ private:
     QList<Track*> tracks;
 
     QSize currentViewSize;
-
-    qint64 selectionBegin, selectionEnd;
 
     bool unsavedChanges;
 

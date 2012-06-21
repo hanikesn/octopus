@@ -17,8 +17,6 @@ PresentationArea::PresentationArea(QGraphicsScene *scene, const DataProvider &da
     QObject(parent),
     dataProvider(dataProvider),
     currentViewSize(949, 1),
-    selectionBegin(-1),
-    selectionEnd(-1),
     unsavedChanges(false)
 {
     timeLine = new TimeLine(52, 0, 0);
@@ -31,8 +29,7 @@ PresentationArea::PresentationArea(QGraphicsScene *scene, const DataProvider &da
     connect(this, SIGNAL(play()),                   timeManager, SLOT(onPlay()));
     connect(this, SIGNAL(zoomIn()),                 timeManager, SLOT(onZoomIn()));
     connect(this, SIGNAL(zoomOut()),                timeManager, SLOT(onZoomOut()));
-    connect(pi, SIGNAL(selection(qint64,qint64)),   this, SLOT(onSelection(qint64, qint64)));
-    connect(pi, SIGNAL(exportTriggered()),          this, SLOT(onExportTriggered()));
+    connect(pi, SIGNAL(onExport(qint64,qint64)),          this, SIGNAL(exportRange(qint64,qint64)));
 
     connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)),
             this, SLOT(onRangeChanged(qint64,qint64)));
@@ -133,23 +130,6 @@ void PresentationArea::onChangedViewSize(QSize size)
     }
     // propagate event (resizes TimeLine and Cursor in PresentationItem)
     emit changedViewSize(size);
-}
-
-void PresentationArea::onExportTriggered()
-{    // propagate signal
-    emit exportRange(selectionBegin, selectionEnd);
-}
-
-void PresentationArea::onSelection(qint64 begin, qint64 end)
-{
-    if ((begin != -1) && (end != -1)) {
-        selectionBegin = begin;
-        selectionEnd = end;
-    } else {
-        // no more selection:
-        selectionBegin = -1;
-        selectionEnd = -1;
-    }
 }
 
 void PresentationArea::save(QVariantMap *qvm)
