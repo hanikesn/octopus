@@ -1,4 +1,5 @@
 #include "gui/discretegraph.h"
+#include "stringseries.h"
 
 #include "gui/qcustomplot.h"
 

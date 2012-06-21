@@ -1,5 +1,7 @@
 #include "gui/sourcedialog.h"
 
+#include "dataprovider.h"
+
 #include <QDebug>
 
 SourceDialog::SourceDialog(const DataProvider &dataProvider,

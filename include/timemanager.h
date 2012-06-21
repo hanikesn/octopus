@@ -3,9 +3,9 @@
 
 #include <QObject>
 
-#include "gui/timeline.h"
 #include "serializable.h"
 
+class TimeLine;
 class QScrollBar;
 class QTimer;
 
@@ -26,7 +26,7 @@ public:
       */
     qint64 getTimePerPx() {return timePerPx;}
 
-    qint64 getUpperEnd(qint64 lowerEnd) {return timeLine->getUpperEnd(lowerEnd);}
+    qint64 getUpperEnd(qint64 lowerEnd);
 
     /**
       * Converts a position on the view into the corresponting point in time.

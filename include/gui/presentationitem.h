@@ -2,13 +2,11 @@
 #define PRESENTATIONITEM_H
 
 #include <QGraphicsItem>
-#include <QGraphicsScene>
-#include <QGraphicsWidget>
 #include <QList>
-#include <QTimer>
 
 #include "serializable.h"
 
+class QGraphicsScene;
 class Track;
 class QGraphicsProxyWidget;
 class Selection;

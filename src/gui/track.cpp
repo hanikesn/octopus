@@ -5,6 +5,7 @@
 #include "gui/interpolatinggraph.h"
 #include "gui/sourcedialog.h"
 
+#include "dataprovider.h"
 #include "common.h"
 #include "measure.h"
 

@@ -1,5 +1,7 @@
 #include "timemanager.h"
 
+#include "gui/timeline.h"
+
 #include <QDebug>
 #include <QScrollBar>
 #include <QTimer>
@@ -211,6 +213,11 @@ void TimeManager::onTimeout()
     }
 
     emit currentTimeChanged(currentTime);
+}
+
+qint64 TimeManager::getUpperEnd(qint64 lowerEnd)
+{
+    return timeLine->getUpperEnd(lowerEnd);
 }
 
 void TimeManager::onPlay()

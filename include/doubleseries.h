@@ -2,7 +2,6 @@
 #define DOUBLESERIES_H
 
 #include "abstractdataseries.h"
-#include "common.h"
 
 #include <QObject>
 

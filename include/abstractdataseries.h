@@ -3,10 +3,10 @@
 
 #include "metadata.h"
 #include "visitor.h"
-#include "value.h"
-#include "dataprovider.h"
 
-#include <QMap>
+class Value;
+class DataProvider;
+
 #include <QObject>
 
 class AbstractDataSeries : public QObject, public Visitable

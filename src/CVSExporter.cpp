@@ -4,6 +4,7 @@
 #include "dataprovider.h"
 #include "qtextstream.h"
 #include "DBUtil.h"
+#include "value.h"
 
 QString CVSExporter::getFileType()
 {

@@ -1,5 +1,7 @@
 #include "stringseries.h"
 
+#include "dataprovider.h"
+
 #include "value.h"
 
 StringSeries::StringSeries(const DataProvider &dp, const QString &deviceName, const QString &name, Data::Properties properties) :

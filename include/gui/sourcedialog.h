@@ -1,10 +1,11 @@
 #ifndef SOURCEDIALOG_H
 #define SOURCEDIALOG_H
 
-#include "dataprovider.h"
 #include "ui_sourcedialog.h"
 
 #include <QDialog>
+
+class DataProvider;
 
 class SourceDialog : public QDialog
 {

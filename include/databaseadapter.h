@@ -3,10 +3,11 @@
 
 #include "sqlite.h"
 #include "metadata.h"
-#include "value.h"
 
-#include <QString>
 #include <QMap>
+
+class QString;
+class Value;
 
 class DatabaseAdapter
 {

@@ -1,11 +1,11 @@
 #ifndef INTERPOLATINGGRAPH_H
 #define INTERPOLATINGGRAPH_H
 
-#include "doubleseries.h"
 #include "gui/graph.h"
 
 class QCustomPlot;
 class QCPGraph;
+class DoubleSeries;
 
 class InterpolatingGraph : public Graph
 {

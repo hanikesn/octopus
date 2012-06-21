@@ -1,17 +1,14 @@
 #ifndef Track_H
 #define Track_H
 
-#include "dataprovider.h"
 #include "ui_track.h"
 #include "visitor.h"
-#include "gui/graph.h"
 #include "serializable.h"
 
-#include <QLabel>
-#include <QPainter>
-#include <QStyleOption>
 #include <QWidget>
 
+class Graph;
+class DataProvider;
 class AbstractDataSeries;
 
 class Track : public QWidget, public DataSeriesVisitor, public Serializable

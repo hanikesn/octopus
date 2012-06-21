@@ -3,6 +3,7 @@
 
 #include "sqlite.h"
 #include "common.h"
+#include "value.h"
 
 inline Sqlite::Row& operator >>(Sqlite::Row& row, QString& value)
 {

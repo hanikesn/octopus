@@ -2,7 +2,6 @@
 #define SELECTION_H
 
 #include <QGraphicsItem>
-#include <QGraphicsScene>
 #include <QPen>
 
 class QMenu;

@@ -6,7 +6,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "gui/presentationarea.h"
-#include "gui/trackscene.h"
 
 #include <QAction>
 #include <QVBoxLayout>
@@ -19,6 +18,7 @@
 #include <exporterfactory.h>
 
 
+class TrackScene;
 class PresentationArea;
 class HorizontalScrollBar;
 

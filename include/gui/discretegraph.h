@@ -1,9 +1,9 @@
 #ifndef DISCRETEGRAPH_H
 #define DISCRETEGRAPH_H
 
-#include "stringseries.h"
 #include "gui/graph.h"
 
+class StringSeries;
 class QCustomPlot;
 class QCPGraph;
 class QCPItemAnchor;

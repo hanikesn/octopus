@@ -4,6 +4,7 @@
 #include <qglobal.h>
 #include <memory>
 #include <vector>
+
 #include "exporter.h"
 
 class QStringList;

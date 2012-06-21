@@ -1,4 +1,5 @@
 #include "gui/interpolatinggraph.h"
+#include "doubleseries.h"
 
 #include "gui/qcustomplot.h"
 

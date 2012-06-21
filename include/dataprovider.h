@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "databaseadapter.h"
+#include "value.h"
 
 #include <EIDescription.h>
 #include <QMap>

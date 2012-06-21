@@ -6,6 +6,7 @@
 #include <sstream>
 #include <QDateTime>
 
+#include "gui/trackscene.h"
 #include "gui/sourcedialog.h"
 #include "dataprovider.h"
 #include "gui/presentationarea.h"

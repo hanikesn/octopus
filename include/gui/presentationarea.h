@@ -2,11 +2,13 @@
 #define PRESENTATIONAREA_H
 
 #include <QObject>
+#include <QSize>
+#include <QRectF>
 
-#include "dataprovider.h"
-#include "presentationitem.h"
 #include "serializable.h"
 
+class PresentationItem;
+class DataProvider;
 class Track;
 class QVBoxLayout;
 class QGraphicsScene;

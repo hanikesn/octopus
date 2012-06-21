@@ -1,6 +1,8 @@
 #ifndef SERIALIZABLE_H
 #define SERIALIZABLE_H
 
+#include <QVariant>
+
 class Serializable
 {
 public:

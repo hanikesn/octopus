@@ -4,6 +4,8 @@
 #include <QGraphicsWidget>
 #include <QScrollBar>
 
+#include "gui/presentationitem.h"
+#include "dataprovider.h"
 #include "gui/cursor.h"
 #include "gui/sourcedialog.h"
 #include "gui/track.h"
