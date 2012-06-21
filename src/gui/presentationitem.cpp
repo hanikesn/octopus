@@ -21,7 +21,6 @@ PresentationItem::PresentationItem(TimeLine *timeLine, TimeManager *timeManager,
     visRect(0, 0, 100, 672),
     offsetLeft(52),    
     createSelection(false),
-    currentTime(0),
     minCoverHeight(672),
     timeMgr(timeManager)
 {
@@ -34,20 +33,18 @@ PresentationItem::PresentationItem(TimeLine *timeLine, TimeManager *timeManager,
     cursor->updateCoverHeight(100);
     cursor->updateMaxHeight(100);
 
-    selectedArea = new Selection(this);
-    selectedArea->setZValue(1.0);
-    selectedArea->setHeight(minCoverHeight);
+    selectedArea = new Selection(timeMgr, this);
 
     boundingRectangle.setWidth(timeLine->size().width());
     boundingRectangle.setHeight(timeLine->size().height());
 
-    connect(selectedArea, SIGNAL(exportTriggered()),    this, SIGNAL(exportTriggered()));
+    connect(selectedArea, SIGNAL(onExport(qint64,qint64)),    this, SIGNAL(onExport(qint64,qint64)));
+    connect(timeMgr, SIGNAL(rangeChanged(qint64,qint64)), selectedArea, SLOT(update()));
 
     connect(timeMgr, SIGNAL(currentTimeChanged(qint64)), cursor, SLOT(setTime(qint64)));
-
     connect(timeMgr, SIGNAL(rangeChanged(qint64,qint64)), cursor, SLOT(update()));
     connect(this, SIGNAL(update(QSize)),                  timeLine, SLOT(onUpdate(QSize)));
-    connect(this, SIGNAL(update(QSize)),                  selectedArea, SLOT(onUpdate(QSize)));
+    connect(this, SIGNAL(update(QSize)),                  selectedArea, SLOT(update()));
 
     connect(this, SIGNAL(offsetChanged(int)),               cursor, SLOT(onOffsetChanged(int)));
     connect(this, SIGNAL(offsetChanged(int)),               timeLine, SLOT(onOffsetChanged(int)));
@@ -133,11 +130,8 @@ void PresentationItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
             (event->pos().x() >= offsetLeft) &&
             (timeMgr->getPlaystate() != TimeManager::PLAYING)) {
         createSelection = true;
-        selectionStart = event->pos().x();
-        int selectionHeight = boundingRectangle.height() > minCoverHeight ?
-                    boundingRectangle.height() : minCoverHeight;
-        selectedArea->setHeight(selectionHeight);
-        selectedArea->setVisible(true);
+        selectedArea->show();
+        selectedArea->setSelectionBegin(timeMgr->convertPosToTime(event->pos().x()));
     }
 }
 
@@ -147,29 +141,12 @@ void PresentationItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
         createSelection = false;
         selectionEnd = event->pos().x() < offsetLeft ? offsetLeft : event->pos().x();
 
-        int width = 0;
-        int begin = 0;
-        if(selectionEnd > selectionStart){
-            width = selectionEnd - selectionStart + 1;
-            begin = selectionStart;
-        }else{
-            width = selectionStart - selectionEnd + 1;
-            begin = selectionEnd;            
-        }
-
-        selectedArea->setWidth(width);        
-        selectedArea->setPos(begin, 0);
-        selectedArea->update(selectedArea->boundingRect());
+        selectedArea->setSelectionEnd(timeMgr->convertPosToTime(selectionEnd));
         cursor->setVisible(false);
-
-        qint64 lowRange = timeMgr->getLowVisRange() +
-                timeMgr->difference(0, begin - offsetLeft);
-        qint64 highRange = lowRange + timeMgr->difference(begin, begin + width);
-        emit selection(lowRange, highRange);
     } else if (event->pos().x() >= offsetLeft) {
-        currentTime = timeMgr->convertPosToTime(event->pos().x()- offsetLeft);
+        qint64 currentTime = timeMgr->convertPosToTime(event->pos().x()- offsetLeft);
         timeMgr->setTime(currentTime);
-        hideSelection();
+        selectedArea->hide();
     }
 }
 
@@ -178,20 +155,7 @@ void PresentationItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
     if((QApplication::keyboardModifiers() != Qt::ShiftModifier)){
         createSelection = false;
     } else if(event->pos().x() >= offsetLeft) {
-        selectionEnd = event->pos().x();
-        int width = 0;
-        int begin = 0;
-        if(selectionEnd > selectionStart){
-            width = selectionEnd - selectionStart + 1;
-            begin = selectionStart;
-        }else{
-            width = selectionStart - selectionEnd + 1;
-            begin = selectionEnd;
-        }
-
-        selectedArea->setWidth(width);
-        selectedArea->update(selectedArea->boundingRect());
-        selectedArea->setPos(begin, 0);
+        selectedArea->setSelectionEnd(timeMgr->convertPosToTime(event->pos().x()));
     }
 }
 
@@ -246,13 +210,6 @@ void PresentationItem::onVerticalScroll(QRectF visibleRectangle)
     timeMgr->updateRange();
 }
 
-void PresentationItem::hideSelection()
-{
-    selectedArea->hide();
-    // others need to know that there is no selection active any more
-    emit selection(-1, -1);
-}
-
 int PresentationItem::getRightBorder()
 {
     if (parent->views().at(0)->verticalScrollBar()->isVisible()) { // there is a scrollbar
@@ -262,17 +219,6 @@ int PresentationItem::getRightBorder()
     }
     else
         return boundingRectangle.width() - 3;
-}
-
-void PresentationItem::save(QVariantMap *qvm)
-{
-    qvm->insert("cursorPos", cursor->getTime());
-}
-
-void PresentationItem::load(QVariantMap *qvm)
-{    
-    // TODO über timemgr?
-    cursor->setTime(qvm->find("cursorPos").value().toLongLong());
 }
 
 bool PresentationItem::isVisible(Track *t)

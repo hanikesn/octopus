@@ -13,7 +13,8 @@ class TimeManager : public QObject, public Serializable
 {
     Q_OBJECT
 public:
-    TimeManager(QScrollBar *hScrollBar);
+    TimeManager(QScrollBar *hScrollBar, QObject* parent);
+
     ~TimeManager();
 
     qint64 getLowVisRange() {return lowVisRange;}

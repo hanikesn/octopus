@@ -6,7 +6,8 @@
 #include <QScrollBar>
 #include <QTimer>
 
-TimeManager::TimeManager(QScrollBar *hScrollBar):
+TimeManager::TimeManager(QScrollBar *hScrollBar, QObject* parent):
+    QObject(parent),
     lowVisRange(0),
     highVisRange(0),
     timePerPx(40000),
@@ -87,6 +88,10 @@ void TimeManager::load(QVariantMap *qvm)
     hScrollBar->blockSignals(true);
     hScrollBar->setValue(lowVisRange/1000000);
     hScrollBar->blockSignals(false);
+
+
+    currentTime =  qvm->find("cursorPos").value().toLongLong();
+    emit currentTimeChanged(currentTime);
 }
 
 void TimeManager::save(QVariantMap *qvm)
@@ -95,6 +100,7 @@ void TimeManager::save(QVariantMap *qvm)
     visibleArea.insert("low", lowVisRange);
     visibleArea.insert("high", highVisRange);
     qvm->insert("visibleArea", visibleArea);
+    qvm->insert("cursorPos", currentTime);
 }
 
 qint64 TimeManager::difference(int pos1, int pos2)
