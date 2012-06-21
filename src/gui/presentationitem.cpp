@@ -21,7 +21,6 @@ PresentationItem::PresentationItem(TimeLine *timeLine, TimeManager *timeManager,
     visRect(0, 0, 100, 672),
     offsetLeft(52),    
     createSelection(false),
-    currentTime(0),
     minCoverHeight(672),
     timeMgr(timeManager)
 {
@@ -144,7 +143,7 @@ void PresentationItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
         selectedArea->setSelectionEnd(timeMgr->convertPosToTime(selectionEnd));
         cursor->setVisible(false);
     } else if (event->pos().x() >= offsetLeft) {
-        currentTime = timeMgr->convertPosToTime(event->pos().x()- offsetLeft);
+        qint64 currentTime = timeMgr->convertPosToTime(event->pos().x()- offsetLeft);
         timeMgr->setTime(currentTime);
         selectedArea->hide();
     }

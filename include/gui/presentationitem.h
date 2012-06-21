@@ -125,9 +125,6 @@ private:
     bool createSelection;
     int selectionStart, selectionEnd;
 
-    // currentTime is the point of time, which is represented by the cursor.
-    qint64 currentTime;
-
     // minmal height to cover the full presentationArea
     int minCoverHeight;
 
