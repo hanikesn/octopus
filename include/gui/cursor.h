@@ -2,18 +2,19 @@
 #define CURSOR_H
 
 #include <QGraphicsWidget>
+#include <QWidget>
 #include <QPen>
 
 
 class TimeManager;
 class PresentationItem;
 
-class Cursor : public QGraphicsWidget
+class Cursor : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit Cursor(TimeManager *timeManager, QGraphicsItem *parent);
+    explicit Cursor(TimeManager *timeManager, QWidget *parent);
     ~Cursor();
 
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);

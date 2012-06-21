@@ -5,12 +5,11 @@
 #include <QMessageBox>
 #include <sstream>
 #include <QDateTime>
+//#include <QKeySequence>
 
-#include "gui/trackscene.h"
 #include "gui/sourcedialog.h"
 #include "dataprovider.h"
 #include "gui/presentationarea.h"
-#include "gui/mainview.h"
 #include "serializer.h"
 #include "parser.h"
 #include "CVSExporter.h"
@@ -21,8 +20,7 @@ const QString MainWindow::TITLE = "Octopus 0.1";
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     pa(0),
-    dataProvider(0),
-    trackScene(0)
+    dataProvider(0)
 {    
     ui.setupUi(this);
 
@@ -37,11 +35,8 @@ MainWindow::MainWindow(QWidget *parent) :
     quitAction = new QAction(tr("&Quit"), this);
     quitAction->setShortcut(QKeySequence(QKeySequence::Quit));
 
-    ui.mainView->setAlignment(Qt::AlignTop | Qt::AlignLeft);
-    ui.mainView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
-    ui.mainView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    connect(ui.mainView, SIGNAL(resized(QSize)), this, SIGNAL(changedViewSize(QSize)));
-    connect(ui.mainView, SIGNAL(verticalScroll()), this, SLOT(onVerticalScroll()));
+    //connect(ui.mainView, SIGNAL(resized(QSize)), this, SIGNAL(changedViewSize(QSize)));
+    //connect(ui.mainView, SIGNAL(verticalScroll()), this, SLOT(onVerticalScroll()));
 
     connect(saveAction, SIGNAL(triggered()), this, SLOT(onSave()));
     connect(saveAsAction, SIGNAL(triggered()), this, SLOT(onSaveAs()));
@@ -108,7 +103,8 @@ void MainWindow::setUpButtonBars()
 
 void MainWindow::onVerticalScroll()
 {    
-    emit verticalScroll(ui.mainView->mapToScene(ui.mainView->viewport()->geometry()).boundingRect());
+    // TODO REF
+    //emit verticalScroll(ui.mainView->mapToScene(ui.mainView->viewport()->geometry()).boundingRect());
 }
 
 void MainWindow::onExportRange(qint64 begin, qint64 end)
@@ -252,18 +248,11 @@ void MainWindow::setTitle(QString pName)
 
 void MainWindow::setUpView()
 {
-    if (trackScene)
-        trackScene->deleteLater();
     if (pa)
         pa->deleteLater();
 
-    trackScene = new TrackScene(this);
-
-    pa = new PresentationArea(trackScene, *dataProvider, ui.hScrollBar, this);
-    ui.mainView->setScene(trackScene);
-
-    // set new PA to current viewsize
-    pa->onChangedViewSize(ui.mainView->size());
+    pa = new PresentationArea(*dataProvider, ui.hScrollBar, this);
+    ui.verticalLayout_2->insertWidget(0, pa);
 
     connect(pa, SIGNAL(exportRange(qint64,qint64)), this, SLOT(onExportRange(qint64,qint64)));
     connect(this, SIGNAL(verticalScroll(QRectF)), pa, SIGNAL(verticalScroll(QRectF)));

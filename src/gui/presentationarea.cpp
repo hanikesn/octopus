@@ -12,16 +12,18 @@
 #include "gui/timeline.h"
 #include "timemanager.h"
 
-PresentationArea::PresentationArea(QGraphicsScene *scene, const DataProvider &dataProvider,
-                                   QScrollBar *hScrollBar, QObject *parent):
-    QObject(parent),
+PresentationArea::PresentationArea(const DataProvider &dataProvider,
+                                   QScrollBar *hScrollBar, QWidget *parent):
+    QScrollArea(parent),
     dataProvider(dataProvider),
     currentViewSize(949, 1),
     unsavedChanges(false)
 {
+    setLayout(new QVBoxLayout());
+
     timeLine = new TimeLine(52, 0, 0);
     timeManager = new TimeManager(hScrollBar, timeLine, this);
-    pi = new PresentationItem(timeLine, timeManager, scene);
+    pi = new PresentationItem(timeLine, timeManager, parent);
 
 
     connect(this, SIGNAL(changedViewSize(QSize)),   pi, SLOT(onChangedViewSize(QSize)));
@@ -71,6 +73,8 @@ Track* PresentationArea::add(const QList<QString>& fullDataSeriesNames)
 
     tracks.append(t);
     updatePlotMargins();
+
+    layout()->addWidget(t);
 
     pi->addTrack(t);
     t->resize(currentViewSize.width(), t->size().height());

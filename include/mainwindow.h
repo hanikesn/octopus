@@ -78,8 +78,6 @@ private:
 
     Ui::MainWindow ui;
 
-    TrackScene *trackScene;
-
     HorizontalScrollBar *hScrollBar;
 
     QString projectPath;

@@ -13,9 +13,8 @@
 #include "timemanager.h"
 
 PresentationItem::PresentationItem(TimeLine *timeLine, TimeManager *timeManager,
-                                   QGraphicsScene *parent) :
-    QGraphicsItem(0, parent),
-    parent(parent),    
+                                   QWidget *parent) :
+    QWidget(parent),
     timeLine(timeLine),
     boundingRectangle(0, 0, 0, 0),
     visRect(0, 0, 100, 672),
@@ -24,9 +23,6 @@ PresentationItem::PresentationItem(TimeLine *timeLine, TimeManager *timeManager,
     minCoverHeight(672),
     timeMgr(timeManager)
 {
-    timeLine->setParentItem(this);
-    timeLine->setZValue(0.9);
-
     cursor = new Cursor(timeManager, this);
 
     // TODO hardcoded weg
@@ -77,11 +73,7 @@ void PresentationItem::addTrack(Track *t)
     if(t->size().width() > boundingRectangle.width())
         boundingRectangle.setWidth(t->size().width());
 
-    QGraphicsProxyWidget *trackToAdd = parent->addWidget(t);
-    trackToAdd->setParentItem(this);
-    tracks.append(trackToAdd);
-
-    parent->setSceneRect(boundingRectangle);
+    tracks.append(t);
 
     recalcPositions();
 }
@@ -89,17 +81,11 @@ void PresentationItem::addTrack(Track *t)
 void PresentationItem::removeTrack(Track *t)
 {
     boundingRectangle.setHeight(boundingRectangle.height() - t->size().height());
-    parent->setSceneRect(boundingRectangle);
+    //parent->setSceneRect(boundingRectangle);
 
-    QGraphicsProxyWidget *del;
-    foreach (del, tracks){
-        if(del->widget() == t){     
-            tracks.removeAll(del);            
-            parent->removeItem(del);
-            // We should quit the loop, because we have modified the list
-            break;
-        }
-    }    
+    tracks.removeAll(t);
+    layout()->removeWidget(t);
+
     recalcPositions();
 }
 
@@ -112,14 +98,14 @@ void PresentationItem::setOffsetLeft(int offset)
 
 void PresentationItem::recalcPositions()
 {
-    int yPos = timeLine->size().height() + 5; // + 5 for border
+    /*int yPos = timeLine->size().height() + 5; // + 5 for border
     foreach(QGraphicsProxyWidget *proxyTrack, tracks){
         proxyTrack->setPos(0, yPos);
         yPos += proxyTrack->widget()->height();
     }
 
     cursor->updateCoverHeight(getMinCoverHeight());
-    emit update(QSize(visRect.width(), visRect.height()));
+    emit update(QSize(visRect.width(), visRect.height()));*/
 }
 
 void PresentationItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
@@ -166,7 +152,7 @@ void PresentationItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
 
 void PresentationItem::recalcBoundingRec()
 {
-    // If there are no tracks height/width are the size of the timeLine
+    /*// If there are no tracks height/width are the size of the timeLine
     if(tracks.isEmpty()){
         boundingRectangle.setHeight(minCoverHeight);
         boundingRectangle.setWidth(visRect.width());
@@ -186,7 +172,7 @@ void PresentationItem::recalcBoundingRec()
 
     boundingRectangle.setHeight(height);
     boundingRectangle.setWidth(width);
-    parent->setSceneRect(boundingRectangle);
+    parent->setSceneRect(boundingRectangle);*/
 }
 
 void PresentationItem::onChangedViewSize(QSize size)
@@ -211,18 +197,20 @@ void PresentationItem::onVerticalScroll(QRectF visibleRectangle)
 
 int PresentationItem::getRightBorder()
 {
-    if (parent->views().at(0)->verticalScrollBar()->isVisible()) { // there is a scrollbar
+    /*if (parent->views().at(0)->verticalScrollBar()->isVisible()) { // there is a scrollbar
         // subtract size of scrollbar
         return boundingRectangle.width() -
                 parent->views().at(0)->verticalScrollBar()->size().width() - 6;
     }
     else
-        return boundingRectangle.width() - 3;
+        return boundingRectangle.width() - 3;*/
+    return 0;
 }
 
 bool PresentationItem::isVisible(Track *t)
 {
-    int minYPos = visRect.y();
+    return true;
+    /*int minYPos = visRect.y();
     int maxYPos = visRect.y() + minCoverHeight;
     int trackMinY = 0;
     int trackMaxY = 0;
@@ -239,5 +227,5 @@ bool PresentationItem::isVisible(Track *t)
                 return false;
         }
     }
-    return false; // return false in case there are no tracks or the specified track couldn't be found
+    return false; // return false in case there are no tracks or the specified track couldn't be found*/
 }

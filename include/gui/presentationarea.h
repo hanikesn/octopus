@@ -1,9 +1,10 @@
 #ifndef PRESENTATIONAREA_H
 #define PRESENTATIONAREA_H
 
-#include <QObject>
+#include <QWidget>
 #include <QSize>
 #include <QRectF>
+#include <QScrollArea>
 
 #include "serializable.h"
 
@@ -18,12 +19,12 @@ class QScrollBar;
 class TimeLine;
 class TimeManager;
 
-class PresentationArea : public QObject, public Serializable
+class PresentationArea : public QScrollArea, public Serializable
 {
     Q_OBJECT
 public:
-    explicit PresentationArea(QGraphicsScene *scene, const DataProvider &dataProvider,
-                              QScrollBar *hScrollBar, QObject *parent = 0);
+    explicit PresentationArea(const DataProvider &dataProvider,
+                              QScrollBar *hScrollBar, QWidget *parent = 0);
     ~PresentationArea();
 
     void save(QVariantMap *qvm);

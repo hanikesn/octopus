@@ -2,6 +2,7 @@
 #define PRESENTATIONITEM_H
 
 #include <QGraphicsItem>
+#include <QWidget>
 #include <QList>
 
 #include "serializable.h"
@@ -15,12 +16,12 @@ class TimeLine;
 class QScrollBar;
 class TimeManager;
 
-class PresentationItem : public QObject, public QGraphicsItem
+class PresentationItem : public QWidget
 {
     Q_OBJECT
 public:
     explicit PresentationItem(TimeLine *timeLine, TimeManager *timeManager,
-                              QGraphicsScene *parent = 0);
+                              QWidget *parent = 0);
     ~PresentationItem();
 
     QRectF boundingRect() const;
@@ -112,8 +113,7 @@ signals:
     void updateVisibleSize(QSize size);
 
 private:
-    QGraphicsScene *parent;
-    QList<QGraphicsProxyWidget*> tracks;    
+    QList<Track*> tracks;
 
     TimeLine *timeLine;
     Cursor *cursor;

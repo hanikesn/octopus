@@ -12,8 +12,8 @@
 
 #include <QDebug>
 
-Selection::Selection(TimeManager* timeManager, PresentationItem *parent) :
-    QGraphicsItem(parent),
+Selection::Selection(TimeManager* timeManager, QWidget *parent):
+    QWidget(parent),
     begin(0),
     end(0),
     visible(true),
@@ -31,14 +31,10 @@ Selection::Selection(TimeManager* timeManager, PresentationItem *parent) :
     setObjectName("Selection");
 
     hide();
-
-    setZValue(1.0);
 }
 
 void Selection::update()
 {
-    prepareGeometryChange();
-
     qint64 begin_ = begin;
     qint64 end_ = end;
 
@@ -49,7 +45,7 @@ void Selection::update()
     int right = timeManager->convertTimeToPos(end_);
 
     width = right - left;
-    setPos(left, 0.0);
+    //setPos(left, 0.0);
 }
 
 

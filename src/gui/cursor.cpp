@@ -8,8 +8,8 @@
 
 #include <QDebug>
 
-Cursor::Cursor(TimeManager *timeManager, QGraphicsItem *parent) :
-    QGraphicsWidget(parent),
+Cursor::Cursor(TimeManager *timeManager, QWidget *parent) :
+    QWidget(parent),
     pen(Qt::red),
     brush(Qt::red),
     offsetLeft(0),
@@ -19,7 +19,6 @@ Cursor::Cursor(TimeManager *timeManager, QGraphicsItem *parent) :
     maxHeight(0)
 
 {
-    setZValue(1.0);
     update();
 }
 
@@ -66,7 +65,9 @@ void Cursor::update()
         setVisible(false);
     else
         setVisible(true);
-    setPos(newPos + offsetLeft, 0);
+
+    // TODO REF
+    //setPos(newPos + offsetLeft, 0);
 }
 
 qint64 Cursor::getTime()

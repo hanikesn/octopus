@@ -3,17 +3,18 @@
 
 #include <QGraphicsItem>
 #include <QPen>
+#include <QWidget>
 
 class QMenu;
 class QAction;
 class PresentationItem;
 class TimeManager;
 
-class Selection : public QObject, public QGraphicsItem
+class Selection : public QWidget
 {
     Q_OBJECT
 public:
-    explicit Selection(TimeManager *timeManager, PresentationItem *parent);
+    explicit Selection(TimeManager *timeManager, QWidget *parent);
     ~Selection();
 
     QRectF boundingRect() const;
