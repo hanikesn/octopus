@@ -22,7 +22,7 @@ PresentationArea::PresentationArea(QGraphicsScene *scene, const DataProvider &da
     unsavedChanges(false)
 {
     timeLine = new TimeLine(52, 0, 0);
-    timeManager = new TimeManager(hScrollBar, timeLine);
+    timeManager = new TimeManager(hScrollBar, timeLine, this);
     pi = new PresentationItem(timeLine, timeManager, scene);
 
 
@@ -42,8 +42,6 @@ PresentationArea::PresentationArea(QGraphicsScene *scene, const DataProvider &da
 
 PresentationArea::~PresentationArea()
 {
-    // Tracks werden über pi gelöscht, das über die TrackScene gelöscht wird.
-    timeManager->deleteLater();
 }
 
 void PresentationArea::addTrack(const QList<QString> &fullDataSeriesNames)

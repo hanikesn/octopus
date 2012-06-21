@@ -6,7 +6,8 @@
 #include <QScrollBar>
 #include <QTimer>
 
-TimeManager::TimeManager(QScrollBar *hScrollBar, TimeLine *timeLine):
+TimeManager::TimeManager(QScrollBar *hScrollBar, TimeLine *timeLine, QObject* parent):
+    QObject(parent),
     lowVisRange(0),
     highVisRange(0),
     timePerPx(40000),
