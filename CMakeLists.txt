@@ -46,11 +46,13 @@ set(Octopus_SOURCES
   src/databaseadapter.cpp
   src/dataprovider.cpp
   src/doubleseries.cpp
+  src/plotsettings.cpp
   src/exporterfactory.cpp
   src/gui/cursor.cpp
   src/gui/discretegraph.cpp
   src/gui/interpolatinggraph.cpp
   src/gui/mainview.cpp
+  src/gui/plotsettingsdialog.cpp
   src/gui/presentationarea.cpp
   src/gui/presentationitem.cpp
   src/gui/qcustomplot.cpp
@@ -78,11 +80,13 @@ set(Octopus_HEADERS
   include/databaseadapter.h
   include/dataprovider.h
   include/doubleseries.h
+  include/plotsettings.h
   include/gui/cursor.h
   include/gui/discretegraph.h
   include/gui/graph.h
   include/gui/interpolatinggraph.h
   include/gui/mainview.h
+  include/gui/plotsettingsdialog.h
   include/gui/presentationarea.h
   include/gui/presentationitem.h
   include/gui/qcustomplot.h
@@ -105,6 +109,7 @@ set(Octopus_HEADERS
 
 set(Octopus_FORMS
   ui/mainwindow.ui
+  ui/plotsettingsdialog.ui
   ui/sourcedialog.ui
   ui/track.ui
   ui/startscreen.ui
