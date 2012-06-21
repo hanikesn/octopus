@@ -46,10 +46,13 @@ PresentationItem::PresentationItem(TimeLine *timeLine, TimeManager *timeManager,
     connect(this, SIGNAL(update(QSize)),                  timeLine, SLOT(onUpdate(QSize)));
     connect(this, SIGNAL(update(QSize)),                  selectedArea, SLOT(update()));
 
+    connect(this, SIGNAL(offsetChanged(int)),               cursor, SLOT(onOffsetChanged(int)));
+    connect(this, SIGNAL(offsetChanged(int)),               timeLine, SLOT(onOffsetChanged(int)));
+    connect(this, SIGNAL(offsetChanged(int)),               this, SLOT(onOffsetChanged(int)));
+
     recalcBoundingRec();
     recalcPositions();
-
-    setOffsetLeft(52);
+    emit offsetChanged(52);
 }
 
 PresentationItem::~PresentationItem()
@@ -103,10 +106,8 @@ void PresentationItem::removeTrack(Track *t)
     recalcPositions();
 }
 
-void PresentationItem::setOffsetLeft(int offset)
-{    
-    timeLine->setOffset(offset);
-    cursor->updateOffset(offset);
+void PresentationItem::onOffsetChanged(int offset)
+{
     offsetLeft = offset;
 }
 

@@ -40,7 +40,7 @@ void Cursor::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QW
     painter->drawRect(frame);
 }
 
-void Cursor::updateOffset(int offset)
+void Cursor::onOffsetChanged(int offset)
 {
     offsetLeft = offset;
     update();

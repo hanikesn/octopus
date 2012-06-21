@@ -40,6 +40,8 @@ private slots:
     void onNew();
     void onVerticalScroll();
     void onExportRange(qint64 begin, qint64 end);
+    void onRecord();
+    void onSaveProject(qint64 start, qint64 end);
 
 private:
     QVBoxLayout *trackLayout;
@@ -54,6 +56,8 @@ private:
     QPushButton zoomOutButton;
     QPushButton playButton;    
     QIcon playButtonIcon;
+    QPushButton recButton;
+    QIcon recButtonIcon;
 
     // Spacer item to center the play button (in the bottomButtonBar)
     QSpacerItem *spacerLeft;

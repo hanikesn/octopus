@@ -17,18 +17,26 @@ public:
 
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
 
-    QRectF boundingRect() const;
-
-    void drawFrom(qint64 time);
-    void setOffset(int offset);
+    QRectF boundingRect() const;    
 
     qint64 getUpperEnd(qint64 lowerEnd);
 
-    void setStepSize(qint64 microSeconds);
     qint64 getStepSize() {return largeTickAmount;}
 
 public slots:
     void onUpdate(QSize size);
+
+    void onOffsetChanged(int offset);
+
+    void onStepSizeChanged(qint64 microSeconds);
+
+    void onRangeChanged(qint64 begin, qint64 end);
+
+signals:
+    void newUpperEnd(qint64);
+
+protected:
+    void resizeEvent(QGraphicsSceneResizeEvent *event);
 
 private:
     int offset;
