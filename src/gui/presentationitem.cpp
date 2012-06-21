@@ -263,17 +263,6 @@ int PresentationItem::getRightBorder()
         return boundingRectangle.width() - 3;
 }
 
-void PresentationItem::save(QVariantMap *qvm)
-{
-    qvm->insert("cursorPos", cursor->getTime());
-}
-
-void PresentationItem::load(QVariantMap *qvm)
-{    
-    // TODO über timemgr?
-    cursor->setTime(qvm->find("cursorPos").value().toLongLong());
-}
-
 bool PresentationItem::isVisible(Track *t)
 {
     int minYPos = visRect.y();

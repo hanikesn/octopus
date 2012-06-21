@@ -15,7 +15,7 @@ class TimeLine;
 class QScrollBar;
 class TimeManager;
 
-class PresentationItem : public QObject, public QGraphicsItem, public Serializable
+class PresentationItem : public QObject, public QGraphicsItem
 {
     Q_OBJECT
 public:
@@ -73,11 +73,7 @@ public:
       * As we have no interaction for the double click, this function does nothing.
       * @param event The mouseDoubleClickEvent to be processed.
       */
-    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event);    
-
-    void save(QVariantMap *qvm);
-
-    void load(QVariantMap *qvm);
+    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event);
 
     /**
       * Determines whether the specified track is currently visible.

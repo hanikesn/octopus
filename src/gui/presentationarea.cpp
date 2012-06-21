@@ -156,7 +156,6 @@ void PresentationArea::onSelection(qint64 begin, qint64 end)
 
 void PresentationArea::save(QVariantMap *qvm)
 {
-    pi->save(qvm);
     timeManager->save(qvm);
     // save tracks in array
     QVariantList trackList;
@@ -184,7 +183,6 @@ void PresentationArea::load(QVariantMap *qvm)
         trackMap.insert("track", track);
         t->load(&trackMap);
     }
-    pi->load(qvm);
     timeManager->load(qvm);
 }
 
