@@ -27,6 +27,8 @@ public:
     void addGraph(const DoubleSeries &s);
     void addGraph(const StringSeries &s);
 
+    void mousePressEvent(QMouseEvent *);
+
     int getPlotOffset();
     void setPlotMarginLeft(int margin);
 

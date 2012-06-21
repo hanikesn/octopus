@@ -18,6 +18,7 @@ PresentationArea::PresentationArea(const DataProvider &dataProvider,
     QScrollArea(parent),
     dataProvider(dataProvider),
     currentViewSize(949, 1),
+    offsetLeft(0),
     unsavedChanges(false)
 {
     setObjectName("PresentationArea");

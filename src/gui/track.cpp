@@ -53,6 +53,8 @@ void Track::init()
 {
     ui.setupUi(this);
 
+    ui.plot->setAttribute(Qt::WA_TransparentForMouseEvents);
+
     setupButtons();
     setupPlot();
 }
@@ -116,6 +118,12 @@ void Track::addGraph(const DoubleSeries &s) {
 
 void Track::addGraph(const StringSeries &s) {
     graphs.append(new DiscreteGraph(ui.plot, s));
+}
+
+void Track::mousePressEvent(QMouseEvent * event)
+{
+    QWidget::mousePressEvent(event);
+    qDebug() << "press" << event->isAccepted();
 }
 
 void Track::onDelete()
