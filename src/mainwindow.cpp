@@ -361,9 +361,7 @@ void MainWindow::onRecord()
 void MainWindow::onSaveProject(qint64 start, qint64 end)
 {
     // initiate save (project file)
-    save(true, start, end);
-
-    //TODO(steffen): initiate save (database with range (start, end)    
+    save(true, start, end);    
 }
 
 bool MainWindow::writeProjectSettings(QVariantMap pName, QString path)
