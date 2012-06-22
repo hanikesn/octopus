@@ -283,46 +283,29 @@ void MainWindow::setUpView()
     connect(&recButton, SIGNAL(clicked()), this, SLOT(onRecord()));
 }
 
-void MainWindow::save(bool saveAs)
+void MainWindow::save(bool saveAs, qint64 begin, qint64 end)
 {
-    QString caption = saveAs ? tr("Save as") : tr("Save");
+    QString fileName = getSaveFileName(saveAs);
+    if (fileName.isEmpty()) return;  // dialog cancelled
 
-    if (projectPath.isEmpty() || saveAs) {
-        QString fileName = QFileDialog::getSaveFileName(this, caption,
-                                                        projectPath, "Octopus (*.oct)");
-        if (fileName.isEmpty()) return;
+    // The db lies in a temporary file. We might need to move it.
+    QString dbname = fileName;
+    dbname.remove(QRegExp(".oct$"));
 
-        if (fileName.endsWith(".oct") == false)
-            fileName += ".oct";
-
-        if(projectPath.isEmpty()) {
-            // The db lies in a temporary file. We need too move it.
-            QString dbname = fileName;
-            dbname.remove(QRegExp(".oct$"));
-            dataProvider->moveDB(dbname + ".db");
-        }
-
+    QVariantMap pName; // Map with the projects settings
+    if ((begin == -1) && (end == -1)) { // save all
         projectPath = fileName;
+        dataProvider->moveDB(dbname + ".db"); // move tmp-database if we save all
+        pName.insert("dbfile", dataProvider->getDBFileName());
 
-        if (!saveAs){
-            setTitle(QFileInfo(fileName).completeBaseName().remove(".oct"));
-        }
+        if (writeProjectSettings(pName, projectPath)) // in case save was successfull ...
+            pa->setUnsavedChanges(false); // ... clear flag in PresentationArea
+    } else { // save range
+        QString subProjectPath = fileName;
+        // TODO(steffen): dataProvider->movePartDB(dbname  + ".db", begin, end)    oder so ähnlich
+        pName.insert("dbfile", dbname);
+        writeProjectSettings(pName, subProjectPath);
     }
-    QVariantMap pName;
-    pName.insert("dbfile", dataProvider->getDBFileName());
-    pa->save(&pName);
-
-    QJson::Serializer serializer;
-    serializer.setIndentMode(QJson::IndentFull);
-    QByteArray json = serializer.serialize(pName);
-
-    // open/create the file
-    QFile file(projectPath);
-    file.open(QIODevice::WriteOnly);
-    if(file.write(json) == -1)
-        qDebug() << "Could not write config file!";
-
-    pa->setUnsavedChanges(false);
 }
 
 int MainWindow::checkForUnsavedChanges()
@@ -344,6 +327,24 @@ int MainWindow::checkForUnsavedChanges()
     return result;
 }
 
+QString MainWindow::getSaveFileName(bool saveAs)
+{
+    QString caption = saveAs ? tr("Save as") : tr("Save");
+
+    if (projectPath.isEmpty() || saveAs) { // determine new filename
+        QString fileName = QFileDialog::getSaveFileName(this, caption,
+                                                        projectPath, "Octopus (*.oct)");
+        if (fileName.isEmpty()) return fileName;
+
+        if (fileName.endsWith(".oct") == false)
+            fileName += ".oct";
+        if (!saveAs)
+            setTitle(QFileInfo(fileName).completeBaseName().remove(".oct"));
+        return fileName;
+    } else
+        return projectPath;
+}
+
 void MainWindow::closeEvent(QCloseEvent *ce)
 {
     //TODO(domi): Kommentare wegmachen:
@@ -354,8 +355,7 @@ void MainWindow::closeEvent(QCloseEvent *ce)
 }
 
 void MainWindow::onRecord()
-{
-    // change buttons according to pa.isrecording
+{    
     if (pa->isRecording())
         recButton.setChecked(true);
     else
@@ -366,5 +366,28 @@ void MainWindow::onSaveProject(qint64 start, qint64 end)
 {
     qDebug() << Q_FUNC_INFO << start << "|" << end;
 
+    // initiate save (project file)
+    save(true, start, end);
+
+    //TODO(steffen): initiate save (database with range (start, end)
+
     //TODO(domi): Projekt speichern, in die DB nur Bereich aufnehmen
+}
+
+bool MainWindow::writeProjectSettings(QVariantMap pName, QString path)
+{
+    pa->save(&pName);
+
+    QJson::Serializer serializer;
+    serializer.setIndentMode(QJson::IndentFull);
+    QByteArray json = serializer.serialize(pName);
+
+    // open/create the file
+    QFile file(path);
+    file.open(QIODevice::WriteOnly);
+    if(file.write(json) == -1) {
+        qDebug() << "Could not write config file!";
+        return false;
+    }
+    return true;
 }

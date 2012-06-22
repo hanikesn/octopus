@@ -41,6 +41,11 @@ private slots:
     void onVerticalScroll();
     void onExportRange(qint64 begin, qint64 end);
     void onRecord();
+    /**
+      * This saves the recorded data into a new project (project file and new database is created).
+      * @param start Timestamp for the begin of the recorded data.
+      * @param end Timestamp for the end of the recorded data.
+      */
     void onSaveProject(qint64 start, qint64 end);
 
 private:
@@ -102,14 +107,22 @@ private:
 
     /**
       * Saves the current projects configuration (position of cursor, view range...).
+      * If begin and end are != -1 a new databse will be generated with the data in the range (begin, end).
+      * To save all recorded data, leave begin and end with their default values.
       * @param saveAs If this flag is set to true, the user will be asked for a new projectName
       *               'save as'-semantics.
       *               If this flag is false the user will be asked for a projectName only if this
       *               project hasn't been saved before.
+      * @param begin Timestamp for the begin of the recorded data.
+      * @param end Timestamp for the end of the recorded data.
       */
-    void save(bool saveAs);
+    void save(bool saveAs, qint64 begin = -1, qint64 end = -1);
 
     int checkForUnsavedChanges();
+
+    QString getSaveFileName(bool saveAs);
+
+    bool writeProjectSettings(QVariantMap pName, QString path);
 
 signals:
     void verticalScroll(QRectF visibleRectangle);
