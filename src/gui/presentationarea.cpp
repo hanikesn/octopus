@@ -145,8 +145,6 @@ PresentationArea::PresentationArea(const DataProvider &dataProvider,
     connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)),this, SLOT(onRangeChanged(qint64,qint64)));
     connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)),timeLine, SLOT(onRangeChanged(qint64,qint64)));
 
-    connect(timeManager, SIGNAL(stepSizeChanged(qint64)), timeLine, SLOT(onStepSizeChanged(qint64)));
-
     connect(&dataProvider, SIGNAL(newMax(qint64)), timeManager, SLOT(onNewMax(qint64)));
 
     timeManager->onOffsetChanged(50);

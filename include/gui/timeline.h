@@ -15,17 +15,19 @@ class TimeLine : public QWidget
 public:    
     explicit TimeLine(TimeManager& timeManager, QWidget *parent);
 
-    void paintEvent(QPaintEvent *);
-
     qint64 getStepSize() {return largeTickAmount;}
 
 public slots:
-    void onStepSizeChanged(qint64 microSeconds);
-
     void onRangeChanged(qint64 begin, qint64 end);
 
     void updateWidth(int w);
+
+protected:
+    void paintEvent(QPaintEvent *);
+
 private:
+    void onStepSizeChanged(qint64 microSeconds);
+
     TimeManager& timeManager;
 
     qint64 beginRange;

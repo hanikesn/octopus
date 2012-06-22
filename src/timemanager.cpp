@@ -31,7 +31,6 @@ TimeManager::TimeManager(QScrollBar *hScrollBar, QObject* parent):
 
     connect(hScrollBar, SIGNAL(sliderMoved(int)),       this, SLOT(horizontalScroll(int)));
     connect(hScrollBar, SIGNAL(valueChanged(int)),      this, SLOT(horizontalScroll(int)));
-    connect(this, SIGNAL(stepSizeChanged(qint64)),      this, SLOT(onStepSizeChanged(qint64)));
 }
 
 qint64 TimeManager::convertPosToTime(int pos)
@@ -104,21 +103,6 @@ void TimeManager::center(qint64 timestamp)
     hScrollBar->blockSignals(false);
 }
 
-void TimeManager::changeTimeStep(int milliSeconds)
-{
-    qint64 microSeconds = milliSeconds * 1000;
-    emit stepSizeChanged(microSeconds);
-    timePerPx = microSeconds / 50;
-    // TODO on rangeChanged
-
-    emit rangeChanged(lowVisRange, highVisRange);
-}
-
-void TimeManager::onStepSizeChanged(qint64 size)
-{
-    stepSize = size;
-}
-
 void TimeManager::setTime(qint64 time)
 {
     currentTime = time;
@@ -166,22 +150,19 @@ void TimeManager::onZoomIn()
 {
     qint64 newStepSize = stepSize - getZoomFactor(false);
     if (newStepSize <= 0) return;
+    stepSize = newStepSize;
 
-    // inform timeLine about new stepSize
-    emit stepSizeChanged(newStepSize);
-    timePerPx = newStepSize / 50;
+    timePerPx = stepSize / 50;
     // initiate redraw according to new range
-    emit rangeChanged(lowVisRange, highVisRange);
+    onNewWidth(width);
 }
 
 void TimeManager::onZoomOut()
 {
-    qint64 newStepSize = stepSize + getZoomFactor(true);
-    // inform timeLine about new stepSize
-    emit stepSizeChanged(newStepSize);
-    timePerPx = newStepSize / 50;
+    stepSize += getZoomFactor(true);
+    timePerPx = stepSize / 50;
     // initiate redraw according to new range
-    emit rangeChanged(lowVisRange, highVisRange);
+    onNewWidth(width);
 }
 
 void TimeManager::horizontalScroll(int pos)

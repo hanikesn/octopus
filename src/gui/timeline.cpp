@@ -110,6 +110,7 @@ void TimeLine::onRangeChanged(qint64 begin, qint64 end)
 {
     Q_UNUSED(end)
     beginRange = begin;
+    onStepSizeChanged(timeManager.getStepSize());
     update();
 }
 

@@ -49,20 +49,18 @@ public:
 
     void center(qint64 timestamp);
 
-    void changeTimeStep(int milliSeconds);
-
     enum Playstate {PLAYING, PAUSED};
 
     Playstate getPlaystate() {return playstate;}
 
     int getOffset() {return offsetLeft;}
 
+    int getStepSize() {return stepSize;}
+
 signals:
     void rangeChanged(qint64 begin, qint64 end);
 
     void currentTimeChanged(qint64 time);
-
-    void stepSizeChanged(qint64 microSeconds);
 
 public slots:
     void onNewMax(qint64 timestamp);
@@ -81,8 +79,6 @@ private slots:
     void onTimeout();
 
     void horizontalScroll(int pos);
-
-    void onStepSizeChanged(qint64 size);
 
 private:
     // low and high limit of the visible range
