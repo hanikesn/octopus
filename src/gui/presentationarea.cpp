@@ -21,8 +21,7 @@ public:
         : timeManager(timeManager),
           selection(selection),
           cursor(cursor),
-          createSelection(false),
-          offsetLeft(0)
+          createSelection(false)
     {}
 
     /**
@@ -33,7 +32,7 @@ public:
     {
         if ((event->button() == Qt::LeftButton) &&
                 (event->modifiers() == Qt::ShiftModifier) &&
-                (event->pos().x() >= offsetLeft) &&
+                (event->pos().x() >= timeManager.getOffset()) &&
                 (timeManager.getPlaystate() != TimeManager::PLAYING)) {
             createSelection = true;
             selection.show();
@@ -52,12 +51,12 @@ public:
     {
         if(createSelection){
             createSelection = false;
-            int selectionEnd = event->pos().x() < offsetLeft ? offsetLeft : event->pos().x();
+            int selectionEnd = qMax(event->pos().x(), timeManager.getOffset());
 
             selection.setSelectionEnd(timeManager.convertPosToTime(selectionEnd));
             cursor.setVisible(false);
-        } else if (event->pos().x() >= offsetLeft) {
-            qint64 currentTime = timeManager.convertPosToTime(event->pos().x()- offsetLeft);
+        } else if (event->pos().x() >= timeManager.getOffset()) {
+            qint64 currentTime = timeManager.convertPosToTime(event->pos().x());
             timeManager.setTime(currentTime);
             selection.hide();
         }
@@ -73,7 +72,7 @@ public:
     {
         if((event->modifiers() != Qt::ShiftModifier)){
             createSelection = false;
-        } else if(event->pos().x() >= offsetLeft) {
+        } else if(event->pos().x() >= timeManager.getOffset()) {
             selection.setSelectionEnd(timeManager.convertPosToTime(event->pos().x()));
         }
     }
@@ -89,25 +88,21 @@ private:
     Cursor& cursor;
 
     bool createSelection;
-    // TODO delete
-    int offsetLeft;
 };
 
 PresentationArea::PresentationArea(const DataProvider &dataProvider,
                                    QScrollBar *hScrollBar, QWidget *parent):
     QScrollArea(parent),
     dataProvider(dataProvider),
-    offsetLeft(0),
     unsavedChanges(false),
     recording(false),
     recordStart(0),
-    recordEnd(0),
-    currentMax(0)
+    recordEnd(0)
 {
     setObjectName("PresentationArea");
 
     timeManager = new TimeManager(hScrollBar, this);
-    timeLine = new TimeLine(52, viewport());
+    timeLine = new TimeLine(*timeManager, viewport());
     selection = new Selection(timeManager, viewport());
     cursor = new Cursor(timeManager, viewport());
 
@@ -143,18 +138,16 @@ PresentationArea::PresentationArea(const DataProvider &dataProvider,
     connect(this, SIGNAL(changedViewHeight(int)), selection, SLOT(updateHeight(int)));
 
     connect(this, SIGNAL(changedViewWidth(int)), timeLine, SLOT(updateWidth(int)));
+    connect(this, SIGNAL(changedViewWidth(int)), timeManager, SLOT(onNewWidth(int)));
 
     connect(selection, SIGNAL(onExport(qint64,qint64)),          this, SIGNAL(exportRange(qint64,qint64)));   
 
     connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)),this, SLOT(onRangeChanged(qint64,qint64)));
     connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)),timeLine, SLOT(onRangeChanged(qint64,qint64)));
 
-    connect(timeManager, SIGNAL(stepSizeChanged(qint64)), timeLine, SLOT(onStepSizeChanged(qint64)));
-
-    connect(timeLine, SIGNAL(newUpperEnd(qint64)), timeManager, SLOT(onNewUpperEnd(qint64)));
-
     connect(&dataProvider, SIGNAL(newMax(qint64)), timeManager, SLOT(onNewMax(qint64)));
-    connect(&dataProvider, SIGNAL(newMax(qint64)), this, SLOT(onNewMax(qint64)));
+
+    timeManager->onOffsetChanged(50);
 }
 
 PresentationArea::~PresentationArea()
@@ -231,14 +224,14 @@ Track* PresentationArea::add(const QList<QString>& fullDataSeriesNames)
     tracks.append(t);
     updatePlotMargins();
 
+    t->setPlotRange(timeManager->getLowVisRange(), timeManager->getHighVisRange());
+
     widget()->layout()->addWidget(t);
 
     // We need to raise them, because otherwise the tracks will be on top
     timeLine->raise();
     selection->raise();
     cursor->raise();
-
-    t->setPlotRange(timeManager->getLowVisRange(), timeManager->getHighVisRange());
 
     unsavedChanges = true;
     return t;
@@ -263,6 +256,9 @@ void PresentationArea::onRangeChanged(qint64 begin, qint64 end)
 
 void PresentationArea::updatePlotMargins()
 {
+    if (tracks.isEmpty())
+        return;
+
     // determine the optimal plot margin over all tracks
     int optMargin = 0;
     foreach (Track *t, tracks) {
@@ -271,23 +267,10 @@ void PresentationArea::updatePlotMargins()
         }
     }
 
-    setPlotMargins(optMargin);
-}
-
-void PresentationArea::onNewMax(qint64 max)
-{
-    currentMax = max;
-}
-
-void PresentationArea::setPlotMargins(int newMargin)
-{
-    /*if (!tracks.isEmpty()) {
-        foreach (Track *t, tracks) {
-            t->setPlotMarginLeft(newMargin);
-        }
-        pi->setOffsetLeft(tracks.first()->getPlotOffset() + newMargin);
-        emit offsetChanged(tracks.first()->getPlotOffset() + newMargin);
-    }*/
+    foreach (Track *t, tracks) {
+        t->setPlotMarginLeft(optMargin);
+    }
+    timeManager->onOffsetChanged(tracks.first()->getPlotOffset() + optMargin);
 }
 
 int PresentationArea::showRecordDialog()
@@ -350,7 +333,7 @@ void PresentationArea::onPlay()
 void PresentationArea::onRecord()
 {
     if (recording) {
-        recordEnd = currentMax;
+        recordEnd = timeManager->getMaximum();
         // end recording, show record dialog
         int result = showRecordDialog();
         if (result == QMessageBox::Save) {
@@ -361,7 +344,7 @@ void PresentationArea::onRecord()
         else if (result == QMessageBox::Ok) // go on with the recording
             recording = true;
     } else {
-        recordStart = currentMax;
+        recordStart = timeManager->getMaximum();
         recording = true;
     }
 

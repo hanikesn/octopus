@@ -14,8 +14,6 @@ class Selection : public QWidget
 public:
     explicit Selection(TimeManager *timeManager, QWidget *parent);
 
-    void paintEvent(QPaintEvent *);
-
     void hide();
     void show();
 
@@ -25,7 +23,7 @@ public slots:
 
     void updateHeight(int h);
 
-    void update();
+    void onUpdate();
 
 signals:
     void onExport(qint64 begin, qint64 end);
@@ -37,6 +35,7 @@ protected slots:
 
 protected:
     void contextMenuEvent(QContextMenuEvent * event);
+    void paintEvent(QPaintEvent *);
 
 private:
 

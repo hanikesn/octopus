@@ -29,7 +29,7 @@ Selection::Selection(TimeManager* timeManager, QWidget *parent):
     hide();
 }
 
-void Selection::update()
+void Selection::onUpdate()
 {
     int left = timeManager->convertTimeToPos(begin);
     int right = timeManager->convertTimeToPos(end);
@@ -64,7 +64,7 @@ void Selection::updateHeight(int h)
 void Selection::show()
 {
     setVisible(true);
-    update();
+    onUpdate();
     emit selectionChanged(begin, end);
 }
 
@@ -74,7 +74,7 @@ void Selection::hide()
 
     setVisible(false);
 
-    update();
+    onUpdate();
 
     emit selectionChanged(-1, -1);
 }
@@ -83,14 +83,14 @@ void Selection::setSelectionBegin(qint64 time)
 {
     begin = time;
     end = time;
-    update();
+    onUpdate();
     emit selectionChanged(begin, end);
 }
 
 void Selection::setSelectionEnd(qint64 time)
 {
     end = time;
-    update();
+    onUpdate();
     emit selectionChanged(begin, end);
 }
 

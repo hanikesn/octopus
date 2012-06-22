@@ -12,7 +12,6 @@ Cursor::Cursor(TimeManager *timeManager, QWidget *parent) :
     QWidget(parent),
     pen(Qt::red),
     brush(Qt::red),
-    offsetLeft(0),
     currentTime(0),
     timeMgr(timeManager)
 
@@ -20,7 +19,7 @@ Cursor::Cursor(TimeManager *timeManager, QWidget *parent) :
     setObjectName("Cursor");
     setAttribute(Qt::WA_TransparentForMouseEvents);
     setFixedWidth(1);
-    update();
+    onUpdate();
 }
 
 void Cursor::paintEvent(QPaintEvent *)
@@ -32,19 +31,13 @@ void Cursor::paintEvent(QPaintEvent *)
     painter.drawRect(QRect(0,0, geometry().width(), geometry().height()));
 }
 
-void Cursor::onOffsetChanged(int offset)
-{
-    offsetLeft = offset;
-    update();
-}
-
 void Cursor::setTime(qint64 time)
 {
     currentTime = time;
-    update();
+    onUpdate();
 }
 
-void Cursor::update()
+void Cursor::onUpdate()
 {
     int newPos = timeMgr->convertTimeToPos(currentTime);
     if(newPos == -1)
@@ -52,7 +45,7 @@ void Cursor::update()
     else
         setVisible(true);
 
-    move(newPos + offsetLeft, 0);
+    move(newPos, 0);
 }
 
 qint64 Cursor::getTime()

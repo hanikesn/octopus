@@ -7,39 +7,33 @@
 
 class QGraphicsItem;
 class PresentationItem;
-
+class TimeManager;
 
 class TimeLine : public QWidget
 {
     Q_OBJECT
 public:    
-    explicit TimeLine(int offset, QWidget *parent);
-
-    void paintEvent(QPaintEvent *);
-
-    qint64 getUpperEnd(qint64 lowerEnd);
+    explicit TimeLine(TimeManager& timeManager, QWidget *parent);
 
     qint64 getStepSize() {return largeTickAmount;}
 
 public slots:
-    void onOffsetChanged(int offset);
-
-    void onStepSizeChanged(qint64 microSeconds);
-
     void onRangeChanged(qint64 begin, qint64 end);
 
     void updateWidth(int w);
 
-signals:
-    void newUpperEnd(qint64);
+protected:
+    void paintEvent(QPaintEvent *);
 
 private:
-    int offset;
+    void onStepSizeChanged(qint64 microSeconds);
+
+    TimeManager& timeManager;
+
     qint64 beginRange;
 
     // stuff to draw ticks:
     double value;
-    qint64 rangeOffset;
     int currentPos;
     int bottom;
     int textBoxWidth;
