@@ -2,6 +2,7 @@
 
 #include <QPainter>
 #include <QPen>
+#include "measure.h"
 
 #include <QDebug>
 
@@ -28,8 +29,8 @@ TimeLine::TimeLine(int offset, QWidget * parent):
 
 void TimeLine::paintEvent(QPaintEvent *)
 {
+    MEASURE("TIMELINE");
     QPainter painter(this);
-    painter.setClipRect(boundingRect());
 
     QRectF frame(QPointF(0,0), geometry().size());
     QGradientStops stops;
@@ -51,11 +52,6 @@ void TimeLine::paintEvent(QPaintEvent *)
     QRect rect = QRect(5, geometry().height() - 15, 50, 15);
     QString text = timeRepresentation == MILLISECOND ? "ms" : "sec";
     painter.drawText(rect, text);
-}
-
-QRectF TimeLine::boundingRect() const
-{
-    return QRectF(0, 0, geometry().width(), geometry().height());
 }
 
 void TimeLine::drawTicks(QPainter *painter)
@@ -123,12 +119,6 @@ void TimeLine::onOffsetChanged(int offset)
     //update(boundingRect());
 }
 
-void TimeLine::resizeEvent(QGraphicsSceneResizeEvent *event)
-{
-    qint64 max = beginRange + ((geometry().width()-offset)*timePerPx);
-    emit newUpperEnd(max);
-}
-
 qint64 TimeLine::getUpperEnd(qint64 lowerEnd)
 {
     beginRange = lowerEnd;
@@ -153,7 +143,9 @@ void TimeLine::onStepSizeChanged(qint64 microSeconds)
     emit newUpperEnd(getUpperEnd(beginRange));
 }
 
-void TimeLine::onUpdate(QSize size)
+void TimeLine::updateWidth(int w)
 {
-    resize(size.width(), this->size().height());
+    setFixedWidth(w);
+    qint64 max = beginRange + ((geometry().width()-offset)*timePerPx);
+    emit newUpperEnd(max);
 }

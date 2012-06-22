@@ -1,7 +1,6 @@
 #ifndef TIMELINE_H
 #define TIMELINE_H
 
-#include <QGraphicsWidget>
 #include <QPen>
 
 #include <QWidget>
@@ -18,26 +17,21 @@ public:
 
     void paintEvent(QPaintEvent *);
 
-    QRectF boundingRect() const;    
-
     qint64 getUpperEnd(qint64 lowerEnd);
 
     qint64 getStepSize() {return largeTickAmount;}
 
 public slots:
-    void onUpdate(QSize size);
-
     void onOffsetChanged(int offset);
 
     void onStepSizeChanged(qint64 microSeconds);
 
     void onRangeChanged(qint64 begin, qint64 end);
 
+    void updateWidth(int w);
+
 signals:
     void newUpperEnd(qint64);
-
-protected:
-    void resizeEvent(QGraphicsSceneResizeEvent *event);
 
 private:
     int offset;

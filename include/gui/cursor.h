@@ -2,7 +2,6 @@
 #define CURSOR_H
 
 #include <QWidget>
-#include <QWidget>
 #include <QPen>
 
 
