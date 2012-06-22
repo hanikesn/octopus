@@ -38,7 +38,6 @@ private slots:
     void onSaveAs();
     void onLoad();
     void onNew();
-    void onVerticalScroll();
     void onExportRange(qint64 begin, qint64 end);
     void onRecord();
     /**
@@ -125,8 +124,6 @@ private:
     bool writeProjectSettings(QVariantMap pName, QString path);
 
 signals:
-    void verticalScroll(QRectF visibleRectangle);
-    void changedViewSize(QSize size);
     void timeStepChanged(int);
 };
 

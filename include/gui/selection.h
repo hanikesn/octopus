@@ -28,6 +28,8 @@ public slots:
     void setSelectionBegin(qint64 begin);
     void setSelectionEnd(qint64 end);
 
+    void updateHeight(int h);
+
     void update();
 
 signals:
@@ -40,14 +42,10 @@ private slots:
     void exportTriggered();
 
 private:
-    void setHeight(int h);
 
     qint64 begin;
     qint64 end;
 
-    bool visible;
-
-    int height, width;
     QPen pen;
     QBrush brush;
 

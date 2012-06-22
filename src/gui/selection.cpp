@@ -16,9 +16,6 @@ Selection::Selection(TimeManager* timeManager, QWidget *parent):
     QWidget(parent),
     begin(0),
     end(0),
-    visible(true),
-    height(100),
-    width(100),
     pen(Qt::lightGray),
     brush(Qt::lightGray),
     timeManager(timeManager)
@@ -37,14 +34,11 @@ Selection::Selection(TimeManager* timeManager, QWidget *parent):
 
 void Selection::update()
 {
-    qint64 begin_ = begin;
-    qint64 end_ = end;
+    int left = timeManager->convertTimeToPos(begin);
+    int right = timeManager->convertTimeToPos(end);
 
-    if(begin_ > end_)
-        std::swap(begin_, end_);
-
-    int left = timeManager->convertTimeToPos(begin_);
-    int right = timeManager->convertTimeToPos(end_);
+    if(left > right)
+        std::swap(left, right);
 
     setFixedWidth(right-left);
     move(left, 0);
@@ -64,17 +58,16 @@ void Selection::exportTriggered()
 void Selection::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
-    QRectF frame(0, 0, width, height);
+
     painter.setPen(pen);
     painter.setBrush(brush);
     painter.setOpacity(0.5);
-    painter.drawRoundedRect(frame, 5, 5);
+    painter.drawRoundedRect(QRect(0,0, geometry().width(), geometry().height()), 5, 5);
 }
 
-void Selection::setHeight(int h)
+void Selection::updateHeight(int h)
 {
-    height = h;
-    update();
+    setFixedHeight(h);
 }
 
 void Selection::show()
@@ -89,8 +82,6 @@ void Selection::hide()
     if (!isVisible()) return;
 
     setVisible(false);
-
-    visible = false;
 
     update();
 
