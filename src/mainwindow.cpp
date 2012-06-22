@@ -111,7 +111,12 @@ void MainWindow::setUpButtonBars()
 
 void MainWindow::onExportRange(qint64 begin, qint64 end)
 {    
-    QStringList sources = SourceDialog::getSources(*dataProvider, tr("Export"), false, QStringList(), this).front();
+    QList<QStringList> res = SourceDialog::getSources(*dataProvider, tr("Export"), false, QStringList(), this);
+
+    if(res.isEmpty())
+        return;
+
+    QStringList sources = res.front();
 
     QFileDialog dialog(this, tr("Export"));
     dialog.setFileMode(QFileDialog::AnyFile);
