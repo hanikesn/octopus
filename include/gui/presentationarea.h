@@ -45,7 +45,8 @@ signals:
     void offsetChanged(int);
     void saveProject(qint64 start, qint64 end);
 
-    void changedViewSize(int h, int w);
+    void changedViewHeight(int h);
+    void changedViewWidth(int w);
 public slots:
     void onAddTrack();
     void onDelete(Track *t);    

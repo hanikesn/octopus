@@ -48,6 +48,9 @@ PresentationArea::PresentationArea(const DataProvider &dataProvider,
     connect(this, SIGNAL(zoomIn()),                 timeManager, SLOT(onZoomIn()));
     connect(this, SIGNAL(zoomOut()),                timeManager, SLOT(onZoomOut()));
 
+    connect(this, SIGNAL(changedViewHeight(int)), cursor, SLOT(updateHeight(int)));
+    connect(this, SIGNAL(changedViewHeight(int)), selection, SLOT(updateHeight(int)));
+
     connect(selection, SIGNAL(onExport(qint64,qint64)),          this, SIGNAL(exportRange(qint64,qint64)));
 
     connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)),this, SLOT(onRangeChanged(qint64,qint64)));
@@ -74,7 +77,8 @@ bool PresentationArea::eventFilter(QObject* obj, QEvent* event)
 {
     if(obj == viewport() && event->type() == QEvent::Resize) {
         QResizeEvent* resizeEvent = dynamic_cast<QResizeEvent*>(event);
-        emit changedViewSize(resizeEvent->size().height(), resizeEvent->size().width());
+        emit changedViewHeight(resizeEvent->size().height());
+        emit changedViewWidth(resizeEvent->size().width());
     }
     return QWidget::eventFilter(obj, event);
 }

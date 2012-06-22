@@ -46,9 +46,6 @@ private:
     qint64 begin;
     qint64 end;
 
-    bool visible;
-
-    int height, width;
     QPen pen;
     QBrush brush;
 
