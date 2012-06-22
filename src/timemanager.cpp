@@ -31,12 +31,7 @@ TimeManager::TimeManager(QScrollBar *hScrollBar, QObject* parent):
 
     connect(hScrollBar, SIGNAL(sliderMoved(int)),       this, SLOT(horizontalScroll(int)));
     connect(hScrollBar, SIGNAL(valueChanged(int)),      this, SLOT(horizontalScroll(int)));
-    connect(this, SIGNAL(rangeChanged(qint64,qint64)),  this, SLOT(onRangeChanged(qint64,qint64)));
     connect(this, SIGNAL(stepSizeChanged(qint64)),      this, SLOT(onStepSizeChanged(qint64)));
-}
-
-TimeManager::~TimeManager()
-{
 }
 
 qint64 TimeManager::convertPosToTime(int pos)
@@ -69,12 +64,6 @@ void TimeManager::addRange(qint64 delta)
     hScrollBar->blockSignals(false);
 }
 
-void TimeManager::updateRange()
-{
-    highVisRange = getUpperEnd(lowVisRange);
-    emit rangeChanged(lowVisRange, highVisRange);
-}
-
 void TimeManager::load(QVariantMap *qvm)
 {
     QVariantMap visibleArea = qvm->find("visibleArea").value().toMap();
@@ -103,16 +92,6 @@ void TimeManager::save(QVariantMap *qvm)
     qvm->insert("cursorPos", currentTime);
 }
 
-qint64 TimeManager::difference(int pos1, int pos2)
-{
-    if (pos2 < pos1){
-        qint64 tmp = pos2;
-        pos2 = pos1;
-        pos1 = tmp;
-    }
-    return (pos2 - pos1) * timePerPx;
-}
-
 void TimeManager::center(qint64 timestamp)
 {
     qint64 range = highVisRange - lowVisRange;
@@ -133,12 +112,6 @@ void TimeManager::changeTimeStep(int milliSeconds)
     // TODO on rangeChanged
 
     emit rangeChanged(lowVisRange, highVisRange);
-}
-
-void TimeManager::onRangeChanged(qint64 begin, qint64 end)
-{
-    lowVisRange = begin;
-    highVisRange = end;
 }
 
 void TimeManager::onStepSizeChanged(qint64 size)
@@ -231,14 +204,18 @@ void TimeManager::onTimeout()
     emit currentTimeChanged(currentTime);
 }
 
-qint64 TimeManager::getUpperEnd(qint64 lowerEnd)
-{
-    return highVisRange;
-}
-
 void TimeManager::onOffsetChanged(int offset)
 {
     offsetLeft = offset;
+    // TODO besser berechnen
+    onNewWidth(width);
+}
+
+void TimeManager::onNewWidth(int w)
+{
+    width = w;
+    highVisRange = lowVisRange + timePerPx * (w - offsetLeft);
+    emit rangeChanged(lowVisRange, highVisRange);
 }
 
 void TimeManager::onPlay()
@@ -259,9 +236,3 @@ void TimeManager::onPlay()
         break;
     }
 }
-
-void TimeManager::onNewUpperEnd(qint64 max)
-{
-    highVisRange = max;
-}
-

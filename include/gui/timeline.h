@@ -29,10 +29,6 @@ public slots:
     void onRangeChanged(qint64 begin, qint64 end);
 
     void updateWidth(int w);
-
-signals:
-    void newUpperEnd(qint64);
-
 private:
     int offset;
     qint64 beginRange;

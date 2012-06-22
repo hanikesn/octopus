@@ -139,13 +139,11 @@ void TimeLine::onStepSizeChanged(qint64 microSeconds)
     else
         timeRepresentation = MILLISECOND;
 
-    //update(boundingRect());
-    emit newUpperEnd(getUpperEnd(beginRange));
+    update();
 }
 
 void TimeLine::updateWidth(int w)
 {
     setFixedWidth(w);
     qint64 max = beginRange + ((geometry().width()-offset)*timePerPx);
-    emit newUpperEnd(max);
 }

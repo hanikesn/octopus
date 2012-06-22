@@ -123,8 +123,7 @@ void PresentationItem::onChangedViewSize(QSize size)
     visRect.setWidth(size.width());    
 
     recalcBoundingRec();
-    emit update(size);  // triggers the resize in cursor, timeLine, selectedArea
-    timeMgr->updateRange();    
+    emit update(size);  // triggers the resize in cursor, timeLine, selectedArea   
 }
 
 void PresentationItem::onVerticalScroll(QRectF visibleRectangle)
@@ -132,7 +131,6 @@ void PresentationItem::onVerticalScroll(QRectF visibleRectangle)
     timeLine->move(0, visibleRectangle.y()-1);
     visRect = visibleRectangle;
     // will trigger a rangeChanged() --> previously invisible tracks will update their range
-    timeMgr->updateRange();
 }
 
 int PresentationItem::getRightBorder()
