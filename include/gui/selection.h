@@ -1,26 +1,18 @@
 #ifndef SELECTION_H
 #define SELECTION_H
 
-#include <QGraphicsItem>
 #include <QPen>
+#include <QWidget>
 
 class QMenu;
-class QAction;
 class PresentationItem;
 class TimeManager;
 
-class Selection : public QObject, public QGraphicsItem
+class Selection : public QWidget
 {
     Q_OBJECT
 public:
-    explicit Selection(TimeManager *timeManager, PresentationItem *parent);
-    ~Selection();
-
-    QRectF boundingRect() const;
-
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
-
-    void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
+    explicit Selection(TimeManager *timeManager, QWidget *parent);
 
     void hide();
     void show();
@@ -29,31 +21,31 @@ public slots:
     void setSelectionBegin(qint64 begin);
     void setSelectionEnd(qint64 end);
 
-    void update();
+    void updateHeight(int h);
+
+    void onUpdate();
 
 signals:
     void onExport(qint64 begin, qint64 end);
 
     void selectionChanged(qint64 begin, qint64 end);
 
-private slots:
-
+protected slots:
     void exportTriggered();
 
+protected:
+    void contextMenuEvent(QContextMenuEvent * event);
+    void paintEvent(QPaintEvent *);
+
 private:
-    void setHeight(int h);
 
     qint64 begin;
     qint64 end;
 
-    bool visible;
-
-    int height, width;
     QPen pen;
     QBrush brush;
 
     QMenu *menu;
-    QAction *exportAction;
 
     TimeManager* timeManager;
 };

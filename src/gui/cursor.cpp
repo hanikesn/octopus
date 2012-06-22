@@ -8,65 +8,44 @@
 
 #include <QDebug>
 
-Cursor::Cursor(TimeManager *timeManager, QGraphicsItem *parent) :
-    QGraphicsWidget(parent),
+Cursor::Cursor(TimeManager *timeManager, QWidget *parent) :
+    QWidget(parent),
     pen(Qt::red),
     brush(Qt::red),
-    offsetLeft(0),
     currentTime(0),
-    timeMgr(timeManager),
-    coverHeight(0),
-    maxHeight(0)
+    timeMgr(timeManager)
 
 {
-    setZValue(1.0);
-    update();
+    setObjectName("Cursor");
+    setAttribute(Qt::WA_TransparentForMouseEvents);
+    setFixedWidth(1);
+    onUpdate();
 }
 
-Cursor::~Cursor()
-{
-}
-
-void Cursor::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+void Cursor::paintEvent(QPaintEvent *)
 {    
-    Q_UNUSED(option)
-    Q_UNUSED(widget)
+    QPainter painter(this);
 
-    painter->setClipRect(boundingRect());
-
-    QRectF frame(QPointF(0, 0), geometry().size());
-    painter->setPen(pen);
-    painter->setBrush(brush);
-    painter->drawRect(frame);
-}
-
-void Cursor::onOffsetChanged(int offset)
-{
-    offsetLeft = offset;
-    update();
-}
-
-QRectF Cursor::boundingRect() const
-{    
-    return QRectF(0, 0, geometry().width(), geometry().height());
+    painter.setPen(pen);
+    painter.setBrush(brush);
+    painter.drawRect(QRect(0,0, geometry().width(), geometry().height()));
 }
 
 void Cursor::setTime(qint64 time)
 {
     currentTime = time;
-    update();
+    onUpdate();
 }
 
-void Cursor::update()
+void Cursor::onUpdate()
 {
-    resize(1.0,qMin(coverHeight, maxHeight));
-
     int newPos = timeMgr->convertTimeToPos(currentTime);
     if(newPos == -1)
         setVisible(false);
     else
         setVisible(true);
-    setPos(newPos + offsetLeft, 0);
+
+    move(newPos, 0);
 }
 
 qint64 Cursor::getTime()
@@ -74,13 +53,7 @@ qint64 Cursor::getTime()
     return currentTime;
 }
 
-
-void Cursor::updateCoverHeight(int height)
+void Cursor::updateHeight(int height)
 {
-    coverHeight = height;
-}
-
-void Cursor::updateMaxHeight(int height)
-{
-    maxHeight = height;
+    setFixedHeight(height);
 }

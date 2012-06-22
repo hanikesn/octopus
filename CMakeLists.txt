@@ -51,7 +51,6 @@ set(Octopus_SOURCES
   src/gui/cursor.cpp
   src/gui/discretegraph.cpp
   src/gui/interpolatinggraph.cpp
-  src/gui/mainview.cpp
   src/gui/plotsettingsdialog.cpp
   src/gui/presentationarea.cpp
   src/gui/presentationitem.cpp
@@ -60,7 +59,6 @@ set(Octopus_SOURCES
   src/gui/sourcedialog.cpp
   src/gui/timeline.cpp
   src/gui/track.cpp
-  src/gui/trackscene.cpp
   src/mainwindow.cpp
   src/networkadapter.cpp
   src/sqlite.cpp
@@ -85,7 +83,6 @@ set(Octopus_HEADERS
   include/gui/discretegraph.h
   include/gui/graph.h
   include/gui/interpolatinggraph.h
-  include/gui/mainview.h
   include/gui/plotsettingsdialog.h
   include/gui/presentationarea.h
   include/gui/presentationitem.h
@@ -94,7 +91,6 @@ set(Octopus_HEADERS
   include/gui/sourcedialog.h
   include/gui/timeline.h
   include/gui/track.h
-  include/gui/trackscene.h
   include/mainwindow.h
   include/measure.h
   include/networkadapter.h

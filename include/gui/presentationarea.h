@@ -1,7 +1,7 @@
 #ifndef PRESENTATIONAREA_H
 #define PRESENTATIONAREA_H
 
-#include <QObject>
+#include <QScrollArea>
 #include <QSize>
 #include <QRectF>
 
@@ -17,13 +17,25 @@ class Cursor;
 class QScrollBar;
 class TimeLine;
 class TimeManager;
+class Cursor;
+class Selection;
 
-class PresentationArea : public QObject, public Serializable
+class MouseEventHandler
+{
+public:
+    virtual ~MouseEventHandler() {}
+    virtual void mousePressEvent(QMouseEvent *event) = 0;
+    virtual void mouseReleaseEvent(QMouseEvent *event) = 0;
+    virtual void mouseMoveEvent(QMouseEvent *event) = 0;
+    virtual void mouseDoubleClickEvent(QMouseEvent* event) = 0;
+};
+
+class PresentationArea : public QScrollArea, public Serializable
 {
     Q_OBJECT
 public:
-    explicit PresentationArea(QGraphicsScene *scene, const DataProvider &dataProvider,
-                              QScrollBar *hScrollBar, QObject *parent = 0);
+    explicit PresentationArea(const DataProvider &dataProvider,
+                              QScrollBar *hScrollBar, QWidget *parent = 0);
     ~PresentationArea();
 
     void save(QVariantMap *qvm);
@@ -35,24 +47,18 @@ public:
     bool isRecording() {return recording;}
 
 signals:
-    void changedViewSize(QSize size);
     void verticalScroll(QRectF visibleRectangle);
     void exportRange(qint64 begin, qint64 end);
     void play();
     void zoomIn();
     void zoomOut();
-    void offsetChanged(int);
     void saveProject(qint64 start, qint64 end);
+
+    void changedViewHeight(int h);
+    void changedViewWidth(int w);
 public slots:
     void onAddTrack();
-    void onDelete(Track *t);
-
-    /**
-      * Resizes tracks to new view length.
-      * Propagates event (PresentationItem resizes timeLine and cursor)
-      * @param size Size of the new view (it's the size of the mainView not the window size)
-      */
-    void onChangedViewSize(QSize size);
+    void onDelete(Track *t);    
 
     void onPlay();
 
@@ -69,29 +75,29 @@ private slots:
 
     void updatePlotMargins();
 
-    void onNewMax(qint64 max);
+protected:
+    bool eventFilter(QObject *, QEvent *);
 
 private:    
-    PresentationItem *pi;
-
     const DataProvider &dataProvider;
     QList<Track*> tracks;
-
-    QSize currentViewSize;
 
     bool unsavedChanges;
     bool recording;
 
     TimeLine *timeLine;
+    Cursor *cursor;
+    Selection *selection;
+
     TimeManager *timeManager;
 
-    qint64 recordStart, recordEnd, currentMax;
+    MouseEventHandler* viewportMouseHandler;
+
+    qint64 recordStart, recordEnd;
 
     void addTrack(const QList<QString>& fullDataSeriesNames);
     void addTracks(const QList<QString>& fullDataSeriesNames);
     Track* add(const QList<QString>& fullDataSeriesNames);
-
-    void setPlotMargins(int newMargin);
 
     int showRecordDialog();
 };

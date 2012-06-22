@@ -5,12 +5,12 @@
 #include <QMessageBox>
 #include <sstream>
 #include <QDateTime>
+//#include <QKeySequence>
+#include <QCloseEvent>
 
-#include "gui/trackscene.h"
 #include "gui/sourcedialog.h"
 #include "dataprovider.h"
 #include "gui/presentationarea.h"
-#include "gui/mainview.h"
 #include "serializer.h"
 #include "parser.h"
 #include "CVSExporter.h"
@@ -21,8 +21,7 @@ const QString MainWindow::TITLE = "Octopus 0.1";
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     pa(0),
-    dataProvider(0),
-    trackScene(0)
+    dataProvider(0)
 {    
     ui.setupUi(this);
 
@@ -37,11 +36,7 @@ MainWindow::MainWindow(QWidget *parent) :
     quitAction = new QAction(tr("&Quit"), this);
     quitAction->setShortcut(QKeySequence(QKeySequence::Quit));
 
-    ui.mainView->setAlignment(Qt::AlignTop | Qt::AlignLeft);
-    ui.mainView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
-    ui.mainView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    connect(ui.mainView, SIGNAL(resized(QSize)), this, SIGNAL(changedViewSize(QSize)));
-    connect(ui.mainView, SIGNAL(verticalScroll()), this, SLOT(onVerticalScroll()));
+    //connect(ui.mainView, SIGNAL(verticalScroll()), this, SLOT(onVerticalScroll()));
 
     connect(saveAction, SIGNAL(triggered()), this, SLOT(onSave()));
     connect(saveAsAction, SIGNAL(triggered()), this, SLOT(onSaveAs()));
@@ -115,14 +110,14 @@ void MainWindow::setUpButtonBars()
     addToolBar(Qt::LeftToolBarArea, ui.mainToolBar);
 }
 
-void MainWindow::onVerticalScroll()
-{    
-    emit verticalScroll(ui.mainView->mapToScene(ui.mainView->viewport()->geometry()).boundingRect());
-}
-
 void MainWindow::onExportRange(qint64 begin, qint64 end)
 {    
-    QStringList sources = SourceDialog::getSources(*dataProvider, tr("Export"), false, QStringList(), this).front();
+    QList<QStringList> res = SourceDialog::getSources(*dataProvider, tr("Export"), false, QStringList(), this);
+
+    if(res.isEmpty())
+        return;
+
+    QStringList sources = res.front();
 
     QFileDialog dialog(this, tr("Export"));
     dialog.setFileMode(QFileDialog::AnyFile);
@@ -261,23 +256,14 @@ void MainWindow::setTitle(QString pName)
 
 void MainWindow::setUpView()
 {
-    if (trackScene)
-        trackScene->deleteLater();
     if (pa)
         pa->deleteLater();
 
-    trackScene = new TrackScene(this);
-
-    pa = new PresentationArea(trackScene, *dataProvider, ui.hScrollBar, this);
-    ui.mainView->setScene(trackScene);
-
-    // set new PA to current viewsize
-    pa->onChangedViewSize(ui.mainView->size());
+    pa = new PresentationArea(*dataProvider, ui.hScrollBar, this);
+    ui.verticalLayout_2->insertWidget(0, pa);
 
     connect(pa, SIGNAL(exportRange(qint64,qint64)), this, SLOT(onExportRange(qint64,qint64)));
     connect(pa, SIGNAL(saveProject(qint64,qint64)), this, SLOT(onSaveProject(qint64,qint64)));
-    connect(this, SIGNAL(verticalScroll(QRectF)), pa, SIGNAL(verticalScroll(QRectF)));
-    connect(this, SIGNAL(changedViewSize(QSize)), pa, SLOT(onChangedViewSize(QSize)));    
     connect(&zoomInButton, SIGNAL(clicked()), pa, SIGNAL(zoomIn()));
     connect(&zoomOutButton, SIGNAL(clicked()), pa, SIGNAL(zoomOut()));
     connect(&addTrackButton, SIGNAL(clicked()), pa, SLOT(onAddTrack()));
@@ -294,46 +280,29 @@ void MainWindow::setUpView()
     connect(&recButton, SIGNAL(clicked()), this, SLOT(onRecord()));
 }
 
-void MainWindow::save(bool saveAs)
+void MainWindow::save(bool saveAs, qint64 begin, qint64 end)
 {
-    QString caption = saveAs ? tr("Save as") : tr("Save");
+    QString fileName = getSaveFileName(saveAs);
+    if (fileName.isEmpty()) return;  // dialog cancelled
 
-    if (projectPath.isEmpty() || saveAs) {
-        QString fileName = QFileDialog::getSaveFileName(this, caption,
-                                                        projectPath, "Octopus (*.oct)");
-        if (fileName.isEmpty()) return;
+    // The db lies in a temporary file. We might need to move it.
+    QString dbname = fileName;
+    dbname.remove(QRegExp(".oct$"));
 
-        if (fileName.endsWith(".oct") == false)
-            fileName += ".oct";
-
-        if(projectPath.isEmpty()) {
-            // The db lies in a temporary file. We need too move it.
-            QString dbname = fileName;
-            dbname.remove(QRegExp(".oct$"));
-            dataProvider->moveDB(dbname + ".db");
-        }
-
+    QVariantMap pName; // Map with the projects settings
+    if ((begin == -1) && (end == -1)) { // save all
         projectPath = fileName;
+        dataProvider->moveDB(dbname + ".db"); // move tmp-database if we save all
+        pName.insert("dbfile", dataProvider->getDBFileName());
 
-        if (!saveAs){
-            setTitle(QFileInfo(fileName).completeBaseName().remove(".oct"));
-        }
+        if (writeProjectSettings(pName, projectPath)) // in case save was successfull ...
+            pa->setUnsavedChanges(false); // ... clear flag in PresentationArea
+    } else { // save range
+        QString subProjectPath = fileName;
+        // TODO(steffen): dataProvider->movePartDB(dbname  + ".db", begin, end)    oder so ähnlich
+        pName.insert("dbfile", dbname);
+        writeProjectSettings(pName, subProjectPath);
     }
-    QVariantMap pName;
-    pName.insert("dbfile", dataProvider->getDBFileName());
-    pa->save(&pName);
-
-    QJson::Serializer serializer;
-    serializer.setIndentMode(QJson::IndentFull);
-    QByteArray json = serializer.serialize(pName);
-
-    // open/create the file
-    QFile file(projectPath);
-    file.open(QIODevice::WriteOnly);
-    if(file.write(json) == -1)
-        qDebug() << "Could not write config file!";
-
-    pa->setUnsavedChanges(false);
 }
 
 int MainWindow::checkForUnsavedChanges()
@@ -355,18 +324,47 @@ int MainWindow::checkForUnsavedChanges()
     return result;
 }
 
+QString MainWindow::getSaveFileName(bool saveAs)
+{
+    QString caption = saveAs ? tr("Save as") : tr("Save");
+
+    if (projectPath.isEmpty() || saveAs) { // determine new filename
+        QString fileName = QFileDialog::getSaveFileName(this, caption,
+                                                        projectPath, "Octopus (*.oct)");
+        if (fileName.isEmpty()) return fileName;
+
+        if (fileName.endsWith(".oct") == false)
+            fileName += ".oct";
+        if (!saveAs)
+            setTitle(QFileInfo(fileName).completeBaseName().remove(".oct"));
+        return fileName;
+    } else
+        return projectPath;
+}
+
 void MainWindow::closeEvent(QCloseEvent *ce)
 {
     //TODO(domi): Kommentare wegmachen:
-//    if(checkForUnsavedChanges() != QMessageBox::Abort)
+//    if (pa->isRecording()) { // ask whether recording should be stopped
+//        // simulate button click
+//        pa->onRecord();
+
+//        if (pa->isRecording()) { // if there is still a running recording, the user continued!
+//            ce->ignore();
+//            return; // dont exit the program
+//        }
+//        onRecord(); // in case the recording was stopped, set corresponding state of rec button.
+//    }
+
+//    // usual check for unsaved changes in the project
+//    if (checkForUnsavedChanges() != QMessageBox::Abort)
 //        QMainWindow::closeEvent(ce);
 //    else
 //        ce->ignore();
 }
 
 void MainWindow::onRecord()
-{
-    // change buttons according to pa.isrecording
+{    
     if (pa->isRecording())
         recButton.setChecked(true);
     else
@@ -375,7 +373,24 @@ void MainWindow::onRecord()
 
 void MainWindow::onSaveProject(qint64 start, qint64 end)
 {
-    qDebug() << Q_FUNC_INFO << start << "|" << end;
+    // initiate save (project file)
+    save(true, start, end);    
+}
 
-    //TODO(domi): Projekt speichern, in die DB nur Bereich aufnehmen
+bool MainWindow::writeProjectSettings(QVariantMap pName, QString path)
+{
+    pa->save(&pName);
+
+    QJson::Serializer serializer;
+    serializer.setIndentMode(QJson::IndentFull);
+    QByteArray json = serializer.serialize(pName);
+
+    // open/create the file
+    QFile file(path);
+    file.open(QIODevice::WriteOnly);
+    if(file.write(json) == -1) {
+        qDebug() << "Could not write config file!";
+        return false;
+    }
+    return true;
 }

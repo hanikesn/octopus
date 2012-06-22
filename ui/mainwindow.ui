@@ -45,9 +45,6 @@
     <item row="0" column="0">
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
-       <widget class="MainView" name="mainView"/>
-      </item>
-      <item>
        <widget class="QScrollBar" name="hScrollBar">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -67,7 +64,7 @@
      <x>0</x>
      <y>0</y>
      <width>1031</width>
-     <height>25</height>
+     <height>23</height>
     </rect>
    </property>
   </widget>
@@ -99,13 +96,6 @@
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <customwidgets>
-  <customwidget>
-   <class>MainView</class>
-   <extends>QGraphicsView</extends>
-   <header>gui/mainview.h</header>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>

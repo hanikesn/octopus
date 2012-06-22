@@ -53,6 +53,8 @@ void Track::init()
 {
     ui.setupUi(this);
 
+    ui.plot->setAttribute(Qt::WA_TransparentForMouseEvents);
+
     setupButtons();
     setupPlot();
 }
@@ -83,14 +85,10 @@ void Track::setPlotRange(qint64 begin, qint64 end)
 {
     if (ui.plot->xAxis->range().lower != begin
             || ui.plot->xAxis->range().lower != end) {
-		{
-            MEASURE("setRange");
-			ui.plot->xAxis->setRange(begin, end);
-		}
-        ui.plot->setNotAntialiasedElements(QCP::aeAll);
+        ui.plot->xAxis->setRange(begin, end);
 		{
             MEASURE("plot");
-			ui.plot->replot();
+            ui.plot->replot();
 		}
     }
 }
