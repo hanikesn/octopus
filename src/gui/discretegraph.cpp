@@ -41,6 +41,10 @@ QString DiscreteGraph::dataSeriesName()
     return series.fullName();
 }
 
+void DiscreteGraph::update(const PlotSettings &settings)
+{
+}
+
 void DiscreteGraph::configureAppearance(QCPGraph *graph)
 {
     graph->setLineStyle(QCPGraph::lsImpulse);

@@ -1,12 +1,12 @@
 #ifndef INTERPOLATINGGRAPH_H
 #define INTERPOLATINGGRAPH_H
 
+#include "plotsettings.h"
 #include "gui/graph.h"
 
-class PlotSettings;
-class QCustomPlot;
-class QCPGraph;
 class DoubleSeries;
+class QCPGraph;
+class QCustomPlot;
 
 class InterpolatingGraph : public Graph
 {
@@ -17,7 +17,10 @@ public:
     QCPGraph* getGraph();
 
     QString dataSeriesName();
-    void update(PlotSettings settings, bool respectScalingMode = true);
+    void update(const PlotSettings &settings);
+
+protected slots:
+    void onNewData(qint64 timestamp);
 
 private:
     const DoubleSeries &series;
@@ -25,18 +28,13 @@ private:
     QCPGraph *graph;
 
     qint64 lastUpdate;
-    int offset;
 
-//    ScalingMode currentScalingMode;
+    PlotSettings::ScalingMode currentScalingMode;
 
     void configureAppearance(QCPGraph *graph);
-    void initialize(QCPGraph *graph, const DoubleSeries &series, int offsetMicroSecs);
+    void initialize(QCPGraph *graph, const DoubleSeries &series);
 
-//    void rescale(ScaleType scaleType, ScalingMode scalingMode);
-    void setOffset(int microSecs);
-
-protected slots:
-    void onNewData(qint64 timestamp);
+//    void rescale(PlotSettings::ScaleType scaleType, PlotSettings::ScalingMode scalingMode);
 };
 
 #endif // INTERPOLATINGGRAPH_H

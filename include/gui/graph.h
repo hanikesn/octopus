@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QtCore/QIntegerForSize>
 
+class PlotSettings;
 class QCPGraph;
 
 class Graph : public QObject
@@ -16,6 +17,7 @@ public:
     virtual QCPGraph* getGraph() = 0;
 
     virtual QString dataSeriesName() = 0;
+    virtual void update(const PlotSettings &settings) = 0;
 
 protected slots:
     virtual void onNewData(qint64 timestamp) = 0;

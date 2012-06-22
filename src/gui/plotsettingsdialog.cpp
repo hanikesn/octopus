@@ -3,6 +3,7 @@
 #include "plotsettings.h"
 
 #include <QComboBox>
+#include <QDebug>
 #include <QRadioButton>
 #include <QSpinBox>
 #include <limits>
@@ -12,7 +13,7 @@ static const int OFFSETCOL = 1;
 static const int SCALECOL = 2;
 static const int COLCOUNT = 3;
 
-PlotSettingsDialog::PlotSettingsDialog(const QStringList &dataSeriesNames,
+PlotSettingsDialog::PlotSettingsDialog(const QList<AbstractDataSeries*> dataSeries,
                                        bool showScalingOption,
                                        bool offsetsEditable,
                                        QWidget *parent) :
@@ -21,7 +22,7 @@ PlotSettingsDialog::PlotSettingsDialog(const QStringList &dataSeriesNames,
 {
     ui->setupUi(this);
 
-    setupSourceTable(dataSeriesNames, offsetsEditable);
+    setupSourceTable(dataSeries, offsetsEditable);
     ui->sameScaleOption->setVisible(showScalingOption);
     ui->sourceTable->setColumnHidden(SCALECOL, showScalingOption);
     ui->sameScaleOption->setChecked(showScalingOption);
@@ -35,7 +36,7 @@ PlotSettingsDialog::~PlotSettingsDialog()
     delete ui;
 }
 
-void PlotSettingsDialog::setupSourceTable(const QStringList &dataSeriesNames, bool offsetsEditable)
+void PlotSettingsDialog::setupSourceTable(const QList<AbstractDataSeries*> dataSeries, bool offsetsEditable)
 {
     ui->sourceTable->setColumnCount(COLCOUNT);
 
@@ -52,37 +53,75 @@ void PlotSettingsDialog::setupSourceTable(const QStringList &dataSeriesNames, bo
     QHeaderView *vHeader = ui->sourceTable->verticalHeader();
     vHeader->setVisible(false);
 
-    foreach (QString name, dataSeriesNames) {
+    foreach (AbstractDataSeries *series, dataSeries) {
         int row = ui->sourceTable->rowCount();
         ui->sourceTable->setRowCount(row + 1);
 
-        QTableWidgetItem *sourceItem = new QTableWidgetItem(name);
+        QTableWidgetItem *sourceItem = new QTableWidgetItem(series->fullName());
         // the item showing the data series name should not be editable
         sourceItem->setFlags(sourceItem->flags() & ~Qt::ItemIsEditable);
         ui->sourceTable->setItem(row, SOURCENAMECOL, sourceItem);
+        dataSeriesMap.insert(series->fullName(), series);
 
         QSpinBox *offsetSpinner = new QSpinBox(ui->sourceTable);
-        offsetSpinner->setValue(0);
+        offsetSpinner->setValue(series->offset);
         offsetSpinner->setMaximum(std::numeric_limits<int>::max());
         offsetSpinner->setEnabled(offsetsEditable);
         ui->sourceTable->setCellWidget(row, OFFSETCOL, offsetSpinner);
 
         QComboBox *scaleCombo = new QComboBox();
-        scaleCombo->addItems(QStringList() << "LOG" << "LIN");
+        scaleCombo->addItems(PlotSettings::scaleTypeNames);
+        scaleCombo->setCurrentIndex(series->defaultScaleType);
         ui->sourceTable->setCellWidget(row, SCALECOL, scaleCombo);
     }
 }
 
-PlotSettings PlotSettingsDialog::getSettings(const QStringList &dataSeriesNames,
+PlotSettings PlotSettingsDialog::getSettings(const QList<AbstractDataSeries*> dataSeries,
+//                                             QMap<QString, PlotSettings::ScaleType> currentScaleTypes,
                                              bool showScalingOption,
                                              bool offsetsEditable,
+                                             bool changeDefaultScaleTypes,
                                              QWidget *parent)
 {
-    PlotSettingsDialog *d = new PlotSettingsDialog(dataSeriesNames, showScalingOption, offsetsEditable, parent);
+    PlotSettingsDialog *d = new PlotSettingsDialog(dataSeries, showScalingOption, offsetsEditable, parent);
     d->exec();
 
-    // TODO(Steffi)
-    return PlotSettings();
+    return d->getResult(changeDefaultScaleTypes);
+}
+
+PlotSettings PlotSettingsDialog::getResult(bool changeDefaultScaleTypes)
+{
+    if (result() == QDialog::Rejected) {
+        return PlotSettings();
+    }
+
+    PlotSettings settings;
+    for (int row = 0; row < ui->sourceTable->rowCount(); row++) {
+        QString sourceName = ui->sourceTable->item(row, SOURCENAMECOL)->text();
+        AbstractDataSeries *series = dataSeriesMap.value(sourceName);
+
+        if (series) {
+            QSpinBox *offsetSpinner = qobject_cast<QSpinBox*>(ui->sourceTable->cellWidget(row, OFFSETCOL));
+            series->offset = offsetSpinner->value();
+
+            QComboBox *scaleCombo = qobject_cast<QComboBox*>(ui->sourceTable->cellWidget(row, SCALECOL));
+            if (changeDefaultScaleTypes) {
+                series->defaultScaleType = (PlotSettings::ScaleType) scaleCombo->currentIndex();
+            }
+
+            if (ui->sameScaleOption->checkState() == Qt::Unchecked) {
+                settings.setScaleType(sourceName, (PlotSettings::ScaleType) scaleCombo->currentIndex());
+            } else {
+                if (ui->logChoice->isChecked()) {
+                    settings.setScaleType(sourceName, PlotSettings::LOGSCALE);
+                } else {
+                    settings.setScaleType(sourceName, PlotSettings::LINSCALE);
+                }
+            }
+        }
+    }
+
+    return settings;
 }
 
 void PlotSettingsDialog::onSameScaleStateChanged(int state)

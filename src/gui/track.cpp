@@ -155,7 +155,32 @@ void Track::onPlotSettings()
 {
     // TODO(Steffi)
 
-    PlotSettings settings = PlotSettingsDialog::getSettings(getFullDataSeriesNames(), true, false);
+    QList<AbstractDataSeries*> dataSeries;
+    foreach (QString name, getFullDataSeriesNames()) {
+        AbstractDataSeries *series = dataProvider.getDataSeries(name);
+        if (series) {
+            dataSeries.append(series);
+        }
+    }
+
+    PlotSettings settings = PlotSettingsDialog::getSettings(dataSeries, true, false, false);
+
+    if (!settings.isEmpty()) {
+        //    if (settings.scalingMode == PlotSettings::MINMAXSCALING) {
+        //        ui.plot->yAxis->setScaleType(QCPAxis::stLinear);
+        //        ui.plot->yAxis->setRange(0, 1);
+        //    } else if (settings.scalingMode == PlotSettings::NOSCALING) {
+        //        if (settings.scaleType == PlotSettings::LOGSCALE) {
+        //            ui.plot->yAxis->setScaleType(QCPAxis::stLogarithmic);
+        //        } else {
+        //            ui.plot->yAxis->setScaleType(QCPAxis::stLinear);
+        //        }
+        //    }
+
+        foreach (Graph *g, graphs) {
+            g->update(settings);
+        }
+    }
 }
 
 void Track::onOptPlotMarginsRecalculated(int left, int /*right*/, int /*top*/, int /*bottom*/)

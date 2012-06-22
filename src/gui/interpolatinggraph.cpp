@@ -9,8 +9,7 @@ InterpolatingGraph::InterpolatingGraph(QCustomPlot *plot, const DoubleSeries &d)
     series(d),
     plot(plot),
     lastUpdate(-1),
-    offset(0)/*,
-    currentScalingMode(ONEFORALL)*/
+    currentScalingMode(PlotSettings::NOSCALING)
 {
     connect(&series, SIGNAL(newData(qint64)), this, SLOT(onNewData(qint64)));
 
@@ -18,7 +17,7 @@ InterpolatingGraph::InterpolatingGraph(QCustomPlot *plot, const DoubleSeries &d)
     plot->yAxis->setVisible(true);
 
     configureAppearance(graph);
-    initialize(graph, series, offset);
+    initialize(graph, series);
 
     plot->rescaleValueAxes();
     plot->replot();
@@ -34,10 +33,9 @@ QString InterpolatingGraph::dataSeriesName()
     return series.fullName();
 }
 
-void InterpolatingGraph::update(PlotSettings settings, bool respectScalingMode)
+void InterpolatingGraph::update(const PlotSettings &settings)
 {
 //    rescale(settings.scalingMode(series.fullName()), settings.scaleType(series.fullName()));
-//    setOffset(settings.offset(series.fullName()));
 }
 
 void InterpolatingGraph::configureAppearance(QCPGraph *graph)
@@ -47,26 +45,26 @@ void InterpolatingGraph::configureAppearance(QCPGraph *graph)
     graph->setScatterSize(4);
 }
 
-void InterpolatingGraph::initialize(QCPGraph *graph, const DoubleSeries &series, int offsetMicroSecs)
+void InterpolatingGraph::initialize(QCPGraph *graph, const DoubleSeries &series)
 {
     graph->setName(series.fullName());
 
     auto const& data = series.getData();
     for (auto i = data.constBegin(); i != data.constEnd(); ++i) {
-        graph->addData(i.key() + offsetMicroSecs, i.value());
+        graph->addData(i.key(), i.value());
     }
 }
 
-//void InterpolatingGraph::rescale(ScaleType scaleType, ScalingMode scalingMode)
+//void InterpolatingGraph::rescale(PlotSettings::ScaleType scaleType, PlotSettings::ScalingMode scalingMode)
 //{
 //    if (scalingMode != currentScalingMode) {
 //        switch (scalingMode) {
-//        case ONEFORALL:
+//        case PlotSettings::NOSCALING:
 //            // this means that the graph's data have been rescaled --> reset
 //            graph->clearData();
-//            initialize(graph, series, offset);
+//            initialize(graph, series);
 //            break;
-//        case MINMAXEACH:
+//        case PlotSettings::MINMAXSCALING:
 //            // the graph's data need to be rescaled to use the plot's full height
 //            break;
 //        default:
@@ -76,27 +74,12 @@ void InterpolatingGraph::initialize(QCPGraph *graph, const DoubleSeries &series,
 //    }
 
 //    switch (scaleType) {
-//    case LIN:
+//    case PlotSettings::LINSCALE:
 //        break;
-//    case LOG:
+//    case PlotSettings::LOGSCALE:
 //        break;
 //    }
 //}
-
-void InterpolatingGraph::setOffset(int microSecs)
-{
-    if (offset != microSecs) {
-        // use the data from the graph instead of from the series, in case they have been rescaled.
-        QCPDataMap *newDataMap = new QCPDataMap();
-        QCPDataMapIterator i(*(graph->data()));
-        while (i.hasNext()) {
-            i.next();
-            newDataMap->insert(i.key() + microSecs, i.value());
-        }
-        graph->setData(newDataMap);
-        offset = microSecs;
-    }
-}
 
 void InterpolatingGraph::onNewData(qint64 timestamp)
 {
@@ -104,7 +87,7 @@ void InterpolatingGraph::onNewData(qint64 timestamp)
 
     for (auto i = data.constBegin(); i != data.constEnd(); ++i) {
         // TODO(Steffi): ggf. skalieren!
-        graph->addData(i.key() + offset, i.value());
+        graph->addData(i.key(), i.value());
     }
 
     lastUpdate = timestamp;

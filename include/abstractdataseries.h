@@ -2,6 +2,7 @@
 #define ABSTRACTDATASERIES_H
 
 #include "metadata.h"
+#include "plotsettings.h"
 #include "visitor.h"
 
 class Value;
@@ -20,6 +21,16 @@ public:
      * Visitor pattern.
      */
     virtual void accept(DataSeriesVisitor *v) = 0;
+
+    /**
+     * Offset in microseconds
+     */
+    int offset;
+
+    /**
+     * The default scale type to be used for plotting the data.
+     */
+    PlotSettings::ScaleType defaultScaleType;
 
     QString device() const;
     QString name() const;
@@ -47,7 +58,6 @@ private:
      * Stores a combination of data property flags.
      */
     Data::Properties props;
-
 
 protected:
     const DataProvider &dp;

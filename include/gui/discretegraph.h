@@ -19,6 +19,10 @@ public:
     QCPGraph* getGraph();
 
     QString dataSeriesName();
+    void update(const PlotSettings &settings);
+
+protected slots:
+    void onNewData(qint64 timestamp);
 
 private:
     const StringSeries &series;
@@ -33,9 +37,6 @@ private:
     void addData(qint64 timestamp, QString const& str);
     QCPItemTracer* addTracer(double graphKey, double size);
     QCPItemText* addLabel(const QString& text, QCPItemAnchor *parentAnchor);
-
-protected slots:
-    void onNewData(qint64 timestamp);
 };
 
 #endif // DISCRETEGRAPH_H
