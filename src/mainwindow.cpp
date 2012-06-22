@@ -6,6 +6,7 @@
 #include <sstream>
 #include <QDateTime>
 //#include <QKeySequence>
+#include <QCloseEvent>
 
 #include "gui/sourcedialog.h"
 #include "dataprovider.h"
@@ -344,7 +345,19 @@ QString MainWindow::getSaveFileName(bool saveAs)
 void MainWindow::closeEvent(QCloseEvent *ce)
 {
     //TODO(domi): Kommentare wegmachen:
-//    if(checkForUnsavedChanges() != QMessageBox::Abort)
+//    if (pa->isRecording()) { // ask whether recording should be stopped
+//        // simulate button click
+//        pa->onRecord();
+
+//        if (pa->isRecording()) { // if there is still a running recording, the user continued!
+//            ce->ignore();
+//            return; // dont exit the program
+//        }
+//        onRecord(); // in case the recording was stopped, set corresponding state of rec button.
+//    }
+
+//    // usual check for unsaved changes in the project
+//    if (checkForUnsavedChanges() != QMessageBox::Abort)
 //        QMainWindow::closeEvent(ce);
 //    else
 //        ce->ignore();
