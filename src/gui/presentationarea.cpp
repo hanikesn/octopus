@@ -5,6 +5,7 @@
 #include <QScrollBar>
 #include <QMessageBox>
 
+#include "gui/selection.h"
 #include "gui/presentationitem.h"
 #include "dataprovider.h"
 #include "gui/cursor.h"
@@ -13,47 +14,183 @@
 #include "gui/timeline.h"
 #include "timemanager.h"
 
-PresentationArea::PresentationArea(QGraphicsScene *scene, const DataProvider &dataProvider,
-                                   QScrollBar *hScrollBar, QObject *parent):
-    QObject(parent),
+class EventHandler : public MouseEventHandler
+{
+public:
+    EventHandler(TimeManager& timeManager, Cursor &cursor, Selection& selection)
+        : timeManager(timeManager),
+          selection(selection),
+          cursor(cursor),
+          createSelection(false)
+    {}
+
+    /**
+      * If shift-button is pressed, a selection is started. Otherwise nothing happens.
+      * @param event The mousePressEvent to be processed.
+      */
+    void mousePressEvent(QMouseEvent *event)
+    {
+        if ((event->button() == Qt::LeftButton) &&
+                (event->modifiers() == Qt::ShiftModifier) &&
+                (event->pos().x() >= timeManager.getOffset()) &&
+                (timeManager.getPlaystate() != TimeManager::PLAYING)) {
+            createSelection = true;
+            selection.show();
+            selection.setSelectionBegin(timeManager.convertPosToTime(event->pos().x()));
+        }
+    }
+
+    /**
+      * If a selection has been started at 'mousePressEvent()' it ends at the current position of
+      * the event (x-position). The corresponding timestamps are calculated and the
+      * 'selection()'-signal is emitted.
+      * If no new selection has been started this shows the cursor at the events position.
+      * @param event The mouseReleaseEvent to be processed.
+      */
+    void mouseReleaseEvent(QMouseEvent *event)
+    {
+        if(createSelection){
+            createSelection = false;
+            int selectionEnd = qMax(event->pos().x(), timeManager.getOffset());
+
+            selection.setSelectionEnd(timeManager.convertPosToTime(selectionEnd));
+            cursor.setVisible(false);
+        } else if (event->pos().x() >= timeManager.getOffset()) {
+            qint64 currentTime = timeManager.convertPosToTime(event->pos().x());
+            timeManager.setTime(currentTime);
+            selection.hide();
+        }
+    }
+
+    /**
+      * If a selection has been started at 'mousePressEvent()' and the shift-button is pressed
+      * the selected area is increased in size to the events position (x-position).
+      * Otherwise, nothing happens.
+      * @param event The mouseMoveEvent to be processed.
+      */
+    void mouseMoveEvent(QMouseEvent *event)
+    {
+        if((event->modifiers() != Qt::ShiftModifier)){
+            createSelection = false;
+        } else if(event->pos().x() >= timeManager.getOffset()) {
+            selection.setSelectionEnd(timeManager.convertPosToTime(event->pos().x()));
+        }
+    }
+
+    /**
+      * As we have no interaction for the double click, this function does nothing.
+      * @param event The mouseDoubleClickEvent to be processed.
+      */
+    void mouseDoubleClickEvent(QMouseEvent *event) {Q_UNUSED(event)}
+private:
+    TimeManager& timeManager;
+    Selection& selection;
+    Cursor& cursor;
+
+    bool createSelection;
+};
+
+PresentationArea::PresentationArea(const DataProvider &dataProvider,
+                                   QScrollBar *hScrollBar, QWidget *parent):
+    QScrollArea(parent),
     dataProvider(dataProvider),
-    currentViewSize(949, 1),
     unsavedChanges(false),
     recording(false),
     recordStart(0),
-    recordEnd(0),
-    currentMax(0)
+    recordEnd(0)
 {
-    timeLine = new TimeLine(52, 0, 0);
+    setObjectName("PresentationArea");
+
     timeManager = new TimeManager(hScrollBar, this);
+    timeLine = new TimeLine(*timeManager, viewport());
+    selection = new Selection(timeManager, viewport());
+    cursor = new Cursor(timeManager, viewport());
 
-    pi = new PresentationItem(timeLine, timeManager, scene);
+    setWidget(new QWidget(this));
+    setWidgetResizable(true);
 
+    widget()->setLayout(new QVBoxLayout());
+    widget()->layout()->setMargin(0);
+    widget()->layout()->setSpacing(0);
+    // This is needed because we embed the layout in a scroll area
+    widget()->layout()->setSizeConstraint(QLayout::SetMinAndMaxSize);
 
-    connect(this, SIGNAL(changedViewSize(QSize)),   pi, SLOT(onChangedViewSize(QSize)));
-    connect(this, SIGNAL(verticalScroll(QRectF)),   pi, SLOT(onVerticalScroll(QRectF)));
+    QWidget* placeholder = new QWidget();
+    placeholder->setFixedHeight(timeLine->size().height());
+    widget()->layout()->addWidget(placeholder);
+
+    timeLine->raise();
+    selection->raise();
+    cursor->raise();
+
+    viewportMouseHandler = new EventHandler(*timeManager, *cursor, *selection);
+    viewport()->installEventFilter(this);
+
+    connect(timeManager, SIGNAL(currentTimeChanged(qint64)), cursor, SLOT(setTime(qint64)));
+    connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)), cursor, SLOT(update()));
+    connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)), selection, SLOT(update()));
+
     connect(this, SIGNAL(play()),                   timeManager, SLOT(onPlay()));
     connect(this, SIGNAL(zoomIn()),                 timeManager, SLOT(onZoomIn()));
     connect(this, SIGNAL(zoomOut()),                timeManager, SLOT(onZoomOut()));
-    connect(this, SIGNAL(offsetChanged(int)),       pi, SIGNAL(offsetChanged(int)));
 
-    connect(pi, SIGNAL(onExport(qint64,qint64)),    this, SIGNAL(exportRange(qint64,qint64)));
+    connect(this, SIGNAL(changedViewHeight(int)), cursor, SLOT(updateHeight(int)));
+    connect(this, SIGNAL(changedViewHeight(int)), selection, SLOT(updateHeight(int)));
 
+    connect(this, SIGNAL(changedViewWidth(int)), timeLine, SLOT(updateWidth(int)));
+    connect(this, SIGNAL(changedViewWidth(int)), timeManager, SLOT(onNewWidth(int)));
 
-    connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)),
-            this, SLOT(onRangeChanged(qint64,qint64)));
-    connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)),
-            timeLine, SLOT(onRangeChanged(qint64,qint64)));
-    connect(timeManager, SIGNAL(stepSizeChanged(qint64)), timeLine, SLOT(onStepSizeChanged(qint64)));
+    connect(selection, SIGNAL(onExport(qint64,qint64)),          this, SIGNAL(exportRange(qint64,qint64)));   
 
-    connect(timeLine, SIGNAL(newUpperEnd(qint64)), timeManager, SLOT(onNewUpperEnd(qint64)));
+    connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)),this, SLOT(onRangeChanged(qint64,qint64)));
+    connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)),timeLine, SLOT(onRangeChanged(qint64,qint64)));
 
     connect(&dataProvider, SIGNAL(newMax(qint64)), timeManager, SLOT(onNewMax(qint64)));
-    connect(&dataProvider, SIGNAL(newMax(qint64)), this, SLOT(onNewMax(qint64)));
+
+    timeManager->onOffsetChanged(50);
 }
 
 PresentationArea::~PresentationArea()
 {
+    delete viewportMouseHandler;
+}
+
+/**
+ * @brief PresentationArea::eventFilter
+ *
+ * We need to check the resize events of the viewport
+ */
+bool PresentationArea::eventFilter(QObject* obj, QEvent* event)
+{
+    if(obj == viewport())
+    {
+        switch(event->type())
+        {
+        case QEvent::Resize:
+        {
+            QResizeEvent* resizeEvent = dynamic_cast<QResizeEvent*>(event);
+            emit changedViewHeight(resizeEvent->size().height());
+            emit changedViewWidth(resizeEvent->size().width());
+            break;
+        }
+        case QEvent::MouseMove:
+            viewportMouseHandler->mouseMoveEvent(dynamic_cast<QMouseEvent*>(event));
+            break;
+        case QEvent::MouseButtonPress:
+            viewportMouseHandler->mousePressEvent(dynamic_cast<QMouseEvent*>(event));
+            break;
+        case QEvent::MouseButtonRelease:
+            viewportMouseHandler->mouseReleaseEvent(dynamic_cast<QMouseEvent*>(event));
+            break;
+        case QEvent::MouseButtonDblClick:
+            viewportMouseHandler->mouseDoubleClickEvent(dynamic_cast<QMouseEvent*>(event));
+            break;
+        default:
+            break;
+        }
+    }
+
+    return QWidget::eventFilter(obj, event);
 }
 
 void PresentationArea::addTrack(const QList<QString> &fullDataSeriesNames)
@@ -87,9 +224,14 @@ Track* PresentationArea::add(const QList<QString>& fullDataSeriesNames)
     tracks.append(t);
     updatePlotMargins();
 
-    pi->addTrack(t);
-    t->resize(currentViewSize.width(), t->size().height());
     t->setPlotRange(timeManager->getLowVisRange(), timeManager->getHighVisRange());
+
+    widget()->layout()->addWidget(t);
+
+    // We need to raise them, because otherwise the tracks will be on top
+    timeLine->raise();
+    selection->raise();
+    cursor->raise();
 
     unsavedChanges = true;
     return t;
@@ -98,7 +240,6 @@ Track* PresentationArea::add(const QList<QString>& fullDataSeriesNames)
 void PresentationArea::onDelete(Track *t)
 {
     tracks.removeAll(t);
-    pi->removeTrack(t);
     t->deleteLater();
     unsavedChanges = true;
 }
@@ -106,7 +247,7 @@ void PresentationArea::onDelete(Track *t)
 void PresentationArea::onRangeChanged(qint64 begin, qint64 end)
 {            
     foreach (Track *t, tracks) {
-        if (pi->isVisible(t))
+        //if (pi->isVisible(t))
             t->setPlotRange(begin, end);
     }
     if (!tracks.isEmpty())
@@ -115,6 +256,9 @@ void PresentationArea::onRangeChanged(qint64 begin, qint64 end)
 
 void PresentationArea::updatePlotMargins()
 {
+    if (tracks.isEmpty())
+        return;
+
     // determine the optimal plot margin over all tracks
     int optMargin = 0;
     foreach (Track *t, tracks) {
@@ -123,22 +267,10 @@ void PresentationArea::updatePlotMargins()
         }
     }
 
-    setPlotMargins(optMargin);
-}
-
-void PresentationArea::onNewMax(qint64 max)
-{
-    currentMax = max;
-}
-
-void PresentationArea::setPlotMargins(int newMargin)
-{
-    if (!tracks.isEmpty()) {
-        foreach (Track *t, tracks) {
-            t->setPlotMarginLeft(newMargin);
-        }
-        emit offsetChanged(tracks.first()->getPlotOffset() + newMargin);
+    foreach (Track *t, tracks) {
+        t->setPlotMarginLeft(optMargin);
     }
+    timeManager->onOffsetChanged(tracks.first()->getPlotOffset() + optMargin);
 }
 
 int PresentationArea::showRecordDialog()
@@ -153,17 +285,6 @@ int PresentationArea::showRecordDialog()
     msg.setText(tr("Do you wish to save the currently recorded data, discard the complete recording or continue the recording?"));
     int result = msg.exec();
     return result;
-}
-
-void PresentationArea::onChangedViewSize(QSize size)
-{    
-    currentViewSize = size;
-    // resize tracks:
-    foreach(Track *t, tracks) {
-        t->resize(size.width(), t->size().height());
-    }
-    // propagate event (resizes TimeLine and Cursor in PresentationItem)
-    emit changedViewSize(size);
 }
 
 void PresentationArea::save(QVariantMap *qvm)
@@ -212,8 +333,8 @@ void PresentationArea::onPlay()
 void PresentationArea::onRecord()
 {
     if (recording) {
-        recordEnd = currentMax;
-        // end recording, dialog n stuff
+        recordEnd = timeManager->getMaximum();
+        // end recording, show record dialog
         int result = showRecordDialog();
         if (result == QMessageBox::Save) {
             //TODO: speichern, nicht nur exportieren.
@@ -223,9 +344,8 @@ void PresentationArea::onRecord()
         else if (result == QMessageBox::Ok) // go on with the recording
             recording = true;
     } else {
-        recordStart = currentMax;
+        recordStart = timeManager->getMaximum();
         recording = true;
     }
 
 }
-

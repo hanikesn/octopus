@@ -31,17 +31,11 @@ TimeManager::TimeManager(QScrollBar *hScrollBar, QObject* parent):
 
     connect(hScrollBar, SIGNAL(sliderMoved(int)),       this, SLOT(horizontalScroll(int)));
     connect(hScrollBar, SIGNAL(valueChanged(int)),      this, SLOT(horizontalScroll(int)));
-    connect(this, SIGNAL(rangeChanged(qint64,qint64)),  this, SLOT(onRangeChanged(qint64,qint64)));
-    connect(this, SIGNAL(stepSizeChanged(qint64)),      this, SLOT(onStepSizeChanged(qint64)));
-}
-
-TimeManager::~TimeManager()
-{
 }
 
 qint64 TimeManager::convertPosToTime(int pos)
 {
-    qint64 result = lowVisRange + (pos * timePerPx);
+    qint64 result = lowVisRange + ((pos - offsetLeft) * timePerPx);
     return result;
 }
 
@@ -55,7 +49,7 @@ int TimeManager::convertTimeToPos(qint64 time)
         currentTime += timePerPx;
         pos++;
     }
-    return pos;
+    return pos + offsetLeft;
 }
 
 void TimeManager::addRange(qint64 delta)
@@ -67,12 +61,6 @@ void TimeManager::addRange(qint64 delta)
     hScrollBar->blockSignals(true);
     hScrollBar->setValue(lowVisRange/1000000);
     hScrollBar->blockSignals(false);
-}
-
-void TimeManager::updateRange()
-{
-    highVisRange = getUpperEnd(lowVisRange);
-    emit rangeChanged(lowVisRange, highVisRange);
 }
 
 void TimeManager::load(QVariantMap *qvm)
@@ -103,16 +91,6 @@ void TimeManager::save(QVariantMap *qvm)
     qvm->insert("cursorPos", currentTime);
 }
 
-qint64 TimeManager::difference(int pos1, int pos2)
-{
-    if (pos2 < pos1){
-        qint64 tmp = pos2;
-        pos2 = pos1;
-        pos1 = tmp;
-    }
-    return (pos2 - pos1) * timePerPx;
-}
-
 void TimeManager::center(qint64 timestamp)
 {
     qint64 range = highVisRange - lowVisRange;
@@ -123,27 +101,6 @@ void TimeManager::center(qint64 timestamp)
     hScrollBar->blockSignals(true);
     hScrollBar->setValue(lowVisRange/1000000);
     hScrollBar->blockSignals(false);
-}
-
-void TimeManager::changeTimeStep(int milliSeconds)
-{
-    qint64 microSeconds = milliSeconds * 1000;
-    emit stepSizeChanged(microSeconds);
-    timePerPx = microSeconds / 50;
-    // TODO on rangeChanged
-
-    emit rangeChanged(lowVisRange, highVisRange);
-}
-
-void TimeManager::onRangeChanged(qint64 begin, qint64 end)
-{
-    lowVisRange = begin;
-    highVisRange = end;
-}
-
-void TimeManager::onStepSizeChanged(qint64 size)
-{
-    stepSize = size;
 }
 
 void TimeManager::setTime(qint64 time)
@@ -193,22 +150,19 @@ void TimeManager::onZoomIn()
 {
     qint64 newStepSize = stepSize - getZoomFactor(false);
     if (newStepSize <= 0) return;
+    stepSize = newStepSize;
 
-    // inform timeLine about new stepSize
-    emit stepSizeChanged(newStepSize);
-    timePerPx = newStepSize / 50;
+    timePerPx = stepSize / 50;
     // initiate redraw according to new range
-    emit rangeChanged(lowVisRange, highVisRange);
+    onNewWidth(width);
 }
 
 void TimeManager::onZoomOut()
 {
-    qint64 newStepSize = stepSize + getZoomFactor(true);
-    // inform timeLine about new stepSize
-    emit stepSizeChanged(newStepSize);
-    timePerPx = newStepSize / 50;
+    stepSize += getZoomFactor(true);
+    timePerPx = stepSize / 50;
     // initiate redraw according to new range
-    emit rangeChanged(lowVisRange, highVisRange);
+    onNewWidth(width);
 }
 
 void TimeManager::horizontalScroll(int pos)
@@ -231,9 +185,18 @@ void TimeManager::onTimeout()
     emit currentTimeChanged(currentTime);
 }
 
-qint64 TimeManager::getUpperEnd(qint64 lowerEnd)
+void TimeManager::onOffsetChanged(int offset)
 {
-    return highVisRange;
+    offsetLeft = offset;
+    // TODO besser berechnen
+    onNewWidth(width);
+}
+
+void TimeManager::onNewWidth(int w)
+{
+    width = w;
+    highVisRange = lowVisRange + timePerPx * (w - offsetLeft);
+    emit rangeChanged(lowVisRange, highVisRange);
 }
 
 void TimeManager::onPlay()
@@ -254,9 +217,3 @@ void TimeManager::onPlay()
         break;
     }
 }
-
-void TimeManager::onNewUpperEnd(qint64 max)
-{
-    highVisRange = max;
-}
-

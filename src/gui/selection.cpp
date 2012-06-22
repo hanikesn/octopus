@@ -1,8 +1,7 @@
 #include "gui/selection.h"
 
-#include <QGraphicsItem>
 #include <QPainter>
-#include <QGraphicsSceneContextMenuEvent>
+#include <QContextMenuEvent>
 #include <QMenu>
 #include <QAction>
 
@@ -10,57 +9,36 @@
 
 #include "gui/presentationitem.h"
 
-#include <QDebug>
-
-Selection::Selection(TimeManager* timeManager, PresentationItem *parent) :
-    QGraphicsItem(parent),
+Selection::Selection(TimeManager* timeManager, QWidget *parent):
+    QWidget(parent),
     begin(0),
     end(0),
-    visible(true),
-    height(100),
-    width(100),
     pen(Qt::lightGray),
     brush(Qt::lightGray),
     timeManager(timeManager)
 {
-    menu = new QMenu();
-    exportAction = new QAction(tr("Export Range"), this);
+    setObjectName("Selection");
+
+    menu = new QMenu(this);
+    QAction* exportAction = new QAction(tr("Export Range"), this);
     menu->addAction(exportAction);
     connect(exportAction, SIGNAL(triggered()), this, SLOT(exportTriggered()));
 
     setObjectName("Selection");
 
     hide();
-
-    setZValue(1.0);
 }
 
-void Selection::update()
+void Selection::onUpdate()
 {
-    prepareGeometryChange();
+    int left = timeManager->convertTimeToPos(begin);
+    int right = timeManager->convertTimeToPos(end);
 
-    qint64 begin_ = begin;
-    qint64 end_ = end;
+    if(left > right)
+        std::swap(left, right);
 
-    if(begin_ > end_)
-        std::swap(begin_, end_);
-
-    int left = timeManager->convertTimeToPos(begin_);
-    int right = timeManager->convertTimeToPos(end_);
-
-    width = right - left;
-    setPos(left, 0.0);
-}
-
-
-Selection::~Selection()
-{
-    menu->deleteLater();
-}
-
-QRectF Selection::boundingRect() const
-{
-    return QRectF(0, 0, width, height);
+    setFixedWidth(right-left);
+    move(left, 0);
 }
 
 void Selection::exportTriggered()
@@ -68,29 +46,25 @@ void Selection::exportTriggered()
     emit onExport(begin, end);
 }
 
-void Selection::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
-                      QWidget *widget)
+void Selection::paintEvent(QPaintEvent *)
 {
-    Q_UNUSED(widget);
-    Q_UNUSED(option);
+    QPainter painter(this);
 
-    QRectF frame(0, 0, width, height);
-    painter->setPen(pen);
-    painter->setBrush(brush);
-    painter->setOpacity(0.5);
-    painter->drawRoundedRect(frame, 5, 5);
+    painter.setPen(pen);
+    painter.setBrush(brush);
+    painter.setOpacity(0.5);
+    painter.drawRoundedRect(QRect(0,0, geometry().width(), geometry().height()), 5, 5);
 }
 
-void Selection::setHeight(int h)
+void Selection::updateHeight(int h)
 {
-    height = h;
-    update();
+    setFixedHeight(h);
 }
 
 void Selection::show()
 {
     setVisible(true);
-    update();
+    onUpdate();
     emit selectionChanged(begin, end);
 }
 
@@ -100,9 +74,7 @@ void Selection::hide()
 
     setVisible(false);
 
-    visible = false;
-
-    update();
+    onUpdate();
 
     emit selectionChanged(-1, -1);
 }
@@ -111,18 +83,18 @@ void Selection::setSelectionBegin(qint64 time)
 {
     begin = time;
     end = time;
-    update();
+    onUpdate();
     emit selectionChanged(begin, end);
 }
 
 void Selection::setSelectionEnd(qint64 time)
 {
     end = time;
-    update();
+    onUpdate();
     emit selectionChanged(begin, end);
 }
 
-void Selection::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
+void Selection::contextMenuEvent(QContextMenuEvent * event)
 { 
-    menu->popup(event->screenPos());
+    menu->popup(event->globalPos());
 }

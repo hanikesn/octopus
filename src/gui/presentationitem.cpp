@@ -13,9 +13,8 @@
 #include "timemanager.h"
 
 PresentationItem::PresentationItem(TimeLine *timeLine, TimeManager *timeManager,
-                                   QGraphicsScene *parent) :
-    QGraphicsItem(0, parent),
-    parent(parent),    
+                                   QWidget *parent) :
+    QWidget(parent),
     timeLine(timeLine),
     boundingRectangle(0, 0, 0, 0),
     visRect(0, 0, 100, 672),
@@ -24,31 +23,8 @@ PresentationItem::PresentationItem(TimeLine *timeLine, TimeManager *timeManager,
     minCoverHeight(672),
     timeMgr(timeManager)
 {
-    timeLine->setParentItem(this);
-    timeLine->setZValue(0.9);
-
-    cursor = new Cursor(timeManager, this);
-
-    // TODO hardcoded weg
-    cursor->updateCoverHeight(100);
-    cursor->updateMaxHeight(100);
-
-    selectedArea = new Selection(timeMgr, this);
-
     boundingRectangle.setWidth(timeLine->size().width());
     boundingRectangle.setHeight(timeLine->size().height());
-
-    connect(selectedArea, SIGNAL(onExport(qint64,qint64)),    this, SIGNAL(onExport(qint64,qint64)));
-    connect(timeMgr, SIGNAL(rangeChanged(qint64,qint64)), selectedArea, SLOT(update()));
-
-    connect(timeMgr, SIGNAL(currentTimeChanged(qint64)), cursor, SLOT(setTime(qint64)));
-    connect(timeMgr, SIGNAL(rangeChanged(qint64,qint64)), cursor, SLOT(update()));
-    connect(this, SIGNAL(update(QSize)),                  timeLine, SLOT(onUpdate(QSize)));
-    connect(this, SIGNAL(update(QSize)),                  selectedArea, SLOT(update()));
-
-    connect(this, SIGNAL(offsetChanged(int)),               cursor, SLOT(onOffsetChanged(int)));
-    connect(this, SIGNAL(offsetChanged(int)),               timeLine, SLOT(onOffsetChanged(int)));
-    connect(this, SIGNAL(offsetChanged(int)),               this, SLOT(onOffsetChanged(int)));
 
     recalcBoundingRec();
     recalcPositions();
@@ -80,11 +56,7 @@ void PresentationItem::addTrack(Track *t)
     if(t->size().width() > boundingRectangle.width())
         boundingRectangle.setWidth(t->size().width());
 
-    QGraphicsProxyWidget *trackToAdd = parent->addWidget(t);
-    trackToAdd->setParentItem(this);
-    tracks.append(trackToAdd);
-
-    parent->setSceneRect(boundingRectangle);
+    tracks.append(t);
 
     recalcPositions();
 }
@@ -92,19 +64,14 @@ void PresentationItem::addTrack(Track *t)
 void PresentationItem::removeTrack(Track *t)
 {
     boundingRectangle.setHeight(boundingRectangle.height() - t->size().height());
-    parent->setSceneRect(boundingRectangle);
+    //parent->setSceneRect(boundingRectangle);
 
-    QGraphicsProxyWidget *del;
-    foreach (del, tracks){
-        if(del->widget() == t){     
-            tracks.removeAll(del);            
-            parent->removeItem(del);
-            // We should quit the loop, because we have modified the list
-            break;
-        }
-    }    
+    tracks.removeAll(t);
+    layout()->removeWidget(t);
+
     recalcPositions();
 }
+
 
 void PresentationItem::onOffsetChanged(int offset)
 {
@@ -113,61 +80,19 @@ void PresentationItem::onOffsetChanged(int offset)
 
 void PresentationItem::recalcPositions()
 {
-    int yPos = timeLine->size().height() + 5; // + 5 for border
+    /*int yPos = timeLine->size().height() + 5; // + 5 for border
     foreach(QGraphicsProxyWidget *proxyTrack, tracks){
         proxyTrack->setPos(0, yPos);
         yPos += proxyTrack->widget()->height();
     }
 
     cursor->updateCoverHeight(getMinCoverHeight());
-    emit update(QSize(visRect.width(), visRect.height()));
-}
-
-void PresentationItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
-{
-    if ((event->button() == Qt::LeftButton) &&
-            (QApplication::keyboardModifiers() == Qt::ShiftModifier) &&
-            (event->pos().x() >= offsetLeft) &&
-            (timeMgr->getPlaystate() != TimeManager::PLAYING)) {
-        createSelection = true;
-        selectedArea->show();
-        selectedArea->setSelectionBegin(timeMgr->convertPosToTime(event->pos().x()));
-    }
-}
-
-void PresentationItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
-{
-    if(createSelection){        
-        createSelection = false;
-        selectionEnd = event->pos().x() < offsetLeft ? offsetLeft : event->pos().x();
-
-        selectedArea->setSelectionEnd(timeMgr->convertPosToTime(selectionEnd));
-        cursor->setVisible(false);
-    } else if (event->pos().x() >= offsetLeft) {
-        qint64 currentTime = timeMgr->convertPosToTime(event->pos().x()- offsetLeft);
-        timeMgr->setTime(currentTime);
-        selectedArea->hide();
-    }
-}
-
-void PresentationItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
-{
-    if((QApplication::keyboardModifiers() != Qt::ShiftModifier)){
-        createSelection = false;
-    } else if(event->pos().x() >= offsetLeft) {
-        selectedArea->setSelectionEnd(timeMgr->convertPosToTime(event->pos().x()));
-    }
-}
-
-void PresentationItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event)
-{
-    Q_UNUSED(event)
-    // Nothing to do...
+    emit update(QSize(visRect.width(), visRect.height()));*/
 }
 
 void PresentationItem::recalcBoundingRec()
 {
-    // If there are no tracks height/width are the size of the timeLine
+    /*// If there are no tracks height/width are the size of the timeLine
     if(tracks.isEmpty()){
         boundingRectangle.setHeight(minCoverHeight);
         boundingRectangle.setWidth(visRect.width());
@@ -187,7 +112,7 @@ void PresentationItem::recalcBoundingRec()
 
     boundingRectangle.setHeight(height);
     boundingRectangle.setWidth(width);
-    parent->setSceneRect(boundingRectangle);
+    parent->setSceneRect(boundingRectangle);*/
 }
 
 void PresentationItem::onChangedViewSize(QSize size)
@@ -198,32 +123,32 @@ void PresentationItem::onChangedViewSize(QSize size)
     visRect.setWidth(size.width());    
 
     recalcBoundingRec();
-    emit update(size);  // triggers the resize in cursor, timeLine, selectedArea
-    timeMgr->updateRange();    
+    emit update(size);  // triggers the resize in cursor, timeLine, selectedArea   
 }
 
 void PresentationItem::onVerticalScroll(QRectF visibleRectangle)
 {    
-    timeLine->setPos(0, visibleRectangle.y()-1);    
+    timeLine->move(0, visibleRectangle.y()-1);
     visRect = visibleRectangle;
     // will trigger a rangeChanged() --> previously invisible tracks will update their range
-    timeMgr->updateRange();
 }
 
 int PresentationItem::getRightBorder()
 {
-    if (parent->views().at(0)->verticalScrollBar()->isVisible()) { // there is a scrollbar
+    /*if (parent->views().at(0)->verticalScrollBar()->isVisible()) { // there is a scrollbar
         // subtract size of scrollbar
         return boundingRectangle.width() -
                 parent->views().at(0)->verticalScrollBar()->size().width() - 6;
     }
     else
-        return boundingRectangle.width() - 3;
+        return boundingRectangle.width() - 3;*/
+    return 0;
 }
 
 bool PresentationItem::isVisible(Track *t)
 {
-    int minYPos = visRect.y();
+    return true;
+    /*int minYPos = visRect.y();
     int maxYPos = visRect.y() + minCoverHeight;
     int trackMinY = 0;
     int trackMaxY = 0;
@@ -240,5 +165,5 @@ bool PresentationItem::isVisible(Track *t)
                 return false;
         }
     }
-    return false; // return false in case there are no tracks or the specified track couldn't be found
+    return false; // return false in case there are no tracks or the specified track couldn't be found*/
 }

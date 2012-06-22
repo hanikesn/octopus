@@ -15,8 +15,6 @@ class TimeManager : public QObject, public Serializable
 public:
     TimeManager(QScrollBar *hScrollBar, QObject* parent);
 
-    ~TimeManager();
-
     qint64 getLowVisRange() {return lowVisRange;}
     qint64 getHighVisRange() {return highVisRange;}
     qint64 getMaximum() {return maximum;}
@@ -26,8 +24,6 @@ public:
       * (every 'timeoutIntervall' msecs)
       */
     qint64 getTimePerPx() {return timePerPx;}
-
-    qint64 getUpperEnd(qint64 lowerEnd);
 
     /**
       * Converts a position on the view into the corresponting point in time.
@@ -48,36 +44,23 @@ public:
       */
     void addRange(qint64 delta);
 
-    /**
-      * Recalculates the range from lowVisRange and emit a rangeChanged() signal.
-      */
-    void updateRange();
-
     void load(QVariantMap *qvm);
     void save(QVariantMap *qvm);
 
-    /**
-      * Calculates the amount of time between two points in the view.
-      * @param pos1 First position
-      * @param pos2 Second position
-      * @return The result will always be positive (e.g. if pos1 > pos2 the values will be swapped)
-      */
-    qint64 difference(int pos1, int pos2);
-
     void center(qint64 timestamp);
-
-    void changeTimeStep(int milliSeconds);
 
     enum Playstate {PLAYING, PAUSED};
 
     Playstate getPlaystate() {return playstate;}
 
+    int getOffset() {return offsetLeft;}
+
+    int getStepSize() {return stepSize;}
+
 signals:
     void rangeChanged(qint64 begin, qint64 end);
 
     void currentTimeChanged(qint64 time);
-
-    void stepSizeChanged(qint64 microSeconds);
 
 public slots:
     void onNewMax(qint64 timestamp);
@@ -88,16 +71,14 @@ public slots:
 
     void onPlay();
 
-    void onNewUpperEnd(qint64 max);
+    void onOffsetChanged(int offset);
+
+    void onNewWidth(int width);
 
 private slots:
     void onTimeout();
 
     void horizontalScroll(int pos);
-
-    void onRangeChanged(qint64 begin, qint64 end);
-
-    void onStepSizeChanged(qint64 size);
 
 private:
     // low and high limit of the visible range
@@ -129,6 +110,8 @@ private:
 
     TimeLine *timeLine;
 
+    int offsetLeft;
+    int width;
 
     qint64 getZoomFactor(bool zoomOut);
 

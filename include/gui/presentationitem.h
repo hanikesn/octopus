@@ -2,6 +2,7 @@
 #define PRESENTATIONITEM_H
 
 #include <QGraphicsItem>
+#include <QWidget>
 #include <QList>
 
 #include "serializable.h"
@@ -15,12 +16,12 @@ class TimeLine;
 class QScrollBar;
 class TimeManager;
 
-class PresentationItem : public QObject, public QGraphicsItem
+class PresentationItem : public QWidget
 {
     Q_OBJECT
 public:
     explicit PresentationItem(TimeLine *timeLine, TimeManager *timeManager,
-                              QGraphicsScene *parent = 0);
+                              QWidget *parent = 0);
     ~PresentationItem();
 
     QRectF boundingRect() const;
@@ -40,35 +41,6 @@ public:
       * @param t The track to be removed
       */
     void removeTrack(Track *t);
-
-    /**
-      * If shift-button is pressed, a selection is started. Otherwise nothing happens.
-      * @param event The mousePressEvent to be processed.
-      */
-    void mousePressEvent(QGraphicsSceneMouseEvent *event);
-
-    /**
-      * If a selection has been started at 'mousePressEvent()' it ends at the current position of
-      * the event (x-position). The corresponding timestamps are calculated and the
-      * 'selection()'-signal is emitted.
-      * If no new selection has been started this shows the cursor at the events position.
-      * @param event The mouseReleaseEvent to be processed.
-      */
-    void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
-
-    /**
-      * If a selection has been started at 'mousePressEvent()' and the shift-button is pressed
-      * the selected area is increased in size to the events position (x-position).
-      * Otherwise, nothing happens.
-      * @param event The mouseMoveEvent to be processed.
-      */
-    void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
-
-    /**
-      * As we have no interaction for the double click, this function does nothing.
-      * @param event The mouseDoubleClickEvent to be processed.
-      */
-    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event);
 
     /**
       * Determines whether the specified track is currently visible.
@@ -115,12 +87,9 @@ signals:
     void offsetChanged(int);
 
 private:
-    QGraphicsScene *parent;
-    QList<QGraphicsProxyWidget*> tracks;    
+    QList<Track*> tracks;
 
     TimeLine *timeLine;
-    Cursor *cursor;
-    Selection *selectedArea;
 
     QRectF boundingRectangle, visRect;    
     int offsetLeft;

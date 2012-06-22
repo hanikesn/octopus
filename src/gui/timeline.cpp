@@ -2,12 +2,14 @@
 
 #include <QPainter>
 #include <QPen>
+#include "timemanager.h"
+#include "measure.h"
 
 #include <QDebug>
 
-TimeLine::TimeLine(int offset, QGraphicsItem * parent, Qt::WindowFlags wFlags):
-    QGraphicsWidget(parent, wFlags),
-    offset(offset),
+TimeLine::TimeLine(TimeManager& timeManager, QWidget * parent):
+    QWidget(parent),
+    timeManager(timeManager),
     beginRange(0),    
     textBoxWidth(50),
     textBoxHeight(10),
@@ -21,15 +23,15 @@ TimeLine::TimeLine(int offset, QGraphicsItem * parent, Qt::WindowFlags wFlags):
     timePerPx(40000), // Amount of time which one pixel represents 40 milliseconds in µs
     timeRepresentation(SECOND_FULL)
 {
-    setGeometry(0, 0, 946, 50);
+    setObjectName("TimeLine");
+    setAttribute(Qt::WA_TransparentForMouseEvents);
+    resize(946, 50);
 }
 
-void TimeLine::paint(QPainter *painter,
-    const QStyleOptionGraphicsItem *option, QWidget *widget)
+void TimeLine::paintEvent(QPaintEvent *)
 {
-    painter->setClipRect(boundingRect());
-    Q_UNUSED(widget);
-    Q_UNUSED(option);
+    MEASURE("TIMELINE");
+    QPainter painter(this);
 
     QRectF frame(QPointF(0,0), geometry().size());
     QGradientStops stops;
@@ -41,27 +43,23 @@ void TimeLine::paint(QPainter *painter,
     stops << QGradientStop(1.0, QColor(215, 215, 215));
     gradient.setStops(stops);
 
-    painter->setBrush(QBrush(gradient));
-    painter->setPen(pen);
-    painter->drawRect(frame);
+    painter.setBrush(QBrush(gradient));
+    painter.setPen(pen);
+    painter.drawRect(frame);
 
     // draw ticks:
-    drawTicks(painter);
+    drawTicks(&painter);
 
     QRect rect = QRect(5, geometry().height() - 15, 50, 15);
     QString text = timeRepresentation == MILLISECOND ? "ms" : "sec";
-    painter->drawText(rect, text);
-}
-
-QRectF TimeLine::boundingRect() const
-{
-    return QRectF(0, 0, geometry().width(), geometry().height());
+    painter.drawText(rect, text);
 }
 
 void TimeLine::drawTicks(QPainter *painter)
 {    
+    int offset = timeManager.getOffset();
     currentPos = 0;
-    qint64 currentTime = rangeOffset;
+    qint64 currentTime = beginRange;
     currentTime -= currentTime%timePerPx;
 
     bottom = geometry().height() - 10;
@@ -70,6 +68,10 @@ void TimeLine::drawTicks(QPainter *painter)
       1 second : medium tick
       0,2 seconds: small tick
       */
+
+    int stCounter = 0;
+    int mtCounter = 0;
+    int ltCounter = 0;
     double timeFactor = 0;
     int digitsAfterPoint = 0;
     if (timeRepresentation == SECOND_FULL)
@@ -81,8 +83,32 @@ void TimeLine::drawTicks(QPainter *painter)
         timeFactor = 1000;
 
     double output  = 0.0;
-    while (currentPos < geometry().width()) {
-        if (currentTime % largeTickAmount == 0) {
+
+    while (currentPos < geometry().width() - offset) {
+//        if (currentTime % largeTickAmount == 0) {
+//            output = (double)currentTime / timeFactor;
+//            // large tick
+//            painter->drawLine(currentPos + offset, bottom, currentPos + offset,
+//                              bottom - largeTickHeight);
+//            QRect rect = QRect(currentPos + offset - textBoxWidth/2, bottom, textBoxWidth,
+//                               textBoxHeight);
+//            painter->drawText(rect, Qt::AlignCenter, QString("%1").arg(output, 0, 'f',
+//                                                                       digitsAfterPoint));
+
+
+//        } else if (currentTime % mediumTickAmount == 0) {
+//            // medium tick
+//            painter->drawLine(currentPos + offset, bottom, currentPos + offset,
+//                              bottom - mediumTickHeight);
+//        } else if (currentTime % smallTickAmount == 0) {
+//            // small tick
+//            painter->drawLine(currentPos + offset, bottom, currentPos + offset,
+//                              bottom - shortTickHeight);
+//        }
+        if (currentTime >= (ltCounter * largeTickAmount) + beginRange) {
+            ltCounter++;
+            mtCounter++;
+            stCounter++;
             output = (double)currentTime / timeFactor;
             // large tick
             painter->drawLine(currentPos + offset, bottom, currentPos + offset,
@@ -90,57 +116,44 @@ void TimeLine::drawTicks(QPainter *painter)
             QRect rect = QRect(currentPos + offset - textBoxWidth/2, bottom, textBoxWidth,
                                textBoxHeight);
             painter->drawText(rect, Qt::AlignCenter, QString("%1").arg(output, 0, 'f',
-                                                                       digitsAfterPoint));
-
-
-        } else if (currentTime % mediumTickAmount == 0) {
-            // medium tick
+                                                                       0));
+        } else if (currentTime >= (mtCounter * mediumTickAmount) + beginRange) {
+            mtCounter++;
+            stCounter++;
             painter->drawLine(currentPos + offset, bottom, currentPos + offset,
                               bottom - mediumTickHeight);
-        } else if (currentTime % smallTickAmount == 0) {
-            // small tick
+        } else if (currentTime >= (stCounter * smallTickAmount) + beginRange) {
+            stCounter++;
             painter->drawLine(currentPos + offset, bottom, currentPos + offset,
                               bottom - shortTickHeight);
         }
 
         currentTime += timePerPx;
-        currentPos++;
+//        currentPos++;
+        currentPos += 1;
     }
 }
 
 void TimeLine::onRangeChanged(qint64 begin, qint64 end)
 {
     Q_UNUSED(end)
-    if (rangeOffset == begin) return;
-
-    rangeOffset = begin;
-    update(boundingRect());
-}
-
-void TimeLine::onOffsetChanged(int offset)
-{
-    this->offset = offset;
-    update(boundingRect());
-}
-
-void TimeLine::resizeEvent(QGraphicsSceneResizeEvent *event)
-{
-    qint64 max = beginRange + ((geometry().width()-offset)*timePerPx);
-    emit newUpperEnd(max);
-}
-
-qint64 TimeLine::getUpperEnd(qint64 lowerEnd)
-{
-    beginRange = lowerEnd;
-    return beginRange + ((geometry().width()-offset)*timePerPx);
+    beginRange = begin;
+    onStepSizeChanged(timeManager.getStepSize());
+    update();
 }
 
 void TimeLine::onStepSizeChanged(qint64 microSeconds)
 {
-    largeTickAmount = microSeconds;
-    mediumTickAmount = microSeconds/2;
+//    largeTickAmount = microSeconds;
+//    mediumTickAmount = microSeconds/2;
+//    smallTickAmount = largeTickAmount/10;
+//    timePerPx = microSeconds/50;
+
+    largeTickAmount = 2000000;
+    mediumTickAmount = largeTickAmount/2;
     smallTickAmount = largeTickAmount/10;
     timePerPx = microSeconds/50;
+    qDebug() << Q_FUNC_INFO << timePerPx;
 
     if (microSeconds % 1000000 == 0)
         timeRepresentation = SECOND_FULL;
@@ -149,11 +162,10 @@ void TimeLine::onStepSizeChanged(qint64 microSeconds)
     else
         timeRepresentation = MILLISECOND;
 
-    update(boundingRect());
-    emit newUpperEnd(getUpperEnd(beginRange));
+    update();
 }
 
-void TimeLine::onUpdate(QSize size)
+void TimeLine::updateWidth(int w)
 {
-    resize(size.width(), this->size().height());
+    setFixedWidth(w);
 }

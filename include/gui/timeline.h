@@ -1,50 +1,39 @@
 #ifndef TIMELINE_H
 #define TIMELINE_H
 
-#include <QGraphicsWidget>
 #include <QPen>
 
+#include <QWidget>
 
 class QGraphicsItem;
 class PresentationItem;
+class TimeManager;
 
-
-class TimeLine : public QGraphicsWidget
+class TimeLine : public QWidget
 {
     Q_OBJECT
 public:    
-    explicit TimeLine(int offset, QGraphicsItem *parent, Qt::WindowFlags wFlags = 0);
-
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
-
-    QRectF boundingRect() const;    
-
-    qint64 getUpperEnd(qint64 lowerEnd);
+    explicit TimeLine(TimeManager& timeManager, QWidget *parent);
 
     qint64 getStepSize() {return largeTickAmount;}
 
 public slots:
-    void onUpdate(QSize size);
-
-    void onOffsetChanged(int offset);
-
-    void onStepSizeChanged(qint64 microSeconds);
-
     void onRangeChanged(qint64 begin, qint64 end);
 
-signals:
-    void newUpperEnd(qint64);
+    void updateWidth(int w);
 
 protected:
-    void resizeEvent(QGraphicsSceneResizeEvent *event);
+    void paintEvent(QPaintEvent *);
 
 private:
-    int offset;
+    void onStepSizeChanged(qint64 microSeconds);
+
+    TimeManager& timeManager;
+
     qint64 beginRange;
 
     // stuff to draw ticks:
     double value;
-    qint64 rangeOffset;
     int currentPos;
     int bottom;
     int textBoxWidth;
