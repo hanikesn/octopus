@@ -105,7 +105,7 @@ void TimeLine::drawTicks(QPainter *painter)
 //            painter->drawLine(currentPos + offset, bottom, currentPos + offset,
 //                              bottom - shortTickHeight);
 //        }
-        if (currentTime >= (ltCounter * largeTickAmount) + rangeOffset) {
+        if (currentTime >= (ltCounter * largeTickAmount) + beginRange) {
             ltCounter++;
             mtCounter++;
             stCounter++;
@@ -117,12 +117,12 @@ void TimeLine::drawTicks(QPainter *painter)
                                textBoxHeight);
             painter->drawText(rect, Qt::AlignCenter, QString("%1").arg(output, 0, 'f',
                                                                        0));
-        } else if (currentTime >= (mtCounter * mediumTickAmount) + rangeOffset) {
+        } else if (currentTime >= (mtCounter * mediumTickAmount) + beginRange) {
             mtCounter++;
             stCounter++;
             painter->drawLine(currentPos + offset, bottom, currentPos + offset,
                               bottom - mediumTickHeight);
-        } else if (currentTime >= (stCounter * smallTickAmount) + rangeOffset) {
+        } else if (currentTime >= (stCounter * smallTickAmount) + beginRange) {
             stCounter++;
             painter->drawLine(currentPos + offset, bottom, currentPos + offset,
                               bottom - shortTickHeight);
