@@ -18,7 +18,8 @@ public:
                           QWidget *parent = 0);
 
     /**
-     * @return One list per track, with the full names of the selected data series. An empty list if the dialog was canceled.
+     * @return One list per track to be changed or created, with the full names of the selected data series.
+     *      An empty list if the dialog was canceled.
      */
     static QList<QStringList> getSources(const DataProvider &dataProvider,
                                          const QString &dialogTitle,
