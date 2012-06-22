@@ -37,8 +37,7 @@ PresentationArea::PresentationArea(const DataProvider &dataProvider,
     setWidgetResizable(true);
 
     // TODO hardcoded weg
-    cursor->updateCoverHeight(100);
-    cursor->updateMaxHeight(100);
+    cursor->setFixedHeight(100);
 
     connect(timeManager, SIGNAL(currentTimeChanged(qint64)), cursor, SLOT(setTime(qint64)));
     connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)), cursor, SLOT(update()));
@@ -100,7 +99,6 @@ Track* PresentationArea::add(const QList<QString>& fullDataSeriesNames)
 
     widget()->layout()->addWidget(t);
 
-    t->resize(currentViewSize.width(), t->size().height());
     t->setPlotRange(timeManager->getLowVisRange(), timeManager->getHighVisRange());
 
     unsavedChanges = true;

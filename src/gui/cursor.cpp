@@ -14,13 +14,12 @@ Cursor::Cursor(TimeManager *timeManager, QWidget *parent) :
     brush(Qt::red),
     offsetLeft(0),
     currentTime(0),
-    timeMgr(timeManager),
-    coverHeight(0),
-    maxHeight(0)
+    timeMgr(timeManager)
 
 {
     setObjectName("Cursor");
     setAttribute(Qt::WA_TransparentForMouseEvents);
+    setFixedWidth(1);
     update();
 }
 
@@ -47,8 +46,6 @@ void Cursor::setTime(qint64 time)
 
 void Cursor::update()
 {
-    resize(1.0,qMin(coverHeight, maxHeight));
-
     int newPos = timeMgr->convertTimeToPos(currentTime);
     if(newPos == -1)
         setVisible(false);
@@ -63,13 +60,7 @@ qint64 Cursor::getTime()
     return currentTime;
 }
 
-
-void Cursor::updateCoverHeight(int height)
+void Cursor::updateHeight(int height)
 {
-    coverHeight = height;
-}
-
-void Cursor::updateMaxHeight(int height)
-{
-    maxHeight = height;
+    setFixedHeight(height);
 }

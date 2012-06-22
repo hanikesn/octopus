@@ -25,8 +25,7 @@ public slots:
 
     void onOffsetChanged(int offset);
 
-    void updateCoverHeight(int height);
-    void updateMaxHeight(int height);
+    void updateHeight(int height);
 
     void update();
 
@@ -38,9 +37,6 @@ private:
     qint64 currentTime;
 
     TimeManager *timeMgr;
-
-    int coverHeight;
-    int maxHeight;
 };
 
 #endif // CURSOR_H
