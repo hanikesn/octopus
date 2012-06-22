@@ -38,7 +38,6 @@ private slots:
     void onSaveAs();
     void onLoad();
     void onNew();
-    void onVerticalScroll();
     void onExportRange(qint64 begin, qint64 end);
     void onRecord();
     void onSaveProject(qint64 start, qint64 end);
@@ -112,8 +111,6 @@ private:
     int checkForUnsavedChanges();
 
 signals:
-    void verticalScroll(QRectF visibleRectangle);
-    void changedViewSize(QSize size);
     void timeStepChanged(int);
 };
 

@@ -19,7 +19,6 @@ PresentationArea::PresentationArea(const DataProvider &dataProvider,
                                    QScrollBar *hScrollBar, QWidget *parent):
     QScrollArea(parent),
     dataProvider(dataProvider),
-    currentViewSize(949, 1),
     offsetLeft(0),
     unsavedChanges(false),
     recording(false),
@@ -39,6 +38,8 @@ PresentationArea::PresentationArea(const DataProvider &dataProvider,
     // TODO hardcoded weg
     cursor->setFixedHeight(100);
 
+    viewport()->installEventFilter(this);
+
     connect(timeManager, SIGNAL(currentTimeChanged(qint64)), cursor, SLOT(setTime(qint64)));
     connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)), cursor, SLOT(update()));
     connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)), selection, SLOT(update()));
@@ -49,11 +50,9 @@ PresentationArea::PresentationArea(const DataProvider &dataProvider,
 
     connect(selection, SIGNAL(onExport(qint64,qint64)),          this, SIGNAL(exportRange(qint64,qint64)));
 
+    connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)),this, SLOT(onRangeChanged(qint64,qint64)));
+    connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)),timeLine, SLOT(onRangeChanged(qint64,qint64)));
 
-    connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)),
-            this, SLOT(onRangeChanged(qint64,qint64)));
-    connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)),
-            timeLine, SLOT(onRangeChanged(qint64,qint64)));
     connect(timeManager, SIGNAL(stepSizeChanged(qint64)), timeLine, SLOT(onStepSizeChanged(qint64)));
 
     connect(timeLine, SIGNAL(newUpperEnd(qint64)), timeManager, SLOT(onNewUpperEnd(qint64)));
@@ -64,6 +63,20 @@ PresentationArea::PresentationArea(const DataProvider &dataProvider,
 
 PresentationArea::~PresentationArea()
 {
+}
+
+/**
+ * @brief PresentationArea::eventFilter
+ *
+ * We need to check the resize events of the viewport
+ */
+bool PresentationArea::eventFilter(QObject* obj, QEvent* event)
+{
+    if(obj == viewport() && event->type() == QEvent::Resize) {
+        QResizeEvent* resizeEvent = dynamic_cast<QResizeEvent*>(event);
+        emit changedViewSize(resizeEvent->size().height(), resizeEvent->size().width());
+    }
+    return QWidget::eventFilter(obj, event);
 }
 
 void PresentationArea::addTrack(const QList<QString> &fullDataSeriesNames)
@@ -163,17 +176,6 @@ int PresentationArea::showRecordDialog()
     msg.setText(tr("Do you wish to save the currently recorded data, discard the complete recording or continue the recording?"));
     int result = msg.exec();
     return result;
-}
-
-void PresentationArea::onChangedViewSize(QSize size)
-{    
-    currentViewSize = size;
-    // resize tracks:
-    foreach(Track *t, tracks) {
-        t->resize(size.width(), t->size().height());
-    }
-    // propagate event (resizes TimeLine and Cursor in PresentationItem)
-    emit changedViewSize(size);
 }
 
 void PresentationArea::save(QVariantMap *qvm)

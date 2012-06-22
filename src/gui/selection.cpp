@@ -71,10 +71,9 @@ void Selection::paintEvent(QPaintEvent *)
     painter.drawRoundedRect(frame, 5, 5);
 }
 
-void Selection::setHeight(int h)
+void Selection::updateHeight(int h)
 {
-    height = h;
-    update();
+    setFixedHeight(h);
 }
 
 void Selection::show()

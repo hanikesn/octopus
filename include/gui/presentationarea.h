@@ -37,7 +37,6 @@ public:
     bool isRecording() {return recording;}
 
 signals:
-    void changedViewSize(QSize size);
     void verticalScroll(QRectF visibleRectangle);
     void exportRange(qint64 begin, qint64 end);
     void play();
@@ -45,16 +44,11 @@ signals:
     void zoomOut();
     void offsetChanged(int);
     void saveProject(qint64 start, qint64 end);
+
+    void changedViewSize(int h, int w);
 public slots:
     void onAddTrack();
-    void onDelete(Track *t);
-
-    /**
-      * Resizes tracks to new view length.
-      * Propagates event (PresentationItem resizes timeLine and cursor)
-      * @param size Size of the new view (it's the size of the mainView not the window size)
-      */
-    void onChangedViewSize(QSize size);
+    void onDelete(Track *t);    
 
     void onPlay();
 
@@ -73,11 +67,12 @@ private slots:
 
     void onNewMax(qint64 max);
 
+protected:
+    bool eventFilter(QObject *, QEvent *);
+
 private:    
     const DataProvider &dataProvider;
     QList<Track*> tracks;
-
-    QSize currentViewSize;
 
     int offsetLeft;
 

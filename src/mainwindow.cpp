@@ -35,7 +35,6 @@ MainWindow::MainWindow(QWidget *parent) :
     quitAction = new QAction(tr("&Quit"), this);
     quitAction->setShortcut(QKeySequence(QKeySequence::Quit));
 
-    //connect(ui.mainView, SIGNAL(resized(QSize)), this, SIGNAL(changedViewSize(QSize)));
     //connect(ui.mainView, SIGNAL(verticalScroll()), this, SLOT(onVerticalScroll()));
 
     connect(saveAction, SIGNAL(triggered()), this, SLOT(onSave()));
@@ -108,12 +107,6 @@ void MainWindow::setUpButtonBars()
 
     ui.mainToolBar->addWidget(&toolBarWidget);
     addToolBar(Qt::LeftToolBarArea, ui.mainToolBar);
-}
-
-void MainWindow::onVerticalScroll()
-{    
-    // TODO REF
-    //emit verticalScroll(ui.mainView->mapToScene(ui.mainView->viewport()->geometry()).boundingRect());
 }
 
 void MainWindow::onExportRange(qint64 begin, qint64 end)
@@ -265,8 +258,6 @@ void MainWindow::setUpView()
 
     connect(pa, SIGNAL(exportRange(qint64,qint64)), this, SLOT(onExportRange(qint64,qint64)));
     connect(pa, SIGNAL(saveProject(qint64,qint64)), this, SLOT(onSaveProject(qint64,qint64)));
-    connect(this, SIGNAL(verticalScroll(QRectF)), pa, SIGNAL(verticalScroll(QRectF)));
-    connect(this, SIGNAL(changedViewSize(QSize)), pa, SLOT(onChangedViewSize(QSize)));    
     connect(&zoomInButton, SIGNAL(clicked()), pa, SIGNAL(zoomIn()));
     connect(&zoomOutButton, SIGNAL(clicked()), pa, SIGNAL(zoomOut()));
     connect(&addTrackButton, SIGNAL(clicked()), pa, SLOT(onAddTrack()));
