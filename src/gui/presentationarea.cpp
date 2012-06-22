@@ -236,7 +236,7 @@ void PresentationArea::onRecord()
 {
     if (recording) {
         recordEnd = currentMax;
-        // end recording, dialog n stuff
+        // end recording, show record dialog
         int result = showRecordDialog();
         if (result == QMessageBox::Save) {
             //TODO: speichern, nicht nur exportieren.
