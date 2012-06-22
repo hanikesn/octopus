@@ -129,8 +129,7 @@ void TimeLine::drawTicks(QPainter *painter)
         }
 
         currentTime += timePerPx;
-//        currentPos++;
-        currentPos += 1;
+        currentPos++;
     }
 }
 
@@ -152,8 +151,7 @@ void TimeLine::onStepSizeChanged(qint64 microSeconds)
     largeTickAmount = 2000000;
     mediumTickAmount = largeTickAmount/2;
     smallTickAmount = largeTickAmount/10;
-    timePerPx = microSeconds/50;
-    qDebug() << Q_FUNC_INFO << timePerPx;
+    timePerPx = microSeconds/50;    
 
     if (microSeconds % 1000000 == 0)
         timeRepresentation = SECOND_FULL;
