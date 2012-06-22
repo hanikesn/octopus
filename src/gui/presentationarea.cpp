@@ -280,9 +280,9 @@ int PresentationArea::showRecordDialog()
     msg.setIcon(QMessageBox::Information);
     msg.setButtonText(QMessageBox::Save, tr("Save"));
     msg.setButtonText(QMessageBox::Discard, tr("Discard"));
-    msg.setButtonText(QMessageBox::Ok, tr("Continue"));
+    msg.setButtonText(QMessageBox::Ok, tr("Continue Recording"));
     msg.setDefaultButton(QMessageBox::Save);
-    msg.setText(tr("Do you wish to save the currently recorded data, discard the complete recording or continue the recording?"));
+    msg.setText(tr("Do you wish to save the currently recorded data?"));
     int result = msg.exec();
     return result;
 }
