@@ -35,9 +35,6 @@ PresentationArea::PresentationArea(const DataProvider &dataProvider,
     setWidget(new TrackHolder(*timeManager, *cursor, *selection, this));
     setWidgetResizable(true);
 
-    // TODO hardcoded weg
-    cursor->setFixedHeight(100);
-
     viewport()->installEventFilter(this);
 
     connect(timeManager, SIGNAL(currentTimeChanged(qint64)), cursor, SLOT(setTime(qint64)));
