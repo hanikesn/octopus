@@ -36,7 +36,7 @@ public:
                 (timeManager.getPlaystate() != TimeManager::PLAYING)) {
             createSelection = true;
             selection.show();
-            selection.setSelectionBegin(timeManager.convertPosToTime(event->pos().x() - timeManager.getOffset()));
+            selection.setSelectionBegin(timeManager.convertPosToTime(event->pos().x()));
         }
     }
 
@@ -56,7 +56,7 @@ public:
             selection.setSelectionEnd(timeManager.convertPosToTime(selectionEnd));
             cursor.setVisible(false);
         } else if (event->pos().x() >= timeManager.getOffset()) {
-            qint64 currentTime = timeManager.convertPosToTime(event->pos().x() - timeManager.getOffset());
+            qint64 currentTime = timeManager.convertPosToTime(event->pos().x());
             timeManager.setTime(currentTime);
             selection.hide();
         }
@@ -73,7 +73,7 @@ public:
         if((event->modifiers() != Qt::ShiftModifier)){
             createSelection = false;
         } else if(event->pos().x() >= timeManager.getOffset()) {
-            selection.setSelectionEnd(timeManager.convertPosToTime(event->pos().x() - timeManager.getOffset()));
+            selection.setSelectionEnd(timeManager.convertPosToTime(event->pos().x()));
         }
     }
 

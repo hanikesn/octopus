@@ -36,7 +36,7 @@ TimeManager::TimeManager(QScrollBar *hScrollBar, QObject* parent):
 
 qint64 TimeManager::convertPosToTime(int pos)
 {
-    qint64 result = lowVisRange + (pos * timePerPx);
+    qint64 result = lowVisRange + ((pos - offsetLeft) * timePerPx);
     return result;
 }
 
@@ -50,7 +50,7 @@ int TimeManager::convertTimeToPos(qint64 time)
         currentTime += timePerPx;
         pos++;
     }
-    return pos;
+    return pos + offsetLeft;
 }
 
 void TimeManager::addRange(qint64 delta)

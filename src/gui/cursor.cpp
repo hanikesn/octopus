@@ -45,7 +45,7 @@ void Cursor::update()
     else
         setVisible(true);
 
-    move(newPos + timeMgr->getOffset(), 0);
+    move(newPos, 0);
 }
 
 qint64 Cursor::getTime()
