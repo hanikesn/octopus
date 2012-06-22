@@ -13,7 +13,85 @@
 #include "gui/track.h"
 #include "gui/timeline.h"
 #include "timemanager.h"
-#include "gui/TrackHolder.h"
+
+class EventHandler : public MouseEventHandler
+{
+public:
+    EventHandler(TimeManager& timeManager, Cursor &cursor, Selection& selection)
+        : timeManager(timeManager),
+          selection(selection),
+          cursor(cursor),
+          createSelection(false),
+          offsetLeft(0)
+    {}
+
+    /**
+      * If shift-button is pressed, a selection is started. Otherwise nothing happens.
+      * @param event The mousePressEvent to be processed.
+      */
+    void mousePressEvent(QMouseEvent *event)
+    {
+        if ((event->button() == Qt::LeftButton) &&
+                (event->modifiers() == Qt::ShiftModifier) &&
+                (event->pos().x() >= offsetLeft) &&
+                (timeManager.getPlaystate() != TimeManager::PLAYING)) {
+            createSelection = true;
+            selection.show();
+            selection.setSelectionBegin(timeManager.convertPosToTime(event->pos().x()));
+        }
+    }
+
+    /**
+      * If a selection has been started at 'mousePressEvent()' it ends at the current position of
+      * the event (x-position). The corresponding timestamps are calculated and the
+      * 'selection()'-signal is emitted.
+      * If no new selection has been started this shows the cursor at the events position.
+      * @param event The mouseReleaseEvent to be processed.
+      */
+    void mouseReleaseEvent(QMouseEvent *event)
+    {
+        if(createSelection){
+            createSelection = false;
+            int selectionEnd = event->pos().x() < offsetLeft ? offsetLeft : event->pos().x();
+
+            selection.setSelectionEnd(timeManager.convertPosToTime(selectionEnd));
+            cursor.setVisible(false);
+        } else if (event->pos().x() >= offsetLeft) {
+            qint64 currentTime = timeManager.convertPosToTime(event->pos().x()- offsetLeft);
+            timeManager.setTime(currentTime);
+            selection.hide();
+        }
+    }
+
+    /**
+      * If a selection has been started at 'mousePressEvent()' and the shift-button is pressed
+      * the selected area is increased in size to the events position (x-position).
+      * Otherwise, nothing happens.
+      * @param event The mouseMoveEvent to be processed.
+      */
+    void mouseMoveEvent(QMouseEvent *event)
+    {
+        if((event->modifiers() != Qt::ShiftModifier)){
+            createSelection = false;
+        } else if(event->pos().x() >= offsetLeft) {
+            selection.setSelectionEnd(timeManager.convertPosToTime(event->pos().x()));
+        }
+    }
+
+    /**
+      * As we have no interaction for the double click, this function does nothing.
+      * @param event The mouseDoubleClickEvent to be processed.
+      */
+    void mouseDoubleClickEvent(QMouseEvent *event) {Q_UNUSED(event)}
+private:
+    TimeManager& timeManager;
+    Selection& selection;
+    Cursor& cursor;
+
+    bool createSelection;
+    // TODO delete
+    int offsetLeft;
+};
 
 PresentationArea::PresentationArea(const DataProvider &dataProvider,
                                    QScrollBar *hScrollBar, QWidget *parent):
@@ -27,14 +105,30 @@ PresentationArea::PresentationArea(const DataProvider &dataProvider,
     currentMax(0)
 {
     setObjectName("PresentationArea");
+
     timeManager = new TimeManager(hScrollBar, this);
     timeLine = new TimeLine(52, viewport());
     selection = new Selection(timeManager, viewport());
     cursor = new Cursor(timeManager, viewport());
 
-    setWidget(new TrackHolder(*timeManager, *cursor, *selection, this));
+    setWidget(new QWidget(this));
     setWidgetResizable(true);
 
+    widget()->setLayout(new QVBoxLayout());
+    widget()->layout()->setMargin(0);
+    widget()->layout()->setSpacing(0);
+    // This is needed because we embed the layout in a scroll area
+    widget()->layout()->setSizeConstraint(QLayout::SetMinAndMaxSize);
+
+    QWidget* placeholder = new QWidget();
+    placeholder->setFixedHeight(timeLine->size().height());
+    widget()->layout()->addWidget(placeholder);
+
+    timeLine->raise();
+    selection->raise();
+    cursor->raise();
+
+    viewportMouseHandler = new EventHandler(*timeManager, *cursor, *selection);
     viewport()->installEventFilter(this);
 
     connect(timeManager, SIGNAL(currentTimeChanged(qint64)), cursor, SLOT(setTime(qint64)));
@@ -50,7 +144,7 @@ PresentationArea::PresentationArea(const DataProvider &dataProvider,
 
     connect(this, SIGNAL(changedViewWidth(int)), timeLine, SLOT(updateWidth(int)));
 
-    connect(selection, SIGNAL(onExport(qint64,qint64)),          this, SIGNAL(exportRange(qint64,qint64)));
+    connect(selection, SIGNAL(onExport(qint64,qint64)),          this, SIGNAL(exportRange(qint64,qint64)));   
 
     connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)),this, SLOT(onRangeChanged(qint64,qint64)));
     connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)),timeLine, SLOT(onRangeChanged(qint64,qint64)));
@@ -65,6 +159,7 @@ PresentationArea::PresentationArea(const DataProvider &dataProvider,
 
 PresentationArea::~PresentationArea()
 {
+    delete viewportMouseHandler;
 }
 
 /**
@@ -74,11 +169,34 @@ PresentationArea::~PresentationArea()
  */
 bool PresentationArea::eventFilter(QObject* obj, QEvent* event)
 {
-    if(obj == viewport() && event->type() == QEvent::Resize) {
-        QResizeEvent* resizeEvent = dynamic_cast<QResizeEvent*>(event);
-        emit changedViewHeight(resizeEvent->size().height());
-        emit changedViewWidth(resizeEvent->size().width());
+    if(obj == viewport())
+    {
+        switch(event->type())
+        {
+        case QEvent::Resize:
+        {
+            QResizeEvent* resizeEvent = dynamic_cast<QResizeEvent*>(event);
+            emit changedViewHeight(resizeEvent->size().height());
+            emit changedViewWidth(resizeEvent->size().width());
+            break;
+        }
+        case QEvent::MouseMove:
+            viewportMouseHandler->mouseMoveEvent(dynamic_cast<QMouseEvent*>(event));
+            break;
+        case QEvent::MouseButtonPress:
+            viewportMouseHandler->mousePressEvent(dynamic_cast<QMouseEvent*>(event));
+            break;
+        case QEvent::MouseButtonRelease:
+            viewportMouseHandler->mouseReleaseEvent(dynamic_cast<QMouseEvent*>(event));
+            break;
+        case QEvent::MouseButtonDblClick:
+            viewportMouseHandler->mouseDoubleClickEvent(dynamic_cast<QMouseEvent*>(event));
+            break;
+        default:
+            break;
+        }
     }
+
     return QWidget::eventFilter(obj, event);
 }
 

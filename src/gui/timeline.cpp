@@ -110,13 +110,13 @@ void TimeLine::onRangeChanged(qint64 begin, qint64 end)
     if (rangeOffset == begin) return;
 
     rangeOffset = begin;
-    //update(boundingRect());
+    update();
 }
 
 void TimeLine::onOffsetChanged(int offset)
 {
     this->offset = offset;
-    //update(boundingRect());
+    update();
 }
 
 qint64 TimeLine::getUpperEnd(qint64 lowerEnd)
