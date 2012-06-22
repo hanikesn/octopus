@@ -148,9 +148,6 @@ void TimeLine::onStepSizeChanged(qint64 microSeconds)
 //    smallTickAmount = largeTickAmount/10;
 //    timePerPx = microSeconds/50;
 
-    largeTickAmount = 2000000;
-    mediumTickAmount = largeTickAmount/2;
-    smallTickAmount = largeTickAmount/10;
     timePerPx = microSeconds/50;    
 
     if (microSeconds % 1000000 == 0)
