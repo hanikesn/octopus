@@ -5,7 +5,6 @@
 #include <QWidget>
 
 class QMenu;
-class QAction;
 class PresentationItem;
 class TimeManager;
 
@@ -14,12 +13,8 @@ class Selection : public QWidget
     Q_OBJECT
 public:
     explicit Selection(TimeManager *timeManager, QWidget *parent);
-    ~Selection();
 
     void paintEvent(QPaintEvent *);
-
-    // TODO REF
-    //void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
 
     void hide();
     void show();
@@ -37,9 +32,11 @@ signals:
 
     void selectionChanged(qint64 begin, qint64 end);
 
-private slots:
-
+protected slots:
     void exportTriggered();
+
+protected:
+    void contextMenuEvent(QContextMenuEvent * event);
 
 private:
 
@@ -50,7 +47,6 @@ private:
     QBrush brush;
 
     QMenu *menu;
-    QAction *exportAction;
 
     TimeManager* timeManager;
 };

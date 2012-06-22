@@ -1,16 +1,13 @@
 #include "gui/selection.h"
 
-#include <QGraphicsItem>
 #include <QPainter>
-#include <QGraphicsSceneContextMenuEvent>
+#include <QContextMenuEvent>
 #include <QMenu>
 #include <QAction>
 
 #include "timemanager.h"
 
 #include "gui/presentationitem.h"
-
-#include <QDebug>
 
 Selection::Selection(TimeManager* timeManager, QWidget *parent):
     QWidget(parent),
@@ -22,8 +19,8 @@ Selection::Selection(TimeManager* timeManager, QWidget *parent):
 {
     setObjectName("Selection");
 
-    menu = new QMenu();
-    exportAction = new QAction(tr("Export Range"), this);
+    menu = new QMenu(this);
+    QAction* exportAction = new QAction(tr("Export Range"), this);
     menu->addAction(exportAction);
     connect(exportAction, SIGNAL(triggered()), this, SLOT(exportTriggered()));
 
@@ -42,12 +39,6 @@ void Selection::update()
 
     setFixedWidth(right-left);
     move(left, 0);
-}
-
-
-Selection::~Selection()
-{
-    menu->deleteLater();
 }
 
 void Selection::exportTriggered()
@@ -103,7 +94,7 @@ void Selection::setSelectionEnd(qint64 time)
     emit selectionChanged(begin, end);
 }
 
-/*void Selection::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
+void Selection::contextMenuEvent(QContextMenuEvent * event)
 { 
-    menu->popup(event->screenPos());
-}*/
+    menu->popup(event->globalPos());
+}
