@@ -20,6 +20,16 @@ class TimeManager;
 class Cursor;
 class Selection;
 
+class MouseEventHandler
+{
+public:
+    virtual ~MouseEventHandler() {}
+    virtual void mousePressEvent(QMouseEvent *event) = 0;
+    virtual void mouseReleaseEvent(QMouseEvent *event) = 0;
+    virtual void mouseMoveEvent(QMouseEvent *event) = 0;
+    virtual void mouseDoubleClickEvent(QMouseEvent* event) = 0;
+};
+
 class PresentationArea : public QScrollArea, public Serializable
 {
     Q_OBJECT
@@ -87,6 +97,8 @@ private:
     Selection *selection;
 
     TimeManager *timeManager;
+
+    MouseEventHandler* viewportMouseHandler;
 
     qint64 recordStart, recordEnd, currentMax;
 
