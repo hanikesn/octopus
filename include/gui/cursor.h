@@ -15,8 +15,6 @@ class Cursor : public QWidget
 public:
     explicit Cursor(TimeManager *timeManager, QWidget *parent);
 
-    void paintEvent(QPaintEvent *);
-
     qint64 getTime();
 
 public slots:
@@ -24,7 +22,10 @@ public slots:
 
     void updateHeight(int height);
 
-    void update();
+    void onUpdate();
+
+protected:
+    void paintEvent(QPaintEvent *);
 
 private:    
     QPen pen;    

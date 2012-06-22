@@ -19,7 +19,7 @@ Cursor::Cursor(TimeManager *timeManager, QWidget *parent) :
     setObjectName("Cursor");
     setAttribute(Qt::WA_TransparentForMouseEvents);
     setFixedWidth(1);
-    update();
+    onUpdate();
 }
 
 void Cursor::paintEvent(QPaintEvent *)
@@ -34,10 +34,10 @@ void Cursor::paintEvent(QPaintEvent *)
 void Cursor::setTime(qint64 time)
 {
     currentTime = time;
-    update();
+    onUpdate();
 }
 
-void Cursor::update()
+void Cursor::onUpdate()
 {
     int newPos = timeMgr->convertTimeToPos(currentTime);
     if(newPos == -1)
