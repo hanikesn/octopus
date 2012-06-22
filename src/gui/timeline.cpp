@@ -2,13 +2,14 @@
 
 #include <QPainter>
 #include <QPen>
+#include "timemanager.h"
 #include "measure.h"
 
 #include <QDebug>
 
-TimeLine::TimeLine(int offset, QWidget * parent):
+TimeLine::TimeLine(TimeManager& timeManager, QWidget * parent):
     QWidget(parent),
-    offset(offset),
+    timeManager(timeManager),
     beginRange(0),    
     textBoxWidth(50),
     textBoxHeight(10),
@@ -56,8 +57,9 @@ void TimeLine::paintEvent(QPaintEvent *)
 
 void TimeLine::drawTicks(QPainter *painter)
 {    
+    int offset = timeManager.getOffset();
     currentPos = 0;
-    qint64 currentTime = rangeOffset;
+    qint64 currentTime = beginRange;
     currentTime -= currentTime%timePerPx;
 
     bottom = geometry().height() - 10;
@@ -107,22 +109,8 @@ void TimeLine::drawTicks(QPainter *painter)
 void TimeLine::onRangeChanged(qint64 begin, qint64 end)
 {
     Q_UNUSED(end)
-    if (rangeOffset == begin) return;
-
-    rangeOffset = begin;
+    beginRange = begin;
     update();
-}
-
-void TimeLine::onOffsetChanged(int offset)
-{
-    this->offset = offset;
-    update();
-}
-
-qint64 TimeLine::getUpperEnd(qint64 lowerEnd)
-{
-    beginRange = lowerEnd;
-    return beginRange + ((geometry().width()-offset)*timePerPx);
 }
 
 void TimeLine::onStepSizeChanged(qint64 microSeconds)
@@ -145,5 +133,4 @@ void TimeLine::onStepSizeChanged(qint64 microSeconds)
 void TimeLine::updateWidth(int w)
 {
     setFixedWidth(w);
-    qint64 max = beginRange + ((geometry().width()-offset)*timePerPx);
 }

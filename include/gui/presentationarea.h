@@ -75,18 +75,12 @@ private slots:
 
     void updatePlotMargins();
 
-    void onNewMax(qint64 max);
-
 protected:
     bool eventFilter(QObject *, QEvent *);
 
 private:    
     const DataProvider &dataProvider;
     QList<Track*> tracks;
-
-    int offsetLeft;
-
-    bool createSelection;
 
     bool unsavedChanges;
     bool recording;
@@ -99,13 +93,11 @@ private:
 
     MouseEventHandler* viewportMouseHandler;
 
-    qint64 recordStart, recordEnd, currentMax;
+    qint64 recordStart, recordEnd;
 
     void addTrack(const QList<QString>& fullDataSeriesNames);
     void addTracks(const QList<QString>& fullDataSeriesNames);
     Track* add(const QList<QString>& fullDataSeriesNames);
-
-    void setPlotMargins(int newMargin);
 
     int showRecordDialog();
 };

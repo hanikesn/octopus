@@ -94,17 +94,15 @@ PresentationArea::PresentationArea(const DataProvider &dataProvider,
                                    QScrollBar *hScrollBar, QWidget *parent):
     QScrollArea(parent),
     dataProvider(dataProvider),
-    offsetLeft(0),
     unsavedChanges(false),
     recording(false),
     recordStart(0),
-    recordEnd(0),
-    currentMax(0)
+    recordEnd(0)
 {
     setObjectName("PresentationArea");
 
     timeManager = new TimeManager(hScrollBar, this);
-    timeLine = new TimeLine(52, viewport());
+    timeLine = new TimeLine(*timeManager, viewport());
     selection = new Selection(timeManager, viewport());
     cursor = new Cursor(timeManager, viewport());
 
@@ -150,7 +148,8 @@ PresentationArea::PresentationArea(const DataProvider &dataProvider,
     connect(timeManager, SIGNAL(stepSizeChanged(qint64)), timeLine, SLOT(onStepSizeChanged(qint64)));
 
     connect(&dataProvider, SIGNAL(newMax(qint64)), timeManager, SLOT(onNewMax(qint64)));
-    connect(&dataProvider, SIGNAL(newMax(qint64)), this, SLOT(onNewMax(qint64)));
+
+    timeManager->onOffsetChanged(50);
 }
 
 PresentationArea::~PresentationArea()
@@ -259,6 +258,9 @@ void PresentationArea::onRangeChanged(qint64 begin, qint64 end)
 
 void PresentationArea::updatePlotMargins()
 {
+    if (tracks.isEmpty())
+        return;
+
     // determine the optimal plot margin over all tracks
     int optMargin = 0;
     foreach (Track *t, tracks) {
@@ -267,22 +269,10 @@ void PresentationArea::updatePlotMargins()
         }
     }
 
-    setPlotMargins(optMargin);
-}
-
-void PresentationArea::onNewMax(qint64 max)
-{
-    currentMax = max;
-}
-
-void PresentationArea::setPlotMargins(int newMargin)
-{
-    if (!tracks.isEmpty()) {
-        foreach (Track *t, tracks) {
-            t->setPlotMarginLeft(newMargin);
-        }
-        timeManager->onOffsetChanged(tracks.first()->getPlotOffset() + newMargin);
+    foreach (Track *t, tracks) {
+        t->setPlotMarginLeft(optMargin);
     }
+    timeManager->onOffsetChanged(tracks.first()->getPlotOffset() + optMargin);
 }
 
 int PresentationArea::showRecordDialog()
@@ -345,7 +335,7 @@ void PresentationArea::onPlay()
 void PresentationArea::onRecord()
 {
     if (recording) {
-        recordEnd = currentMax;
+        recordEnd = timeManager->getMaximum();
         // end recording, show record dialog
         int result = showRecordDialog();
         if (result == QMessageBox::Save) {
@@ -356,7 +346,7 @@ void PresentationArea::onRecord()
         else if (result == QMessageBox::Ok) // go on with the recording
             recording = true;
     } else {
-        recordStart = currentMax;
+        recordStart = timeManager->getMaximum();
         recording = true;
     }
 
