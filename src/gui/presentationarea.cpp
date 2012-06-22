@@ -51,6 +51,8 @@ PresentationArea::PresentationArea(const DataProvider &dataProvider,
     connect(this, SIGNAL(changedViewHeight(int)), cursor, SLOT(updateHeight(int)));
     connect(this, SIGNAL(changedViewHeight(int)), selection, SLOT(updateHeight(int)));
 
+    connect(this, SIGNAL(changedViewWidth(int)), timeLine, SLOT(updateWidth(int)));
+
     connect(selection, SIGNAL(onExport(qint64,qint64)),          this, SIGNAL(exportRange(qint64,qint64)));
 
     connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)),this, SLOT(onRangeChanged(qint64,qint64)));
