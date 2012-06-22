@@ -21,6 +21,7 @@ public:
         : timeManager(timeManager),
           selection(selection),
           cursor(cursor),
+          createSelection(false),
           offsetLeft(0)
     {}
 
@@ -83,11 +84,11 @@ public:
       */
     void mouseDoubleClickEvent(QMouseEvent *event) {Q_UNUSED(event)}
 private:
-    bool createSelection;
     TimeManager& timeManager;
     Selection& selection;
     Cursor& cursor;
 
+    bool createSelection;
     // TODO delete
     int offsetLeft;
 };
@@ -135,7 +136,7 @@ PresentationArea::PresentationArea(const DataProvider &dataProvider,
 
     connect(this, SIGNAL(changedViewWidth(int)), timeLine, SLOT(updateWidth(int)));
 
-    connect(selection, SIGNAL(onExport(qint64,qint64)),          this, SIGNAL(exportRange(qint64,qint64)));
+    connect(selection, SIGNAL(onExport(qint64,qint64)),          this, SIGNAL(exportRange(qint64,qint64)));   
 
     connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)),this, SLOT(onRangeChanged(qint64,qint64)));
     connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)),timeLine, SLOT(onRangeChanged(qint64,qint64)));
