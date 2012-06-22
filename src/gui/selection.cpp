@@ -34,14 +34,11 @@ Selection::Selection(TimeManager* timeManager, QWidget *parent):
 
 void Selection::update()
 {
-    qint64 begin_ = begin;
-    qint64 end_ = end;
+    int left = timeManager->convertTimeToPos(begin);
+    int right = timeManager->convertTimeToPos(end);
 
-    if(begin_ > end_)
-        std::swap(begin_, end_);
-
-    int left = timeManager->convertTimeToPos(begin_);
-    int right = timeManager->convertTimeToPos(end_);
+    if(left > right)
+        std::swap(left, right);
 
     setFixedWidth(right-left);
     move(left, 0);
