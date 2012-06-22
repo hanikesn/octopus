@@ -181,8 +181,12 @@ void Track::onPlotSettings()
     }
 }
 
-void Track::onOptPlotMarginsRecalculated(int left, int /*right*/, int /*top*/, int /*bottom*/)
+void Track::onOptPlotMarginsRecalculated(int left, int right, int top, int bottom)
 {
+    ui.plot->setMarginRight(right);
+    ui.plot->setMarginTop(top);
+    ui.plot->setMarginBottom(bottom);
+
     if (optPlotMarginLeft != left) {
         optPlotMarginLeft = left;
         emit optPlotMarginsChanged();

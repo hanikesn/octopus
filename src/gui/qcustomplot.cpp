@@ -7279,26 +7279,7 @@ void QCustomPlot::deselectAll()
 */
 void QCustomPlot::replot()
 {
-  if (mReplotting) // incase signals loop back to replot slot
-    return;
-  mReplotting = true;
-  emit beforeReplot();
-  mPaintBuffer.fill(mColor);
-  QCPPainter painter;
-  painter.begin(&mPaintBuffer);
-  if (painter.isActive()) 
-  {
-    painter.setRenderHint(QPainter::HighQualityAntialiasing);
-    draw(&painter);
-    if (mPlottingHints.testFlag(QCP::phForceRepaint))
-      repaint();
-    else
-      update();
-    painter.end();
-  } else // might happen if QCustomPlot has width or height zero
-    qDebug() << Q_FUNC_INFO << "Couldn't activate painter on buffer";
-  emit afterReplot();
-  mReplotting = false;
+    update();
 }
 
 /*!
@@ -7585,9 +7566,18 @@ QSize QCustomPlot::minimumSizeHint() const
 */
 void QCustomPlot::paintEvent(QPaintEvent *event)
 {
-  Q_UNUSED(event);
-  QPainter painter(this);
-  painter.drawPixmap(0, 0, mPaintBuffer);
+  if (mReplotting) // incase signals loop back to replot slot
+    return;
+  mReplotting = true;
+  emit beforeReplot();
+
+  QCPPainter painter(this);
+  painter.fillRect(event->rect(), Qt::white);
+  painter.setRenderHint(QPainter::HighQualityAntialiasing);
+  draw(&painter);
+
+  emit afterReplot();
+  mReplotting = false;
 }
 
 /*! \internal
