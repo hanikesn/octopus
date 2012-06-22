@@ -222,11 +222,14 @@ Track* PresentationArea::add(const QList<QString>& fullDataSeriesNames)
     connect(t, SIGNAL(del(Track*)), this, SLOT(onDelete(Track*)));
 
     tracks.append(t);
-    updatePlotMargins();
 
     t->setPlotRange(timeManager->getLowVisRange(), timeManager->getHighVisRange());
 
     widget()->layout()->addWidget(t);
+    // Layout the widget before we try to calculate sizes
+    t->layout()->activate();
+
+    updatePlotMargins();
 
     // We need to raise them, because otherwise the tracks will be on top
     timeLine->raise();
@@ -270,6 +273,7 @@ void PresentationArea::updatePlotMargins()
     foreach (Track *t, tracks) {
         t->setPlotMarginLeft(optMargin);
     }
+
     timeManager->onOffsetChanged(tracks.first()->getPlotOffset() + optMargin);
 }
 
