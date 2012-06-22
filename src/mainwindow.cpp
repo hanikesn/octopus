@@ -355,14 +355,10 @@ void MainWindow::onRecord()
 
 void MainWindow::onSaveProject(qint64 start, qint64 end)
 {
-    qDebug() << Q_FUNC_INFO << start << "|" << end;
-
     // initiate save (project file)
     save(true, start, end);
 
-    //TODO(steffen): initiate save (database with range (start, end)
-
-    //TODO(domi): Projekt speichern, in die DB nur Bereich aufnehmen
+    //TODO(steffen): initiate save (database with range (start, end)    
 }
 
 bool MainWindow::writeProjectSettings(QVariantMap pName, QString path)
