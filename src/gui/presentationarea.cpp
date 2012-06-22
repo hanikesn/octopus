@@ -27,10 +27,10 @@ PresentationArea::PresentationArea(const DataProvider &dataProvider,
     currentMax(0)
 {
     setObjectName("PresentationArea");
-    timeLine = new TimeLine(52, this);
     timeManager = new TimeManager(hScrollBar, this);
-    selection = new Selection(timeManager, this);
-    cursor = new Cursor(timeManager, this);
+    timeLine = new TimeLine(52, viewport());
+    selection = new Selection(timeManager, viewport());
+    cursor = new Cursor(timeManager, viewport());
 
     setWidget(new TrackHolder(*timeManager, *cursor, *selection, this));
     setWidgetResizable(true);
@@ -115,6 +115,11 @@ Track* PresentationArea::add(const QList<QString>& fullDataSeriesNames)
     updatePlotMargins();
 
     widget()->layout()->addWidget(t);
+
+    // We need to raise them, because otherwise the tracks will be on top
+    timeLine->raise();
+    selection->raise();
+    cursor->raise();
 
     t->setPlotRange(timeManager->getLowVisRange(), timeManager->getHighVisRange());
 
