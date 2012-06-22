@@ -22,8 +22,6 @@ public:
 public slots:
     void setTime(qint64 time);
 
-    void onOffsetChanged(int offset);
-
     void updateHeight(int height);
 
     void update();
@@ -31,7 +29,6 @@ public slots:
 private:    
     QPen pen;    
     QBrush brush;
-    int offsetLeft;
 
     qint64 currentTime;
 

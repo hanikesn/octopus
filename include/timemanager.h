@@ -72,6 +72,8 @@ public:
 
     Playstate getPlaystate() {return playstate;}
 
+    int getOffset() {return offsetLeft;}
+
 signals:
     void rangeChanged(qint64 begin, qint64 end);
 
@@ -89,6 +91,8 @@ public slots:
     void onPlay();
 
     void onNewUpperEnd(qint64 max);
+
+    void onOffsetChanged(int offset);
 
 private slots:
     void onTimeout();
@@ -129,6 +133,7 @@ private:
 
     TimeLine *timeLine;
 
+    int offsetLeft;
 
     qint64 getZoomFactor(bool zoomOut);
 

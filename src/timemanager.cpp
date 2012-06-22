@@ -236,6 +236,11 @@ qint64 TimeManager::getUpperEnd(qint64 lowerEnd)
     return highVisRange;
 }
 
+void TimeManager::onOffsetChanged(int offset)
+{
+    offsetLeft = offset;
+}
+
 void TimeManager::onPlay()
 {
     switch(playstate)

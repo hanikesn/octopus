@@ -21,8 +21,7 @@ public:
         : timeManager(timeManager),
           selection(selection),
           cursor(cursor),
-          createSelection(false),
-          offsetLeft(0)
+          createSelection(false)
     {}
 
     /**
@@ -33,11 +32,11 @@ public:
     {
         if ((event->button() == Qt::LeftButton) &&
                 (event->modifiers() == Qt::ShiftModifier) &&
-                (event->pos().x() >= offsetLeft) &&
+                (event->pos().x() >= timeManager.getOffset()) &&
                 (timeManager.getPlaystate() != TimeManager::PLAYING)) {
             createSelection = true;
             selection.show();
-            selection.setSelectionBegin(timeManager.convertPosToTime(event->pos().x()));
+            selection.setSelectionBegin(timeManager.convertPosToTime(event->pos().x() - timeManager.getOffset()));
         }
     }
 
@@ -52,12 +51,12 @@ public:
     {
         if(createSelection){
             createSelection = false;
-            int selectionEnd = event->pos().x() < offsetLeft ? offsetLeft : event->pos().x();
+            int selectionEnd = qMax(event->pos().x(), timeManager.getOffset());
 
             selection.setSelectionEnd(timeManager.convertPosToTime(selectionEnd));
             cursor.setVisible(false);
-        } else if (event->pos().x() >= offsetLeft) {
-            qint64 currentTime = timeManager.convertPosToTime(event->pos().x()- offsetLeft);
+        } else if (event->pos().x() >= timeManager.getOffset()) {
+            qint64 currentTime = timeManager.convertPosToTime(event->pos().x() - timeManager.getOffset());
             timeManager.setTime(currentTime);
             selection.hide();
         }
@@ -73,8 +72,8 @@ public:
     {
         if((event->modifiers() != Qt::ShiftModifier)){
             createSelection = false;
-        } else if(event->pos().x() >= offsetLeft) {
-            selection.setSelectionEnd(timeManager.convertPosToTime(event->pos().x()));
+        } else if(event->pos().x() >= timeManager.getOffset()) {
+            selection.setSelectionEnd(timeManager.convertPosToTime(event->pos().x() - timeManager.getOffset()));
         }
     }
 
@@ -89,8 +88,6 @@ private:
     Cursor& cursor;
 
     bool createSelection;
-    // TODO delete
-    int offsetLeft;
 };
 
 PresentationArea::PresentationArea(const DataProvider &dataProvider,
@@ -231,14 +228,14 @@ Track* PresentationArea::add(const QList<QString>& fullDataSeriesNames)
     tracks.append(t);
     updatePlotMargins();
 
+    t->setPlotRange(timeManager->getLowVisRange(), timeManager->getHighVisRange());
+
     widget()->layout()->addWidget(t);
 
     // We need to raise them, because otherwise the tracks will be on top
     timeLine->raise();
     selection->raise();
     cursor->raise();
-
-    t->setPlotRange(timeManager->getLowVisRange(), timeManager->getHighVisRange());
 
     unsavedChanges = true;
     return t;
@@ -281,13 +278,12 @@ void PresentationArea::onNewMax(qint64 max)
 
 void PresentationArea::setPlotMargins(int newMargin)
 {
-    /*if (!tracks.isEmpty()) {
+    if (!tracks.isEmpty()) {
         foreach (Track *t, tracks) {
             t->setPlotMarginLeft(newMargin);
         }
-        pi->setOffsetLeft(tracks.first()->getPlotOffset() + newMargin);
-        emit offsetChanged(tracks.first()->getPlotOffset() + newMargin);
-    }*/
+        timeManager->onOffsetChanged(tracks.first()->getPlotOffset() + newMargin);
+    }
 }
 
 int PresentationArea::showRecordDialog()

@@ -88,7 +88,7 @@ void Track::setPlotRange(qint64 begin, qint64 end)
         ui.plot->xAxis->setRange(begin, end);
 		{
             MEASURE("plot");
-			ui.plot->replot();
+            ui.plot->replot();
 		}
     }
 }

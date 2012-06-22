@@ -52,7 +52,6 @@ signals:
     void play();
     void zoomIn();
     void zoomOut();
-    void offsetChanged(int);
     void saveProject(qint64 start, qint64 end);
 
     void changedViewHeight(int h);
