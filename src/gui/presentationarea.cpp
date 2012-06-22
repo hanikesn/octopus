@@ -105,12 +105,11 @@ PresentationArea::PresentationArea(const DataProvider &dataProvider,
     currentMax(0)
 {
     setObjectName("PresentationArea");
+
     timeManager = new TimeManager(hScrollBar, this);
     timeLine = new TimeLine(52, viewport());
     selection = new Selection(timeManager, viewport());
     cursor = new Cursor(timeManager, viewport());
-
-    viewportMouseHandler = new EventHandler(*timeManager, *cursor, *selection);
 
     setWidget(new QWidget(this));
     setWidgetResizable(true);
@@ -121,6 +120,15 @@ PresentationArea::PresentationArea(const DataProvider &dataProvider,
     // This is needed because we embed the layout in a scroll area
     widget()->layout()->setSizeConstraint(QLayout::SetMinAndMaxSize);
 
+    QWidget* placeholder = new QWidget();
+    placeholder->setFixedHeight(timeLine->size().height());
+    widget()->layout()->addWidget(placeholder);
+
+    timeLine->raise();
+    selection->raise();
+    cursor->raise();
+
+    viewportMouseHandler = new EventHandler(*timeManager, *cursor, *selection);
     viewport()->installEventFilter(this);
 
     connect(timeManager, SIGNAL(currentTimeChanged(qint64)), cursor, SLOT(setTime(qint64)));
