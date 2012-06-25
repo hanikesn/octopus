@@ -40,7 +40,12 @@ public:
 
     int getOffset() {return offsetLeft;}
 
-    int getStepSize() {return stepSize;}
+    // determines how much time should be between 2 big ticks in the timeline (in microseconds)
+    int getStepSize();
+
+    // TODO ugly, scrollbar sollte nicht im mainwindow sein, sondern der presentation area bekannt sein,
+    // damit man sie hier die events nicht vorwarden muss.
+    void forwardEventToScrollbar(QEvent *ev);
 
 private:
     /**
@@ -56,8 +61,12 @@ signals:
 
 public slots:
     void onNewMax(qint64 timestamp);
-    void onZoomIn();
-    void onZoomOut();
+
+    /**
+     * @brief onZoom
+     * @param factor positive means zoom in
+     */
+    void onZoom(int factor);
 
     void setTime(qint64);
 
@@ -83,9 +92,6 @@ private:
     qint64 maximum;
 
     qint64 currentTime;
-
-    // determines how much time should be between 2 big ticks in the timeline (in microseconds)
-    qint64 stepSize;
 
     bool playing;
 
