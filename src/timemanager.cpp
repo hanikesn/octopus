@@ -12,25 +12,18 @@ TimeManager::TimeManager(QScrollBar *hScrollBar, QObject* parent):
     highVisRange(30000000),
     timePerPx(40000),
     maximum(0),
-    timeoutUpdateIntervall(40000),
-    timeoutIntervall(40),
     stepSize(2000000), // 2 seconds
-    playstate(PAUSED),
+    playing(false),
     autoScroll(false),
     hScrollBar(hScrollBar),
-    timer(new QTimer(this)),
-    resolution(1000000)
+    timer(new QTimer(this))
 {
     hScrollBar->setSingleStep(1);
-    hScrollBar->setPageStep(30);
-    hScrollBar->setMinimum(0);
-    hScrollBar->setMaximum(0);
 
     timer->setSingleShot(false);
-    timer->setInterval(timeoutIntervall);
+    timer->setInterval(40);
     connect(timer, SIGNAL(timeout()),                  this, SLOT(onTimeout()));
 
-    connect(hScrollBar, SIGNAL(sliderMoved(int)),       this, SLOT(horizontalScroll(int)));
     connect(hScrollBar, SIGNAL(valueChanged(int)),      this, SLOT(horizontalScroll(int)));
 }
 
@@ -53,15 +46,10 @@ int TimeManager::convertTimeToPos(qint64 time)
     return pos + offsetLeft;
 }
 
-void TimeManager::addRange(qint64 delta)
+void TimeManager::setRange(qint64 begin, qint64 end)
 {
-    if (delta <= 0) return;
-    emit rangeChanged(lowVisRange + delta, highVisRange + delta);
-
-    // no signals necessary if we trigger them ourselves
-    hScrollBar->blockSignals(true);
-    hScrollBar->setValue(lowVisRange/1000000);
-    hScrollBar->blockSignals(false);
+    updateScrollBar(false);
+    emit rangeChanged(begin, end);
 }
 
 void TimeManager::load(QVariantMap *qvm)
@@ -75,7 +63,7 @@ void TimeManager::load(QVariantMap *qvm)
     // step-size of scrollbar is 1 second --> left border of timeline is always a full second
     // so we can set the value of the scrollbars slider to the second visRangeLow represents
     hScrollBar->blockSignals(true);
-    hScrollBar->setValue(lowVisRange/1000000);
+    hScrollBar->setValue(lowVisRange/getTimePerPx());
     hScrollBar->blockSignals(false);
 
 
@@ -98,10 +86,7 @@ void TimeManager::center(qint64 timestamp)
 
     lowVisRange = timestamp - range/2;
     highVisRange = timestamp + range/2;
-    emit rangeChanged(lowVisRange, highVisRange);
-    hScrollBar->blockSignals(true);
-    hScrollBar->setValue(lowVisRange/1000000);
-    hScrollBar->blockSignals(false);
+    setRange(lowVisRange, highVisRange);
 }
 
 void TimeManager::setTime(qint64 time)
@@ -131,19 +116,18 @@ qint64 TimeManager::getZoomFactor(bool zoomOut)
 
 void TimeManager::updateScrollBar(bool scroll)
 {
-    if ((highVisRange - lowVisRange) <= 10000000) // visible range is less than 10s
-        resolution = 100000; // hScrollBars resolution is 100ms
+    int max = getMaximum() / getTimePerPx();
+    hScrollBar->setMaximum(max);
 
-    int max = maximum/resolution; // max in either in seconds or 100ms
-    int min = 0;
-
-    hScrollBar->setMaximum(max - hScrollBar->pageStep());
-    hScrollBar->setMinimum(min);
+    hScrollBar->blockSignals(true);
+    hScrollBar->setValue(lowVisRange/getTimePerPx());
+    hScrollBar->blockSignals(false);
 
     if (scroll) {
         qint64 timeFrame = highVisRange - lowVisRange;
         hScrollBar->setValue(hScrollBar->maximum());
         qint64 lowerRange = maximum < timeFrame ? 0 : maximum - timeFrame;
+        // emit the signal directly to prevent a loop
         emit rangeChanged(lowerRange, maximum);
     }
 }
@@ -166,7 +150,6 @@ void TimeManager::onZoomIn()
     timePerPx = stepSize / 50;
     // initiate redraw according to new range
     onNewWidth(width);
-    updateScrollBar(false);
 }
 
 void TimeManager::onZoomOut()
@@ -175,24 +158,31 @@ void TimeManager::onZoomOut()
     timePerPx = stepSize / 50;
     // initiate redraw according to new range
     onNewWidth(width);
-    updateScrollBar(false);
 }
 
 void TimeManager::horizontalScroll(int pos)
 {
     qint64 range = highVisRange - lowVisRange;
-    lowVisRange = pos * resolution;
+    lowVisRange = pos * getTimePerPx();
     highVisRange = lowVisRange + range;
-    emit rangeChanged(lowVisRange, highVisRange);
+    setRange(lowVisRange, highVisRange);
 }
 
 void TimeManager::onTimeout()
 {
     currentTime += getTimePerPx();
     if (currentTime > getMaximum()) { // stop playing
-        playstate = PAUSED;
+        playing = true;
         timer->stop();
         return;
+    }
+
+    // We need to adjust the range slightly so that the cursor stays visible
+    if(currentTime>highVisRange- getTimePerPx()) {
+        qint64 range = highVisRange - lowVisRange;
+        highVisRange = currentTime + getTimePerPx();
+        lowVisRange = highVisRange - range;
+        setRange(lowVisRange, highVisRange);
     }
 
     emit currentTimeChanged(currentTime);
@@ -201,32 +191,29 @@ void TimeManager::onTimeout()
 void TimeManager::onOffsetChanged(int offset)
 {
     offsetLeft = offset;
-    // TODO besser berechnen
     onNewWidth(width);
 }
 
 void TimeManager::onNewWidth(int w)
 {
     width = w;
+    hScrollBar->setPageStep(w);
     highVisRange = lowVisRange + timePerPx * (w - offsetLeft);
-    emit rangeChanged(lowVisRange, highVisRange);
+    setRange(lowVisRange, highVisRange);
 }
 
 void TimeManager::onPlay()
 {
-    switch(playstate)
+    if(playing)
     {
-    case PLAYING:
-        playstate = PAUSED;
+        playing = false;
         timer->stop();
-        break;
-    case PAUSED:
-        playstate = PLAYING;
+    } else {
+        playing = true;
         if (currentTime > getHighVisRange() || currentTime < getLowVisRange()) {
             center(currentTime);
             emit currentTimeChanged(currentTime);
         }
         timer->start();
-        break;
     }
 }

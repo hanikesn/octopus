@@ -299,20 +299,19 @@ void MainWindow::save(bool saveAs, qint64 begin, qint64 end)
     if (fileName.isEmpty()) return;  // dialog cancelled
 
     // The db lies in a temporary file. We might need to move it.
-    QString dbname = fileName;
+    QString dbname = fileName + ".db";
     dbname.remove(QRegExp(".oct$"));
 
     QVariantMap pName; // Map with the projects settings
     if ((begin == -1) && (end == -1)) { // save all
-        projectPath = fileName;
-        dataProvider->moveDB(dbname + ".db"); // move tmp-database if we save all
+        projectPath = fileName;       
+        dataProvider->moveDB(dbname); // move tmp-database if we save all        
 
         if (writeProjectSettings(pName, projectPath)) // in case save was successfull ...
             pa->setUnsavedChanges(false); // ... clear flag in PresentationArea
     } else { // save range
         QString subProjectPath = fileName;
-        // TODO(steffen): dataProvider->movePartDB(dbname  + ".db", begin, end)    oder so ähnlich
-
+        dataProvider->copyDB(dbname, begin, end);
         writeProjectSettings(pName, subProjectPath);
     }
 }
