@@ -195,6 +195,14 @@ void TimeManager::onTimeout()
         return;
     }
 
+    // We need to adjust the range slightly so that the cursor stays visible
+    if(currentTime>highVisRange- getTimePerPx()) {
+        qint64 range = highVisRange - lowVisRange;
+        highVisRange = currentTime + getTimePerPx();
+        lowVisRange = highVisRange - range;
+        emit rangeChanged(lowVisRange, highVisRange);
+    }
+
     emit currentTimeChanged(currentTime);
 }
 
