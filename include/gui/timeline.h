@@ -38,9 +38,10 @@ private:
     int bottom;
     int textBoxWidth;
     int textBoxHeight;
-    int shortTickHeight;
+    int smallTickHeight;
     int mediumTickHeight;
     int largeTickHeight;
+    int offset;
     QPen pen;
 
     qint64 largeTickAmount;
@@ -52,6 +53,10 @@ private:
     TimeRepresentation timeRepresentation;
 
     void drawTicks(QPainter *painter);
+
+    void drawLargeTick(QPainter *painter, double value);
+    void drawMediumTick(QPainter *painter);
+    void drawSmallTick(QPainter *painter);
 };
 
 #endif // TIMELINE_H
