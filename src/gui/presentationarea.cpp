@@ -28,7 +28,7 @@ public:
         if ((event->button() == Qt::LeftButton) &&
                 (event->modifiers() == Qt::ShiftModifier) &&
                 (event->pos().x() >= timeManager.getOffset()) &&
-                (timeManager.getPlaystate() != TimeManager::PLAYING)) {
+                !timeManager.isPlaying()) {
             createSelection = true;
             selection.show();
             selection.setSelectionBegin(timeManager.convertPosToTime(event->pos().x()));

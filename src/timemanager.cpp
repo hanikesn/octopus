@@ -15,7 +15,7 @@ TimeManager::TimeManager(QScrollBar *hScrollBar, QObject* parent):
     timeoutUpdateIntervall(40000),
     timeoutIntervall(40),
     stepSize(2000000), // 2 seconds
-    playstate(PAUSED),
+    playing(false),
     autoScroll(false),
     hScrollBar(hScrollBar),
     timer(new QTimer(this)),
@@ -30,7 +30,6 @@ TimeManager::TimeManager(QScrollBar *hScrollBar, QObject* parent):
     timer->setInterval(timeoutIntervall);
     connect(timer, SIGNAL(timeout()),                  this, SLOT(onTimeout()));
 
-    connect(hScrollBar, SIGNAL(sliderMoved(int)),       this, SLOT(horizontalScroll(int)));
     connect(hScrollBar, SIGNAL(valueChanged(int)),      this, SLOT(horizontalScroll(int)));
 }
 
@@ -51,17 +50,6 @@ int TimeManager::convertTimeToPos(qint64 time)
         pos++;
     }
     return pos + offsetLeft;
-}
-
-void TimeManager::addRange(qint64 delta)
-{
-    if (delta <= 0) return;
-    emit rangeChanged(lowVisRange + delta, highVisRange + delta);
-
-    // no signals necessary if we trigger them ourselves
-    hScrollBar->blockSignals(true);
-    hScrollBar->setValue(lowVisRange/1000000);
-    hScrollBar->blockSignals(false);
 }
 
 void TimeManager::load(QVariantMap *qvm)
@@ -190,7 +178,7 @@ void TimeManager::onTimeout()
 {
     currentTime += getTimePerPx();
     if (currentTime > getMaximum()) { // stop playing
-        playstate = PAUSED;
+        playing = true;
         timer->stop();
         return;
     }
@@ -222,19 +210,16 @@ void TimeManager::onNewWidth(int w)
 
 void TimeManager::onPlay()
 {
-    switch(playstate)
+    if(playing)
     {
-    case PLAYING:
-        playstate = PAUSED;
+        playing = false;
         timer->stop();
-        break;
-    case PAUSED:
-        playstate = PLAYING;
+    } else {
+        playing = true;
         if (currentTime > getHighVisRange() || currentTime < getLowVisRange()) {
             center(currentTime);
             emit currentTimeChanged(currentTime);
         }
         timer->start();
-        break;
     }
 }
