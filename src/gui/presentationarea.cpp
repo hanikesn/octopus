@@ -236,8 +236,7 @@ void PresentationArea::onDelete(Track *t)
 void PresentationArea::onRangeChanged(qint64 begin, qint64 end)
 {            
     foreach (Track *t, tracks) {
-        //if (pi->isVisible(t))
-            t->setPlotRange(begin, end);
+        t->setPlotRange(begin, end);
     }
     if (!tracks.isEmpty())
         unsavedChanges = true;
