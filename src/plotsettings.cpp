@@ -3,7 +3,9 @@
 // This list needs to be kept up to date with the respective enum in the header file!
 const QStringList PlotSettings::scaleTypeNames = QStringList() << "lin" << "log";
 
-PlotSettings::PlotSettings()
+PlotSettings::PlotSettings() :
+    scalingMode(NOSCALING),
+    plotScaleType(NOT_SCALABLE)
 {
 }
 
@@ -19,7 +21,11 @@ void PlotSettings::setOffset(const QString &fullDataSeriesName, int microSecs)
 
 int PlotSettings::offset(const QString &fullDataSeriesName) const
 {
-    offsets.value(fullDataSeriesName);
+    if (offsets.contains(fullDataSeriesName)) {
+        return offsets.value(fullDataSeriesName);
+    } else {
+        return 0;
+    }
 }
 
 void PlotSettings::setScaleType(const QString &fullDataSeriesName, ScaleType scaleType)
@@ -29,5 +35,9 @@ void PlotSettings::setScaleType(const QString &fullDataSeriesName, ScaleType sca
 
 PlotSettings::ScaleType PlotSettings::scaleType(const QString &fullDataSeriesName) const
 {
-    return scaleTypes.value(fullDataSeriesName);
+    if (scaleTypes.contains(fullDataSeriesName)) {
+        return scaleTypes.value(fullDataSeriesName);
+    } else {
+        return NOT_SCALABLE;
+    }
 }

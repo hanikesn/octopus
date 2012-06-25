@@ -39,6 +39,7 @@ public:
     ScaleType scaleType(const QString &fullDataSeriesName) const;
 
     ScaleType plotScaleType;
+    ScalingMode scalingMode;
 
 private:
     QMap<QString, int> offsets;
