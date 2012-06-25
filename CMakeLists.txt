@@ -54,7 +54,6 @@ set(Octopus_SOURCES
   src/gui/interpolatinggraph.cpp
   src/gui/plotsettingsdialog.cpp
   src/gui/presentationarea.cpp
-  src/gui/presentationitem.cpp
   src/gui/qcustomplot.cpp
   src/gui/selection.cpp
   src/gui/sourcedialog.cpp
@@ -87,7 +86,6 @@ set(Octopus_HEADERS
   include/gui/interpolatinggraph.h
   include/gui/plotsettingsdialog.h
   include/gui/presentationarea.h
-  include/gui/presentationitem.h
   include/gui/qcustomplot.h
   include/gui/selection.h
   include/gui/sourcedialog.h

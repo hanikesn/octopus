@@ -3,7 +3,6 @@
 
 #include "gui/qcustomplot.h"
 
-//#include <QPair>
 #include <algorithm>
 
 const QCPRange RANGE(0.0, 1.0);

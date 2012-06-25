@@ -7,8 +7,6 @@
 
 #include "timemanager.h"
 
-#include "gui/presentationitem.h"
-
 Selection::Selection(TimeManager* timeManager, QWidget *parent):
     QWidget(parent),
     begin(0),

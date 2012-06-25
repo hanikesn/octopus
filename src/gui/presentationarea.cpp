@@ -1,12 +1,6 @@
 #include "gui/presentationarea.h"
 
-#include <QGraphicsScene>
-#include <QGraphicsWidget>
-#include <QScrollBar>
-#include <QMessageBox>
-
 #include "gui/selection.h"
-#include "gui/presentationitem.h"
 #include "dataprovider.h"
 #include "gui/cursor.h"
 #include "gui/sourcedialog.h"
