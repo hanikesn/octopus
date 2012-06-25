@@ -241,7 +241,7 @@ void Track::load(QVariantMap *qvm)
         foreach (Graph *g, graphs) { // look for the graph which was just added.
             if (g->dataSeriesName() == name) {
                 g->setScaleType((PlotSettings::ScaleType) scaling);
-                return; // there won't be the same graph in this track again --> we can quit the loop
+                break; // there won't be the same graph in this track again --> we can quit the loop
             }
         }
     }

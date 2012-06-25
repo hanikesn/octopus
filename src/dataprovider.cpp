@@ -46,7 +46,6 @@ void DataProvider::save(QVariantMap *qvm)
         tmp.insert("offset", ads->offset);
         seriesList << tmp;
     }
-    dataProvider.insert("dbfile", getDBFileName());
     dataProvider.insert("dataSeries", seriesList);
     qvm->insert("dataProvider", dataProvider);
 }

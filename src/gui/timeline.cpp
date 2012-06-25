@@ -16,17 +16,16 @@ TimeLine::TimeLine(TimeManager& timeManager, QWidget * parent):
     smallTickHeight(5),
     mediumTickHeight(10),
     largeTickHeight(15),
+    offset(timeManager.getOffset()),
     pen(Qt::black, 1, Qt::SolidLine),
     largeTickAmount(2000000), // two seconds in µs
     mediumTickAmount(1000000), // one second in µs
     smallTickAmount(200000), // 0,2 seconds in µs
     timePerPx(40000), // Amount of time which one pixel represents 40 milliseconds in µs
-    timeRepresentation(SECOND_FULL),
-    offset(timeManager.getOffset())
+    timeRepresentation(SECOND_FULL)
 {
     setObjectName("TimeLine");
     setAttribute(Qt::WA_TransparentForMouseEvents);
-    resize(946, 50);
 }
 
 void TimeLine::paintEvent(QPaintEvent *)

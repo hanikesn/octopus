@@ -5,7 +5,7 @@
 #include <QMessageBox>
 #include <sstream>
 #include <QDateTime>
-//#include <QKeySequence>
+#include <QSignalMapper>
 #include <QCloseEvent>
 
 #include "gui/sourcedialog.h"
@@ -24,6 +24,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     pa(0),
     dataProvider(0),
+    networkAdapter(0),
     timeManager(0),
     recorder(0)
 {    
@@ -57,7 +58,12 @@ MainWindow::MainWindow(QWidget *parent) :
     //TODO(domi): Kommentare wegmachen
 //    StartScreen *s = new StartScreen(this);
 //    if (s->showScreen() == StartScreen::LOAD)
-//        onLoad();
+    //        onLoad();
+}
+
+MainWindow::~MainWindow()
+{
+    networkAdapter->deleteLater();
 }
 
 void MainWindow::onExportAction()
@@ -110,7 +116,8 @@ void MainWindow::setUpButtonBars()
     toolBarWidget.setLayout(&layout);
 
     connect(&loadButton, SIGNAL(clicked()), this, SLOT(onLoad()));
-    connect(&exportButton, SIGNAL(clicked()), this, SLOT(onExportAction()));    
+    connect(&exportButton, SIGNAL(clicked()), this, SLOT(onExportAction()));
+    connect(&recButton, SIGNAL(clicked()), this, SLOT(onRecord()));
 
     ui.mainToolBar->addWidget(&toolBarWidget);
     addToolBar(Qt::LeftToolBarArea, ui.mainToolBar);
@@ -170,8 +177,8 @@ void MainWindow::onSaveAs()
 }
 
 void MainWindow::onLoad()
-{
-    if(checkForUnsavedChanges() == QMessageBox::Abort) return;
+{    
+    if (checkForUnsavedChanges() == QMessageBox::Abort) return;
     QString fileName = QFileDialog::getOpenFileName(this, tr("Load File"),
                                                     projectPath, "Octopus (*.oct)");
     if(fileName.isEmpty()) return;
@@ -187,13 +194,18 @@ void MainWindow::onLoad()
         return;
     }
     DataProvider* olddataProvider = dataProvider;
-    QString dbfile = result["dataProvider"].toMap().find("dbfile").value().toString();
+    QString dbfile = result["dbfile"].toString();
     // load the db might fail
     try {
         dataProvider = new DataProvider(dbfile, this);
     } catch(std::exception& e) {
         qDebug() << "Loading of DB failed.";
         return;
+    }
+    // in case there is a networkAdapter, delete it. We opened an old project --> no new data accepted!
+    if (networkAdapter) {
+        networkAdapter->deleteLater();
+        networkAdapter = 0;
     }
 
     // at this point loading was successful --> delete old presentationArea and create new one.
@@ -236,14 +248,20 @@ static void addData(DataProvider& dp)
 
 void MainWindow::onNew()
 {
-    if(checkForUnsavedChanges() == QMessageBox::Abort) return;
+    if (checkForUnsavedChanges() == QMessageBox::Abort) return;
 
-    if(dataProvider) {
+    if (dataProvider) {
         dataProvider->closeDB();
         dataProvider->deleteLater();
     }
+
+    if (networkAdapter) {
+        networkAdapter->deleteLater();
+    }
+
     // create a temporary file for the db
     dataProvider = new DataProvider(QDir::tempPath() + "/Octopus-" + QDateTime::currentDateTime().toString("yyyyMMdd_hhmmsszzz"), this);
+    networkAdapter = new NetworkAdapter();
 
     setUpView();
     addData(*dataProvider);
@@ -277,20 +295,25 @@ void MainWindow::setUpView()
 
     connect(pa, SIGNAL(exportRange(qint64,qint64)), this, SLOT(onExportRange(qint64,qint64)));
     connect(recorder, SIGNAL(saveProject(qint64,qint64)), this, SLOT(onSaveProject(qint64,qint64)));
-    connect(&zoomInButton, SIGNAL(clicked()), timeManager, SLOT(onZoomIn()));
-    connect(&zoomOutButton, SIGNAL(clicked()), timeManager, SLOT(onZoomOut()));
     connect(&addTrackButton, SIGNAL(clicked()), pa, SLOT(onAddTrack()));
     connect(&plotSettingsButton, SIGNAL(clicked()), pa, SLOT(onPlotSettings()));
 
+    QSignalMapper* mapZoom = new QSignalMapper(this);
+    mapZoom->setMapping(&zoomInButton, 100);
+    mapZoom->setMapping(&zoomOutButton, -100);
+    connect(&zoomOutButton, SIGNAL(clicked()), mapZoom, SLOT(map()));
+    connect(&zoomInButton, SIGNAL(clicked()), mapZoom, SLOT(map()));
+    connect(mapZoom, SIGNAL(mapped(int)), timeManager, SLOT(onZoom(int)));
+
     qRegisterMetaType<EIDescriptionWrapper>("EIDescriptionWrapper");
     qRegisterMetaType<Value>("Value");
-    connect(&networkAdapter, SIGNAL(onNewSender(EIDescriptionWrapper)), dataProvider, SLOT(onNewSender(EIDescriptionWrapper)), Qt::QueuedConnection);
-    connect(&networkAdapter, SIGNAL(onNewData(qint64,QString,Value)),      dataProvider, SLOT(onNewData(qint64,QString,Value)), Qt::QueuedConnection);
 
-    networkAdapter.discoverSenders();
-
-    connect(&playButton, SIGNAL(clicked()), timeManager, SLOT(onPlay()));
-    connect(&recButton, SIGNAL(clicked()), this, SLOT(onRecord()));
+    if (networkAdapter) {
+        connect(networkAdapter, SIGNAL(onNewSender(EIDescriptionWrapper)), dataProvider, SLOT(onNewSender(EIDescriptionWrapper)), Qt::QueuedConnection);
+        connect(networkAdapter, SIGNAL(onNewData(qint64,QString,Value)),      dataProvider, SLOT(onNewData(qint64,QString,Value)), Qt::QueuedConnection);
+        networkAdapter->discoverSenders();
+    }
+    connect(&playButton, SIGNAL(clicked()), timeManager, SLOT(onPlay()));    
 }
 
 void MainWindow::save(bool saveAs, qint64 begin, qint64 end)
@@ -302,16 +325,18 @@ void MainWindow::save(bool saveAs, qint64 begin, qint64 end)
     QString dbname = fileName + ".db";
     dbname.remove(QRegExp(".oct$"));
 
-    QVariantMap pName; // Map with the projects settings
+    QVariantMap pName; // Map with the projects settings    
     if ((begin == -1) && (end == -1)) { // save all
         projectPath = fileName;       
         dataProvider->moveDB(dbname); // move tmp-database if we save all        
+        pName.insert("dbfile", dbname);
 
         if (writeProjectSettings(pName, projectPath)) // in case save was successfull ...
             pa->setUnsavedChanges(false); // ... clear flag in PresentationArea
     } else { // save range
         QString subProjectPath = fileName;
         dataProvider->copyDB(dbname, begin, end);
+        pName.insert("dbfile", dbname);
         writeProjectSettings(pName, subProjectPath);
     }
 }
@@ -375,7 +400,7 @@ void MainWindow::closeEvent(QCloseEvent *ce)
 }
 
 void MainWindow::onRecord()
-{    
+{        
     recButton.setChecked(recorder->toggleRecording());
 }
 

@@ -16,7 +16,8 @@ public:
         : timeManager(timeManager),
           selection(selection),
           cursor(cursor),
-          createSelection(false)
+          createSelection(false),
+          dragging(false)
     {}
 
     /**
@@ -25,13 +26,24 @@ public:
       */
     void mousePressEvent(QMouseEvent *event)
     {
+        if(timeManager.isPlaying())
+            return;
+
+        if(event->pos().x() < timeManager.getOffset())
+            return;
+
         if ((event->button() == Qt::LeftButton) &&
-                (event->modifiers() == Qt::ShiftModifier) &&
-                (event->pos().x() >= timeManager.getOffset()) &&
-                !timeManager.isPlaying()) {
+                (event->modifiers() == Qt::ShiftModifier)) {
             createSelection = true;
             selection.show();
             selection.setSelectionBegin(timeManager.convertPosToTime(event->pos().x()));
+            event->accept();
+        }
+
+        if(event->button() == Qt::MidButton) {
+            dragging = true;
+            dragLastPos = event->pos();
+            event->accept();
         }
     }
 
@@ -44,6 +56,11 @@ public:
       */
     void mouseReleaseEvent(QMouseEvent *event)
     {
+        dragging = false;
+
+        if(event->button() != Qt::LeftButton)
+            return;
+
         if(createSelection){
             createSelection = false;
             int selectionEnd = qMax(event->pos().x(), timeManager.getOffset());
@@ -55,6 +72,8 @@ public:
             timeManager.setTime(currentTime);
             selection.hide();
         }
+
+        event->accept();
     }
 
     /**
@@ -65,10 +84,29 @@ public:
       */
     void mouseMoveEvent(QMouseEvent *event)
     {
-        if((event->modifiers() != Qt::ShiftModifier)){
-            createSelection = false;
-        } else if(event->pos().x() >= timeManager.getOffset()) {
+        if(dragging) {
+            timeManager.movePx(dragLastPos.x() - event->pos().x());
+
+            dragLastPos = event->pos();
+            event->accept();
+        }
+
+        if(createSelection &&
+                event->modifiers() == Qt::ShiftModifier &&
+                event->pos().x() >= timeManager.getOffset()) {
             selection.setSelectionEnd(timeManager.convertPosToTime(event->pos().x()));
+            event->accept();
+        }
+    }
+
+    virtual void wheelEvent(QWheelEvent* event)
+    {
+        if(event->orientation() == Qt::Horizontal) {
+            timeManager.forwardEventToScrollbar(event);
+        } else if(event->orientation() == Qt::Vertical &&
+                  event->modifiers() == Qt::ControlModifier) {
+            timeManager.onZoom(event->delta());
+            event->accept();
         }
     }
 
@@ -83,6 +121,8 @@ private:
     Cursor& cursor;
 
     bool createSelection;
+    bool dragging;
+    QPoint dragLastPos;
 };
 
 PresentationArea::PresentationArea(const DataProvider &dataProvider,
@@ -171,6 +211,9 @@ bool PresentationArea::eventFilter(QObject* obj, QEvent* event)
             break;
         case QEvent::MouseButtonDblClick:
             viewportMouseHandler->mouseDoubleClickEvent(dynamic_cast<QMouseEvent*>(event));
+            break;
+        case QEvent::Wheel:
+            viewportMouseHandler->wheelEvent(dynamic_cast<QWheelEvent*>(event));
             break;
         default:
             break;
