@@ -24,7 +24,7 @@ Selection::Selection(TimeManager* timeManager, QWidget *parent):
 
     setObjectName("Selection");
 
-    hide();
+    setVisible(false);
 }
 
 void Selection::onUpdate()
