@@ -153,17 +153,24 @@ void Track::onPlotSettings()
 {
     // TODO(Steffi)
 
-    QList<AbstractDataSeries*> dataSeries;
-    foreach (QString name, getFullDataSeriesNames()) {
-        AbstractDataSeries *series = dataProvider.getDataSeries(name);
-        if (series) {
-            dataSeries.append(series);
-        }
+    PlotSettings preset;
+
+    switch (ui.plot->yAxis->scaleType()) {
+    case QCPAxis::stLinear:
+        preset.plotScaleType = PlotSettings::LINSCALE;
+        break;
+    case QCPAxis::stLogarithmic:
+        preset.plotScaleType = PlotSettings::LOGSCALE;
+        break;
     }
 
-    PlotSettings settings = PlotSettingsDialog::getSettings(dataSeries, true, false, false);
+    foreach (Graph *g, graphs) {
+        preset.setScaleType(g->dataSeriesName(), g->getScaleType());
+    }
 
-    if (!settings.isEmpty()) {
+    PlotSettings newSettings = PlotSettingsDialog::getSettings(getFullDataSeriesNames(), preset, true, false);
+
+    if (!newSettings.isEmpty()) {
         //    if (settings.scalingMode == PlotSettings::MINMAXSCALING) {
         //        ui.plot->yAxis->setScaleType(QCPAxis::stLinear);
         //        ui.plot->yAxis->setRange(0, 1);
@@ -176,7 +183,7 @@ void Track::onPlotSettings()
         //    }
 
         foreach (Graph *g, graphs) {
-            g->update(settings);
+            g->update(newSettings);
         }
     }
 }

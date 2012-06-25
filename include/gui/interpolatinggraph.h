@@ -15,6 +15,7 @@ public:
     explicit InterpolatingGraph(QCustomPlot *plot, const DoubleSeries &d);
 
     QCPGraph* getGraph();
+    PlotSettings::ScaleType getScaleType() const;
 
     QString dataSeriesName();
     void update(const PlotSettings &settings);
@@ -30,6 +31,7 @@ private:
     qint64 lastUpdate;
 
     PlotSettings::ScalingMode currentScalingMode;
+    PlotSettings::ScaleType currentScaleType;
 
     void configureAppearance(QCPGraph *graph);
     void initialize(QCPGraph *graph, const DoubleSeries &series);

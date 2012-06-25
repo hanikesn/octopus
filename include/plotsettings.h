@@ -21,7 +21,8 @@ public:
     // When changing this enum, also update the respective string list in the source file!
     enum ScaleType {
         LINSCALE,   // linear scale
-        LOGSCALE    // logarithmic scale
+        LOGSCALE,    // logarithmic scale
+        NOT_SCALABLE
     };
 
     static const QStringList scaleTypeNames;
@@ -31,10 +32,16 @@ public:
      */
     bool isEmpty();
 
+    void setOffset(const QString &fullDataSeriesName, int microSecs);
+    int offset(const QString &fullDataSeriesName) const;
+
     void setScaleType(const QString &fullDataSeriesName, ScaleType scaleType);
     ScaleType scaleType(const QString &fullDataSeriesName) const;
 
+    ScaleType plotScaleType;
+
 private:
+    QMap<QString, int> offsets;
     QMap<QString, ScaleType> scaleTypes;
 };
 

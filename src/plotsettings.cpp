@@ -9,7 +9,17 @@ PlotSettings::PlotSettings()
 
 bool PlotSettings::isEmpty()
 {
-    return /*offsets.isEmpty() &&*/ scaleTypes.isEmpty();
+    return offsets.isEmpty() && scaleTypes.isEmpty();
+}
+
+void PlotSettings::setOffset(const QString &fullDataSeriesName, int microSecs)
+{
+    offsets.insert(fullDataSeriesName, microSecs);
+}
+
+int PlotSettings::offset(const QString &fullDataSeriesName) const
+{
+    offsets.value(fullDataSeriesName);
 }
 
 void PlotSettings::setScaleType(const QString &fullDataSeriesName, ScaleType scaleType)
