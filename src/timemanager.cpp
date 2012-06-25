@@ -134,6 +134,11 @@ void TimeManager::onZoom(int factor)
     onNewWidth(width);
 }
 
+void TimeManager::movePx(int px)
+{
+    hScrollBar->setValue(hScrollBar->value() + px);
+}
+
 void TimeManager::horizontalScroll(int pos)
 {
     qint64 range = highVisRange - lowVisRange;
