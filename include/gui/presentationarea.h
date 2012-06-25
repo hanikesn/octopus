@@ -44,9 +44,12 @@ signals:
 
     void changedViewHeight(int h);
     void changedViewWidth(int w);
+
 private slots:
     void onAddTrack();
     void onDelete(Track *t);
+
+    void onPlotSettings();
     /**
       * Is called when the signal rangeChange(qint64, qint64) is emitted.
       * Updates the tracks to the new range.
@@ -77,6 +80,7 @@ private:
     void addTrack(const QList<QString>& fullDataSeriesNames);
     void addTracks(const QList<QString>& fullDataSeriesNames);
     Track* add(const QList<QString>& fullDataSeriesNames);
+    int showRecordDialog();
 };
 
 #endif // PRESENTATIONAREA_H

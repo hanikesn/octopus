@@ -54,6 +54,7 @@ private:
     QWidget toolBarWidget;
     QVBoxLayout layout;
     QPushButton addTrackButton;
+    QPushButton plotSettingsButton;
     QPushButton loadButton;
     QPushButton exportButton;
     QPushButton zoomInButton;

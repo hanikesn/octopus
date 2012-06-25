@@ -68,7 +68,8 @@ void MainWindow::onExportAction()
 
 void MainWindow::setUpButtonBars()
 {    
-    addTrackButton.setIcon(QIcon(":/buttons/toolbar/icons/add_16.png"));    
+    addTrackButton.setIcon(QIcon(":/buttons/toolbar/icons/add_16.png"));
+    plotSettingsButton.setIcon(QIcon(":/buttons/toolbar/settings"));
     loadButton.setIcon(QIcon(":/buttons/toolbar/icons/document-open-3_16.png"));
     exportButton.setIcon(QIcon(":/buttons/toolbar/icons/document-export-4_16.png"));
     zoomInButton.setIcon(QIcon(":/buttons/toolbar/icons/zoom-in_16.png"));
@@ -91,6 +92,7 @@ void MainWindow::setUpButtonBars()
 
     // add buttons to the horizontal layout in the toolbar
     layout.addWidget(&addTrackButton);
+    layout.addWidget(&plotSettingsButton);
     layout.addWidget(&loadButton);
     layout.addWidget(&exportButton);
     layout.addWidget(&zoomInButton);
@@ -277,6 +279,7 @@ void MainWindow::setUpView()
     connect(&zoomInButton, SIGNAL(clicked()), timeManager, SLOT(onZoomIn()));
     connect(&zoomOutButton, SIGNAL(clicked()), timeManager, SLOT(onZoomOut()));
     connect(&addTrackButton, SIGNAL(clicked()), pa, SLOT(onAddTrack()));
+    connect(&plotSettingsButton, SIGNAL(clicked()), pa, SLOT(onPlotSettings()));
 
     qRegisterMetaType<EIDescriptionWrapper>("EIDescriptionWrapper");
     qRegisterMetaType<Value>("Value");
