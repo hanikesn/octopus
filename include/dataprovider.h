@@ -46,6 +46,11 @@ public:
      */
     void moveDB(QString const& newFilename);
 
+    /**
+     * @brief Copy all data within a given range to a new DB
+     */
+    void copyDB(QString filename, qint64 begin, qint64 end);
+
     DatabaseAdapter const& getDB() const;
 
     void closeDB();

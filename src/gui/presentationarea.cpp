@@ -28,7 +28,7 @@ public:
         if ((event->button() == Qt::LeftButton) &&
                 (event->modifiers() == Qt::ShiftModifier) &&
                 (event->pos().x() >= timeManager.getOffset()) &&
-                (timeManager.getPlaystate() != TimeManager::PLAYING)) {
+                !timeManager.isPlaying()) {
             createSelection = true;
             selection.show();
             selection.setSelectionBegin(timeManager.convertPosToTime(event->pos().x()));
@@ -118,8 +118,6 @@ PresentationArea::PresentationArea(const DataProvider &dataProvider,
     viewport()->installEventFilter(this);
 
     connect(timeManager, SIGNAL(currentTimeChanged(qint64)), cursor, SLOT(setTime(qint64)));
-    connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)), cursor, SLOT(update()));
-    connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)), selection, SLOT(update()));
 
     connect(this, SIGNAL(changedViewHeight(int)), cursor, SLOT(updateHeight(int)));
     connect(this, SIGNAL(changedViewHeight(int)), selection, SLOT(updateHeight(int)));
@@ -131,6 +129,8 @@ PresentationArea::PresentationArea(const DataProvider &dataProvider,
 
     connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)),this, SLOT(onRangeChanged(qint64,qint64)));
     connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)),timeLine, SLOT(onRangeChanged(qint64,qint64)));
+    connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)), cursor, SLOT(onUpdate()));
+    connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)), selection, SLOT(onUpdate()));
 
     connect(&dataProvider, SIGNAL(newMax(qint64)), timeManager, SLOT(onNewMax(qint64)));
 

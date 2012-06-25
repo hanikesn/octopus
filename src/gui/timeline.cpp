@@ -13,7 +13,7 @@ TimeLine::TimeLine(TimeManager& timeManager, QWidget * parent):
     beginRange(0),    
     textBoxWidth(50),
     textBoxHeight(10),
-    shortTickHeight(5),
+    smallTickHeight(5),
     mediumTickHeight(10),
     largeTickHeight(15),
     pen(Qt::black, 1, Qt::SolidLine),
@@ -21,7 +21,8 @@ TimeLine::TimeLine(TimeManager& timeManager, QWidget * parent):
     mediumTickAmount(1000000), // one second in µs
     smallTickAmount(200000), // 0,2 seconds in µs
     timePerPx(40000), // Amount of time which one pixel represents 40 milliseconds in µs
-    timeRepresentation(SECOND_FULL)
+    timeRepresentation(SECOND_FULL),
+    offset(timeManager.getOffset())
 {
     setObjectName("TimeLine");
     setAttribute(Qt::WA_TransparentForMouseEvents);
@@ -57,80 +58,68 @@ void TimeLine::paintEvent(QPaintEvent *)
 
 void TimeLine::drawTicks(QPainter *painter)
 {    
-    int offset = timeManager.getOffset();
+    offset = timeManager.getOffset();
     currentPos = 0;
     qint64 currentTime = beginRange;
-    currentTime -= currentTime%timePerPx;
-
     bottom = geometry().height() - 10;
-    /* default:
-      2 seconds: large tick
-      1 second : medium tick
-      0,2 seconds: small tick
-      */
 
-    int stCounter = 0;
-    int mtCounter = 0;
-    int ltCounter = 0;
-    double timeFactor = 0;
-    int digitsAfterPoint = 0;
-    if (timeRepresentation == SECOND_FULL)
-        timeFactor = 1000000;
-    else if (timeRepresentation == SECOND_PART) {
-        timeFactor = 1000000;
-        digitsAfterPoint = 2;
-    } else
+    int stCounter = beginRange / smallTickAmount + 1;
+    int mtCounter = beginRange / mediumTickAmount + 1;
+    int ltCounter = beginRange / largeTickAmount + 1;
+
+    double timeFactor = 1000000;
+    if (timeRepresentation == MILLISECOND)
         timeFactor = 1000;
 
     double output  = 0.0;
+    if (currentTime % largeTickAmount == 0) {
+        output = (double)currentTime / timeFactor;
+        drawLargeTick(painter, output);
+    } else if (currentTime % mediumTickAmount == 0)
+        drawMediumTick(painter);
+    else if (currentTime % smallTickAmount == 0)
+        drawSmallTick(painter);
 
     while (currentPos < geometry().width() - offset) {
-//        if (currentTime % largeTickAmount == 0) {
-//            output = (double)currentTime / timeFactor;
-//            // large tick
-//            painter->drawLine(currentPos + offset, bottom, currentPos + offset,
-//                              bottom - largeTickHeight);
-//            QRect rect = QRect(currentPos + offset - textBoxWidth/2, bottom, textBoxWidth,
-//                               textBoxHeight);
-//            painter->drawText(rect, Qt::AlignCenter, QString("%1").arg(output, 0, 'f',
-//                                                                       digitsAfterPoint));
-
-
-//        } else if (currentTime % mediumTickAmount == 0) {
-//            // medium tick
-//            painter->drawLine(currentPos + offset, bottom, currentPos + offset,
-//                              bottom - mediumTickHeight);
-//        } else if (currentTime % smallTickAmount == 0) {
-//            // small tick
-//            painter->drawLine(currentPos + offset, bottom, currentPos + offset,
-//                              bottom - shortTickHeight);
-//        }
-        if (currentTime >= (ltCounter * largeTickAmount) + beginRange) {
+        if (currentTime / (ltCounter * largeTickAmount) >= 1) { // large tick
             ltCounter++;
             mtCounter++;
             stCounter++;
-            output = (double)currentTime / timeFactor;
-            // large tick
-            painter->drawLine(currentPos + offset, bottom, currentPos + offset,
-                              bottom - largeTickHeight);
-            QRect rect = QRect(currentPos + offset - textBoxWidth/2, bottom, textBoxWidth,
-                               textBoxHeight);
-            painter->drawText(rect, Qt::AlignCenter, QString("%1").arg(output, 0, 'f',
-                                                                       0));
-        } else if (currentTime >= (mtCounter * mediumTickAmount) + beginRange) {
+            output = (double)currentTime / timeFactor;            
+            drawLargeTick(painter, output);
+        } else if (currentTime / (mtCounter * mediumTickAmount) >= 1){ // medium tick
             mtCounter++;
             stCounter++;
-            painter->drawLine(currentPos + offset, bottom, currentPos + offset,
-                              bottom - mediumTickHeight);
-        } else if (currentTime >= (stCounter * smallTickAmount) + beginRange) {
+            drawMediumTick(painter);
+        } else if (currentTime / (stCounter * smallTickAmount) >= 1) { // small tick
             stCounter++;
-            painter->drawLine(currentPos + offset, bottom, currentPos + offset,
-                              bottom - shortTickHeight);
+            drawSmallTick(painter);
         }
-
         currentTime += timePerPx;
         currentPos++;
     }
+}
+
+void TimeLine::drawLargeTick(QPainter *painter, double value)
+{
+    painter->drawLine(currentPos + offset, bottom, currentPos + offset,
+                      bottom - largeTickHeight);
+    QRect rect = QRect(currentPos + offset - textBoxWidth/2, bottom, textBoxWidth,
+                       textBoxHeight);
+    painter->drawText(rect, Qt::AlignCenter, QString("%1").arg(value, 0, 'f',
+                                                               0));
+}
+
+void TimeLine::drawMediumTick(QPainter *painter)
+{
+    painter->drawLine(currentPos + offset, bottom, currentPos + offset,
+                      bottom - mediumTickHeight);
+}
+
+void TimeLine::drawSmallTick(QPainter *painter)
+{
+    painter->drawLine(currentPos + offset, bottom, currentPos + offset,
+                      bottom - smallTickHeight);
 }
 
 void TimeLine::onRangeChanged(qint64 begin, qint64 end)
@@ -143,11 +132,6 @@ void TimeLine::onRangeChanged(qint64 begin, qint64 end)
 
 void TimeLine::onStepSizeChanged(qint64 microSeconds)
 {
-//    largeTickAmount = microSeconds;
-//    mediumTickAmount = microSeconds/2;
-//    smallTickAmount = largeTickAmount/10;
-//    timePerPx = microSeconds/50;
-
     timePerPx = microSeconds/50;    
 
     if (microSeconds % 1000000 == 0)

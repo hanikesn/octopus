@@ -9,6 +9,24 @@
 DatabaseAdapter::DatabaseAdapter(const QString &file)
     : db(file.toLocal8Bit().data())
 {
+    initDB(db);
+
+    stmtAddDataFloat = db.prepare("INSERT INTO data_float VALUES (?,?,?);");
+    stmtAddDataString = db.prepare("INSERT INTO data_string VALUES (?,?,?);");
+    stmtSelectDataWithTimeFloat = db.prepare("SELECT time, value FROM data_float WHERE name=? and time>=? and time<=?;");
+    stmtSelectDataWithTimeString = db.prepare("SELECT time, value FROM data_string WHERE name=? and time>=? and time<=?;");
+    stmtSelectDataFloat = db.prepare("SELECT time, value FROM data_float WHERE name=?;");
+    stmtSelectDataString = db.prepare("SELECT time, value FROM data_string WHERE name=?;");
+
+    stmtAddSender = db.prepare("INSERT OR REPLACE INTO senders VALUES (?,?)");
+    stmtSelectSender = db.prepare("SELECT * from senders");
+
+    stmtAddSeries = db.prepare("INSERT OR REPLACE INTO series VALUES (?,?,?,?,?,?,?)");
+    stmtSelectSeries = db.prepare("SELECT * from series where sender=?");
+}
+
+void DatabaseAdapter::initDB(Sqlite::DB &db)
+{
     db.execute("PRAGMA journal_mode=WAL;");
     db.execute("PRAGMA locking_mode=EXCLUSIVE;");
     db.execute("PRAGMA synchronous=OFF;");
@@ -33,19 +51,6 @@ DatabaseAdapter::DatabaseAdapter(const QString &file)
         throw std::exception();
     if(db.execute("CREATE INDEX IF NOT EXISTS sender_name_idx on series(sender, name);") != Sqlite::DB::Done)
         throw std::exception();
-
-    stmtAddDataFloat = db.prepare("INSERT INTO data_float VALUES (?,?,?);");
-    stmtAddDataString = db.prepare("INSERT INTO data_string VALUES (?,?,?);");
-    stmtSelectDataWithTimeFloat = db.prepare("SELECT time, value FROM data_float WHERE name=? and time>=? and time<=?;");
-    stmtSelectDataWithTimeString = db.prepare("SELECT time, value FROM data_string WHERE name=? and time>=? and time<=?;");
-    stmtSelectDataFloat = db.prepare("SELECT time, value FROM data_float WHERE name=?;");
-    stmtSelectDataString = db.prepare("SELECT time, value FROM data_string WHERE name=?;");
-
-    stmtAddSender = db.prepare("INSERT OR REPLACE INTO senders VALUES (?,?)");
-    stmtSelectSender = db.prepare("SELECT * from senders");
-
-    stmtAddSeries = db.prepare("INSERT OR REPLACE INTO series VALUES (?,?,?,?,?,?,?)");
-    stmtSelectSeries = db.prepare("SELECT * from series where sender=?");
 }
 
 template<typename T>
@@ -248,4 +253,40 @@ QList<EI::Description> DatabaseAdapter::getSenders()
     }
 
     return std::move(list);
+}
+
+void DatabaseAdapter::copy(QString other, qint64 begin, qint64 end)
+{
+    {
+        // Create and close a DB
+        Sqlite::DB otherDB(toStdString(other));
+        initDB(otherDB);
+    }
+
+    Sqlite::PreparedStatement stmt = db.prepare("ATTACH DATABASE ? AS other;");
+
+    stmt << toStdString(other);
+
+    if(stmt.execute() != stmt.done())
+        throw std::exception();
+
+    if(db.execute("INSERT INTO other.senders SELECT * FROM main.senders;") != db.Done)
+        throw std::exception();
+
+    if(db.execute("INSERT INTO other.series SELECT * FROM main.series;") != db.Done)
+        throw std::exception();
+
+    stmt = db.prepare("INSERT INTO other.data_string SELECT * FROM main.data_string WHERE time>=? and time<=?;");
+    stmt << begin << end;
+    if(stmt.execute() != stmt.done())
+        throw std::exception();
+
+    stmt = db.prepare("INSERT INTO other.data_float SELECT * FROM main.data_float WHERE time>=? and time<=?;");
+    stmt << begin << end;
+    if(stmt.execute() != stmt.done())
+        throw std::exception();
+
+    // TODO should always execute
+    if(db.execute("DETACH DATABASE other;") != db.Done)
+        throw std::exception();
 }

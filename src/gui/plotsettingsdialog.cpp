@@ -104,6 +104,14 @@ PlotSettings PlotSettingsDialog::getResult()
     }
 
     PlotSettings settings;
+    if (ui->sameScaleOption->isChecked()) {
+        if (ui->logChoice->isChecked()) {
+            settings.plotScaleType = PlotSettings::LOGSCALE;
+        } else {
+            settings.plotScaleType = PlotSettings::LINSCALE;
+        }
+    }
+
     for (int row = 0; row < ui->sourceTable->rowCount(); row++) {
         QString sourceName = ui->sourceTable->item(row, SOURCENAMECOL)->text();
 

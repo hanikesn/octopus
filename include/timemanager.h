@@ -20,12 +20,6 @@ public:
     qint64 getMaximum() {return maximum;}
 
     /**
-      * Returns the amount of time the range is changed during playing
-      * (every 'timeoutIntervall' msecs)
-      */
-    qint64 getTimePerPx() {return timePerPx;}
-
-    /**
       * Converts a position on the view into the corresponting point in time.
       * @param pos The x-position in the view to be converted.
       */
@@ -37,25 +31,23 @@ public:
       */
     int convertTimeToPos(qint64 time);
 
-    /**
-      * Adds 'delta' to current high- and lowVisRange.
-      * This function will do nothing if delta is <= 0.
-      * @param delta The amount of time to be added.
-      */
-    void addRange(qint64 delta);
-
     void load(QVariantMap *qvm);
     void save(QVariantMap *qvm);
 
     void center(qint64 timestamp);
 
-    enum Playstate {PLAYING, PAUSED};
-
-    Playstate getPlaystate() {return playstate;}
+    bool isPlaying() {return playing;}
 
     int getOffset() {return offsetLeft;}
 
     int getStepSize() {return stepSize;}
+
+private:
+    /**
+      * Returns the amount of time the range is changed during playing
+      * (every 'timeoutIntervall' msecs)
+      */
+    qint64 getTimePerPx() {return timePerPx;}
 
 signals:
     void rangeChanged(qint64 begin, qint64 end);
@@ -90,17 +82,12 @@ private:
     // highest timestamp ever seen
     qint64 maximum;
 
-    // this is the amount of time the range is changed during playing
-    // (every timeoutIntervall msecs)
-    qint64 timeoutUpdateIntervall;
-    int timeoutIntervall;
-
     qint64 currentTime;
 
     // determines how much time should be between 2 big ticks in the timeline (in microseconds)
     qint64 stepSize;
 
-    Playstate playstate;
+    bool playing;
 
     bool autoScroll;
 
@@ -114,7 +101,8 @@ private:
     int width;
 
     qint64 getZoomFactor(bool zoomOut);
-
+    void updateScrollBar(bool scroll);
+    void setRange(qint64 begin, qint64 end);
 };
 
 #endif // TIMEMANAGER_H
