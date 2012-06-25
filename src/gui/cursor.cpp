@@ -1,12 +1,8 @@
 #include "gui/cursor.h"
 
 #include <QPainter>
-#include <QGraphicsScene>
-
 #include "timemanager.h"
-#include "gui/presentationitem.h"
 
-#include <QDebug>
 
 Cursor::Cursor(TimeManager *timeManager, QWidget *parent) :
     QWidget(parent),

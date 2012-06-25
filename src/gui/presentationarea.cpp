@@ -1,18 +1,13 @@
 #include "gui/presentationarea.h"
 
-#include <QGraphicsScene>
-#include <QGraphicsWidget>
-#include <QScrollBar>
-#include <QMessageBox>
-
-#include "gui/selection.h"
-#include "gui/presentationitem.h"
 #include "dataprovider.h"
-#include "gui/cursor.h"
-#include "gui/sourcedialog.h"
-#include "gui/track.h"
-#include "gui/timeline.h"
 #include "timemanager.h"
+#include "gui/cursor.h"
+#include "gui/plotsettingsdialog.h"
+#include "gui/selection.h"
+#include "gui/sourcedialog.h"
+#include "gui/timeline.h"
+#include "gui/track.h"
 
 class EventHandler : public MouseEventHandler
 {
@@ -91,17 +86,13 @@ private:
 };
 
 PresentationArea::PresentationArea(const DataProvider &dataProvider,
-                                   QScrollBar *hScrollBar, QWidget *parent):
+                                   TimeManager *timeManager, QWidget *parent):
     QScrollArea(parent),
     dataProvider(dataProvider),
-    unsavedChanges(false),
-    recording(false),
-    recordStart(0),
-    recordEnd(0)
+    timeManager(timeManager),
+    unsavedChanges(false)
 {
     setObjectName("PresentationArea");
-
-    timeManager = new TimeManager(hScrollBar, this);
     timeLine = new TimeLine(*timeManager, viewport());
     selection = new Selection(timeManager, viewport());
     cursor = new Cursor(timeManager, viewport());
@@ -129,10 +120,6 @@ PresentationArea::PresentationArea(const DataProvider &dataProvider,
     connect(timeManager, SIGNAL(currentTimeChanged(qint64)), cursor, SLOT(setTime(qint64)));
     connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)), cursor, SLOT(update()));
     connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)), selection, SLOT(update()));
-
-    connect(this, SIGNAL(play()),                   timeManager, SLOT(onPlay()));
-    connect(this, SIGNAL(zoomIn()),                 timeManager, SLOT(onZoomIn()));
-    connect(this, SIGNAL(zoomOut()),                timeManager, SLOT(onZoomOut()));
 
     connect(this, SIGNAL(changedViewHeight(int)), cursor, SLOT(updateHeight(int)));
     connect(this, SIGNAL(changedViewHeight(int)), selection, SLOT(updateHeight(int)));
@@ -215,6 +202,11 @@ void PresentationArea::onAddTrack()
     }
 }
 
+void PresentationArea::onPlotSettings()
+{
+    PlotSettingsDialog::getSettings(dataProvider.getDataSeries());
+}
+
 Track* PresentationArea::add(const QList<QString>& fullDataSeriesNames)
 {
     Track *t = new Track(dataProvider, fullDataSeriesNames);
@@ -250,8 +242,7 @@ void PresentationArea::onDelete(Track *t)
 void PresentationArea::onRangeChanged(qint64 begin, qint64 end)
 {            
     foreach (Track *t, tracks) {
-        //if (pi->isVisible(t))
-            t->setPlotRange(begin, end);
+        t->setPlotRange(begin, end);
     }
     if (!tracks.isEmpty())
         unsavedChanges = true;
@@ -275,20 +266,6 @@ void PresentationArea::updatePlotMargins()
     }
 
     timeManager->onOffsetChanged(tracks.first()->getPlotOffset() + optMargin);
-}
-
-int PresentationArea::showRecordDialog()
-{
-    QMessageBox msg;
-    msg.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Ok);
-    msg.setIcon(QMessageBox::Information);
-    msg.setButtonText(QMessageBox::Save, tr("Save"));
-    msg.setButtonText(QMessageBox::Discard, tr("Discard"));
-    msg.setButtonText(QMessageBox::Ok, tr("Continue Recording"));
-    msg.setDefaultButton(QMessageBox::Save);
-    msg.setText(tr("Do you wish to save the currently recorded data?"));
-    int result = msg.exec();
-    return result;
 }
 
 void PresentationArea::save(QVariantMap *qvm)
@@ -326,30 +303,4 @@ void PresentationArea::load(QVariantMap *qvm)
 void PresentationArea::setUnsavedChanges(bool uc)
 {
     unsavedChanges = uc;
-}
-
-void PresentationArea::onPlay()
-{
-    /* Do stuff */
-    emit play();  // propagate signal
-}
-
-void PresentationArea::onRecord()
-{
-    if (recording) {
-        recordEnd = timeManager->getMaximum();
-        // end recording, show record dialog
-        int result = showRecordDialog();
-        if (result == QMessageBox::Save) {
-            //TODO: speichern, nicht nur exportieren.
-            emit saveProject(recordStart, recordEnd);
-        } else if (result == QMessageBox::Discard) // discard recording
-            recording = false;
-        else if (result == QMessageBox::Ok) // go on with the recording
-            recording = true;
-    } else {
-        recordStart = timeManager->getMaximum();
-        recording = true;
-    }
-
 }

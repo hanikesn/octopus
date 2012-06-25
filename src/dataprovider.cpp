@@ -69,6 +69,11 @@ AbstractDataSeries* DataProvider::getDataSeries(const QString &fullName) const
     return dataSeries.value(fullName);
 }
 
+QList<AbstractDataSeries*> DataProvider::getDataSeries() const
+{
+    return dataSeries.values();
+}
+
 void DataProvider::onNewSender(EIDescriptionWrapper desc)
 {
     if(!db)

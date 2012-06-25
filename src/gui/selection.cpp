@@ -7,8 +7,6 @@
 
 #include "timemanager.h"
 
-#include "gui/presentationitem.h"
-
 Selection::Selection(TimeManager* timeManager, QWidget *parent):
     QWidget(parent),
     begin(0),
@@ -26,7 +24,7 @@ Selection::Selection(TimeManager* timeManager, QWidget *parent):
 
     setObjectName("Selection");
 
-    hide();
+    setVisible(false);
 }
 
 void Selection::onUpdate()

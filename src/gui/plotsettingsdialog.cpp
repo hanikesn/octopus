@@ -24,6 +24,9 @@ PlotSettingsDialog::PlotSettingsDialog(const QList<AbstractDataSeries*> dataSeri
 
     setupSourceTable(dataSeries, offsetsEditable);
     ui->sameScaleOption->setVisible(showScalingOption);
+    ui->linChoice->setVisible(showScalingOption);
+    ui->logChoice->setVisible(showScalingOption);
+
     ui->sourceTable->setColumnHidden(SCALECOL, showScalingOption);
     ui->sameScaleOption->setChecked(showScalingOption);
     ui->linChoice->setChecked(showScalingOption);
@@ -69,10 +72,16 @@ void PlotSettingsDialog::setupSourceTable(const QList<AbstractDataSeries*> dataS
         offsetSpinner->setEnabled(offsetsEditable);
         ui->sourceTable->setCellWidget(row, OFFSETCOL, offsetSpinner);
 
-        QComboBox *scaleCombo = new QComboBox();
-        scaleCombo->addItems(PlotSettings::scaleTypeNames);
-        scaleCombo->setCurrentIndex(series->defaultScaleType);
-        ui->sourceTable->setCellWidget(row, SCALECOL, scaleCombo);
+        if (series->properties() & Data::INTERPOLATABLE) {
+            QComboBox *scaleCombo = new QComboBox();
+            scaleCombo->addItems(PlotSettings::scaleTypeNames);
+            scaleCombo->setCurrentIndex(series->defaultScaleType);
+            ui->sourceTable->setCellWidget(row, SCALECOL, scaleCombo);
+        } else {
+            QTableWidgetItem *scaleItem = new QTableWidgetItem(tr("n/a"));
+            scaleItem->setFlags(scaleItem->flags() & ~Qt::ItemIsEditable);
+            ui->sourceTable->setItem(row, SCALECOL, scaleItem);
+        }
     }
 }
 
@@ -102,20 +111,24 @@ PlotSettings PlotSettingsDialog::getResult(bool changeDefaultScaleTypes)
 
         if (series) {
             QSpinBox *offsetSpinner = qobject_cast<QSpinBox*>(ui->sourceTable->cellWidget(row, OFFSETCOL));
-            series->offset = offsetSpinner->value();
-
-            QComboBox *scaleCombo = qobject_cast<QComboBox*>(ui->sourceTable->cellWidget(row, SCALECOL));
-            if (changeDefaultScaleTypes) {
-                series->defaultScaleType = (PlotSettings::ScaleType) scaleCombo->currentIndex();
+            if (offsetSpinner) {
+                series->offset = offsetSpinner->value();
             }
 
-            if (ui->sameScaleOption->checkState() == Qt::Unchecked) {
-                settings.setScaleType(sourceName, (PlotSettings::ScaleType) scaleCombo->currentIndex());
-            } else {
-                if (ui->logChoice->isChecked()) {
-                    settings.setScaleType(sourceName, PlotSettings::LOGSCALE);
+            QComboBox *scaleCombo = qobject_cast<QComboBox*>(ui->sourceTable->cellWidget(row, SCALECOL));
+            if (scaleCombo) {
+                if (changeDefaultScaleTypes) {
+                    series->defaultScaleType = (PlotSettings::ScaleType) scaleCombo->currentIndex();
+                }
+
+                if (ui->sameScaleOption->checkState() == Qt::Unchecked) {
+                    settings.setScaleType(sourceName, (PlotSettings::ScaleType) scaleCombo->currentIndex());
                 } else {
-                    settings.setScaleType(sourceName, PlotSettings::LINSCALE);
+                    if (ui->logChoice->isChecked()) {
+                        settings.setScaleType(sourceName, PlotSettings::LOGSCALE);
+                    } else {
+                        settings.setScaleType(sourceName, PlotSettings::LINSCALE);
+                    }
                 }
             }
         }
