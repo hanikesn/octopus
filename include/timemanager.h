@@ -82,11 +82,6 @@ private:
     // highest timestamp ever seen
     qint64 maximum;
 
-    // this is the amount of time the range is changed during playing
-    // (every timeoutIntervall msecs)
-    qint64 timeoutUpdateIntervall;
-    int timeoutIntervall;
-
     qint64 currentTime;
 
     // determines how much time should be between 2 big ticks in the timeline (in microseconds)
@@ -105,13 +100,9 @@ private:
     int offsetLeft;
     int width;
 
-    // Smallest step on the scrollbar (either 1s or 100ms represented in µs)
-    int resolution;
-
     qint64 getZoomFactor(bool zoomOut);
-
     void updateScrollBar(bool scroll);
-
+    void setRange(qint64 begin, qint64 end);
 };
 
 #endif // TIMEMANAGER_H
