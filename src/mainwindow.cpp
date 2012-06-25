@@ -15,13 +15,17 @@
 #include "parser.h"
 #include "CVSExporter.h"
 #include "gui/startscreen.h"
+#include "timemanager.h"
+#include "recorder.h"
 
 const QString MainWindow::TITLE = "Octopus 0.1";
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     pa(0),
-    dataProvider(0)
+    dataProvider(0),
+    timeManager(0),
+    recorder(0)
 {    
     ui.setupUi(this);
 
@@ -258,16 +262,22 @@ void MainWindow::setTitle(QString pName)
 
 void MainWindow::setUpView()
 {
+    if(recorder)
+        recorder->deleteLater();
     if (pa)
         pa->deleteLater();
+    if(timeManager)
+        timeManager->deleteLater();
 
-    pa = new PresentationArea(*dataProvider, ui.hScrollBar, this);
+    timeManager = new TimeManager(ui.hScrollBar, this);
+    pa = new PresentationArea(*dataProvider, timeManager, this);
+    recorder = new Recorder(timeManager, this);
     ui.verticalLayout_2->insertWidget(0, pa);
 
     connect(pa, SIGNAL(exportRange(qint64,qint64)), this, SLOT(onExportRange(qint64,qint64)));
-    connect(pa, SIGNAL(saveProject(qint64,qint64)), this, SLOT(onSaveProject(qint64,qint64)));
-    connect(&zoomInButton, SIGNAL(clicked()), pa, SIGNAL(zoomIn()));
-    connect(&zoomOutButton, SIGNAL(clicked()), pa, SIGNAL(zoomOut()));
+    connect(recorder, SIGNAL(saveProject(qint64,qint64)), this, SLOT(onSaveProject(qint64,qint64)));
+    connect(&zoomInButton, SIGNAL(clicked()), timeManager, SLOT(onZoomIn()));
+    connect(&zoomOutButton, SIGNAL(clicked()), timeManager, SLOT(onZoomOut()));
     connect(&addTrackButton, SIGNAL(clicked()), pa, SLOT(onAddTrack()));
     connect(&plotSettingsButton, SIGNAL(clicked()), pa, SLOT(onPlotSettings()));
 
@@ -278,8 +288,7 @@ void MainWindow::setUpView()
 
     networkAdapter.discoverSenders();
 
-    connect(&playButton, SIGNAL(clicked()), pa, SLOT(onPlay()));
-    connect(&recButton, SIGNAL(clicked()), pa, SLOT(onRecord()));
+    connect(&playButton, SIGNAL(clicked()), timeManager, SLOT(onPlay()));
     connect(&recButton, SIGNAL(clicked()), this, SLOT(onRecord()));
 }
 
@@ -368,10 +377,7 @@ void MainWindow::closeEvent(QCloseEvent *ce)
 
 void MainWindow::onRecord()
 {    
-    if (pa->isRecording())
-        recButton.setChecked(true);
-    else
-        recButton.setChecked(false);
+    recButton.setChecked(recorder->toggleRecording());
 }
 
 void MainWindow::onSaveProject(qint64 start, qint64 end)

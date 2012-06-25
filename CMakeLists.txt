@@ -48,12 +48,12 @@ set(Octopus_SOURCES
   src/doubleseries.cpp
   src/plotsettings.cpp
   src/exporterfactory.cpp
+  src/recorder.cpp
   src/gui/cursor.cpp
   src/gui/discretegraph.cpp
   src/gui/interpolatinggraph.cpp
   src/gui/plotsettingsdialog.cpp
   src/gui/presentationarea.cpp
-  src/gui/presentationitem.cpp
   src/gui/qcustomplot.cpp
   src/gui/selection.cpp
   src/gui/sourcedialog.cpp
@@ -74,6 +74,7 @@ set(Octopus_HEADERS
   include/CVSExporter.h
   include/exporter.h
   include/DBUtil.h
+  include/recorder.h
   include/exporterfactory.h
   include/databaseadapter.h
   include/dataprovider.h
@@ -85,7 +86,6 @@ set(Octopus_HEADERS
   include/gui/interpolatinggraph.h
   include/gui/plotsettingsdialog.h
   include/gui/presentationarea.h
-  include/gui/presentationitem.h
   include/gui/qcustomplot.h
   include/gui/selection.h
   include/gui/sourcedialog.h
