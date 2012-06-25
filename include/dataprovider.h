@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "databaseadapter.h"
+#include "serializable.h"
 #include "value.h"
 
 #include <EIDescription.h>
@@ -13,7 +14,7 @@
 
 class AbstractDataSeries;
 
-class DataProvider : public QObject
+class DataProvider : public QObject, public Serializable
 {
     Q_OBJECT
 public:
@@ -54,6 +55,9 @@ public:
     DatabaseAdapter const& getDB() const;
 
     void closeDB();
+
+    void save(QVariantMap *qvm);
+    void load(QVariantMap *qvm);
 
 signals:
     void unknownDataSeries();
