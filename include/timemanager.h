@@ -19,6 +19,8 @@ public:
     qint64 getHighVisRange() {return highVisRange;}
     qint64 getMaximum() {return maximum;}
 
+    void movePx(int px);
+
     /**
       * Converts a position on the view into the corresponting point in time.
       * @param pos The x-position in the view to be converted.
