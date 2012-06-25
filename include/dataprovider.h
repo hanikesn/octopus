@@ -21,7 +21,7 @@ public:
     ~DataProvider();
 
     /**
-     * @return The full name of each known data series.
+     * @return A list containing the full name of each data series.
      */
     QList<QString> getDataSeriesList() const;
 
@@ -30,6 +30,11 @@ public:
      *      0 if there is no such data series.
      */
     AbstractDataSeries* getDataSeries(const QString &fullName) const;
+
+    /**
+     * @return A list of all data series.
+     */
+    QList<AbstractDataSeries*> getDataSeries() const;
 
     /**
      * @return the filename of the used database
