@@ -52,6 +52,9 @@ const DatabaseAdapter &DataProvider::getDB() const
 
 void DataProvider::moveDB(QString const& newFilename)
 {
+    if(newFilename == filename)
+        return;
+
     // delete the dbadapter so that the db connection is closed
     db.reset();
 
