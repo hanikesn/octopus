@@ -5,7 +5,7 @@
 #include <QMessageBox>
 #include <sstream>
 #include <QDateTime>
-//#include <QKeySequence>
+#include <QSignalMapper>
 #include <QCloseEvent>
 
 #include "gui/sourcedialog.h"
@@ -278,10 +278,15 @@ void MainWindow::setUpView()
 
     connect(pa, SIGNAL(exportRange(qint64,qint64)), this, SLOT(onExportRange(qint64,qint64)));
     connect(recorder, SIGNAL(saveProject(qint64,qint64)), this, SLOT(onSaveProject(qint64,qint64)));
-    connect(&zoomInButton, SIGNAL(clicked()), timeManager, SLOT(onZoomIn()));
-    connect(&zoomOutButton, SIGNAL(clicked()), timeManager, SLOT(onZoomOut()));
     connect(&addTrackButton, SIGNAL(clicked()), pa, SLOT(onAddTrack()));
     connect(&plotSettingsButton, SIGNAL(clicked()), pa, SLOT(onPlotSettings()));
+
+    QSignalMapper* mapZoom = new QSignalMapper(this);
+    mapZoom->setMapping(&zoomInButton, 100);
+    mapZoom->setMapping(&zoomOutButton, -100);
+    connect(&zoomOutButton, SIGNAL(clicked()), mapZoom, SLOT(map()));
+    connect(&zoomInButton, SIGNAL(clicked()), mapZoom, SLOT(map()));
+    connect(mapZoom, SIGNAL(mapped(int)), timeManager, SLOT(onZoom(int)));
 
     qRegisterMetaType<EIDescriptionWrapper>("EIDescriptionWrapper");
     qRegisterMetaType<Value>("Value");

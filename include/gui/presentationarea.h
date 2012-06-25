@@ -6,6 +6,7 @@
 #include <QScrollArea>
 
 class QMouseEvent;
+class QWheelEvent;
 class PresentationItem;
 class DataProvider;
 class Track;
@@ -23,6 +24,7 @@ public:
     virtual void mouseReleaseEvent(QMouseEvent *event) = 0;
     virtual void mouseMoveEvent(QMouseEvent *event) = 0;
     virtual void mouseDoubleClickEvent(QMouseEvent* event) = 0;
+    virtual void wheelEvent(QWheelEvent* event) = 0;
 };
 
 class PresentationArea : public QScrollArea, public Serializable

@@ -72,6 +72,17 @@ public:
         }
     }
 
+    virtual void wheelEvent(QWheelEvent* event)
+    {
+        if(event->orientation() == Qt::Horizontal) {
+            timeManager.forwardEventToScrollbar(event);
+        } else if(event->orientation() == Qt::Vertical &&
+                  event->modifiers() == Qt::ControlModifier) {
+            timeManager.onZoom(event->delta());
+            event->accept();
+        }
+    }
+
     /**
       * As we have no interaction for the double click, this function does nothing.
       * @param event The mouseDoubleClickEvent to be processed.
@@ -171,6 +182,9 @@ bool PresentationArea::eventFilter(QObject* obj, QEvent* event)
             break;
         case QEvent::MouseButtonDblClick:
             viewportMouseHandler->mouseDoubleClickEvent(dynamic_cast<QMouseEvent*>(event));
+            break;
+        case QEvent::Wheel:
+            viewportMouseHandler->wheelEvent(dynamic_cast<QWheelEvent*>(event));
             break;
         default:
             break;
