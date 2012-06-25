@@ -110,7 +110,8 @@ void MainWindow::setUpButtonBars()
     toolBarWidget.setLayout(&layout);
 
     connect(&loadButton, SIGNAL(clicked()), this, SLOT(onLoad()));
-    connect(&exportButton, SIGNAL(clicked()), this, SLOT(onExportAction()));    
+    connect(&exportButton, SIGNAL(clicked()), this, SLOT(onExportAction()));
+    connect(&recButton, SIGNAL(clicked()), this, SLOT(onRecord()));
 
     ui.mainToolBar->addWidget(&toolBarWidget);
     addToolBar(Qt::LeftToolBarArea, ui.mainToolBar);
@@ -187,7 +188,7 @@ void MainWindow::onLoad()
         return;
     }
     DataProvider* olddataProvider = dataProvider;
-    QString dbfile = result["dataProvider"].toMap().find("dbfile").value().toString();
+    QString dbfile = result["dbfile"].toString();
     // load the db might fail
     try {
         dataProvider = new DataProvider(dbfile, this);
@@ -289,8 +290,7 @@ void MainWindow::setUpView()
 
     networkAdapter.discoverSenders();
 
-    connect(&playButton, SIGNAL(clicked()), timeManager, SLOT(onPlay()));
-    connect(&recButton, SIGNAL(clicked()), this, SLOT(onRecord()));
+    connect(&playButton, SIGNAL(clicked()), timeManager, SLOT(onPlay()));    
 }
 
 void MainWindow::save(bool saveAs, qint64 begin, qint64 end)
@@ -302,16 +302,18 @@ void MainWindow::save(bool saveAs, qint64 begin, qint64 end)
     QString dbname = fileName + ".db";
     dbname.remove(QRegExp(".oct$"));
 
-    QVariantMap pName; // Map with the projects settings
+    QVariantMap pName; // Map with the projects settings    
     if ((begin == -1) && (end == -1)) { // save all
         projectPath = fileName;       
         dataProvider->moveDB(dbname); // move tmp-database if we save all        
+        pName.insert("dbfile", dbname);
 
         if (writeProjectSettings(pName, projectPath)) // in case save was successfull ...
             pa->setUnsavedChanges(false); // ... clear flag in PresentationArea
     } else { // save range
         QString subProjectPath = fileName;
         dataProvider->copyDB(dbname, begin, end);
+        pName.insert("dbfile", dbname);
         writeProjectSettings(pName, subProjectPath);
     }
 }
@@ -375,7 +377,7 @@ void MainWindow::closeEvent(QCloseEvent *ce)
 }
 
 void MainWindow::onRecord()
-{    
+{        
     recButton.setChecked(recorder->toggleRecording());
 }
 

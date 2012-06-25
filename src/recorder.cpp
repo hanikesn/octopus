@@ -33,14 +33,14 @@ bool Recorder::isRecording()
 }
 
 bool Recorder::toggleRecording()
-{
+{    
     if (recording) {
         recordEnd = timeManager->getMaximum();
         // end recording, show record dialog
         int result = showRecordDialog();
-        if (result == QMessageBox::Save) {
-            //TODO: speichern, nicht nur exportieren.
+        if (result == QMessageBox::Save) {                        
             emit saveProject(recordStart, recordEnd);
+            recording = false;
         } else if (result == QMessageBox::Discard) // discard recording
             recording = false;
         else if (result == QMessageBox::Ok) // go on with the recording
@@ -49,6 +49,5 @@ bool Recorder::toggleRecording()
         recordStart = timeManager->getMaximum();
         recording = true;
     }
-
     return recording;
 }
