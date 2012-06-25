@@ -214,20 +214,34 @@ void Track::setPlotMarginLeft(int margin)
 }
 
 void Track::save(QVariantMap *qvm)
-{
-    QVariantList track;
-    foreach(Graph *g, graphs){
-        track << g->dataSeriesName();
-    }
-    qvm->insert("dataSeries", track);
+{    
+    QVariantList graphList;
+    foreach (Graph *g, graphs) {
+        QVariantMap graph;
+        graph.insert("name", g->dataSeriesName());
+        graph.insert("scaling", g->getScaleType());
+
+        graphList << graph;
+    }    
+    qvm->insert("dataSeries", graphList);
 }
 
 void Track::load(QVariantMap *qvm)
 {
     QVariantMap map = qvm->find("track").value().toMap();
-    QVariantList seriesList = map.find("dataSeries").value().toList();
-    foreach(QVariant series, seriesList){
-        addSource(series.toString());
+    QVariantList graphList = map.find("dataSeries").value().toList();
+
+    foreach (QVariant entry, graphList) {
+        QVariantMap graph = entry.toMap(); // one graph object (contains dataSeries + Scaling)
+        QString name(graph.find("name").value().toString()); // name of the series
+        addSource(name);
+        int scaling = graph.find("scaling").value().toInt();
+        foreach (Graph *g, graphs) { // look for the graph which was just added.
+            if (g->dataSeriesName() == name) {
+                g->setScaleType((PlotSettings::ScaleType) scaling);
+                return; // there won't be the same graph in this track again --> we can quit the loop
+            }
+        }
     }
 }
 

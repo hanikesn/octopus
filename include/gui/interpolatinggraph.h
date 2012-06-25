@@ -16,9 +16,10 @@ public:
 
     QCPGraph* getGraph();
     PlotSettings::ScaleType getScaleType() const;
+    void setScaleType(PlotSettings::ScaleType scaleType);
 
     QString dataSeriesName();
-    void update(const PlotSettings &settings);
+    void update(const PlotSettings &settings);    
 
 protected slots:
     void onNewData(qint64 timestamp);
@@ -30,7 +31,7 @@ private:
 
     qint64 lastUpdate;
 
-    PlotSettings::ScalingMode currentScalingMode;
+    PlotSettings::ScalingMode currentScalingMode;    
     PlotSettings::ScaleType currentScaleType;
 
     void configureAppearance(QCPGraph *graph);

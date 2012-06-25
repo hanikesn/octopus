@@ -34,6 +34,11 @@ PlotSettings::ScaleType InterpolatingGraph::getScaleType() const
     return currentScaleType;
 }
 
+void InterpolatingGraph::setScaleType(PlotSettings::ScaleType scaleType)
+{
+    //TODO(steffi)
+}
+
 QString InterpolatingGraph::dataSeriesName()
 {
     return series.fullName();
