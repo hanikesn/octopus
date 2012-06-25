@@ -86,10 +86,10 @@ void Track::setPlotRange(qint64 begin, qint64 end)
     if (ui.plot->xAxis->range().lower != begin
             || ui.plot->xAxis->range().lower != end) {
         ui.plot->xAxis->setRange(begin, end);
-		{
+        {
             MEASURE("plot");
             ui.plot->replot();
-		}
+        }
     }
 }
 
@@ -153,17 +153,24 @@ void Track::onPlotSettings()
 {
     // TODO(Steffi)
 
-    QList<AbstractDataSeries*> dataSeries;
-    foreach (QString name, getFullDataSeriesNames()) {
-        AbstractDataSeries *series = dataProvider.getDataSeries(name);
-        if (series) {
-            dataSeries.append(series);
-        }
+    PlotSettings preset;
+
+    switch (ui.plot->yAxis->scaleType()) {
+    case QCPAxis::stLinear:
+        preset.plotScaleType = PlotSettings::LINSCALE;
+        break;
+    case QCPAxis::stLogarithmic:
+        preset.plotScaleType = PlotSettings::LOGSCALE;
+        break;
     }
 
-    PlotSettings settings = PlotSettingsDialog::getSettings(dataSeries, true, false, false);
+    foreach (Graph *g, graphs) {
+        preset.setScaleType(g->dataSeriesName(), g->getScaleType());
+    }
 
-    if (!settings.isEmpty()) {
+    PlotSettings newSettings = PlotSettingsDialog::getSettings(getFullDataSeriesNames(), preset, true, false);
+
+    if (!newSettings.isEmpty()) {
         //    if (settings.scalingMode == PlotSettings::MINMAXSCALING) {
         //        ui.plot->yAxis->setScaleType(QCPAxis::stLinear);
         //        ui.plot->yAxis->setRange(0, 1);
@@ -176,7 +183,7 @@ void Track::onPlotSettings()
         //    }
 
         foreach (Graph *g, graphs) {
-            g->update(settings);
+            g->update(newSettings);
         }
     }
 }
@@ -208,19 +215,33 @@ void Track::setPlotMarginLeft(int margin)
 
 void Track::save(QVariantMap *qvm)
 {    
-    QVariantList track;
-    foreach(Graph *g, graphs){
-        track << g->dataSeriesName();
-    }
-    qvm->insert("dataSeries", track);
+    QVariantList graphList;
+    foreach (Graph *g, graphs) {
+        QVariantMap graph;
+        graph.insert("name", g->dataSeriesName());
+        graph.insert("scaling", g->getScaleType());
+
+        graphList << graph;
+    }    
+    qvm->insert("dataSeries", graphList);
 }
 
 void Track::load(QVariantMap *qvm)
 {
     QVariantMap map = qvm->find("track").value().toMap();
-    QVariantList seriesList = map.find("dataSeries").value().toList();
-    foreach(QVariant series, seriesList){
-        addSource(series.toString());
+    QVariantList graphList = map.find("dataSeries").value().toList();
+
+    foreach (QVariant entry, graphList) {
+        QVariantMap graph = entry.toMap(); // one graph object (contains dataSeries + Scaling)
+        QString name(graph.find("name").value().toString()); // name of the series
+        addSource(name);
+        int scaling = graph.find("scaling").value().toInt();
+        foreach (Graph *g, graphs) { // look for the graph which was just added.
+            if (g->dataSeriesName() == name) {
+                g->setScaleType((PlotSettings::ScaleType) scaling);
+                break; // there won't be the same graph in this track again --> we can quit the loop
+            }
+        }
     }
 }
 

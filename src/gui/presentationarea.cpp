@@ -218,7 +218,15 @@ void PresentationArea::onAddTrack()
 
 void PresentationArea::onPlotSettings()
 {
-    PlotSettingsDialog::getSettings(dataProvider.getDataSeries());
+    PlotSettings preset;
+    QStringList dataSeriesNames;
+    foreach (AbstractDataSeries *series, dataProvider.getDataSeries()) {
+        dataSeriesNames.append(series->fullName());
+        preset.setOffset(series->fullName(), series->offset);
+        preset.setScaleType(series->fullName(), series->defaultScaleType);
+    }
+
+    PlotSettingsDialog::getSettings(dataSeriesNames, preset);
 }
 
 Track* PresentationArea::add(const QList<QString>& fullDataSeriesNames)

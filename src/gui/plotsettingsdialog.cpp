@@ -13,7 +13,8 @@ static const int OFFSETCOL = 1;
 static const int SCALECOL = 2;
 static const int COLCOUNT = 3;
 
-PlotSettingsDialog::PlotSettingsDialog(const QList<AbstractDataSeries*> dataSeries,
+PlotSettingsDialog::PlotSettingsDialog(const QStringList &dataSeriesNames,
+                                       const PlotSettings &preset,
                                        bool showScalingOption,
                                        bool offsetsEditable,
                                        QWidget *parent) :
@@ -22,7 +23,7 @@ PlotSettingsDialog::PlotSettingsDialog(const QList<AbstractDataSeries*> dataSeri
 {
     ui->setupUi(this);
 
-    setupSourceTable(dataSeries, offsetsEditable);
+    setupSourceTable(dataSeriesNames, preset, offsetsEditable);
     ui->sameScaleOption->setVisible(showScalingOption);
     ui->linChoice->setVisible(showScalingOption);
     ui->logChoice->setVisible(showScalingOption);
@@ -39,7 +40,7 @@ PlotSettingsDialog::~PlotSettingsDialog()
     delete ui;
 }
 
-void PlotSettingsDialog::setupSourceTable(const QList<AbstractDataSeries*> dataSeries, bool offsetsEditable)
+void PlotSettingsDialog::setupSourceTable(const QStringList &dataSeriesNames, const PlotSettings &preset, bool offsetsEditable)
 {
     ui->sourceTable->setColumnCount(COLCOUNT);
 
@@ -56,81 +57,82 @@ void PlotSettingsDialog::setupSourceTable(const QList<AbstractDataSeries*> dataS
     QHeaderView *vHeader = ui->sourceTable->verticalHeader();
     vHeader->setVisible(false);
 
-    foreach (AbstractDataSeries *series, dataSeries) {
+    foreach (QString sourceName, dataSeriesNames) {
         int row = ui->sourceTable->rowCount();
         ui->sourceTable->setRowCount(row + 1);
 
-        QTableWidgetItem *sourceItem = new QTableWidgetItem(series->fullName());
+        QTableWidgetItem *sourceItem = new QTableWidgetItem(sourceName);
         // the item showing the data series name should not be editable
         sourceItem->setFlags(sourceItem->flags() & ~Qt::ItemIsEditable);
         ui->sourceTable->setItem(row, SOURCENAMECOL, sourceItem);
-        dataSeriesMap.insert(series->fullName(), series);
 
         QSpinBox *offsetSpinner = new QSpinBox(ui->sourceTable);
-        offsetSpinner->setValue(series->offset);
+        offsetSpinner->setValue(preset.offset(sourceName));
         offsetSpinner->setMaximum(std::numeric_limits<int>::max());
         offsetSpinner->setEnabled(offsetsEditable);
         ui->sourceTable->setCellWidget(row, OFFSETCOL, offsetSpinner);
 
-        if (series->properties() & Data::INTERPOLATABLE) {
-            QComboBox *scaleCombo = new QComboBox();
-            scaleCombo->addItems(PlotSettings::scaleTypeNames);
-            scaleCombo->setCurrentIndex(series->defaultScaleType);
-            ui->sourceTable->setCellWidget(row, SCALECOL, scaleCombo);
-        } else {
+        if (preset.scaleType(sourceName) == PlotSettings::NOT_SCALABLE) {
             QTableWidgetItem *scaleItem = new QTableWidgetItem(tr("n/a"));
             scaleItem->setFlags(scaleItem->flags() & ~Qt::ItemIsEditable);
             ui->sourceTable->setItem(row, SCALECOL, scaleItem);
+        } else {
+            QComboBox *scaleCombo = new QComboBox();
+            scaleCombo->addItems(PlotSettings::scaleTypeNames);
+            scaleCombo->setCurrentIndex(preset.scaleType(sourceName));
+            ui->sourceTable->setCellWidget(row, SCALECOL, scaleCombo);
         }
     }
 }
 
-PlotSettings PlotSettingsDialog::getSettings(const QList<AbstractDataSeries*> dataSeries,
-//                                             QMap<QString, PlotSettings::ScaleType> currentScaleTypes,
+PlotSettings PlotSettingsDialog::getSettings(const QStringList &dataSeriesNames,
+                                             const PlotSettings &preset,
                                              bool showScalingOption,
                                              bool offsetsEditable,
-                                             bool changeDefaultScaleTypes,
                                              QWidget *parent)
 {
-    PlotSettingsDialog *d = new PlotSettingsDialog(dataSeries, showScalingOption, offsetsEditable, parent);
+    PlotSettingsDialog *d = new PlotSettingsDialog(dataSeriesNames, preset, showScalingOption, offsetsEditable, parent);
     d->exec();
 
-    return d->getResult(changeDefaultScaleTypes);
+    return d->getResult();
 }
 
-PlotSettings PlotSettingsDialog::getResult(bool changeDefaultScaleTypes)
+PlotSettings PlotSettingsDialog::getResult()
 {
     if (result() == QDialog::Rejected) {
         return PlotSettings();
     }
 
     PlotSettings settings;
+    if (ui->sameScaleOption->isChecked()) {
+        if (ui->logChoice->isChecked()) {
+            settings.plotScaleType = PlotSettings::LOGSCALE;
+        } else {
+            settings.plotScaleType = PlotSettings::LINSCALE;
+        }
+    }
+
     for (int row = 0; row < ui->sourceTable->rowCount(); row++) {
         QString sourceName = ui->sourceTable->item(row, SOURCENAMECOL)->text();
-        AbstractDataSeries *series = dataSeriesMap.value(sourceName);
 
-        if (series) {
-            QSpinBox *offsetSpinner = qobject_cast<QSpinBox*>(ui->sourceTable->cellWidget(row, OFFSETCOL));
-            if (offsetSpinner) {
-                series->offset = offsetSpinner->value();
-            }
+        QSpinBox *offsetSpinner = qobject_cast<QSpinBox*>(ui->sourceTable->cellWidget(row, OFFSETCOL));
+        if (offsetSpinner) {
+            settings.setOffset(sourceName, offsetSpinner->value());
+        }
 
-            QComboBox *scaleCombo = qobject_cast<QComboBox*>(ui->sourceTable->cellWidget(row, SCALECOL));
-            if (scaleCombo) {
-                if (changeDefaultScaleTypes) {
-                    series->defaultScaleType = (PlotSettings::ScaleType) scaleCombo->currentIndex();
-                }
-
-                if (ui->sameScaleOption->checkState() == Qt::Unchecked) {
-                    settings.setScaleType(sourceName, (PlotSettings::ScaleType) scaleCombo->currentIndex());
+        QComboBox *scaleCombo = qobject_cast<QComboBox*>(ui->sourceTable->cellWidget(row, SCALECOL));
+        if (scaleCombo) {
+            if (ui->sameScaleOption->checkState() == Qt::Unchecked) {
+                settings.setScaleType(sourceName, (PlotSettings::ScaleType) scaleCombo->currentIndex());
+            } else {
+                if (ui->logChoice->isChecked()) {
+                    settings.setScaleType(sourceName, PlotSettings::LOGSCALE);
                 } else {
-                    if (ui->logChoice->isChecked()) {
-                        settings.setScaleType(sourceName, PlotSettings::LOGSCALE);
-                    } else {
-                        settings.setScaleType(sourceName, PlotSettings::LINSCALE);
-                    }
+                    settings.setScaleType(sourceName, PlotSettings::LINSCALE);
                 }
             }
+        } else {
+            settings.setScaleType(sourceName, PlotSettings::NOT_SCALABLE);
         }
     }
 

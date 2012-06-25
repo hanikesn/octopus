@@ -9,7 +9,8 @@ InterpolatingGraph::InterpolatingGraph(QCustomPlot *plot, const DoubleSeries &d)
     series(d),
     plot(plot),
     lastUpdate(-1),
-    currentScalingMode(PlotSettings::NOSCALING)
+    currentScalingMode(PlotSettings::NOSCALING),
+    currentScaleType(d.defaultScaleType)
 {
     connect(&series, SIGNAL(newData(qint64)), this, SLOT(onNewData(qint64)));
 
@@ -26,6 +27,16 @@ InterpolatingGraph::InterpolatingGraph(QCustomPlot *plot, const DoubleSeries &d)
 QCPGraph* InterpolatingGraph::getGraph()
 {
     return graph;
+}
+
+PlotSettings::ScaleType InterpolatingGraph::getScaleType() const
+{
+    return currentScaleType;
+}
+
+void InterpolatingGraph::setScaleType(PlotSettings::ScaleType scaleType)
+{
+    //TODO(steffi)
 }
 
 QString InterpolatingGraph::dataSeriesName()

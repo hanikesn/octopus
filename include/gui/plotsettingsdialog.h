@@ -16,7 +16,8 @@ class PlotSettingsDialog : public QDialog
     Q_OBJECT
     
 public:
-    explicit PlotSettingsDialog(const QList<AbstractDataSeries*> dataSeries,
+    explicit PlotSettingsDialog(const QStringList &dataSeriesNames,
+                                const PlotSettings &preset,
                                 bool showScalingOption,
                                 bool offsetsEditable,
                                 QWidget *parent);
@@ -26,20 +27,17 @@ public:
      * @return A plot settings object containing the settings chosen by the user.
      *      An empty plot settings object if the dialog was canceled.
      */
-    static PlotSettings getSettings(const QList<AbstractDataSeries*> dataSeries,
-//                                    QMap<QString, PlotSettings::ScaleType> currentScaleTypes = QMap<QString, PlotSettings::ScaleType>(),
+    static PlotSettings getSettings(const QStringList &dataSeriesNames,
+                                    const PlotSettings &preset,
                                     bool showScalingOption = false,
                                     bool offsetsEditable = true,
-                                    bool changeDefaultScaleTypes = true,
                                     QWidget *parent = 0);
 
 private:
     Ui::PlotSettingsDialog *ui;
 
-    QMap<QString, AbstractDataSeries*> dataSeriesMap;
-
-    void setupSourceTable(const QList<AbstractDataSeries*> dataSeries, bool offsetsEditable);
-    PlotSettings getResult(bool changeDefaultScaleTypes);
+    void setupSourceTable(const QStringList &dataSeriesNames, const PlotSettings &preset, bool offsetsEditable);
+    PlotSettings getResult();
 
 private slots:
     void onSameScaleStateChanged(int state);

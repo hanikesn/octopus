@@ -1,10 +1,11 @@
 #ifndef GRAPH_H
 #define GRAPH_H
 
+#include "plotsettings.h"
+
 #include <QObject>
 #include <QtCore/QIntegerForSize>
 
-class PlotSettings;
 class QCPGraph;
 
 class Graph : public QObject
@@ -15,9 +16,14 @@ public:
     virtual ~Graph() {}
 
     virtual QCPGraph* getGraph() = 0;
+    virtual PlotSettings::ScaleType getScaleType() const {return PlotSettings::NOT_SCALABLE;}
+    virtual void setScaleType(PlotSettings::ScaleType scaleType) = 0;
 
     virtual QString dataSeriesName() = 0;
-    virtual void update(const PlotSettings &settings) = 0;
+    virtual void update(const PlotSettings &settings) = 0;    
+
+protected:
+    PlotSettings::ScaleType currentScaleType;
 
 protected slots:
     virtual void onNewData(qint64 timestamp) = 0;

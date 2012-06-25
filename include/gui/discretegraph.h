@@ -18,6 +18,8 @@ public:
 
     QCPGraph* getGraph();
 
+    void setScaleType(PlotSettings::ScaleType /*scaleType*/) {}
+
     QString dataSeriesName();
     void update(const PlotSettings &settings);
 
