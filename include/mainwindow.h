@@ -20,7 +20,7 @@
 
 class TrackScene;
 class PresentationArea;
-class HorizontalScrollBar;
+class Recorder;
 
 class MainWindow : public QMainWindow
 {
@@ -82,11 +82,13 @@ private:
 
     NetworkAdapter networkAdapter;
 
+    TimeManager* timeManager;
+
     ExporterFactory exporterFactory;
 
-    Ui::MainWindow ui;
+    Recorder* recorder;
 
-    HorizontalScrollBar *hScrollBar;
+    Ui::MainWindow ui;
 
     QString projectPath;
 

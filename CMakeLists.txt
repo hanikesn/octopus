@@ -48,6 +48,7 @@ set(Octopus_SOURCES
   src/doubleseries.cpp
   src/plotsettings.cpp
   src/exporterfactory.cpp
+  src/recorder.cpp
   src/gui/cursor.cpp
   src/gui/discretegraph.cpp
   src/gui/interpolatinggraph.cpp
@@ -74,6 +75,7 @@ set(Octopus_HEADERS
   include/CVSExporter.h
   include/exporter.h
   include/DBUtil.h
+  include/recorder.h
   include/exporterfactory.h
   include/databaseadapter.h
   include/dataprovider.h
