@@ -24,6 +24,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     pa(0),
     dataProvider(0),
+    networkAdapter(0),
     timeManager(0),
     recorder(0)
 {    
@@ -57,7 +58,12 @@ MainWindow::MainWindow(QWidget *parent) :
     //TODO(domi): Kommentare wegmachen
 //    StartScreen *s = new StartScreen(this);
 //    if (s->showScreen() == StartScreen::LOAD)
-//        onLoad();
+    //        onLoad();
+}
+
+MainWindow::~MainWindow()
+{
+    networkAdapter->deleteLater();
 }
 
 void MainWindow::onExportAction()
@@ -171,8 +177,8 @@ void MainWindow::onSaveAs()
 }
 
 void MainWindow::onLoad()
-{
-    if(checkForUnsavedChanges() == QMessageBox::Abort) return;
+{    
+    if (checkForUnsavedChanges() == QMessageBox::Abort) return;
     QString fileName = QFileDialog::getOpenFileName(this, tr("Load File"),
                                                     projectPath, "Octopus (*.oct)");
     if(fileName.isEmpty()) return;
@@ -195,6 +201,11 @@ void MainWindow::onLoad()
     } catch(std::exception& e) {
         qDebug() << "Loading of DB failed.";
         return;
+    }
+    // in case there is a networkAdapter, delete it. We opened an old project --> no new data accepted!
+    if (networkAdapter) {
+        networkAdapter->deleteLater();
+        networkAdapter = 0;
     }
 
     // at this point loading was successful --> delete old presentationArea and create new one.
@@ -237,14 +248,20 @@ static void addData(DataProvider& dp)
 
 void MainWindow::onNew()
 {
-    if(checkForUnsavedChanges() == QMessageBox::Abort) return;
+    if (checkForUnsavedChanges() == QMessageBox::Abort) return;
 
-    if(dataProvider) {
+    if (dataProvider) {
         dataProvider->closeDB();
         dataProvider->deleteLater();
     }
+
+    if (networkAdapter) {
+        networkAdapter->deleteLater();
+    }
+
     // create a temporary file for the db
     dataProvider = new DataProvider(QDir::tempPath() + "/Octopus-" + QDateTime::currentDateTime().toString("yyyyMMdd_hhmmsszzz"), this);
+    networkAdapter = new NetworkAdapter();
 
     setUpView();
     addData(*dataProvider);
@@ -290,11 +307,12 @@ void MainWindow::setUpView()
 
     qRegisterMetaType<EIDescriptionWrapper>("EIDescriptionWrapper");
     qRegisterMetaType<Value>("Value");
-    connect(&networkAdapter, SIGNAL(onNewSender(EIDescriptionWrapper)), dataProvider, SLOT(onNewSender(EIDescriptionWrapper)), Qt::QueuedConnection);
-    connect(&networkAdapter, SIGNAL(onNewData(qint64,QString,Value)),      dataProvider, SLOT(onNewData(qint64,QString,Value)), Qt::QueuedConnection);
 
-    networkAdapter.discoverSenders();
-
+    if (networkAdapter) {
+        connect(networkAdapter, SIGNAL(onNewSender(EIDescriptionWrapper)), dataProvider, SLOT(onNewSender(EIDescriptionWrapper)), Qt::QueuedConnection);
+        connect(networkAdapter, SIGNAL(onNewData(qint64,QString,Value)),      dataProvider, SLOT(onNewData(qint64,QString,Value)), Qt::QueuedConnection);
+        networkAdapter->discoverSenders();
+    }
     connect(&playButton, SIGNAL(clicked()), timeManager, SLOT(onPlay()));    
 }
 
