@@ -86,10 +86,10 @@ void Track::setPlotRange(qint64 begin, qint64 end)
     if (ui.plot->xAxis->range().lower != begin
             || ui.plot->xAxis->range().lower != end) {
         ui.plot->xAxis->setRange(begin, end);
-		{
+        {
             MEASURE("plot");
             ui.plot->replot();
-		}
+        }
     }
 }
 
@@ -207,7 +207,7 @@ void Track::setPlotMarginLeft(int margin)
 }
 
 void Track::save(QVariantMap *qvm)
-{    
+{
     QVariantList track;
     foreach(Graph *g, graphs){
         track << g->dataSeriesName();

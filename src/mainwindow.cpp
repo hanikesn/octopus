@@ -187,7 +187,7 @@ void MainWindow::onLoad()
         return;
     }
     DataProvider* olddataProvider = dataProvider;
-    QString dbfile = result["dbfile"].toString();
+    QString dbfile = result["dataProvider"].toMap().find("dbfile").value().toString();
     // load the db might fail
     try {
         dataProvider = new DataProvider(dbfile, this);
@@ -207,6 +207,7 @@ void MainWindow::onLoad()
     setUpView();
     setTitle(QFileInfo(projectPath).completeBaseName().remove(".oct"));
 
+    dataProvider->load(&result);
     pa->load(&result);
     pa->setUnsavedChanges(false);
 }
@@ -305,14 +306,13 @@ void MainWindow::save(bool saveAs, qint64 begin, qint64 end)
     if ((begin == -1) && (end == -1)) { // save all
         projectPath = fileName;
         dataProvider->moveDB(dbname + ".db"); // move tmp-database if we save all
-        pName.insert("dbfile", dataProvider->getDBFileName());
 
         if (writeProjectSettings(pName, projectPath)) // in case save was successfull ...
             pa->setUnsavedChanges(false); // ... clear flag in PresentationArea
     } else { // save range
         QString subProjectPath = fileName;
         // TODO(steffen): dataProvider->movePartDB(dbname  + ".db", begin, end)    oder so ähnlich
-        pName.insert("dbfile", dbname);
+
         writeProjectSettings(pName, subProjectPath);
     }
 }
@@ -389,6 +389,7 @@ void MainWindow::onSaveProject(qint64 start, qint64 end)
 bool MainWindow::writeProjectSettings(QVariantMap pName, QString path)
 {
     pa->save(&pName);
+    dataProvider->save(&pName);
 
     QJson::Serializer serializer;
     serializer.setIndentMode(QJson::IndentFull);

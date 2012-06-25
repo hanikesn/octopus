@@ -35,6 +35,39 @@ void DataProvider::closeDB()
     db.reset();
 }
 
+void DataProvider::save(QVariantMap *qvm)
+{
+    QVariantMap dataProvider;
+    QVariantList seriesList;
+    foreach (AbstractDataSeries *ads, dataSeries) {
+        QVariantMap tmp;
+        tmp.insert("name", ads->fullName());
+        tmp.insert("scaling", ads->defaultScaleType);
+        tmp.insert("offset", ads->offset);
+        seriesList << tmp;
+    }
+    dataProvider.insert("dbfile", getDBFileName());
+    dataProvider.insert("dataSeries", seriesList);
+    qvm->insert("dataProvider", dataProvider);
+}
+
+void DataProvider::load(QVariantMap *qvm)
+{
+    QVariantMap dataProvider = qvm->find("dataProvider").value().toMap();
+    QVariantList seriesList = dataProvider.find("dataSeries").value().toList();
+    foreach (QVariant series, seriesList) {
+        QVariantMap seriesMap = series.toMap();
+
+        int defScaleType = seriesMap.find("scaling").value().toInt();
+        QString name(seriesMap.find("name").value().toString());
+        int offset = seriesMap.find("offset").value().toInt();
+
+        getDataSeries(name)->defaultScaleType = (PlotSettings::ScaleType) defScaleType;
+        getDataSeries(name)->offset = offset;
+    }
+
+}
+
 QList<QString> DataProvider::getDataSeriesList() const
 {
     return dataSeries.keys();
