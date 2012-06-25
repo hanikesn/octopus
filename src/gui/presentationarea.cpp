@@ -5,14 +5,15 @@
 #include <QScrollBar>
 #include <QMessageBox>
 
-#include "gui/selection.h"
-#include "gui/presentationitem.h"
 #include "dataprovider.h"
-#include "gui/cursor.h"
-#include "gui/sourcedialog.h"
-#include "gui/track.h"
-#include "gui/timeline.h"
 #include "timemanager.h"
+#include "gui/cursor.h"
+#include "gui/plotsettingsdialog.h"
+#include "gui/presentationitem.h"
+#include "gui/selection.h"
+#include "gui/sourcedialog.h"
+#include "gui/timeline.h"
+#include "gui/track.h"
 
 class EventHandler : public MouseEventHandler
 {
@@ -213,6 +214,11 @@ void PresentationArea::onAddTrack()
     foreach (QStringList list, SourceDialog::getSources(dataProvider, "Select Data Series to be Shown", true, dataProvider.getDataSeriesList())) {
         add(list);
     }
+}
+
+void PresentationArea::onPlotSettings()
+{
+    PlotSettingsDialog::getSettings(dataProvider.getDataSeries());
 }
 
 Track* PresentationArea::add(const QList<QString>& fullDataSeriesNames)

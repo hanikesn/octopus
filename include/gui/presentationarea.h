@@ -56,12 +56,12 @@ signals:
 
     void changedViewHeight(int h);
     void changedViewWidth(int w);
+
 public slots:
     void onAddTrack();
     void onDelete(Track *t);    
 
     void onPlay();
-
     void onRecord();
 
 private slots:
@@ -100,6 +100,9 @@ private:
     Track* add(const QList<QString>& fullDataSeriesNames);
 
     int showRecordDialog();
+
+private slots:
+    void onPlotSettings();
 };
 
 #endif // PRESENTATIONAREA_H
