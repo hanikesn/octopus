@@ -9,6 +9,8 @@ InterpolatingGraph::InterpolatingGraph(QCustomPlot *plot, const DoubleSeries &d)
     series(d),
     plot(plot),
     lastUpdate(-1),
+    currentMin(std::numeric_limits<double>::max()),
+    currentMax(std::numeric_limits<double>::min()),
     currentScalingMode(PlotSettings::NOSCALING),
     currentScaleType(d.defaultScaleType)
 {
@@ -36,7 +38,7 @@ PlotSettings::ScaleType InterpolatingGraph::getScaleType() const
 
 void InterpolatingGraph::setScaleType(PlotSettings::ScaleType scaleType)
 {
-    //TODO(steffi)
+    rescale(currentScalingMode, scaleType);
 }
 
 QString InterpolatingGraph::dataSeriesName()
@@ -46,7 +48,7 @@ QString InterpolatingGraph::dataSeriesName()
 
 void InterpolatingGraph::update(const PlotSettings &settings)
 {
-//    rescale(settings.scalingMode(series.fullName()), settings.scaleType(series.fullName()));
+    rescale(settings.scalingMode, settings.scaleType(series.fullName()));
 }
 
 void InterpolatingGraph::configureAppearance(QCPGraph *graph)
@@ -62,46 +64,110 @@ void InterpolatingGraph::initialize(QCPGraph *graph, const DoubleSeries &series)
 
     auto const& data = series.getData();
     for (auto i = data.constBegin(); i != data.constEnd(); ++i) {
+        if (i.value() > currentMax) {
+            currentMax = i.value();
+        }
+        if (i.value() < currentMin) {
+            currentMin = i.value();
+        }
         graph->addData(i.key(), i.value());
     }
 }
 
-//void InterpolatingGraph::rescale(PlotSettings::ScaleType scaleType, PlotSettings::ScalingMode scalingMode)
-//{
-//    if (scalingMode != currentScalingMode) {
-//        switch (scalingMode) {
-//        case PlotSettings::NOSCALING:
-//            // this means that the graph's data have been rescaled --> reset
-//            graph->clearData();
-//            initialize(graph, series);
-//            break;
-//        case PlotSettings::MINMAXSCALING:
-//            // the graph's data need to be rescaled to use the plot's full height
-//            break;
-//        default:
-//            // ignore
-//            break;
-//        }
-//    }
+void InterpolatingGraph::rescale(PlotSettings::ScalingMode scalingMode, PlotSettings::ScaleType scaleType)
+{
+    switch (scalingMode) {
+    case PlotSettings::NOSCALING:
+        if (scalingMode != currentScalingMode) {
+            // This means that the graph's data need to be reset.
+            graph->clearData();
+            initialize(graph, series);
+        } else {
+            // Nothing to be done here.
+            // The graph's individual scale type has no significance in this case;
+            // the plot's scale type defines the appearance of its graphs.
+        }
+        break;
+    case PlotSettings::MINMAXSCALING:
+        if (scalingMode != currentScalingMode || scaleType != currentScaleType) {
+            // The graph's data need to be rescaled to use the plot's full height.
+            // If only the scale type has changed, we need to rescale anyway.
+            scaleToRange(0.0, 1.0, scaleType);
+        } else {
+            // Nothing to be done here, as neither scaling mode nor scale type have changed.
+        }
+        break;
+    }
 
-//    switch (scaleType) {
-//    case PlotSettings::LINSCALE:
-//        break;
-//    case PlotSettings::LOGSCALE:
-//        break;
-//    }
-//}
+    // update plot
+    plot->rescaleValueAxes();
+    plot->replot();
+}
+
+void InterpolatingGraph::scaleToRange(double lower, double upper, PlotSettings::ScaleType scaleType)
+{
+    if (scaleType == PlotSettings::NOT_SCALABLE) {
+        // nothing to be done here
+        return;
+    }
+
+    graph->clearData();
+
+    auto const& data = series.getData();
+    // rescale to new range
+    for (auto i = data.constBegin(); i != data.constEnd(); ++i) {
+        double scaledValue = i.value();
+        switch (scaleType) {
+        case PlotSettings::LINSCALE:
+            scaledValue = ((i.value() - currentMin)/(currentMax - currentMin)) * (upper - lower) + lower;
+            break;
+        case PlotSettings::LOGSCALE: {
+            double log10 = qLn(10);
+            scaledValue = (qLn(i.value()/currentMin)/log10)/(qLn(currentMax/currentMin)/log10) * (upper - lower) + lower;
+            break;
+        }
+        case PlotSettings::NOT_SCALABLE:
+            // handled above
+            break;
+        }
+        graph->addData(i.key(), scaledValue);
+    }
+
+    // update plot
+    plot->rescaleValueAxes();
+    plot->replot();
+}
 
 void InterpolatingGraph::onNewData(qint64 timestamp)
 {
     auto const& data = series.getData(lastUpdate, timestamp);
 
-    for (auto i = data.constBegin(); i != data.constEnd(); ++i) {
-        // TODO(Steffi): ggf. skalieren!
-        graph->addData(i.key(), i.value());
-    }
+    switch (currentScalingMode) {
+    case PlotSettings::NOSCALING:
+        for (auto i = data.constBegin(); i != data.constEnd(); ++i) {
+            if (i.value() > currentMax) {
+                currentMax = i.value();
+            }
+            if (i.value() < currentMin) {
+                currentMin = i.value();
+            }
+            graph->addData(i.key(), i.value());
+        }
 
-    lastUpdate = timestamp;
-    plot->rescaleValueAxes();
-    plot->replot();
+        lastUpdate = timestamp;
+        plot->rescaleValueAxes();
+        plot->replot();
+        break;
+    case PlotSettings::MINMAXSCALING:
+        for (auto i = data.constBegin(); i != data.constEnd(); ++i) {
+            if (i.value() > currentMax) {
+                currentMax = i.value();
+            }
+            if (i.value() < currentMin) {
+                currentMin = i.value();
+            }
+        }
+        scaleToRange(0.0, 1.0, currentScaleType);
+        break;
+    }
 }

@@ -30,6 +30,8 @@ private:
     QCPGraph *graph;
 
     qint64 lastUpdate;
+    double currentMin;
+    double currentMax;
 
     PlotSettings::ScalingMode currentScalingMode;    
     PlotSettings::ScaleType currentScaleType;
@@ -37,7 +39,8 @@ private:
     void configureAppearance(QCPGraph *graph);
     void initialize(QCPGraph *graph, const DoubleSeries &series);
 
-//    void rescale(PlotSettings::ScaleType scaleType, PlotSettings::ScalingMode scalingMode);
+    void rescale(PlotSettings::ScalingMode scalingMode, PlotSettings::ScaleType scaleType);
+    void scaleToRange(double lower, double upper, PlotSettings::ScaleType scaleType);
 };
 
 #endif // INTERPOLATINGGRAPH_H
