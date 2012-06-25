@@ -50,6 +50,11 @@ const DatabaseAdapter &DataProvider::getDB() const
     return *db;
 }
 
+void DataProvider::copyDB(QString filename, qint64 begin, qint64 end)
+{
+    db->copy(filename, begin, end);
+}
+
 void DataProvider::moveDB(QString const& newFilename)
 {
     if(newFilename == filename)

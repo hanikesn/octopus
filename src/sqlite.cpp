@@ -45,7 +45,8 @@ PreparedStatement DB::prepare(const std::string& query) const
 {
     sqlite3_stmt* stmt;
     const char* unused;
-    int ret = sqlite3_prepare_v2(db, query.c_str(), query.length(), &stmt, &unused);
+    // sqlite expects the null terminator to be included in the lenght
+    int ret = sqlite3_prepare_v2(db, query.c_str(), query.length() + 1, &stmt, &unused);
     if(ret != SQLITE_OK)
         throw Exception(ret);
 
