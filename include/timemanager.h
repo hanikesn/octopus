@@ -113,7 +113,12 @@ private:
     int offsetLeft;
     int width;
 
+    // Smallest step on the scrollbar (either 1s or 100ms represented in µs)
+    int resolution;
+
     qint64 getZoomFactor(bool zoomOut);
+
+    void updateScrollBar(bool scroll);
 
 };
 

@@ -9,7 +9,7 @@
 TimeManager::TimeManager(QScrollBar *hScrollBar, QObject* parent):
     QObject(parent),
     lowVisRange(0),
-    highVisRange(0),
+    highVisRange(30000000),
     timePerPx(40000),
     maximum(0),
     timeoutUpdateIntervall(40000),
@@ -18,7 +18,8 @@ TimeManager::TimeManager(QScrollBar *hScrollBar, QObject* parent):
     playstate(PAUSED),
     autoScroll(false),
     hScrollBar(hScrollBar),
-    timer(new QTimer(this))
+    timer(new QTimer(this)),
+    resolution(1000000)
 {
     hScrollBar->setSingleStep(1);
     hScrollBar->setPageStep(30);
@@ -128,22 +129,32 @@ qint64 TimeManager::getZoomFactor(bool zoomOut)
         return 1000000;
 }
 
-void TimeManager::onNewMax(qint64 timestamp)
+void TimeManager::updateScrollBar(bool scroll)
 {
-    if (timestamp > maximum)
-        maximum = timestamp;
-    int max = timestamp/1000000; // max in seconds
+    if ((highVisRange - lowVisRange) <= 10000000) // visible range is less than 10s
+        resolution = 100000; // hScrollBars resolution is 100ms
+
+    int max = maximum/resolution; // max in either in seconds or 100ms
     int min = 0;
 
     hScrollBar->setMaximum(max - hScrollBar->pageStep());
     hScrollBar->setMinimum(min);
 
-    if (autoScroll) {
+    if (scroll) {
         qint64 timeFrame = highVisRange - lowVisRange;
         hScrollBar->setValue(hScrollBar->maximum());
-        qint64 lowerRange = timestamp < timeFrame ? 0 : timestamp - timeFrame;
-        emit rangeChanged(lowerRange, timestamp);
+        qint64 lowerRange = maximum < timeFrame ? 0 : maximum - timeFrame;
+        emit rangeChanged(lowerRange, maximum);
     }
+}
+
+void TimeManager::onNewMax(qint64 timestamp)
+{
+    if (timestamp < maximum)
+        return;
+
+    maximum = timestamp;
+    updateScrollBar(autoScroll);
 }
 
 void TimeManager::onZoomIn()
@@ -155,6 +166,7 @@ void TimeManager::onZoomIn()
     timePerPx = stepSize / 50;
     // initiate redraw according to new range
     onNewWidth(width);
+    updateScrollBar(false);
 }
 
 void TimeManager::onZoomOut()
@@ -163,12 +175,13 @@ void TimeManager::onZoomOut()
     timePerPx = stepSize / 50;
     // initiate redraw according to new range
     onNewWidth(width);
+    updateScrollBar(false);
 }
 
 void TimeManager::horizontalScroll(int pos)
 {
     qint64 range = highVisRange - lowVisRange;
-    lowVisRange = pos*1000000;
+    lowVisRange = pos * resolution;
     highVisRange = lowVisRange + range;
     emit rangeChanged(lowVisRange, highVisRange);
 }
