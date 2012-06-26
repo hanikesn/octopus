@@ -64,6 +64,7 @@ private slots:
 
     /**
       * Sets 'unsavedChanges' to true when new data is received (even if it's no shown in a track).
+      * This works because the maximum is growing continiously.
       * @param max New maximum
       */
     void onNewMax(qint64 max);
