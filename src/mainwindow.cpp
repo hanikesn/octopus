@@ -63,7 +63,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-    networkAdapter->deleteLater();
+    if (networkAdapter) networkAdapter->deleteLater();
 }
 
 void MainWindow::onExportAction()
