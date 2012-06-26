@@ -270,10 +270,10 @@ void DatabaseAdapter::copy(QString other, qint64 begin, qint64 end)
     if(stmt.execute() != stmt.done())
         throw std::exception();
 
-    if(db.execute("INSERT INTO other.senders SELECT * FROM main.senders;") != db.Done)
+    if(db.execute("INSERT OR REPLACE INTO other.senders SELECT * FROM main.senders;") != db.Done)
         throw std::exception();
 
-    if(db.execute("INSERT INTO other.series SELECT * FROM main.series;") != db.Done)
+    if(db.execute("INSERT OR REPLACE INTO other.series SELECT * FROM main.series;") != db.Done)
         throw std::exception();
 
     stmt = db.prepare("INSERT INTO other.data_string SELECT * FROM main.data_string WHERE time>=? and time<=?;");
