@@ -82,7 +82,7 @@ private:
 
     TimeManager *timeManager;
 
-    bool unsavedChanges;
+    bool unsavedChanges;    
 
     MouseEventHandler* viewportMouseHandler;
 

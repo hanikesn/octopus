@@ -54,11 +54,13 @@ MainWindow::MainWindow(QWidget *parent) :
     setUpButtonBars();
     setUpMenu();
 
-    onNew();
     //TODO(domi): Kommentare wegmachen
-    StartScreen *s = new StartScreen(this);
-    if (s->showScreen() == StartScreen::LOAD)
-            onLoad();
+//    StartScreen *s = new StartScreen(this);
+//    if (s->showScreen() == StartScreen::LOAD)
+//            onLoad();
+//    else
+//        onNew();
+    onNew();
 }
 
 MainWindow::~MainWindow()
@@ -222,6 +224,7 @@ void MainWindow::onLoad()
     dataProvider->load(&result);
     pa->load(&result);
     pa->setUnsavedChanges(false);
+    timeManager->setUnsavedChanges(false);
 
     // no recording in a loaded project.
     recButton.setEnabled(false);
@@ -337,8 +340,10 @@ void MainWindow::save(bool saveAs, qint64 begin, qint64 end)
         dataProvider->moveDB(dbname); // move tmp-database if we save all        
         pName.insert("dbfile", dbname);
 
-        if (writeProjectSettings(pName, projectPath)) // in case save was successfull ...
+        if (writeProjectSettings(pName, projectPath)) { // in case save was successfull ...
             pa->setUnsavedChanges(false); // ... clear flag in PresentationArea
+            timeManager->setUnsavedChanges(false);
+        }
     } else { // save range
         QString subProjectPath = fileName;
         dataProvider->copyDB(dbname, begin, end);
@@ -349,7 +354,7 @@ void MainWindow::save(bool saveAs, qint64 begin, qint64 end)
 
 int MainWindow::checkForUnsavedChanges()
 {
-    if(!pa || !pa->hasUnsavedChanges())
+    if(!pa || (!pa->hasUnsavedChanges() && !timeManager->hasUnsavedChanges()))
         return -1;
 
     QMessageBox msg;
@@ -387,22 +392,22 @@ QString MainWindow::getSaveFileName(bool saveAs)
 void MainWindow::closeEvent(QCloseEvent *ce)
 {
     //TODO(domi): Kommentare wegmachen:
-    if (recorder->isRecording()) { // ask whether recording should be stopped
-        // simulate button click
-        recorder->toggleRecording();
+//    if (recorder->isRecording()) { // ask whether recording should be stopped
+//        // simulate button click
+//        recorder->toggleRecording();
 
-        if (recorder->isRecording()) { // if there is still a running recording, the user continued!
-            ce->ignore();
-            return; // dont exit the program
-        }
-        onRecord(); // in case the recording was stopped, set corresponding state of rec button.
-    }
+//        if (recorder->isRecording()) { // if there is still a running recording, the user continued!
+//            ce->ignore();
+//            return; // dont exit the program
+//        }
+//        onRecord(); // in case the recording was stopped, set corresponding state of rec button.
+//    }
 
-    // usual check for unsaved changes in the project
-    if (checkForUnsavedChanges() != QMessageBox::Abort)
-        QMainWindow::closeEvent(ce);
-    else
-        ce->ignore();
+//    // usual check for unsaved changes in the project
+//    if (checkForUnsavedChanges() != QMessageBox::Abort)
+//        QMainWindow::closeEvent(ce);
+//    else
+//        ce->ignore();
 }
 
 void MainWindow::onRecord()

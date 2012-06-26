@@ -84,12 +84,14 @@ void TimeManager::center(qint64 timestamp)
     lowVisRange = timestamp - range/2;
     highVisRange = timestamp + range/2;
     setRange(lowVisRange, highVisRange);
+    unsavedChanges = true;
 }
 
 void TimeManager::setTime(qint64 time)
 {
     currentTime = time;
     emit currentTimeChanged(time);
+    unsavedChanges = true;
 }
 
 void TimeManager::updateScrollBar(bool scroll)
@@ -145,6 +147,7 @@ void TimeManager::horizontalScroll(int pos)
     lowVisRange = qMax(0LL, pos * getTimePerPx());
     highVisRange = lowVisRange + range;
     setRange(lowVisRange, highVisRange);
+    unsavedChanges = true;
 }
 
 void TimeManager::onTimeout()

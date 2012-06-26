@@ -49,6 +49,9 @@ public:
     // damit man sie hier die events nicht vorwarden muss.
     void forwardEventToScrollbar(QEvent *ev);
 
+    bool hasUnsavedChanges() { return unsavedChanges; }
+    void setUnsavedChanges(bool uc) { unsavedChanges = uc; }
+
 private:
     /**
       * Returns the amount of time the range is changed during playing
@@ -107,6 +110,9 @@ private:
 
     int offsetLeft;
     int width;
+
+    // stores whether changes in the visual range have happened.
+    bool unsavedChanges;
 
     qint64 getZoomFactor(bool zoomOut);
     void updateScrollBar(bool scroll);

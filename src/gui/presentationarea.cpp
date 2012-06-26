@@ -292,12 +292,10 @@ void PresentationArea::onDelete(Track *t)
 }
 
 void PresentationArea::onRangeChanged(qint64 begin, qint64 end)
-{            
+{
     foreach (Track *t, tracks) {
         t->setPlotRange(begin, end);
     }
-    if (!tracks.isEmpty())
-        unsavedChanges = true;
 }
 
 void PresentationArea::updatePlotMargins()
@@ -322,7 +320,7 @@ void PresentationArea::updatePlotMargins()
 
 void PresentationArea::onNewMax(qint64 max)
 {
-    unsavedChanges = true;
+        unsavedChanges = true;
 }
 
 void PresentationArea::save(QVariantMap *qvm)
