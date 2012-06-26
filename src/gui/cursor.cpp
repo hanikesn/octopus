@@ -36,10 +36,7 @@ void Cursor::setTime(qint64 time)
 void Cursor::onUpdate()
 {
     int newPos = timeMgr->convertTimeToPos(currentTime);
-    if(newPos == -1)
-        setVisible(false);
-    else
-        setVisible(true);
+    setVisible(timeMgr->isValidPos(newPos));
 
     move(newPos, 0);
 }

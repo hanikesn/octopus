@@ -192,7 +192,7 @@ void Track::onPlotSettings()
 
 void Track::onOptPlotMarginsRecalculated(int left, int right, int top, int bottom)
 {
-    ui.plot->setMarginRight(0);
+    ui.plot->setMarginRight(50);
     ui.plot->setMarginTop(top);
     ui.plot->setMarginBottom(bottom);
 
@@ -202,9 +202,14 @@ void Track::onOptPlotMarginsRecalculated(int left, int right, int top, int botto
     }
 }
 
-int Track::getPlotOffset()
+int Track::getMarginLeft()
 {
-    return ui.plot->pos().x();
+    return ui.plot->pos().x() + ui.plot->marginLeft();
+}
+
+int Track::getMarginRight()
+{
+    return ui.plot->marginRight();
 }
 
 void Track::setPlotMarginLeft(int margin)

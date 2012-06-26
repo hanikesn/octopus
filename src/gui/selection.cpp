@@ -29,8 +29,8 @@ Selection::Selection(TimeManager* timeManager, QWidget *parent):
 
 void Selection::onUpdate()
 {
-    int left = timeManager->convertTimeToPos(begin);
-    int right = timeManager->convertTimeToPos(end);
+    int left = timeManager->clipPos(timeManager->convertTimeToPos(begin));
+    int right = timeManager->clipPos(timeManager->convertTimeToPos(end));
 
     if(left > right)
         std::swap(left, right);

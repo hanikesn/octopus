@@ -29,7 +29,7 @@ public:
         if(timeManager.isPlaying())
             return;
 
-        if(event->pos().x() < timeManager.getOffset())
+        if(!timeManager.isValidPos(event->pos().x()))
             return;
 
         if ((event->button() == Qt::LeftButton) &&
@@ -63,11 +63,11 @@ public:
 
         if(createSelection){
             createSelection = false;
-            int selectionEnd = qMax(event->pos().x(), timeManager.getOffset());
+            int selectionEnd = timeManager.clipPos(event->pos().x());
 
             selection.setSelectionEnd(timeManager.convertPosToTime(selectionEnd));
             cursor.setVisible(false);
-        } else if (event->pos().x() >= timeManager.getOffset()) {
+        } else if (timeManager.isValidPos(event->pos().x())) {
             qint64 currentTime = timeManager.convertPosToTime(event->pos().x());
             timeManager.setTime(currentTime);
             selection.hide();
@@ -92,9 +92,8 @@ public:
         }
 
         if(createSelection &&
-                event->modifiers() == Qt::ShiftModifier &&
-                event->pos().x() >= timeManager.getOffset()) {
-            selection.setSelectionEnd(timeManager.convertPosToTime(event->pos().x()));
+                event->modifiers() == Qt::ShiftModifier) {
+            selection.setSelectionEnd(timeManager.convertPosToTime(timeManager.clipPos(event->pos().x())));
             event->accept();
         }
     }
@@ -162,6 +161,7 @@ PresentationArea::PresentationArea(const DataProvider &dataProvider,
     connect(this, SIGNAL(changedViewHeight(int)), cursor, SLOT(updateHeight(int)));
     connect(this, SIGNAL(changedViewHeight(int)), selection, SLOT(updateHeight(int)));
 
+    connect(this, SIGNAL(marginsChanged(int,int)), timeManager, SLOT(onMarginsChanged(int,int)));
     connect(this, SIGNAL(changedViewWidth(int)), timeLine, SLOT(updateWidth(int)));
     connect(this, SIGNAL(changedViewWidth(int)), timeManager, SLOT(onNewWidth(int)));
 
@@ -176,7 +176,7 @@ PresentationArea::PresentationArea(const DataProvider &dataProvider,
     connect(&dataProvider, SIGNAL(newMax(qint64)), timeManager, SLOT(onNewMax(qint64)));
     connect(&dataProvider, SIGNAL(newMax(qint64)), this, SLOT(onNewMax(qint64)));
 
-    timeManager->onOffsetChanged(50);
+    timeManager->onMarginsChanged(50, 50);
 }
 
 PresentationArea::~PresentationArea()
@@ -316,7 +316,7 @@ void PresentationArea::updatePlotMargins()
         t->setPlotMarginLeft(optMargin);
     }
 
-    timeManager->onOffsetChanged(tracks.first()->getPlotOffset() + optMargin);
+    emit marginsChanged(tracks.first()->getMarginLeft(), tracks.first()->getMarginRight());
 }
 
 void PresentationArea::onNewMax(qint64 max)

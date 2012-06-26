@@ -46,6 +46,7 @@ signals:
 
     void changedViewHeight(int h);
     void changedViewWidth(int w);
+    void marginsChanged(int marginLeft, int marginRight);
 
     void selectionChanged(qint64 begin, qint64 end);
 

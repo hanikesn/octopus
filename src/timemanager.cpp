@@ -26,21 +26,12 @@ TimeManager::TimeManager(QScrollBar *hScrollBar, QObject* parent):
 
 qint64 TimeManager::convertPosToTime(int pos)
 {
-    qint64 result = lowVisRange + ((pos - offsetLeft) * timePerPx);
-    return result;
+    return lowVisRange + ((pos - marginLeft) * timePerPx);
 }
 
 int TimeManager::convertTimeToPos(qint64 time)
 {
-    if (time < lowVisRange) return -1;
-
-    qint64 currentTime = lowVisRange;
-    int pos = 0;
-    while(currentTime < time) {
-        currentTime += timePerPx;
-        pos++;
-    }
-    return pos + offsetLeft;
+    return marginLeft + (time -lowVisRange) / timePerPx;
 }
 
 void TimeManager::setRange(qint64 begin, qint64 end)
@@ -174,7 +165,7 @@ void TimeManager::onTimeout()
     }
 
     // We need to adjust the range slightly so that the cursor stays visible
-    if(currentTime>highVisRange- getTimePerPx()) {
+    if(currentTime>highVisRange - getTimePerPx()) {
         qint64 range = highVisRange - lowVisRange;
         highVisRange = currentTime + getTimePerPx();
         lowVisRange = highVisRange - range;
@@ -184,9 +175,10 @@ void TimeManager::onTimeout()
     emit currentTimeChanged(currentTime);
 }
 
-void TimeManager::onOffsetChanged(int offset)
+void TimeManager::onMarginsChanged(int left, int right)
 {
-    offsetLeft = offset;
+    marginLeft = left;
+    marginRight = right;
     onNewWidth(width);
 }
 
@@ -195,7 +187,7 @@ void TimeManager::onNewWidth(int w)
     width = w;
     hScrollBar->setSingleStep(60);
     hScrollBar->setPageStep(w);
-    highVisRange = lowVisRange + timePerPx * (w - offsetLeft);
+    highVisRange = lowVisRange + timePerPx * (w - marginLeft - marginRight);
     setRange(lowVisRange, highVisRange);
 }
 

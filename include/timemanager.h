@@ -40,7 +40,11 @@ public:
 
     bool isPlaying() {return playing;}
 
-    int getOffset() {return offsetLeft;}
+    int getMarginLeft() {return marginLeft;}
+    int getMarginRight() {return marginRight;}
+
+    bool isValidPos(int pos) {return pos > marginLeft && pos < width - marginRight;}
+    int clipPos(int pos) {return qMin(qMax(pos, marginLeft), width - marginRight);}
 
     // determines how much time should be between 2 big ticks in the timeline (in microseconds)
     int getStepSize();
@@ -77,7 +81,7 @@ public slots:
 
     void onPlay();
 
-    void onOffsetChanged(int offset);
+    void onMarginsChanged(int marginLeft, int marginRight);
 
     void onNewWidth(int width);
 
@@ -108,7 +112,7 @@ private:
 
     TimeLine *timeLine;
 
-    int offsetLeft;
+    int marginLeft, marginRight;
     int width;
 
     // stores whether changes in the visual range have happened.
