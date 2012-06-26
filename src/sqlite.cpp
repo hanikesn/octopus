@@ -150,7 +150,7 @@ PreparedStatement::QueryIterator& PreparedStatement::QueryIterator::operator++()
 {
     if(stmt != nullptr) {
         int ret = sqlite3_step(stmt->stmt);
-        if(ret == SQLITE_BUSY || ret == SQLITE_ERROR || ret == SQLITE_MISUSE) {
+        if(ret == SQLITE_BUSY || ret == SQLITE_ERROR || ret == SQLITE_MISUSE || ret == SQLITE_CONSTRAINT) {
             throw Exception(ret);
         } else if(ret == SQLITE_DONE) {
             stmt = nullptr;
