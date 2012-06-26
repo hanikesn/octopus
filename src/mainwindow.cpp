@@ -56,9 +56,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     onNew();
     //TODO(domi): Kommentare wegmachen
-//    StartScreen *s = new StartScreen(this);
-//    if (s->showScreen() == StartScreen::LOAD)
-    //        onLoad();
+    StartScreen *s = new StartScreen(this);
+    if (s->showScreen() == StartScreen::LOAD)
+            onLoad();
 }
 
 MainWindow::~MainWindow()
@@ -315,8 +315,8 @@ void MainWindow::setUpView()
     qRegisterMetaType<Value>("Value");
 
     if (networkAdapter) {
-        connect(networkAdapter, SIGNAL(onNewSender(EIDescriptionWrapper)), dataProvider, SLOT(onNewSender(EIDescriptionWrapper)), Qt::QueuedConnection);
-        connect(networkAdapter, SIGNAL(onNewData(qint64,QString,Value)),      dataProvider, SLOT(onNewData(qint64,QString,Value)), Qt::QueuedConnection);
+        connect(networkAdapter, SIGNAL(onNewSender(EIDescriptionWrapper)),  dataProvider, SLOT(onNewSender(EIDescriptionWrapper)), Qt::QueuedConnection);
+        connect(networkAdapter, SIGNAL(onNewData(qint64,QString,Value)),    dataProvider, SLOT(onNewData(qint64,QString,Value)), Qt::QueuedConnection);
         networkAdapter->discoverSenders();
     }
     connect(&playButton, SIGNAL(clicked()), timeManager, SLOT(onPlay()));    
@@ -387,22 +387,22 @@ QString MainWindow::getSaveFileName(bool saveAs)
 void MainWindow::closeEvent(QCloseEvent *ce)
 {
     //TODO(domi): Kommentare wegmachen:
-//    if (pa->isRecording()) { // ask whether recording should be stopped
-//        // simulate button click
-//        pa->onRecord();
+    if (recorder->isRecording()) { // ask whether recording should be stopped
+        // simulate button click
+        recorder->toggleRecording();
 
-//        if (pa->isRecording()) { // if there is still a running recording, the user continued!
-//            ce->ignore();
-//            return; // dont exit the program
-//        }
-//        onRecord(); // in case the recording was stopped, set corresponding state of rec button.
-//    }
+        if (recorder->isRecording()) { // if there is still a running recording, the user continued!
+            ce->ignore();
+            return; // dont exit the program
+        }
+        onRecord(); // in case the recording was stopped, set corresponding state of rec button.
+    }
 
-//    // usual check for unsaved changes in the project
-//    if (checkForUnsavedChanges() != QMessageBox::Abort)
-//        QMainWindow::closeEvent(ce);
-//    else
-//        ce->ignore();
+    // usual check for unsaved changes in the project
+    if (checkForUnsavedChanges() != QMessageBox::Abort)
+        QMainWindow::closeEvent(ce);
+    else
+        ce->ignore();
 }
 
 void MainWindow::onRecord()

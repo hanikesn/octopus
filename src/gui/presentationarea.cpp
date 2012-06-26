@@ -173,6 +173,7 @@ PresentationArea::PresentationArea(const DataProvider &dataProvider,
     connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)), selection, SLOT(onUpdate()));
 
     connect(&dataProvider, SIGNAL(newMax(qint64)), timeManager, SLOT(onNewMax(qint64)));
+    connect(&dataProvider, SIGNAL(newMax(qint64)), this, SLOT(onNewMax(qint64)));
 
     timeManager->onOffsetChanged(50);
 }
@@ -317,6 +318,11 @@ void PresentationArea::updatePlotMargins()
     }
 
     timeManager->onOffsetChanged(tracks.first()->getPlotOffset() + optMargin);
+}
+
+void PresentationArea::onNewMax(qint64 max)
+{
+    unsavedChanges = true;
 }
 
 void PresentationArea::save(QVariantMap *qvm)

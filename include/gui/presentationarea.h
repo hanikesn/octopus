@@ -62,6 +62,12 @@ private slots:
 
     void updatePlotMargins();
 
+    /**
+      * Sets 'unsavedChanges' to true when new data is received (even if it's no shown in a track).
+      * @param max New maximum
+      */
+    void onNewMax(qint64 max);
+
 protected:
     bool eventFilter(QObject *, QEvent *);
 
