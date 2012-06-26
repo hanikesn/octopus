@@ -16,7 +16,7 @@ TimeLine::TimeLine(TimeManager& timeManager, QWidget * parent):
     smallTickHeight(5),
     mediumTickHeight(10),
     largeTickHeight(15),
-    offset(timeManager.getOffset()),
+    offset(timeManager.getMarginLeft()),
     pen(Qt::black, 1, Qt::SolidLine),
     largeTickAmount(2000000), // two seconds in µs
     mediumTickAmount(1000000), // one second in µs
@@ -57,7 +57,7 @@ void TimeLine::paintEvent(QPaintEvent *)
 
 void TimeLine::drawTicks(QPainter *painter)
 {    
-    offset = timeManager.getOffset();
+    offset = timeManager.getMarginLeft();
     currentPos = 0;
     qint64 currentTime = beginRange;
     bottom = geometry().height() - 10;
@@ -79,7 +79,7 @@ void TimeLine::drawTicks(QPainter *painter)
     else if (currentTime % smallTickAmount == 0)
         drawSmallTick(painter);
 
-    while (currentPos < geometry().width() - offset) {
+    while (currentPos + offset < geometry().width() - timeManager.getMarginRight()) {
         if (currentTime / (ltCounter * largeTickAmount) >= 1) { // large tick
             ltCounter++;
             mtCounter++;
