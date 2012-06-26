@@ -105,11 +105,16 @@ PlotSettings PlotSettingsDialog::getResult()
 
     PlotSettings settings;
     if (ui->sameScaleOption->isChecked()) {
+        settings.scalingMode = PlotSettings::NOSCALING;
         if (ui->logChoice->isChecked()) {
             settings.plotScaleType = PlotSettings::LOGSCALE;
         } else {
             settings.plotScaleType = PlotSettings::LINSCALE;
         }
+    } else {
+        settings.scalingMode = PlotSettings::MINMAXSCALING;
+        // keep plotScaleType valid
+        settings.plotScaleType = PlotSettings::NOT_SCALABLE;
     }
 
     for (int row = 0; row < ui->sourceTable->rowCount(); row++) {

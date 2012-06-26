@@ -151,8 +151,6 @@ void Track::onSources()
 
 void Track::onPlotSettings()
 {
-    // TODO(Steffi)
-
     PlotSettings preset;
 
     switch (ui.plot->yAxis->scaleType()) {
@@ -165,25 +163,29 @@ void Track::onPlotSettings()
     }
 
     foreach (Graph *g, graphs) {
+        preset.setOffset(g->dataSeriesName(), dataProvider.getDataSeries(g->dataSeriesName())->offset);
         preset.setScaleType(g->dataSeriesName(), g->getScaleType());
     }
 
-    PlotSettings newSettings = PlotSettingsDialog::getSettings(getFullDataSeriesNames(), preset, true, false);
+    PlotSettings settings = PlotSettingsDialog::getSettings(getFullDataSeriesNames(), preset, true, false);
 
-    if (!newSettings.isEmpty()) {
-        //    if (settings.scalingMode == PlotSettings::MINMAXSCALING) {
-        //        ui.plot->yAxis->setScaleType(QCPAxis::stLinear);
-        //        ui.plot->yAxis->setRange(0, 1);
-        //    } else if (settings.scalingMode == PlotSettings::NOSCALING) {
-        //        if (settings.scaleType == PlotSettings::LOGSCALE) {
-        //            ui.plot->yAxis->setScaleType(QCPAxis::stLogarithmic);
-        //        } else {
-        //            ui.plot->yAxis->setScaleType(QCPAxis::stLinear);
-        //        }
-        //    }
+    if (!settings.isEmpty()) {
+        if (settings.scalingMode == PlotSettings::MINMAXSCALING) {
+            // all graphs will scale their values to use the full height of the plot
+            ui.plot->yAxis->setScaleType(QCPAxis::stLinear);
+            ui.plot->yAxis->setRange(0, 1);
+            // set axis invisible as it will have no informative value
+            ui.plot->yAxis->setVisible(false);
+        } else if (settings.scalingMode == PlotSettings::NOSCALING) {
+            if (settings.plotScaleType == PlotSettings::LOGSCALE) {
+                ui.plot->yAxis->setScaleType(QCPAxis::stLogarithmic);
+            } else {
+                ui.plot->yAxis->setScaleType(QCPAxis::stLinear);
+            }
+        }
 
         foreach (Graph *g, graphs) {
-            g->update(newSettings);
+            g->update(settings);
         }
     }
 }
