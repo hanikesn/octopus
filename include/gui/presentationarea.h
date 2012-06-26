@@ -47,6 +47,8 @@ signals:
     void changedViewHeight(int h);
     void changedViewWidth(int w);
 
+    void selectionChanged(qint64 begin, qint64 end);
+
 private slots:
     void onAddTrack();
     void onDelete(Track *t);

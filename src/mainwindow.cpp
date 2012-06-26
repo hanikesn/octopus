@@ -26,7 +26,9 @@ MainWindow::MainWindow(QWidget *parent) :
     dataProvider(0),
     networkAdapter(0),
     timeManager(0),
-    recorder(0)
+    recorder(0),
+    selectionBegin(-1),
+    selectionEnd(-1)
 {    
     ui.setupUi(this);
 
@@ -70,8 +72,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::onExportAction()
 {
-    // TODO:
-    qDebug() << "Export";
+    onExportRange(selectionBegin, selectionEnd);
 }
 
 void MainWindow::setUpButtonBars()
@@ -127,6 +128,10 @@ void MainWindow::setUpButtonBars()
 
 void MainWindow::onExportRange(qint64 begin, qint64 end)
 {    
+    if (begin == -1 && end == -1) { // export all data
+      //TODO(domi) begin und end auf das maximum setzen (gibts im dataprovider)
+    }
+
     QList<QStringList> res = SourceDialog::getSources(*dataProvider, tr("Export"), false, QStringList(), this);
 
     if(res.isEmpty())
@@ -303,6 +308,7 @@ void MainWindow::setUpView()
     ui.verticalLayout_2->insertWidget(0, pa);
 
     connect(pa, SIGNAL(exportRange(qint64,qint64)), this, SLOT(onExportRange(qint64,qint64)));
+    connect(pa, SIGNAL(selectionChanged(qint64,qint64)), this, SLOT(onSelectionChanged(qint64,qint64)));
     connect(recorder, SIGNAL(saveProject(qint64,qint64)), this, SLOT(onSaveProject(qint64,qint64)));
     connect(&addTrackButton, SIGNAL(clicked()), pa, SLOT(onAddTrack()));
     connect(&plotSettingsButton, SIGNAL(clicked()), pa, SLOT(onPlotSettings()));
@@ -418,7 +424,13 @@ void MainWindow::onRecord()
 void MainWindow::onSaveProject(qint64 start, qint64 end)
 {
     // initiate save (project file)
-    save(true, start, end);    
+    save(true, start, end);
+}
+
+void MainWindow::onSelectionChanged(qint64 begin, qint64 end)
+{
+    selectionBegin = begin;
+    selectionEnd = end;
 }
 
 bool MainWindow::writeProjectSettings(QVariantMap pName, QString path)

@@ -48,6 +48,8 @@ private slots:
       */
     void onSaveProject(qint64 start, qint64 end);
 
+    void onSelectionChanged(qint64 begin, qint64 end);
+
 private:
     QVBoxLayout *trackLayout;
 
@@ -95,6 +97,8 @@ private:
     QString projectPath;
 
     const static QString TITLE;
+
+    qint64 selectionBegin, selectionEnd;
 
     void setUpButtonBars();
 

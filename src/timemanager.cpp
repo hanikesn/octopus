@@ -109,6 +109,18 @@ void TimeManager::updateScrollBar(bool scroll)
         qint64 lowerRange = maximum < timeFrame ? 0 : maximum - timeFrame;
         // emit the signal directly to prevent a loop
         emit rangeChanged(lowerRange, maximum);
+
+        //TODO(domi): nachschauen warum cursor nicht mehr verschoben wird, wenn autoscroll an ist
+
+
+//        // We need to adjust the range slightly so that the cursor stays visible
+//        if(currentTime>highVisRange- getTimePerPx()) {
+//            qint64 range = highVisRange - lowVisRange;
+//            highVisRange = currentTime + getTimePerPx();
+//            lowVisRange = highVisRange - range;
+//            setRange(lowVisRange, highVisRange);
+//        }
+
     }
 }
 
@@ -119,6 +131,8 @@ void TimeManager::onNewMax(qint64 timestamp)
 
     maximum = timestamp;
     updateScrollBar(autoScroll);
+    if (autoScroll)
+        emit setTime(timestamp);
 }
 
 int TimeManager::getStepSize()
