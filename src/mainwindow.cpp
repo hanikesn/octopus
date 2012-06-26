@@ -222,6 +222,9 @@ void MainWindow::onLoad()
     dataProvider->load(&result);
     pa->load(&result);
     pa->setUnsavedChanges(false);
+
+    // no recording in a loaded project.
+    recButton.setEnabled(false);
 }
 
 static void addData(DataProvider& dp)
@@ -267,6 +270,9 @@ void MainWindow::onNew()
     addData(*dataProvider);
     projectPath = "";
     setTitle("");
+
+    // enable recording
+    recButton.setEnabled(true);
 }
 
 void MainWindow::setTitle(QString pName)
