@@ -29,7 +29,7 @@ public:
     void addSender(EI::Description const& desc);
     QList<EI::Description> getSenders();
 
-    void getMinMaxTimeStamp(qint64& min, qint64& max);
+    void getMinMaxTimeStamp(qint64& min, qint64& max) const;
 
     void copy(QString other, qint64 begin, qint64 end);
 
