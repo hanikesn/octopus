@@ -19,8 +19,11 @@ Selection::Selection(TimeManager* timeManager, QWidget *parent):
 
     menu = new QMenu(this);
     QAction* exportAction = new QAction(tr("Export Range"), this);
+    QAction* zoomInAction = new QAction(tr("Zoom In"), this);
     menu->addAction(exportAction);
+    menu->addAction(zoomInAction);
     connect(exportAction, SIGNAL(triggered()), this, SLOT(exportTriggered()));
+    connect(zoomInAction, SIGNAL(triggered()), this, SLOT(onZoomIn()));
 
     setObjectName("Selection");
 
@@ -52,6 +55,11 @@ void Selection::paintEvent(QPaintEvent *)
     painter.setBrush(brush);
     painter.setOpacity(0.5);
     painter.drawRoundedRect(QRect(0,0, geometry().width(), geometry().height()), 5, 5);
+}
+
+void Selection::onZoomIn()
+{
+    emit zoomIn(begin, end);
 }
 
 void Selection::updateHeight(int h)
