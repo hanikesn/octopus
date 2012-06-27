@@ -67,6 +67,10 @@ void DataProvider::load(QVariantMap *qvm)
         getDataSeries(name)->defaultScaleType = (PlotSettings::ScaleType) defScaleType;
         getDataSeries(name)->offset = offset;
     }
+    qint64 min;
+    qint64 max;
+    getDB().getMinMaxTimeStamp(min, max);
+    emit newMax(max);
 
 }
 

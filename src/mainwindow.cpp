@@ -282,7 +282,7 @@ void MainWindow::onNew()
     networkAdapter = new NetworkAdapter();
 
     setUpView();
-//    addData(*dataProvider);
+    addData(*dataProvider);
     projectPath = "";
     setTitle("");
 
