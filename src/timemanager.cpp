@@ -14,6 +14,7 @@ TimeManager::TimeManager(QScrollBar *hScrollBar, QObject* parent):
     maximum(0),
     playing(false),
     autoScroll(false),
+    following(false),
     hScrollBar(hScrollBar),
     timer(new QTimer(this))
 {
@@ -22,6 +23,8 @@ TimeManager::TimeManager(QScrollBar *hScrollBar, QObject* parent):
     connect(timer, SIGNAL(timeout()),                  this, SLOT(onTimeout()));
 
     connect(hScrollBar, SIGNAL(valueChanged(int)),      this, SLOT(horizontalScroll(int)));
+    connect(this, SIGNAL(currentTimeChanged(qint64)),   this, SLOT(onCurrentTimeChanged(qint64)));
+
 }
 
 qint64 TimeManager::convertPosToTime(int pos)
@@ -40,6 +43,17 @@ void TimeManager::setRange(qint64 begin, qint64 end)
     emit rangeChanged(begin, end);
 }
 
+void TimeManager::ensureCursorVisibility()
+{
+    // We need to adjust the range slightly so that the cursor stays visible
+    if((currentTime > highVisRange - getTimePerPx()) && autoScroll) {
+        qint64 range = highVisRange - lowVisRange;
+        highVisRange = currentTime + getTimePerPx();
+        lowVisRange = highVisRange - range;
+        setRange(lowVisRange, highVisRange);
+    }
+}
+
 void TimeManager::load(QVariantMap *qvm)
 {
     QVariantMap visibleArea = qvm->find("visibleArea").value().toMap();
@@ -48,12 +62,10 @@ void TimeManager::load(QVariantMap *qvm)
 
     emit rangeChanged(lowVisRange, highVisRange);
 
-    // step-size of scrollbar is 1 second --> left border of timeline is always a full second
-    // so we can set the value of the scrollbars slider to the second visRangeLow represents
+    // set value of scrollbar to lowVisRange
     hScrollBar->blockSignals(true);
     hScrollBar->setValue(lowVisRange/getTimePerPx());
     hScrollBar->blockSignals(false);
-
 
     currentTime =  qvm->find("cursorPos").value().toLongLong();
     emit currentTimeChanged(currentTime);
@@ -80,9 +92,10 @@ void TimeManager::center(qint64 timestamp)
 
 void TimeManager::setTime(qint64 time)
 {
+    if (following) return;
     currentTime = time;
     emit currentTimeChanged(time);
-    unsavedChanges = true;
+    unsavedChanges = true;    
 }
 
 void TimeManager::updateScrollBar(bool scroll)
@@ -94,27 +107,8 @@ void TimeManager::updateScrollBar(bool scroll)
     hScrollBar->setValue(lowVisRange/getTimePerPx());
     hScrollBar->blockSignals(false);
 
-    //TODO(domi): Ticket #254 --> Range nicht automatisch ändern, sondern highVisRange hoch lassen
-    // rangeChanged() erst, wenn cursor über rechten rand ist, damit ist das problem weg, dass die tracks eine andere range anzeigen als die timeLine bis Sekunde 34
     if (scroll) {
-        qint64 timeFrame = highVisRange - lowVisRange;
-        hScrollBar->setValue(hScrollBar->maximum());
-        qint64 lowerRange = maximum < timeFrame ? 0 : maximum - timeFrame;
-        // emit the signal directly to prevent a loop
-        emit rangeChanged(lowerRange, maximum);
-
-        //TODO(domi): nachschauen warum cursor nicht mehr verschoben wird, wenn autoscroll an ist
-        //funktioniert vllt, wenn man onTimeout() nutzt und im 'onNewMax()' 'setTime' nicht aufruft
-
-
-//        // We need to adjust the range slightly so that the cursor stays visible
-//        if(currentTime>highVisRange- getTimePerPx()) {
-//            qint64 range = highVisRange - lowVisRange;
-//            highVisRange = currentTime + getTimePerPx();
-//            lowVisRange = highVisRange - range;
-//            setRange(lowVisRange, highVisRange);
-//        }
-
+        ensureCursorVisibility();
     }
 }
 
@@ -125,8 +119,6 @@ void TimeManager::onNewMax(qint64 timestamp)
 
     maximum = timestamp;
     updateScrollBar(autoScroll);
-    if (autoScroll)
-        emit setTime(timestamp);
 }
 
 int TimeManager::getStepSize()
@@ -156,26 +148,35 @@ void TimeManager::horizontalScroll(int pos)
     highVisRange = lowVisRange + range;
     setRange(lowVisRange, highVisRange);
     unsavedChanges = true;
+
+    if (currentTime >= lowVisRange && currentTime <= highVisRange)
+        autoScroll = true;
+    else
+        autoScroll = false;
+}
+
+void TimeManager::onCurrentTimeChanged(qint64 newTime)
+{
+    Q_UNUSED(newTime)
+    if (currentTime >= lowVisRange && currentTime <= highVisRange)
+        autoScroll = true;
+    else
+        autoScroll = false;
 }
 
 void TimeManager::onTimeout()
 {
-    currentTime += getTimePerPx();
-    if (currentTime > getMaximum()) { // stop playing
-        playing = true;
+    Clock::duration diff = Clock::now() - startTime;
+    currentTime += diff.count() / 1000;
+    if ((currentTime > getMaximum()) && !following) { // stop playing if end is reached and we are not expecting new data
+        playing = false;
         timer->stop();
         return;
     }
-
-    // We need to adjust the range slightly so that the cursor stays visible
-    if(currentTime>highVisRange - getTimePerPx()) {
-        qint64 range = highVisRange - lowVisRange;
-        highVisRange = currentTime + getTimePerPx();
-        lowVisRange = highVisRange - range;
-        setRange(lowVisRange, highVisRange);
-    }
+    ensureCursorVisibility();
 
     emit currentTimeChanged(currentTime);
+    startTime = Clock::now();
 }
 
 void TimeManager::onMarginsChanged(int left, int right)
@@ -194,23 +195,43 @@ void TimeManager::onNewWidth(int w)
     setRange(lowVisRange, highVisRange);
 }
 
+void TimeManager::onFollow(bool following)
+{
+    if (following) {
+        autoScroll = true;
+        setTime(maximum);
+        if (maximum > getHighVisRange() || maximum < getLowVisRange())
+            center(maximum);
+        timer->start();
+        startTime = Clock::now();
+        playing = true;
+
+    } else {
+        autoScroll = false;
+        timer->stop();
+        playing = false;
+    }
+    this->following = following;
+}
+
 void TimeManager::forwardEventToScrollbar(QEvent *ev)
 {
     hScrollBar->event(ev);
 }
 
 void TimeManager::onPlay()
-{
-    if(playing)
-    {
+{    
+    if(playing) {
         playing = false;
         timer->stop();
+        following = false;
     } else {
-        playing = true;
+        playing = true;        
         if (currentTime > getHighVisRange() || currentTime < getLowVisRange()) {
             center(currentTime);
             emit currentTimeChanged(currentTime);
         }
         timer->start();
+        startTime = Clock::now();
     }
 }
