@@ -7366,9 +7366,13 @@ void QCustomPlot::rescaleValueAxes()
 {
   if (mPlottables.isEmpty()) return;
 
-  mPlottables.at(0)->rescaleValueAxis(false); // onlyEnlarge disabled on first plottable
-  for (int i=1; i<mPlottables.size(); ++i)
-    mPlottables.at(i)->rescaleValueAxis(true);  // onlyEnlarge enabled on all other plottables
+  QSet<QCPAxis*> rescaledAxes;
+  for (int i=0; i<mPlottables.size(); ++i) {
+      // If this plottable's value axis has already been rescaled by another plottable, only enlarge.
+      QCPAxis *valueAxis = mPlottables.at(i)->valueAxis();
+      mPlottables.at(i)->rescaleValueAxis(rescaledAxes.contains(valueAxis));
+      rescaledAxes.insert(valueAxis);
+  }
 }
 
 /*!
