@@ -14,9 +14,9 @@ TimeManager::TimeManager(QScrollBar *hScrollBar, QObject* parent):
     maximum(0),
     playing(false),
     autoScroll(false),
+    following(false),
     hScrollBar(hScrollBar),
-    timer(new QTimer(this)),
-    following(false)
+    timer(new QTimer(this))
 {
     timer->setSingleShot(false);
     timer->setInterval(40);
@@ -157,6 +157,7 @@ void TimeManager::horizontalScroll(int pos)
 
 void TimeManager::onCurrentTimeChanged(qint64 newTime)
 {
+    Q_UNUSED(newTime)
     if (currentTime >= lowVisRange && currentTime <= highVisRange)
         autoScroll = true;
     else
