@@ -126,6 +126,8 @@ void MainWindow::setUpButtonBars()
     connect(&exportButton, SIGNAL(clicked()), this, SLOT(onExportAction()));
     connect(&recButton, SIGNAL(clicked()), this, SLOT(onRecord()));
     connect(&followDataButton, SIGNAL(clicked()), this, SLOT(onFollowData()));
+    connect(&playButton, SIGNAL(clicked()), this, SLOT(onPlay()));
+
     ui.mainToolBar->addWidget(&toolBarWidget);
     addToolBar(Qt::LeftToolBarArea, ui.mainToolBar);
 }
@@ -440,14 +442,14 @@ void MainWindow::onSelectionChanged(qint64 begin, qint64 end)
 
 void MainWindow::onFollowData()
 {
-    if (followDataButton.isChecked()) {
-        playButton.setChecked(true);
-        emit follow(true);
-    } else {
-        playButton.setChecked(false);
-        emit follow(false);
-    }
+    playButton.setChecked(followDataButton.isChecked());
+    emit follow(followDataButton.isChecked());
+}
 
+void MainWindow::onPlay()
+{
+    if (followDataButton.isChecked())
+        followDataButton.setChecked(false);
 }
 
 bool MainWindow::writeProjectSettings(QVariantMap pName, QString path)

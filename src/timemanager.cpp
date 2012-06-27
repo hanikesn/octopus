@@ -114,19 +114,10 @@ void TimeManager::updateScrollBar(bool scroll)
 
 void TimeManager::onNewMax(qint64 timestamp)
 {
-//    if (!timer->isActive()) {
-//        timer->start();
-//        startTime = Clock::now();
-//        receiving = true;
-//    }
-
     if (timestamp < maximum)
         return;
 
     maximum = timestamp;
-//    if (autoScroll)
-//        emit setTime(timestamp);
-
     updateScrollBar(autoScroll);
 }
 
@@ -173,11 +164,11 @@ void TimeManager::onCurrentTimeChanged(qint64 newTime)
 }
 
 void TimeManager::onTimeout()
-{    
+{
     Clock::duration diff = Clock::now() - startTime;
     currentTime += diff.count() / 1000;
-    if (currentTime > getMaximum()) { // stop playing
-        playing = true;
+    if ((currentTime > getMaximum()) && !following) { // stop playing if end is reached and we are not expecting new data
+        playing = false;
         timer->stop();
         return;
     }
@@ -205,19 +196,21 @@ void TimeManager::onNewWidth(int w)
 
 void TimeManager::onFollow(bool following)
 {
-    this->following = following;
     if (following) {
-     //TODO ans Ende springen und mitscrollen
         autoScroll = true;
         setTime(maximum);
+        if (maximum > getHighVisRange() || maximum < getLowVisRange())
+            center(maximum);
         timer->start();
         startTime = Clock::now();
+        playing = true;
 
     } else {
-        //TODO abspielen anhalten und an aktuellem bildausschnitt stehen bleiben
         autoScroll = false;
         timer->stop();
+        playing = false;
     }
+    this->following = following;
 }
 
 void TimeManager::forwardEventToScrollbar(QEvent *ev)
@@ -226,13 +219,13 @@ void TimeManager::forwardEventToScrollbar(QEvent *ev)
 }
 
 void TimeManager::onPlay()
-{
-    if(playing)
-    {
+{    
+    if(playing) {
         playing = false;
         timer->stop();
+        following = false;
     } else {
-        playing = true;
+        playing = true;        
         if (currentTime > getHighVisRange() || currentTime < getLowVisRange()) {
             center(currentTime);
             emit currentTimeChanged(currentTime);

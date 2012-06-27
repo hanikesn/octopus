@@ -52,6 +52,8 @@ private slots:
 
     void onFollowData();
 
+    void onPlay();
+
 private:
     QVBoxLayout *trackLayout;
 
