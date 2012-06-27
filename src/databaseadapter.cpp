@@ -255,7 +255,7 @@ QList<EI::Description> DatabaseAdapter::getSenders()
     return std::move(list);
 }
 
-void DatabaseAdapter::getMinMaxTimeStamp(qint64 &min, qint64 &max)
+void DatabaseAdapter::getMinMaxTimeStamp(qint64 &min, qint64 &max) const
 {
     Sqlite::PreparedStatement stmt = db.prepare(
                 "SELECT MIN(min), MAX(max) FROM "

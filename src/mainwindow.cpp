@@ -133,8 +133,12 @@ void MainWindow::setUpButtonBars()
 void MainWindow::onExportRange(qint64 begin, qint64 end)
 {    
     if (begin == -1 && end == -1) { // export all data
-      //TODO(domi) begin und end auf das maximum setzen (gibts im dataprovider)
+        const DatabaseAdapter& da = dataProvider->getDB();
+        da.getMinMaxTimeStamp(begin, end);
     }
+
+    if (begin > end)
+        std::swap(begin, end);
 
     QList<QStringList> res = SourceDialog::getSources(*dataProvider, tr("Export"), false, QStringList(), this);
 
@@ -279,7 +283,7 @@ void MainWindow::onNew()
     networkAdapter = new NetworkAdapter();
 
     setUpView();
-//    addData(*dataProvider);
+    addData(*dataProvider);
     projectPath = "";
     setTitle("");
 

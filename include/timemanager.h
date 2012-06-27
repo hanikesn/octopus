@@ -99,6 +99,8 @@ public slots:
 
     void onFollow(bool following);
 
+    void onZoomRange(qint64 start, qint64 end);
+
 private slots:
     void onTimeout();
 

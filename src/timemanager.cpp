@@ -182,6 +182,11 @@ void TimeManager::onFollow(bool following)
     this->following = following;
 }
 
+void TimeManager::onZoomRange(qint64 start, qint64 end)
+{
+    setRange(start, end);
+}
+
 void TimeManager::forwardEventToScrollbar(QEvent *ev)
 {
     hScrollBar->event(ev);
