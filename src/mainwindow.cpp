@@ -139,6 +139,9 @@ void MainWindow::onExportRange(qint64 begin, qint64 end)
         da.getMinMaxTimeStamp(begin, end);
     }
 
+    if (begin > end)
+        std::swap(begin, end);
+
     QList<QStringList> res = SourceDialog::getSources(*dataProvider, tr("Export"), false, QStringList(), this);
 
     if(res.isEmpty())
