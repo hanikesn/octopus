@@ -2,6 +2,7 @@
 
 #include <exception>
 #include <iostream>
+#include <cassert>
 
 namespace Sqlite
 {
@@ -155,7 +156,7 @@ PreparedStatement::QueryIterator& PreparedStatement::QueryIterator::operator++()
         } else if(ret == SQLITE_DONE) {
             stmt = nullptr;
         } else {
-            // assert(ret==SQLITE_ROW);
+            assert(ret==SQLITE_ROW);
         }
     }
     return *this;
@@ -199,6 +200,7 @@ Row::Row(PreparedStatement &stmt)
 
 Row& Row::operator>>(std::string& value)
 {
+    assert(index <= sqlite3_data_count(stmt.stmt));
     value = std::string((const char*)sqlite3_column_text(stmt.stmt, index));
     index++;
     return *this;
@@ -206,6 +208,7 @@ Row& Row::operator>>(std::string& value)
 
 Row& Row::operator>>(double& value)
 {
+    assert(index <= sqlite3_data_count(stmt.stmt));
     value = sqlite3_column_double(stmt.stmt, index);
     index++;
     return *this;
@@ -213,6 +216,7 @@ Row& Row::operator>>(double& value)
 
 Row& Row::operator>>(sqlite3_int64& value)
 {
+    assert(index <= sqlite3_data_count(stmt.stmt));
     value = sqlite3_column_int64(stmt.stmt, index);
     index++;
     return *this;
@@ -225,11 +229,13 @@ int Row::columnCount()
 
 int Row::getType(int index)
 {
+    assert(index <= sqlite3_data_count(stmt.stmt));
     return sqlite3_column_type(stmt.stmt, index);
 }
 
 int Row::getType()
 {
+    assert(index <= sqlite3_data_count(stmt.stmt));
     return sqlite3_column_type(stmt.stmt, index);
 }
 
