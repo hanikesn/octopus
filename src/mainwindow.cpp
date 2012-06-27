@@ -317,7 +317,7 @@ void MainWindow::setUpView()
 
     connect(timeManager, SIGNAL(newMax(qint64)), ui.hScrollBar, SLOT(onNewMax(qint64)));
     connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)), ui.hScrollBar, SLOT(onRangeChanged(qint64,qint64)));
-    connect(ui.hScrollBar, SIGNAL(rangeChanged(qint64,qint64)), timeManager, SLOT(onRangeChanged(qint64,qint64)));
+    connect(ui.hScrollBar, SIGNAL(rangeChanged(qint64,qint64)), timeManager, SLOT(setRange(qint64,qint64)));
 
     pa = new PresentationArea(*dataProvider, timeManager, this);
     recorder = new Recorder(timeManager, this);

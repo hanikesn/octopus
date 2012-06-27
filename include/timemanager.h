@@ -64,7 +64,7 @@ public:
     bool hasUnsavedChanges() { return unsavedChanges; }
     void setUnsavedChanges(bool uc) { unsavedChanges = uc; }
 
-//private:
+private:
     /**
       * Returns the amount of time the range is changed during playing
       * (every 'timeoutIntervall' msecs)
@@ -80,8 +80,6 @@ signals:
 
 public slots:
     void onNewMax(qint64 timestamp);
-
-    void onRangeChanged(qint64 begin, qint64 end);
 
     /**
      * @brief onZoom
@@ -99,7 +97,7 @@ public slots:
 
     void onFollow(bool following);
 
-    void onZoomRange(qint64 start, qint64 end);
+    void setRange(qint64 start, qint64 end);
 
 private slots:
     void onTimeout();
@@ -137,7 +135,6 @@ private:
 
     qint64 getZoomFactor(bool zoomOut);
     void updateScrollBar();
-    void setRange(qint64 begin, qint64 end);
     void ensureCursorVisibility();
 };
 

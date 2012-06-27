@@ -44,6 +44,8 @@ void TimeManager::setRange(qint64 begin, qint64 end)
     else
         autoScroll = false;
 
+    // TODO updateTimePerPx
+
     emit rangeChanged(begin, end);
 }
 
@@ -105,13 +107,6 @@ void TimeManager::onNewMax(qint64 timestamp)
     emit newMax(timestamp);
 
     maximum = timestamp;
-}
-
-void TimeManager::onRangeChanged(qint64 begin, qint64 end)
-{
-    lowVisRange = begin;
-    highVisRange = end;
-    setRange(begin, end);
 }
 
 int TimeManager::getStepSize()
@@ -180,11 +175,6 @@ void TimeManager::onFollow(bool following)
         playing = false;
     }
     this->following = following;
-}
-
-void TimeManager::onZoomRange(qint64 start, qint64 end)
-{
-    setRange(start, end);
 }
 
 void TimeManager::forwardEventToScrollbar(QEvent *ev)
