@@ -121,6 +121,7 @@ private:
     qint64 getZoomFactor(bool zoomOut);
     void updateScrollBar(bool scroll);
     void setRange(qint64 begin, qint64 end);
+    void ensureCursorVisibility();
 };
 
 #endif // TIMEMANAGER_H

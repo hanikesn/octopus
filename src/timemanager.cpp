@@ -40,6 +40,17 @@ void TimeManager::setRange(qint64 begin, qint64 end)
     emit rangeChanged(begin, end);
 }
 
+void TimeManager::ensureCursorVisibility()
+{
+    // We need to adjust the range slightly so that the cursor stays visible
+    if(currentTime > highVisRange - getTimePerPx()) {
+        qint64 range = highVisRange - lowVisRange;
+        highVisRange = currentTime + getTimePerPx();
+        lowVisRange = highVisRange - range;
+        setRange(lowVisRange, highVisRange);
+    }
+}
+
 void TimeManager::load(QVariantMap *qvm)
 {
     QVariantMap visibleArea = qvm->find("visibleArea").value().toMap();
@@ -94,27 +105,8 @@ void TimeManager::updateScrollBar(bool scroll)
     hScrollBar->setValue(lowVisRange/getTimePerPx());
     hScrollBar->blockSignals(false);
 
-    //TODO(domi): Ticket #254 --> Range nicht automatisch ändern, sondern highVisRange hoch lassen
-    // rangeChanged() erst, wenn cursor über rechten rand ist, damit ist das problem weg, dass die tracks eine andere range anzeigen als die timeLine bis Sekunde 34
     if (scroll) {
-        qint64 timeFrame = highVisRange - lowVisRange;
-        hScrollBar->setValue(hScrollBar->maximum());
-        qint64 lowerRange = maximum < timeFrame ? 0 : maximum - timeFrame;
-        // emit the signal directly to prevent a loop
-        emit rangeChanged(lowerRange, maximum);
-
-        //TODO(domi): nachschauen warum cursor nicht mehr verschoben wird, wenn autoscroll an ist
-        //funktioniert vllt, wenn man onTimeout() nutzt und im 'onNewMax()' 'setTime' nicht aufruft
-
-
-//        // We need to adjust the range slightly so that the cursor stays visible
-//        if(currentTime>highVisRange- getTimePerPx()) {
-//            qint64 range = highVisRange - lowVisRange;
-//            highVisRange = currentTime + getTimePerPx();
-//            lowVisRange = highVisRange - range;
-//            setRange(lowVisRange, highVisRange);
-//        }
-
+        ensureCursorVisibility();
     }
 }
 
@@ -124,9 +116,10 @@ void TimeManager::onNewMax(qint64 timestamp)
         return;
 
     maximum = timestamp;
-    updateScrollBar(autoScroll);
     if (autoScroll)
         emit setTime(timestamp);
+
+    updateScrollBar(autoScroll);
 }
 
 int TimeManager::getStepSize()
@@ -166,14 +159,7 @@ void TimeManager::onTimeout()
         timer->stop();
         return;
     }
-
-    // We need to adjust the range slightly so that the cursor stays visible
-    if(currentTime>highVisRange - getTimePerPx()) {
-        qint64 range = highVisRange - lowVisRange;
-        highVisRange = currentTime + getTimePerPx();
-        lowVisRange = highVisRange - range;
-        setRange(lowVisRange, highVisRange);
-    }
+    ensureCursorVisibility();
 
     emit currentTimeChanged(currentTime);
 }
