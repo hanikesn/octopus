@@ -99,6 +99,9 @@ void InterpolatingGraph::rescale(PlotSettings::ScalingMode scalingMode, PlotSett
         break;
     }
 
+    currentScalingMode = scalingMode;
+    currentScaleType = scaleType;
+
     // update plot
     plot->rescaleValueAxes();
     plot->replot();
@@ -119,11 +122,11 @@ void InterpolatingGraph::scaleToRange(double lower, double upper, PlotSettings::
         double scaledValue = i.value();
         switch (scaleType) {
         case PlotSettings::LINSCALE:
-            scaledValue = ((i.value() - currentMin)/(currentMax - currentMin)) * (upper - lower) + lower;
+            scaledValue = ((i.value() - currentMin) / (currentMax - currentMin)) * (upper - lower) + lower;
             break;
         case PlotSettings::LOGSCALE: {
             double log10 = qLn(10);
-            scaledValue = (qLn(i.value()/currentMin)/log10)/(qLn(currentMax/currentMin)/log10) * (upper - lower) + lower;
+            scaledValue = ((qLn(i.value()/currentMin)/log10) / (qLn(currentMax/currentMin)/log10)) * (upper - lower) + lower;
             break;
         }
         case PlotSettings::NOT_SCALABLE:

@@ -22,7 +22,8 @@ const QString Track::ICON_AS_BUTTON = QString(
 Track::Track(const DataProvider &dataProvider, QWidget *parent) :
     QWidget(parent),
     optPlotMarginLeft(0),
-    dataProvider(dataProvider)
+    dataProvider(dataProvider),
+    currentScalingMode(PlotSettings::NOSCALING)
 {
     init();
 }
@@ -30,7 +31,8 @@ Track::Track(const DataProvider &dataProvider, QWidget *parent) :
 Track::Track(const DataProvider &dataProvider, const QString &fullDataSeriesName, QWidget *parent) :
     QWidget(parent),
     optPlotMarginLeft(0),
-    dataProvider(dataProvider)
+    dataProvider(dataProvider),
+    currentScalingMode(PlotSettings::NOSCALING)
 {
     init();
 
@@ -40,7 +42,8 @@ Track::Track(const DataProvider &dataProvider, const QString &fullDataSeriesName
 Track::Track(const DataProvider &dataProvider, const QStringList &fullDataSeriesNames, QWidget *parent) :
     QWidget(parent),
     optPlotMarginLeft(0),
-    dataProvider(dataProvider)
+    dataProvider(dataProvider),
+    currentScalingMode(PlotSettings::NOSCALING)
 {
     init();
 
@@ -153,6 +156,8 @@ void Track::onPlotSettings()
 {
     PlotSettings preset;
 
+    preset.scalingMode = currentScalingMode;
+
     switch (ui.plot->yAxis->scaleType()) {
     case QCPAxis::stLinear:
         preset.plotScaleType = PlotSettings::LINSCALE;
@@ -173,16 +178,20 @@ void Track::onPlotSettings()
         if (settings.scalingMode == PlotSettings::MINMAXSCALING) {
             // all graphs will scale their values to use the full height of the plot
             ui.plot->yAxis->setScaleType(QCPAxis::stLinear);
-            ui.plot->yAxis->setRange(0, 1);
-            // set axis invisible as it will have no informative value
+            // set axis and gridlines invisible as they will have no informative value
             ui.plot->yAxis->setVisible(false);
+            ui.plot->yAxis->setGrid(false);
         } else if (settings.scalingMode == PlotSettings::NOSCALING) {
             if (settings.plotScaleType == PlotSettings::LOGSCALE) {
                 ui.plot->yAxis->setScaleType(QCPAxis::stLogarithmic);
             } else {
                 ui.plot->yAxis->setScaleType(QCPAxis::stLinear);
             }
+            ui.plot->yAxis->setVisible(true);
+            ui.plot->yAxis->setGrid(true);
         }
+
+        currentScalingMode = settings.scalingMode;
 
         foreach (Graph *g, graphs) {
             g->update(settings);
