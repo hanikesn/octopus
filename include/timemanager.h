@@ -14,7 +14,14 @@ class TimeManager : public QObject, public Serializable
 {
     Q_OBJECT
 public:
-    TimeManager(QScrollBar *hScrollBar, QObject* parent);
+    typedef boost::chrono::high_resolution_clock Clock;
+
+    /**
+     * @brief TimeManager
+     *
+     * Set startTime to zero to indicate that we don't do a live recording
+     */
+    TimeManager(QScrollBar *hScrollBar, Clock::time_point startTime, QObject* parent);
 
     qint64 getLowVisRange() {return lowVisRange;}
     qint64 getHighVisRange() {return highVisRange;}
@@ -57,7 +64,7 @@ public:
     bool hasUnsavedChanges() { return unsavedChanges; }
     void setUnsavedChanges(bool uc) { unsavedChanges = uc; }
 
-private:
+//private:
     /**
       * Returns the amount of time the range is changed during playing
       * (every 'timeoutIntervall' msecs)
@@ -69,8 +76,12 @@ signals:
 
     void currentTimeChanged(qint64 time);
 
+    void newMax(qint64 time);
+
 public slots:
     void onNewMax(qint64 timestamp);
+
+    void onRangeChanged(qint64 begin, qint64 end);
 
     /**
      * @brief onZoom
@@ -90,10 +101,6 @@ public slots:
 
 private slots:
     void onTimeout();
-
-    void horizontalScroll(int pos);
-
-    void onCurrentTimeChanged(qint64 newTime);
 
 private:
     // low and high limit of the visible range
@@ -124,11 +131,10 @@ private:
     // stores whether changes in the visual range have happened.
     bool unsavedChanges;
 
-    typedef boost::chrono::high_resolution_clock Clock;
     Clock::time_point startTime;
 
     qint64 getZoomFactor(bool zoomOut);
-    void updateScrollBar(bool scroll);
+    void updateScrollBar();
     void setRange(qint64 begin, qint64 end);
     void ensureCursorVisibility();
 };

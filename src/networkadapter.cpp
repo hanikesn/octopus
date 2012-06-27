@@ -61,3 +61,8 @@ void NetworkAdapter::onMessage(EI::Message const& msg)
         knownSenders.insert(d.getSender());
     }
 }
+
+NetworkAdapter::Clock::time_point NetworkAdapter::getStartTime()
+{
+    return startTime;
+}
