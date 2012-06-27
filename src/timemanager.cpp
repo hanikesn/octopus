@@ -22,6 +22,8 @@ TimeManager::TimeManager(QScrollBar *hScrollBar, QObject* parent):
     connect(timer, SIGNAL(timeout()),                  this, SLOT(onTimeout()));
 
     connect(hScrollBar, SIGNAL(valueChanged(int)),      this, SLOT(horizontalScroll(int)));
+    connect(this, SIGNAL(currentTimeChanged(qint64)),   this, SLOT(onCurrentTimeChanged(qint64)));
+
 }
 
 qint64 TimeManager::convertPosToTime(int pos)
@@ -43,7 +45,7 @@ void TimeManager::setRange(qint64 begin, qint64 end)
 void TimeManager::ensureCursorVisibility()
 {
     // We need to adjust the range slightly so that the cursor stays visible
-    if(currentTime > highVisRange - getTimePerPx()) {
+    if((currentTime > highVisRange - getTimePerPx()) && autoScroll) {
         qint64 range = highVisRange - lowVisRange;
         highVisRange = currentTime + getTimePerPx();
         lowVisRange = highVisRange - range;
@@ -59,8 +61,7 @@ void TimeManager::load(QVariantMap *qvm)
 
     emit rangeChanged(lowVisRange, highVisRange);
 
-    // step-size of scrollbar is 1 second --> left border of timeline is always a full second
-    // so we can set the value of the scrollbars slider to the second visRangeLow represents
+    // set value of scrollbar to lowVisRange
     hScrollBar->blockSignals(true);
     hScrollBar->setValue(lowVisRange/getTimePerPx());
     hScrollBar->blockSignals(false);
@@ -93,7 +94,7 @@ void TimeManager::setTime(qint64 time)
 {
     currentTime = time;
     emit currentTimeChanged(time);
-    unsavedChanges = true;
+    unsavedChanges = true;    
 }
 
 void TimeManager::updateScrollBar(bool scroll)
@@ -149,11 +150,25 @@ void TimeManager::horizontalScroll(int pos)
     highVisRange = lowVisRange + range;
     setRange(lowVisRange, highVisRange);
     unsavedChanges = true;
+
+    if (currentTime >= lowVisRange && currentTime <= highVisRange)
+        autoScroll = true;
+    else
+        autoScroll = false;
+}
+
+void TimeManager::onCurrentTimeChanged(qint64 newTime)
+{
+    if (currentTime >= lowVisRange && currentTime <= highVisRange)
+        autoScroll = true;
+    else
+        autoScroll = false;
 }
 
 void TimeManager::onTimeout()
-{
-    currentTime += getTimePerPx();
+{    
+    Clock::duration diff = Clock::now() - startTime;
+    currentTime += diff.count()/1000;
     if (currentTime > getMaximum()) { // stop playing
         playing = true;
         timer->stop();
@@ -162,6 +177,7 @@ void TimeManager::onTimeout()
     ensureCursorVisibility();
 
     emit currentTimeChanged(currentTime);
+    startTime = Clock::now();
 }
 
 void TimeManager::onMarginsChanged(int left, int right)
@@ -198,5 +214,6 @@ void TimeManager::onPlay()
             emit currentTimeChanged(currentTime);
         }
         timer->start();
+        startTime = Clock::now();
     }
 }

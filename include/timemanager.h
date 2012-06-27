@@ -2,6 +2,7 @@
 #define TIMEMANAGER_H
 
 #include <QObject>
+#include <boost/chrono.hpp>
 
 #include "serializable.h"
 
@@ -90,6 +91,8 @@ private slots:
 
     void horizontalScroll(int pos);
 
+    void onCurrentTimeChanged(qint64 newTime);
+
 private:
     // low and high limit of the visible range
     qint64 lowVisRange, highVisRange;
@@ -117,6 +120,9 @@ private:
 
     // stores whether changes in the visual range have happened.
     bool unsavedChanges;
+
+    typedef boost::chrono::high_resolution_clock Clock;
+    Clock::time_point startTime;
 
     qint64 getZoomFactor(bool zoomOut);
     void updateScrollBar(bool scroll);
