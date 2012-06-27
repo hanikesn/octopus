@@ -50,6 +50,8 @@ private slots:
 
     void onSelectionChanged(qint64 begin, qint64 end);
 
+    void onFollowData();
+
 private:
     QVBoxLayout *trackLayout;
 
@@ -66,6 +68,7 @@ private:
     QIcon playButtonIcon;
     QPushButton recButton;
     QIcon recButtonIcon;
+    QPushButton followDataButton;
 
     // Spacer item to center the play button (in the bottomButtonBar)
     QSpacerItem *spacerLeft;
@@ -133,6 +136,7 @@ private:
 
 signals:
     void timeStepChanged(int);
+    void follow(bool following);
 };
 
 #endif // MAINWINDOW_H

@@ -24,7 +24,11 @@ public:
     void discoverSenders();
 
     virtual void onMessage(EI::DataMessage msg);
-    virtual void onMessage(EI::Message const& msg);
+    virtual void onMessage(EI::Message const& msg);    
+
+protected:
+    //TODO debug-only
+    void disconnectNotify(const char *signal);
 
 signals:
     void onNewSender(EIDescriptionWrapper);

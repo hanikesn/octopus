@@ -86,6 +86,8 @@ public slots:
 
     void onNewWidth(int width);
 
+    void onFollow(bool following);
+
 private slots:
     void onTimeout();
 
@@ -108,6 +110,7 @@ private:
     bool playing;
 
     bool autoScroll;
+    bool following;
 
     QScrollBar *hScrollBar;
 

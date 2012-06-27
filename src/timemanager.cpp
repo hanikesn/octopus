@@ -15,7 +15,8 @@ TimeManager::TimeManager(QScrollBar *hScrollBar, QObject* parent):
     playing(false),
     autoScroll(false),
     hScrollBar(hScrollBar),
-    timer(new QTimer(this))
+    timer(new QTimer(this)),
+    following(false)
 {
     timer->setSingleShot(false);
     timer->setInterval(40);
@@ -66,7 +67,6 @@ void TimeManager::load(QVariantMap *qvm)
     hScrollBar->setValue(lowVisRange/getTimePerPx());
     hScrollBar->blockSignals(false);
 
-
     currentTime =  qvm->find("cursorPos").value().toLongLong();
     emit currentTimeChanged(currentTime);
 }
@@ -92,6 +92,7 @@ void TimeManager::center(qint64 timestamp)
 
 void TimeManager::setTime(qint64 time)
 {
+    if (following) return;
     currentTime = time;
     emit currentTimeChanged(time);
     unsavedChanges = true;    
@@ -113,12 +114,18 @@ void TimeManager::updateScrollBar(bool scroll)
 
 void TimeManager::onNewMax(qint64 timestamp)
 {
+//    if (!timer->isActive()) {
+//        timer->start();
+//        startTime = Clock::now();
+//        receiving = true;
+//    }
+
     if (timestamp < maximum)
         return;
 
     maximum = timestamp;
-    if (autoScroll)
-        emit setTime(timestamp);
+//    if (autoScroll)
+//        emit setTime(timestamp);
 
     updateScrollBar(autoScroll);
 }
@@ -168,7 +175,7 @@ void TimeManager::onCurrentTimeChanged(qint64 newTime)
 void TimeManager::onTimeout()
 {    
     Clock::duration diff = Clock::now() - startTime;
-    currentTime += diff.count()/1000;
+    currentTime += diff.count() / 1000;
     if (currentTime > getMaximum()) { // stop playing
         playing = true;
         timer->stop();
@@ -194,6 +201,23 @@ void TimeManager::onNewWidth(int w)
     hScrollBar->setPageStep(w);
     highVisRange = lowVisRange + timePerPx * (w - marginLeft - marginRight);
     setRange(lowVisRange, highVisRange);
+}
+
+void TimeManager::onFollow(bool following)
+{
+    this->following = following;
+    if (following) {
+     //TODO ans Ende springen und mitscrollen
+        autoScroll = true;
+        setTime(maximum);
+        timer->start();
+        startTime = Clock::now();
+
+    } else {
+        //TODO abspielen anhalten und an aktuellem bildausschnitt stehen bleiben
+        autoScroll = false;
+        timer->stop();
+    }
 }
 
 void TimeManager::forwardEventToScrollbar(QEvent *ev)
