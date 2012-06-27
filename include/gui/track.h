@@ -1,6 +1,7 @@
 #ifndef Track_H
 #define Track_H
 
+#include "plotsettings.h"
 #include "ui_track.h"
 #include "visitor.h"
 #include "serializable.h"
@@ -47,6 +48,7 @@ private:
 
     const DataProvider &dataProvider;
     QList<Graph*> graphs;
+    PlotSettings::ScalingMode currentScalingMode;
 
     void init();
     void setupButtons();

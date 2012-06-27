@@ -257,7 +257,7 @@ static void addData(DataProvider& dp)
      for (int j=0; j<500; ++j)
     {
       double d = j/15.0 * 5*3.14 + 0.01;
-      dp.onNewData(d*1000000, "Dummy.Interpolatable.x", Value(7*sin(d)/d));
+      dp.onNewData(d*1000000, "Dummy.Interpolatable.x", Value(14*sin(d)/d + 3));
       dp.onNewData(d*1000000, "Dummy.Interpolatable.y", Value(-7*sin(d)/d));
       dp.onNewData(d*1000000, "Dummy.Discrete", Value("ping"));
     }

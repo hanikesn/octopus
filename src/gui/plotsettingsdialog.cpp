@@ -25,12 +25,17 @@ PlotSettingsDialog::PlotSettingsDialog(const QStringList &dataSeriesNames,
 
     setupSourceTable(dataSeriesNames, preset, offsetsEditable);
     ui->sameScaleOption->setVisible(showScalingOption);
-    ui->linChoice->setVisible(showScalingOption);
-    ui->logChoice->setVisible(showScalingOption);
+    ui->sameScaleOption->setChecked(preset.scalingMode == PlotSettings::NOSCALING);
 
-    ui->sourceTable->setColumnHidden(SCALECOL, showScalingOption);
-    ui->sameScaleOption->setChecked(showScalingOption);
-    ui->linChoice->setChecked(showScalingOption);
+    switch (preset.plotScaleType) {
+    case PlotSettings::LINSCALE:
+        ui->linChoice->setChecked(true);
+        break;
+    case PlotSettings::LOGSCALE:
+        ui->logChoice->setChecked(true);
+    }
+
+    onSameScaleStateChanged(ui->sameScaleOption->checkState());
 
     connect(ui->sameScaleOption, SIGNAL(stateChanged(int)), this, SLOT(onSameScaleStateChanged(int)));
 }
