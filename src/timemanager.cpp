@@ -43,12 +43,16 @@ int TimeManager::convertTimeToPos(qint64 time)
 
 void TimeManager::setRange(qint64 begin, qint64 end)
 {
+    if(begin >= end)
+        return;
+
     lowVisRange = begin;
+
+    timePerPx = (end - begin) / (width - marginLeft - marginRight);
+
     highVisRange = end;
 
-    // TODO updateTimePerPx
-
-    emit rangeChanged(begin, end);
+    emit rangeChanged(lowVisRange, highVisRange);
 }
 
 void TimeManager::ensureCursorVisibility()
