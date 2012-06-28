@@ -16,6 +16,7 @@ InterpolatingGraph::InterpolatingGraph(QCustomPlot *plot, const DoubleSeries &d)
     currentScalingMode(PlotSettings::NOSCALING),
     currentScaleType(d.defaultScaleType)
 {
+    setObjectName("InterpolatingGraph");
     connect(&series, SIGNAL(newData(qint64)), this, SLOT(onNewData(qint64)));
 
     graph = plot->addGraph();

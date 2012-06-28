@@ -11,6 +11,7 @@
 DataProvider::DataProvider(QString const& filename, QObject *parent) :
     QObject(parent), db(new DatabaseAdapter(filename)), filename(filename), currentMax(0)
 {
+    setObjectName("DataProvider");
     QList<EI::Description> list = db->getSenders();
 
     foreach(EI::Description const& d, list)
