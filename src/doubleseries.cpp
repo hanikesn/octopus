@@ -3,7 +3,6 @@
 #include "value.h"
 #include "dataprovider.h"
 
-
 DoubleSeries::DoubleSeries(const DataProvider &dp, const QString &deviceName, const QString &name, Data::Properties properties) :
     AbstractDataSeries(dp, deviceName, name, properties)
 {

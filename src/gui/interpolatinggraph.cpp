@@ -26,6 +26,11 @@ InterpolatingGraph::InterpolatingGraph(QCustomPlot *plot, const DoubleSeries &d)
     plot->replot();
 }
 
+InterpolatingGraph::~InterpolatingGraph()
+{
+    qDebug() << "Interpolating Graph destroyed";
+}
+
 QCPGraph* InterpolatingGraph::getGraph()
 {
     return graph;
