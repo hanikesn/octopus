@@ -85,7 +85,7 @@ public:
     void mouseMoveEvent(QMouseEvent *event)
     {
         if(dragging) {
-            timeManager.movePx(dragLastPos.x() - event->pos().x());
+            timeManager.movePx((dragLastPos.x() - event->pos().x())*10);
 
             dragLastPos = event->pos();
             event->accept();
