@@ -40,7 +40,7 @@ QString DiscreteGraph::dataSeriesName()
     return series.fullName();
 }
 
-void DiscreteGraph::update(const PlotSettings &settings)
+void DiscreteGraph::update(const PlotSettings &/*settings*/)
 {
 }
 

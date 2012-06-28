@@ -82,8 +82,9 @@ private:
     QList<Track*> tracks;
 
     TimeLine *timeLine;
-    Cursor *cursor;
     Selection *selection;
+    Cursor *cursor;
+    Cursor* maxCursor;
 
     TimeManager *timeManager;
 

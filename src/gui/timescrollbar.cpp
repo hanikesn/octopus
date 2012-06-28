@@ -3,7 +3,7 @@
 TimeScrollbar::TimeScrollbar(QWidget *parent) :
     QScrollBar(parent),
     begin(0),
-    end(0),
+    end(100),
     max(0)
 {
     connect(this, SIGNAL(valueChanged(int)), this, SLOT(onScroll(int)));

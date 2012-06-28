@@ -13,7 +13,7 @@ class Cursor : public QWidget
     Q_OBJECT
 
 public:
-    explicit Cursor(TimeManager *timeManager, QWidget *parent);
+    explicit Cursor(QColor color, TimeManager *timeManager, QWidget *parent);
 
     qint64 getTime();
 

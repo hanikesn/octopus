@@ -84,8 +84,9 @@ public slots:
     /**
      * @brief onZoom
      * @param factor positive means zoom in
+     * @param pos to zoom into, -1 means center
      */
-    void onZoom(int factor);
+    void zoom(int factor, qint64 pos = -1);
 
     void setTime(qint64);
 

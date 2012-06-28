@@ -11,6 +11,8 @@
 #include "timemanager.h"
 #include "recorder.h"
 #include "mainwindow.h"
+#include "gui/timescrollbar.h"
+
 static void addData(DataProvider& dp)
 {
     EI::Description desc1("Dummy", "dum");
@@ -33,7 +35,7 @@ static void addData(DataProvider& dp)
     }
 }
 
-ViewManager::ViewManager(MainWindow *parent, QScrollBar *sb):
+ViewManager::ViewManager(MainWindow *parent, TimeScrollbar *sb):
     QObject(parent),
     parent(parent),
     dataProvider(0),
@@ -148,6 +150,8 @@ void ViewManager::setUpView()
     else
         timeManager = new TimeManager(scrollBar, TimeManager::Clock::time_point(), this);
 
+    scrollBar->onRangeChanged(timeManager->getLowVisRange(), timeManager->getHighVisRange());
+
     presentationArea = new PresentationArea(*dataProvider, timeManager, parent);
     recorder = new Recorder(timeManager, this);
 
@@ -166,7 +170,7 @@ void ViewManager::makeConnects()
     connect(this, SIGNAL(play()), timeManager, SLOT(onPlay()));
     connect(this, SIGNAL(setRange(qint64,qint64)), timeManager, SLOT(setRange(qint64,qint64)));
     connect(this, SIGNAL(follow(bool)), timeManager, SLOT(onFollow(bool)));
-    connect(this, SIGNAL(zoom(int)), timeManager, SLOT(onZoom(int)));
+    connect(this, SIGNAL(zoom(int)), timeManager, SLOT(zoom(int)));
 
     // presentationArea
     connect(this, SIGNAL(plotSettings()), presentationArea, SLOT(onPlotSettings()));

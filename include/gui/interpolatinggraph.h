@@ -13,6 +13,7 @@ class InterpolatingGraph : public Graph
     Q_OBJECT
 public:
     explicit InterpolatingGraph(QCustomPlot *plot, const DoubleSeries &d);
+    ~InterpolatingGraph();
 
     QCPGraph* getGraph();
     PlotSettings::ScaleType getScaleType() const;
@@ -33,7 +34,7 @@ private:
     double currentMin;
     double currentMax;
 
-    PlotSettings::ScalingMode currentScalingMode;    
+    PlotSettings::ScalingMode currentScalingMode;
     PlotSettings::ScaleType currentScaleType;
 
     void configureAppearance(QCPGraph *graph);
@@ -41,6 +42,9 @@ private:
 
     void rescale(PlotSettings::ScalingMode scalingMode, PlotSettings::ScaleType scaleType);
     void scaleToRange(double lower, double upper, PlotSettings::ScaleType scaleType);
+
+    void updateMetadata(double value);
+    void updatePlot(PlotSettings::ScalingMode scalingMode);
 };
 
 #endif // INTERPOLATINGGRAPH_H

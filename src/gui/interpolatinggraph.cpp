@@ -4,6 +4,8 @@
 #include "plotsettings.h"
 #include "gui/qcustomplot.h"
 
+#include <algorithm>
+
 InterpolatingGraph::InterpolatingGraph(QCustomPlot *plot, const DoubleSeries &d) :
     Graph(plot),
     series(d),
@@ -22,8 +24,12 @@ InterpolatingGraph::InterpolatingGraph(QCustomPlot *plot, const DoubleSeries &d)
     configureAppearance(graph);
     initialize(graph, series);
 
-    plot->rescaleValueAxes();
-    plot->replot();
+    updatePlot(currentScalingMode);
+}
+
+InterpolatingGraph::~InterpolatingGraph()
+{
+    qDebug() << "Interpolating Graph destroyed";
 }
 
 QCPGraph* InterpolatingGraph::getGraph()
@@ -64,12 +70,7 @@ void InterpolatingGraph::initialize(QCPGraph *graph, const DoubleSeries &series)
 
     auto const& data = series.getData();
     for (auto i = data.constBegin(); i != data.constEnd(); ++i) {
-        if (i.value() > currentMax) {
-            currentMax = i.value();
-        }
-        if (i.value() < currentMin) {
-            currentMin = i.value();
-        }
+        updateMetadata(i.value());
         graph->addData(i.key(), i.value());
     }
 }
@@ -102,9 +103,7 @@ void InterpolatingGraph::rescale(PlotSettings::ScalingMode scalingMode, PlotSett
     currentScalingMode = scalingMode;
     currentScaleType = scaleType;
 
-    // update plot
-    plot->rescaleValueAxes();
-    plot->replot();
+    updatePlot(scalingMode);
 }
 
 void InterpolatingGraph::scaleToRange(double lower, double upper, PlotSettings::ScaleType scaleType)
@@ -126,19 +125,44 @@ void InterpolatingGraph::scaleToRange(double lower, double upper, PlotSettings::
             break;
         case PlotSettings::LOGSCALE: {
             double log10 = qLn(10);
-            scaledValue = ((qLn(i.value()/currentMin)/log10) / (qLn(currentMax/currentMin)/log10)) * (upper - lower) + lower;
+            double rangeFac = 1e-3;
+
+            if (std::abs(currentMin) > currentMax) {
+                // negative interval is wider
+
+                // The log scale boundaries may never be zero or carry the wrong sign.
+                // Cut off above rangeFac or rangeFac*currentMin, whichever is closer to zero.
+                double logScaleMin = std::min(-rangeFac, currentMin);
+                double logScaleMax = std::min(-rangeFac, currentMax);
+
+                if (i.value() > logScaleMax) {
+                    // invalid value. Draw outside visible area.
+                    scaledValue = upper + (upper - lower)*0.75;
+                } else {
+                    scaledValue = upper - ((qLn(i.value()/logScaleMax)/log10) / (qLn(logScaleMin/logScaleMax)/log10)) * (upper - lower);
+                }
+            } else {
+                // positive interval is wider
+
+                // The log scale boundaries may never be zero or carry the wrong sign.
+                // Cut off below rangeFac or rangeFac*currentMax, whichever is closer to zero.
+                double logScaleMin = std::max(rangeFac, currentMin);
+                double logScaleMax = std::max(rangeFac, currentMax);
+
+                if (i.value() < logScaleMin) {
+                    scaledValue = lower - (upper - lower)*0.75;
+                } else {
+                    scaledValue = lower + ((qLn(i.value()/logScaleMin)/log10) / (qLn(logScaleMax/logScaleMin)/log10)) * (upper - lower);
+                }
+            }
             break;
         }
-        case PlotSettings::NOT_SCALABLE:
-            // handled above
+        default:
+            // unknown or unscalable scale type
             break;
         }
         graph->addData(i.key(), scaledValue);
     }
-
-    // update plot
-    plot->rescaleValueAxes();
-    plot->replot();
 }
 
 void InterpolatingGraph::onNewData(qint64 timestamp)
@@ -148,29 +172,44 @@ void InterpolatingGraph::onNewData(qint64 timestamp)
     switch (currentScalingMode) {
     case PlotSettings::NOSCALING:
         for (auto i = data.constBegin(); i != data.constEnd(); ++i) {
-            if (i.value() > currentMax) {
-                currentMax = i.value();
-            }
-            if (i.value() < currentMin) {
-                currentMin = i.value();
-            }
+            updateMetadata(i.value());
             graph->addData(i.key(), i.value());
         }
 
         lastUpdate = timestamp;
-        plot->rescaleValueAxes();
-        plot->replot();
         break;
     case PlotSettings::MINMAXSCALING:
         for (auto i = data.constBegin(); i != data.constEnd(); ++i) {
-            if (i.value() > currentMax) {
-                currentMax = i.value();
-            }
-            if (i.value() < currentMin) {
-                currentMin = i.value();
-            }
+            updateMetadata(i.value());
         }
         scaleToRange(0.0, 1.0, currentScaleType);
         break;
     }
+
+    updatePlot(currentScalingMode);
+}
+
+void InterpolatingGraph::updateMetadata(double value)
+{
+    if (value > currentMax) {
+        currentMax = value;
+    }
+
+    if (value < currentMin) {
+        currentMin = value;
+    }
+}
+
+void InterpolatingGraph::updatePlot(PlotSettings::ScalingMode scalingMode)
+{
+    switch (scalingMode) {
+    case PlotSettings::NOSCALING:
+        plot->rescaleValueAxes();
+        break;
+    default:
+        // no rescaling
+        break;
+    }
+
+    plot->replot();
 }

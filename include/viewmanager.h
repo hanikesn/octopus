@@ -11,14 +11,14 @@ class ExportHandler;
 class PresentationArea;
 class TimeManager;
 class Recorder;
-class QScrollBar;
+class TimeScrollbar;
 class MainWindow;
 
 class ViewManager : public QObject, public Serializable
 {
     Q_OBJECT
 public:
-    explicit ViewManager(MainWindow *parent, QScrollBar *sb);
+    explicit ViewManager(MainWindow *parent, TimeScrollbar *sb);
     ~ViewManager();
 
     void load(QVariantMap *qvm);
@@ -72,7 +72,7 @@ private:
     TimeManager *timeManager;
     Recorder *recorder;
 
-    QScrollBar *scrollBar;
+    TimeScrollbar *scrollBar;
 
     void setUpView();
 

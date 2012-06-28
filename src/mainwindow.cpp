@@ -32,7 +32,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(viewManager, SIGNAL(rangeChanged(qint64,qint64)), ui.hScrollBar, SLOT(onRangeChanged(qint64,qint64)));
     connect(ui.hScrollBar, SIGNAL(rangeChanged(qint64,qint64)), viewManager, SIGNAL(setRange(qint64,qint64)));
 
-
     QSignalMapper* mapZoom = new QSignalMapper(this);
     mapZoom->setMapping(&zoomInButton, 100);
     mapZoom->setMapping(&zoomOutButton, -100);

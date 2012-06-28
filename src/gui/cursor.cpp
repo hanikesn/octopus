@@ -4,10 +4,10 @@
 #include "timemanager.h"
 
 
-Cursor::Cursor(TimeManager *timeManager, QWidget *parent) :
+Cursor::Cursor(QColor color, TimeManager *timeManager, QWidget *parent) :
     QWidget(parent),
-    pen(Qt::red),
-    brush(Qt::red),
+    pen(color),
+    brush(color),
     currentTime(0),
     timeMgr(timeManager)
 
