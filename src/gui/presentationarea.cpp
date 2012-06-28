@@ -134,7 +134,8 @@ PresentationArea::PresentationArea(const DataProvider &dataProvider,
     setObjectName("PresentationArea");
     timeLine = new TimeLine(*timeManager, viewport());
     selection = new Selection(timeManager, viewport());
-    cursor = new Cursor(timeManager, viewport());
+    cursor = new Cursor(Qt::red, timeManager, viewport());
+    maxCursor = new Cursor(Qt::gray, timeManager, viewport());
 
     setWidget(new QWidget(this));
     setWidgetResizable(true);
@@ -151,6 +152,7 @@ PresentationArea::PresentationArea(const DataProvider &dataProvider,
 
     timeLine->raise();
     selection->raise();
+    maxCursor->raise();
     cursor->raise();
 
     viewportMouseHandler = new EventHandler(*timeManager, *cursor, *selection);
@@ -159,6 +161,7 @@ PresentationArea::PresentationArea(const DataProvider &dataProvider,
     connect(timeManager, SIGNAL(currentTimeChanged(qint64)), cursor, SLOT(setTime(qint64)));
 
     connect(this, SIGNAL(changedViewHeight(int)), cursor, SLOT(updateHeight(int)));
+    connect(this, SIGNAL(changedViewHeight(int)), maxCursor, SLOT(updateHeight(int)));
     connect(this, SIGNAL(changedViewHeight(int)), selection, SLOT(updateHeight(int)));
 
     connect(this, SIGNAL(marginsChanged(int,int)), timeManager, SLOT(onMarginsChanged(int,int)));
@@ -172,7 +175,10 @@ PresentationArea::PresentationArea(const DataProvider &dataProvider,
     connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)),this, SLOT(onRangeChanged(qint64,qint64)));
     connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)),timeLine, SLOT(onRangeChanged(qint64,qint64)));
     connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)), cursor, SLOT(onUpdate()));
+    connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)), maxCursor, SLOT(onUpdate()));
     connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)), selection, SLOT(onUpdate()));
+
+    connect(timeManager, SIGNAL(newMax(qint64)), maxCursor, SLOT(setTime(qint64)));
 
     connect(&dataProvider, SIGNAL(newMax(qint64)), timeManager, SLOT(onNewMax(qint64)));
     connect(&dataProvider, SIGNAL(newMax(qint64)), this, SLOT(onNewMax(qint64)));
@@ -280,6 +286,7 @@ Track* PresentationArea::add(const QList<QString>& fullDataSeriesNames)
     // We need to raise them, because otherwise the tracks will be on top
     timeLine->raise();
     selection->raise();
+    maxCursor->raise();
     cursor->raise();
 
     unsavedChanges = true;
