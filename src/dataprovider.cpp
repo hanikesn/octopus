@@ -141,6 +141,13 @@ void DataProvider::onNewSender(EIDescriptionWrapper desc)
 void DataProvider::addSeries(QString const& device_name, QString const& name, EI::DataSeriesInfo const& info)
 {
     AbstractDataSeries* series;
+
+    QString id = device_name + "." + name;
+
+    // Don't replace already existing dataseries
+    if(dataSeries.contains(id))
+        return;
+
     EI::DataSeriesInfo::Properties props = info.getProperties();
     if (props & EI::DataSeriesInfo::INTERPOLATABLE) {
         series = new DoubleSeries(*this, device_name, name, convert(props));
@@ -148,7 +155,7 @@ void DataProvider::addSeries(QString const& device_name, QString const& name, EI
         series = new StringSeries(*this, device_name, name, convert(props));
     }
 
-    dataSeries.insert(device_name + "." + name, series);
+    dataSeries.insert(id, series);
 }
 
 void DataProvider::onNewData(qint64 timestamp, QString fullDataSeriesName, Value value)
