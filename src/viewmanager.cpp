@@ -190,12 +190,3 @@ void ViewManager::makeConnects()
         networkAdapter->discoverSenders();
     }
 }
-
-
-
-
-
-
-
-
-
