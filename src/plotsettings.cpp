@@ -41,3 +41,18 @@ PlotSettings::ScaleType PlotSettings::scaleType(const QString &fullDataSeriesNam
         return NOT_SCALABLE;
     }
 }
+
+PlotSettings::ScaleType PlotSettings::toScaleType(QCPAxis::ScaleType scaleType)
+{
+    switch (scaleType) {
+    case QCPAxis::stLinear:
+        return LINSCALE;
+        break;
+    case QCPAxis::stLogarithmic:
+        return LOGSCALE;
+        break;
+    default:
+        return NOT_SCALABLE;
+        break;
+    }
+}

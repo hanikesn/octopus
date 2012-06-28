@@ -1,6 +1,8 @@
 #ifndef PLOTSETTINGS_H
 #define PLOTSETTINGS_H
 
+#include "gui/qcustomplot.h"
+
 #include <QMap>
 #include <QString>
 #include <QStringList>
@@ -27,6 +29,9 @@ public:
 
     static const QStringList scaleTypeNames;
 
+    ScalingMode scalingMode;
+    ScaleType plotScaleType;
+
     /**
      * @return True if the plot settings object contains no settings, false otherwise.
      */
@@ -38,8 +43,7 @@ public:
     void setScaleType(const QString &fullDataSeriesName, ScaleType scaleType);
     ScaleType scaleType(const QString &fullDataSeriesName) const;
 
-    ScaleType plotScaleType;
-    ScalingMode scalingMode;
+    static ScaleType toScaleType(QCPAxis::ScaleType scaleType);
 
 private:
     QMap<QString, int> offsets;
