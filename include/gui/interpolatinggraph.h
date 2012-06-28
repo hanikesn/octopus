@@ -33,7 +33,7 @@ private:
     double currentMin;
     double currentMax;
 
-    PlotSettings::ScalingMode currentScalingMode;    
+    PlotSettings::ScalingMode currentScalingMode;
     PlotSettings::ScaleType currentScaleType;
 
     void configureAppearance(QCPGraph *graph);

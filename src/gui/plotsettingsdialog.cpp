@@ -33,6 +33,10 @@ PlotSettingsDialog::PlotSettingsDialog(const QStringList &dataSeriesNames,
         break;
     case PlotSettings::LOGSCALE:
         ui->logChoice->setChecked(true);
+        break;
+    case PlotSettings::NOT_SCALABLE:
+        // no button for that :)
+        break;
     }
 
     onSameScaleStateChanged(ui->sameScaleOption->checkState());
