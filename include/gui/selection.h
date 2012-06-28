@@ -30,6 +30,8 @@ signals:
 
     void selectionChanged(qint64 begin, qint64 end);
 
+    void zoomIn(qint64 start, qint64 end);
+
 protected slots:
     void exportTriggered();
 
@@ -48,6 +50,9 @@ private:
     QMenu *menu;
 
     TimeManager* timeManager;
+
+private slots:
+    void onZoomIn();
 };
 
 #endif // SELECTION_H

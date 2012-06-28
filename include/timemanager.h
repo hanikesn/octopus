@@ -2,6 +2,7 @@
 #define TIMEMANAGER_H
 
 #include <QObject>
+#include <boost/chrono.hpp>
 
 #include "serializable.h"
 
@@ -13,7 +14,14 @@ class TimeManager : public QObject, public Serializable
 {
     Q_OBJECT
 public:
-    TimeManager(QScrollBar *hScrollBar, QObject* parent);
+    typedef boost::chrono::high_resolution_clock Clock;
+
+    /**
+     * @brief TimeManager
+     *
+     * Set startTime to zero to indicate that we don't do a live recording
+     */
+    TimeManager(QScrollBar *hScrollBar, Clock::time_point startTime, QObject* parent);
 
     qint64 getLowVisRange() {return lowVisRange;}
     qint64 getHighVisRange() {return highVisRange;}
@@ -68,14 +76,17 @@ signals:
 
     void currentTimeChanged(qint64 time);
 
+    void newMax(qint64 time);
+
 public slots:
     void onNewMax(qint64 timestamp);
 
     /**
      * @brief onZoom
      * @param factor positive means zoom in
+     * @param pos to zoom into, -1 means center
      */
-    void onZoom(int factor);
+    void zoom(int factor, qint64 pos = -1);
 
     void setTime(qint64);
 
@@ -85,10 +96,12 @@ public slots:
 
     void onNewWidth(int width);
 
+    void onFollow(bool following);
+
+    void setRange(qint64 start, qint64 end);
+
 private slots:
     void onTimeout();
-
-    void horizontalScroll(int pos);
 
 private:
     // low and high limit of the visible range
@@ -102,15 +115,14 @@ private:
 
     qint64 currentTime;
 
-    bool playing;
+    bool live;
 
-    bool autoScroll;
+    bool playing;
+    bool following;
 
     QScrollBar *hScrollBar;
 
     QTimer* timer;
-
-    TimeLine *timeLine;
 
     int marginLeft, marginRight;
     int width;
@@ -118,9 +130,13 @@ private:
     // stores whether changes in the visual range have happened.
     bool unsavedChanges;
 
+    Clock::time_point absoluteStartTime;
+    /// The point of time when the playing started
+    Clock::time_point startTime;
+
     qint64 getZoomFactor(bool zoomOut);
-    void updateScrollBar(bool scroll);
-    void setRange(qint64 begin, qint64 end);
+    void updateScrollBar();
+    void ensureCursorVisibility();
 };
 
 #endif // TIMEMANAGER_H

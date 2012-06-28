@@ -45,7 +45,7 @@
     <item row="0" column="0">
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
-       <widget class="QScrollBar" name="hScrollBar">
+       <widget class="TimeScrollbar" name="hScrollBar">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
@@ -96,6 +96,13 @@
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>TimeScrollbar</class>
+   <extends>QScrollBar</extends>
+   <header>gui/timescrollbar.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

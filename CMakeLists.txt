@@ -58,6 +58,7 @@ set(Octopus_SOURCES
   src/gui/selection.cpp
   src/gui/sourcedialog.cpp
   src/gui/timeline.cpp
+  src/gui/timescrollbar.cpp
   src/gui/track.cpp
   src/mainwindow.cpp
   src/networkadapter.cpp
@@ -90,6 +91,7 @@ set(Octopus_HEADERS
   include/gui/selection.h
   include/gui/sourcedialog.h
   include/gui/timeline.h
+  include/gui/timescrollbar.h
   include/gui/track.h
   include/mainwindow.h
   include/measure.h

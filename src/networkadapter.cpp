@@ -7,7 +7,8 @@
 #include <QDebug>
 
 NetworkAdapter::NetworkAdapter()
-    : receiver(EI::StringMap())
+    : receiver(EI::StringMap()),
+      startTime(Clock::now())
 {
     knownSenders.insert("Receiver");
     receiver.addCommunicationListener(this);
@@ -20,10 +21,16 @@ NetworkAdapter::~NetworkAdapter()
     receiver.removeCommunicationListener(this);
 }
 
+
+void NetworkAdapter::disconnectNotify(const char *signal)
+{
+    qDebug() << signal << "disconnected";
+}
+
 void NetworkAdapter::discoverSenders()
 {
     receiver.discoverSenders();
-    lastDiscoverSent = startTime = Clock::now();
+    lastDiscoverSent = Clock::now();
 }
 
 void NetworkAdapter::onMessage(EI::DataMessage msg)
@@ -54,4 +61,9 @@ void NetworkAdapter::onMessage(EI::Message const& msg)
         emit onNewSender(desc);
         knownSenders.insert(d.getSender());
     }
+}
+
+NetworkAdapter::Clock::time_point NetworkAdapter::getStartTime()
+{
+    return startTime;
 }

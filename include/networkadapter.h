@@ -21,10 +21,18 @@ public:
     NetworkAdapter();
     ~NetworkAdapter();
 
+    typedef boost::chrono::high_resolution_clock Clock;
+
     void discoverSenders();
 
     virtual void onMessage(EI::DataMessage msg);
-    virtual void onMessage(EI::Message const& msg);
+    virtual void onMessage(EI::Message const& msg);    
+
+    Clock::time_point getStartTime();
+
+protected:
+    //TODO debug-only
+    void disconnectNotify(const char *signal);
 
 signals:
     void onNewSender(EIDescriptionWrapper);
@@ -34,8 +42,6 @@ signals:
 private:
     EI::Receiver receiver;
     std::set<std::string> knownSenders;
-
-    typedef boost::chrono::high_resolution_clock Clock;
 
     Clock::time_point lastDiscoverSent;
 

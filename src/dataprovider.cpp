@@ -20,6 +20,9 @@ DataProvider::DataProvider(QString const& filename, QObject *parent) :
             addSeries(fromStdString(d.getSender()), fromStdString(info.first), info.second);
         }
     }
+
+    qint64 min, max;
+    db->getMinMaxTimeStamp(min, max);
 }
 
 DataProvider::~DataProvider()
@@ -64,6 +67,10 @@ void DataProvider::load(QVariantMap *qvm)
         getDataSeries(name)->defaultScaleType = (PlotSettings::ScaleType) defScaleType;
         getDataSeries(name)->offset = offset;
     }
+    qint64 min;
+    qint64 max;
+    getDB().getMinMaxTimeStamp(min, max);
+    emit newMax(max);
 
 }
 

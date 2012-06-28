@@ -43,8 +43,6 @@ MainWindow::MainWindow(QWidget *parent) :
     quitAction = new QAction(tr("&Quit"), this);
     quitAction->setShortcut(QKeySequence(QKeySequence::Quit));
 
-    //connect(ui.mainView, SIGNAL(verticalScroll()), this, SLOT(onVerticalScroll()));
-
     connect(saveAction, SIGNAL(triggered()), this, SLOT(onSave()));
     connect(saveAsAction, SIGNAL(triggered()), this, SLOT(onSaveAs()));
     connect(loadAction, SIGNAL(triggered()), this, SLOT(onLoad()));
@@ -99,6 +97,9 @@ void MainWindow::setUpButtonBars()
     recButton.setCheckable(true);
     recButton.setIcon(recButtonIcon);
 
+    followDataButton.setCheckable(true);
+    followDataButton.setText(tr("ADf"));
+
     // add buttons to the horizontal layout in the toolbar
     layout.addWidget(&addTrackButton);
     layout.addWidget(&plotSettingsButton);
@@ -112,6 +113,7 @@ void MainWindow::setUpButtonBars()
     spacerLeft = new QSpacerItem(100, 1, QSizePolicy::MinimumExpanding, QSizePolicy::Maximum);
     spacerRight = new QSpacerItem(100, 1, QSizePolicy::MinimumExpanding, QSizePolicy::Maximum);
     ui.bottomButtonBar->addSpacerItem(spacerLeft);
+    ui.bottomButtonBar->addWidget(&followDataButton);
     ui.bottomButtonBar->addWidget(&playButton);
     ui.bottomButtonBar->addWidget(&recButton);
     ui.bottomButtonBar->addSpacerItem(spacerRight);
@@ -121,6 +123,8 @@ void MainWindow::setUpButtonBars()
     connect(&loadButton, SIGNAL(clicked()), this, SLOT(onLoad()));
     connect(&exportButton, SIGNAL(clicked()), this, SLOT(onExportAction()));
     connect(&recButton, SIGNAL(clicked()), this, SLOT(onRecord()));
+    connect(&followDataButton, SIGNAL(clicked()), this, SLOT(onFollowData()));
+    connect(&playButton, SIGNAL(clicked()), this, SLOT(onPlay()));
 
     ui.mainToolBar->addWidget(&toolBarWidget);
     addToolBar(Qt::LeftToolBarArea, ui.mainToolBar);
@@ -129,8 +133,12 @@ void MainWindow::setUpButtonBars()
 void MainWindow::onExportRange(qint64 begin, qint64 end)
 {    
     if (begin == -1 && end == -1) { // export all data
-      //TODO(domi) begin und end auf das maximum setzen (gibts im dataprovider)
+        const DatabaseAdapter& da = dataProvider->getDB();
+        da.getMinMaxTimeStamp(begin, end);
     }
+
+    if (begin > end)
+        std::swap(begin, end);
 
     QList<QStringList> res = SourceDialog::getSources(*dataProvider, tr("Export"), false, QStringList(), this);
 
@@ -302,7 +310,16 @@ void MainWindow::setUpView()
     if(timeManager)
         timeManager->deleteLater();
 
-    timeManager = new TimeManager(ui.hScrollBar, this);
+    if(networkAdapter)
+        timeManager = new TimeManager(ui.hScrollBar, networkAdapter->getStartTime(), this);
+    else
+        timeManager = new TimeManager(ui.hScrollBar, TimeManager::Clock::time_point(), this);
+
+    connect(timeManager, SIGNAL(newMax(qint64)), ui.hScrollBar, SLOT(onNewMax(qint64)));
+    connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)), ui.hScrollBar, SLOT(onRangeChanged(qint64,qint64)));
+    connect(ui.hScrollBar, SIGNAL(rangeChanged(qint64,qint64)), timeManager, SLOT(setRange(qint64,qint64)));
+    ui.hScrollBar->onRangeChanged(timeManager->getLowVisRange(), timeManager->getHighVisRange());
+
     pa = new PresentationArea(*dataProvider, timeManager, this);
     recorder = new Recorder(timeManager, this);
     ui.verticalLayout_2->insertWidget(0, pa);
@@ -318,7 +335,8 @@ void MainWindow::setUpView()
     mapZoom->setMapping(&zoomOutButton, -100);
     connect(&zoomOutButton, SIGNAL(clicked()), mapZoom, SLOT(map()));
     connect(&zoomInButton, SIGNAL(clicked()), mapZoom, SLOT(map()));
-    connect(mapZoom, SIGNAL(mapped(int)), timeManager, SLOT(onZoom(int)));
+    connect(mapZoom, SIGNAL(mapped(int)),   timeManager, SLOT(zoom(int)));
+    connect(this, SIGNAL(follow(bool)),     timeManager, SLOT(onFollow(bool)));
 
     qRegisterMetaType<EIDescriptionWrapper>("EIDescriptionWrapper");
     qRegisterMetaType<Value>("Value");
@@ -431,6 +449,18 @@ void MainWindow::onSelectionChanged(qint64 begin, qint64 end)
 {
     selectionBegin = begin;
     selectionEnd = end;
+}
+
+void MainWindow::onFollowData()
+{
+    playButton.setChecked(followDataButton.isChecked());
+    emit follow(followDataButton.isChecked());
+}
+
+void MainWindow::onPlay()
+{
+    if (followDataButton.isChecked())
+        followDataButton.setChecked(false);
 }
 
 bool MainWindow::writeProjectSettings(QVariantMap pName, QString path)

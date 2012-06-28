@@ -85,7 +85,7 @@ public:
     void mouseMoveEvent(QMouseEvent *event)
     {
         if(dragging) {
-            timeManager.movePx(dragLastPos.x() - event->pos().x());
+            timeManager.movePx((dragLastPos.x() - event->pos().x())*10);
 
             dragLastPos = event->pos();
             event->accept();
@@ -103,8 +103,10 @@ public:
         if(event->orientation() == Qt::Horizontal) {
             timeManager.forwardEventToScrollbar(event);
         } else if(event->orientation() == Qt::Vertical &&
-                  event->modifiers() == Qt::ControlModifier) {
-            timeManager.onZoom(event->delta());
+                  event->modifiers() == Qt::ControlModifier &&
+                  timeManager.isValidPos(event->pos().x()))
+        {
+            timeManager.zoom(event->delta(), timeManager.convertPosToTime(event->pos().x()));
             event->accept();
         }
     }
@@ -134,7 +136,8 @@ PresentationArea::PresentationArea(const DataProvider &dataProvider,
     setObjectName("PresentationArea");
     timeLine = new TimeLine(*timeManager, viewport());
     selection = new Selection(timeManager, viewport());
-    cursor = new Cursor(timeManager, viewport());
+    cursor = new Cursor(Qt::red, timeManager, viewport());
+    maxCursor = new Cursor(Qt::gray, timeManager, viewport());
 
     setWidget(new QWidget(this));
     setWidgetResizable(true);
@@ -151,6 +154,7 @@ PresentationArea::PresentationArea(const DataProvider &dataProvider,
 
     timeLine->raise();
     selection->raise();
+    maxCursor->raise();
     cursor->raise();
 
     viewportMouseHandler = new EventHandler(*timeManager, *cursor, *selection);
@@ -159,6 +163,7 @@ PresentationArea::PresentationArea(const DataProvider &dataProvider,
     connect(timeManager, SIGNAL(currentTimeChanged(qint64)), cursor, SLOT(setTime(qint64)));
 
     connect(this, SIGNAL(changedViewHeight(int)), cursor, SLOT(updateHeight(int)));
+    connect(this, SIGNAL(changedViewHeight(int)), maxCursor, SLOT(updateHeight(int)));
     connect(this, SIGNAL(changedViewHeight(int)), selection, SLOT(updateHeight(int)));
 
     connect(this, SIGNAL(marginsChanged(int,int)), timeManager, SLOT(onMarginsChanged(int,int)));
@@ -167,11 +172,15 @@ PresentationArea::PresentationArea(const DataProvider &dataProvider,
 
     connect(selection, SIGNAL(onExport(qint64,qint64)),         this, SIGNAL(exportRange(qint64,qint64)));
     connect(selection, SIGNAL(selectionChanged(qint64,qint64)), this, SIGNAL(selectionChanged(qint64,qint64)));
+    connect(selection, SIGNAL(zoomIn(qint64,qint64)),           timeManager, SLOT(setRange(qint64,qint64)));
 
     connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)),this, SLOT(onRangeChanged(qint64,qint64)));
     connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)),timeLine, SLOT(onRangeChanged(qint64,qint64)));
     connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)), cursor, SLOT(onUpdate()));
+    connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)), maxCursor, SLOT(onUpdate()));
     connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)), selection, SLOT(onUpdate()));
+
+    connect(timeManager, SIGNAL(newMax(qint64)), maxCursor, SLOT(setTime(qint64)));
 
     connect(&dataProvider, SIGNAL(newMax(qint64)), timeManager, SLOT(onNewMax(qint64)));
     connect(&dataProvider, SIGNAL(newMax(qint64)), this, SLOT(onNewMax(qint64)));
@@ -215,7 +224,12 @@ bool PresentationArea::eventFilter(QObject* obj, QEvent* event)
             viewportMouseHandler->mouseDoubleClickEvent(dynamic_cast<QMouseEvent*>(event));
             break;
         case QEvent::Wheel:
+            // We need to detect wether we handled the event
+            event->ignore();
             viewportMouseHandler->wheelEvent(dynamic_cast<QWheelEvent*>(event));
+            // If we handled it we need to stop the progpagation or else the area will be scrolled
+            if(event->isAccepted())
+                return true;
             break;
         default:
             break;
@@ -279,6 +293,7 @@ Track* PresentationArea::add(const QList<QString>& fullDataSeriesNames)
     // We need to raise them, because otherwise the tracks will be on top
     timeLine->raise();
     selection->raise();
+    maxCursor->raise();
     cursor->raise();
 
     unsavedChanges = true;
