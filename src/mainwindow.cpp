@@ -94,7 +94,7 @@ void MainWindow::setUpButtonBars()
     followDataButton.setCheckable(true);
     followDataButton.setText(tr("ADf"));
 
-    // add buttons to the horizontal layout in the toolbar
+    // add buttons to the vertical layout in the toolbar
     layout.addWidget(&addTrackButton);
     layout.addWidget(&plotSettingsButton);
     layout.addWidget(&loadButton);
@@ -103,7 +103,7 @@ void MainWindow::setUpButtonBars()
     layout.addWidget(&zoomOutButton);
 
     // buttonBar at the bottom:
-    // set up spacers so they get as much space as possible (button between is then centered)
+    // set up spacers so they get as much space as possible (buttons between are then centered)
     spacerLeft = new QSpacerItem(100, 1, QSizePolicy::MinimumExpanding, QSizePolicy::Maximum);
     spacerRight = new QSpacerItem(100, 1, QSizePolicy::MinimumExpanding, QSizePolicy::Maximum);
     ui.bottomButtonBar->addSpacerItem(spacerLeft);
