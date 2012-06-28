@@ -21,6 +21,7 @@ class TrackScene;
 class PresentationArea;
 class Recorder;
 class ExportHandler;
+class ViewManager;
 
 class MainWindow : public QMainWindow
 {
@@ -72,9 +73,6 @@ private:
     QSpacerItem *spacerLeft;
     QSpacerItem *spacerRight;
 
-    // Area for the tracks
-    PresentationArea *pa;
-
     // Menu
     QMenu menu;
     QAction *saveAction;
@@ -83,15 +81,7 @@ private:
     QAction *newAction;
     QAction *quitAction;
 
-    DataProvider *dataProvider;
-
-    NetworkAdapter *networkAdapter;
-
-    TimeManager* timeManager;    
-
-    Recorder* recorder;
-
-    ExportHandler *exportHandler;
+    ViewManager *viewManager;
 
     Ui::MainWindow ui;
 
@@ -106,12 +96,6 @@ private:
     void setUpMenu();
 
     void setTitle(QString pName);
-
-    /**
-      * Deletes and sets new objects for: pa, dataProvider trackScene.
-      * Reconnects necessary signals.
-      */
-    void setUpView();
 
     /**
       * Saves the current projects configuration (position of cursor, view range...).
