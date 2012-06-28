@@ -117,8 +117,6 @@ private:
     bool live;
 
     bool playing;
-
-    bool autoScroll;
     bool following;
 
     QScrollBar *hScrollBar;

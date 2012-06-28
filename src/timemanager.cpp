@@ -17,7 +17,6 @@ TimeManager::TimeManager(QScrollBar *hScrollBar, Clock::time_point startTime, QO
     currentTime(0),
     live(startTime != Clock::time_point()),
     playing(false),
-    autoScroll(false),
     following(false),
     hScrollBar(hScrollBar),
     timer(new QTimer(this)),
@@ -46,11 +45,6 @@ void TimeManager::setRange(qint64 begin, qint64 end)
 {
     lowVisRange = begin;
     highVisRange = end;
-
-    if (currentTime >= lowVisRange && currentTime <= highVisRange)
-        autoScroll = true;
-    else
-        autoScroll = false;
 
     // TODO updateTimePerPx
 
@@ -191,11 +185,9 @@ void TimeManager::onFollow(bool following)
         return;
 
     if (following) {
-        autoScroll = true;
         playing = true;
         startTime = absoluteStartTime;
     } else {
-        autoScroll = false;
         playing = false;
     }
     this->following = following;
