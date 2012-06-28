@@ -6,22 +6,29 @@
 #include <QScrollBar>
 #include <QTimer>
 
+namespace bc = boost::chrono;
+
 TimeManager::TimeManager(QScrollBar *hScrollBar, Clock::time_point startTime, QObject* parent):
     QObject(parent),
     lowVisRange(0),
     highVisRange(30000000),
     timePerPx(40000),
     maximum(0),
+    currentTime(0),
+    live(startTime != Clock::time_point()),
     playing(false),
-    autoScroll(false),
     following(false),
     hScrollBar(hScrollBar),
     timer(new QTimer(this)),
-    startTime(startTime)
+    absoluteStartTime(startTime)
 {
     timer->setSingleShot(false);
     timer->setInterval(1000/60);
     connect(timer, SIGNAL(timeout()),                  this, SLOT(onTimeout()));
+
+    if(live) {
+        timer->start();
+    }
 }
 
 qint64 TimeManager::convertPosToTime(int pos)
@@ -36,23 +43,22 @@ int TimeManager::convertTimeToPos(qint64 time)
 
 void TimeManager::setRange(qint64 begin, qint64 end)
 {
+    if(begin >= end)
+        return;
+
     lowVisRange = begin;
+
+    timePerPx = (end - begin) / (width - marginLeft - marginRight);
+
     highVisRange = end;
 
-    if (currentTime >= lowVisRange && currentTime <= highVisRange)
-        autoScroll = true;
-    else
-        autoScroll = false;
-
-    // TODO updateTimePerPx
-
-    emit rangeChanged(begin, end);
+    emit rangeChanged(lowVisRange, highVisRange);
 }
 
 void TimeManager::ensureCursorVisibility()
 {
     // We need to adjust the range slightly so that the cursor stays visible
-    if((currentTime > highVisRange - getTimePerPx()) && autoScroll) {
+    if((currentTime > highVisRange - getTimePerPx())) {
         qint64 range = highVisRange - lowVisRange;
         highVisRange = currentTime + getTimePerPx();
         lowVisRange = highVisRange - range;
@@ -86,7 +92,7 @@ void TimeManager::center(qint64 timestamp)
     qint64 range = highVisRange - lowVisRange;
 
     lowVisRange = timestamp - range/2;
-    highVisRange = timestamp + range/2;
+    highVisRange = lowVisRange + range;
     setRange(lowVisRange, highVisRange);
     unsavedChanges = true;
 }
@@ -95,8 +101,13 @@ void TimeManager::setTime(qint64 time)
 {
     if (following) return;
     currentTime = qMin(time, getMaximum());
-    emit currentTimeChanged(time);
-    unsavedChanges = true;    
+    unsavedChanges = true;
+
+    if(playing) {
+        startTime = Clock::now() - bc::microseconds(currentTime);
+    } else {
+        emit currentTimeChanged(currentTime);
+    }
 }
 
 void TimeManager::onNewMax(qint64 timestamp)
@@ -104,15 +115,15 @@ void TimeManager::onNewMax(qint64 timestamp)
     if (timestamp < maximum)
         return;
 
-    emit newMax(timestamp);
-
     maximum = timestamp;
+
+    emit newMax(timestamp);
 }
 
 int TimeManager::getStepSize()
 {
     // TODO ROUNDING
-    return timePerPx * 50;
+    return getTimePerPx() * 50;
 }
 
 void TimeManager::onZoom(int factor)
@@ -131,19 +142,32 @@ void TimeManager::movePx(int px)
 
 void TimeManager::onTimeout()
 {
-    Clock::duration diff = Clock::now() - startTime;
-    currentTime += diff.count() / 1000;
-    if ((currentTime > getMaximum()) && !following) { // stop playing if end is reached and we are not expecting new data
+    Clock::time_point now = Clock::now();
+
+    if(live) {
+        onNewMax(bc::duration_cast<bc::microseconds>(now - absoluteStartTime).count());
+    }
+
+    if(!playing)
+        return;
+
+    if(following)
+        currentTime = maximum;
+    else {
+        currentTime = bc::duration_cast<bc::microseconds>(now - startTime).count();
+    }
+
+    // stop playing if end is reached and we are not expecting new data
+    if ((currentTime > getMaximum()) && !following) {
+        currentTime = getMaximum();
         playing = false;
         timer->stop();
         return;
-    } else {
-        onNewMax(currentTime);
     }
+
     ensureCursorVisibility();
 
     emit currentTimeChanged(currentTime);
-    startTime = Clock::now();
 }
 
 void TimeManager::onMarginsChanged(int left, int right)
@@ -161,17 +185,13 @@ void TimeManager::onNewWidth(int w)
 
 void TimeManager::onFollow(bool following)
 {
-    if (following) {
-        autoScroll = true;
-        setTime(maximum);
-        ensureCursorVisibility();
-        timer->start();
-        startTime = Clock::now();
-        playing = true;
+    if(!live)
+        return;
 
+    if (following) {
+        playing = true;
+        startTime = absoluteStartTime;
     } else {
-        autoScroll = false;
-        timer->stop();
         playing = false;
     }
     this->following = following;
@@ -186,7 +206,8 @@ void TimeManager::onPlay()
 {    
     if(playing) {
         playing = false;
-        timer->stop();
+        if(!live)
+            timer->stop();
         following = false;
     } else {
         playing = true;        
@@ -194,6 +215,6 @@ void TimeManager::onPlay()
             center(currentTime);
         }
         timer->start();
-        startTime = Clock::now();
+        startTime = Clock::now() - bc::microseconds(currentTime);
     }
 }
