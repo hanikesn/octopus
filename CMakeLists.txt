@@ -67,6 +67,7 @@ set(Octopus_SOURCES
   src/value.cpp
   src/timemanager.cpp
   src/gui/startscreen.cpp
+  src/exporthandler.cpp
 )
 
 set(Octopus_HEADERS
@@ -103,6 +104,7 @@ set(Octopus_HEADERS
   include/visitor.h
   include/timemanager.h
   include/gui/startscreen.h
+  include/exporthandler.h
 )
 
 set(Octopus_FORMS

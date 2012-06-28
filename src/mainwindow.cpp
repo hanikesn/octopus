@@ -8,15 +8,14 @@
 #include <QSignalMapper>
 #include <QCloseEvent>
 
-#include "gui/sourcedialog.h"
 #include "dataprovider.h"
 #include "gui/presentationarea.h"
 #include "serializer.h"
 #include "parser.h"
-#include "CVSExporter.h"
 #include "gui/startscreen.h"
 #include "timemanager.h"
 #include "recorder.h"
+#include "exporthandler.h"
 
 const QString MainWindow::TITLE = "Octopus 0.1";
 
@@ -27,6 +26,7 @@ MainWindow::MainWindow(QWidget *parent) :
     networkAdapter(0),
     timeManager(0),
     recorder(0),
+    exportHandler(0),
     selectionBegin(-1),
     selectionEnd(-1)
 {    
@@ -49,8 +49,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(newAction, SIGNAL(triggered()), this, SLOT(onNew()));
     connect(quitAction, SIGNAL(triggered()), this, SLOT(close()));
 
-    exporterFactory.addExporter(std::unique_ptr<Exporter>(new CVSExporter()));
-
     setUpButtonBars();
     setUpMenu();
 
@@ -66,11 +64,7 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     if (networkAdapter) networkAdapter->deleteLater();
-}
-
-void MainWindow::onExportAction()
-{
-    onExportRange(selectionBegin, selectionEnd);
+    if (exportHandler) exportHandler->deleteLater();
 }
 
 void MainWindow::setUpButtonBars()
@@ -121,53 +115,12 @@ void MainWindow::setUpButtonBars()
     toolBarWidget.setLayout(&layout);
 
     connect(&loadButton, SIGNAL(clicked()), this, SLOT(onLoad()));
-    connect(&exportButton, SIGNAL(clicked()), this, SLOT(onExportAction()));
     connect(&recButton, SIGNAL(clicked()), this, SLOT(onRecord()));
     connect(&followDataButton, SIGNAL(clicked()), this, SLOT(onFollowData()));
     connect(&playButton, SIGNAL(clicked()), this, SLOT(onPlay()));
 
     ui.mainToolBar->addWidget(&toolBarWidget);
     addToolBar(Qt::LeftToolBarArea, ui.mainToolBar);
-}
-
-void MainWindow::onExportRange(qint64 begin, qint64 end)
-{    
-    if (begin == -1 && end == -1) { // export all data
-        const DatabaseAdapter& da = dataProvider->getDB();
-        da.getMinMaxTimeStamp(begin, end);
-    }
-
-    if (begin > end)
-        std::swap(begin, end);
-
-    QList<QStringList> res = SourceDialog::getSources(*dataProvider, tr("Export"), false, QStringList(), this);
-
-    if(res.isEmpty())
-        return;
-
-    QStringList sources = res.front();
-
-    QFileDialog dialog(this, tr("Export"));
-    dialog.setFileMode(QFileDialog::AnyFile);
-    dialog.setAcceptMode(QFileDialog::AcceptSave);
-
-    dialog.setNameFilters(exporterFactory.names());
-    QStringList fileNames;
-    if (dialog.exec())
-        fileNames = dialog.selectedFiles();
-
-    if(fileNames.isEmpty())
-        return;
-
-    QFile file(fileNames.first());
-    if(!file.open(QIODevice::WriteOnly)) {
-        QMessageBox::critical(this,tr("Error"), tr("Could not save file."));
-        return;
-    }
-
-    exporterFactory.getExporter(dialog.selectedNameFilter()).write(file, *dataProvider, sources, begin, end);
-
-    qDebug() << "MainWindow::onExportRange " << begin << ":" << end << fileNames << sources;
 }
 
 void MainWindow::setUpMenu()
@@ -222,6 +175,9 @@ void MainWindow::onLoad()
         networkAdapter->deleteLater();
         networkAdapter = 0;
     }
+    if (exportHandler)
+        exportHandler->deleteLater();
+    exportHandler = new ExportHandler(dataProvider);
 
     // at this point loading was successful --> delete old presentationArea and create new one.
     projectPath = fileName;
@@ -274,13 +230,18 @@ void MainWindow::onNew()
         dataProvider->deleteLater();
     }
 
-    if (networkAdapter) {
+    if (networkAdapter)
         networkAdapter->deleteLater();
-    }
+
+    if (exportHandler)
+        exportHandler->deleteLater();
+
 
     // create a temporary file for the db
     dataProvider = new DataProvider(QDir::tempPath() + "/Octopus-" + QDateTime::currentDateTime().toString("yyyyMMdd_hhmmsszzz"), this);
     networkAdapter = new NetworkAdapter();
+    exportHandler = new ExportHandler(dataProvider);
+    connect(&exportButton, SIGNAL(clicked()), exportHandler, SLOT(onExport()));
 
     setUpView();
     addData(*dataProvider);
@@ -323,8 +284,9 @@ void MainWindow::setUpView()
     recorder = new Recorder(timeManager, this);
     ui.verticalLayout_2->insertWidget(0, pa);
 
-    connect(pa, SIGNAL(exportRange(qint64,qint64)), this, SLOT(onExportRange(qint64,qint64)));
-    connect(pa, SIGNAL(selectionChanged(qint64,qint64)), this, SLOT(onSelectionChanged(qint64,qint64)));
+    connect(pa, SIGNAL(exportRange(qint64,qint64)), exportHandler, SLOT(onExport(qint64,qint64)));
+    connect(pa, SIGNAL(selectionChanged(qint64,qint64)), exportHandler, SLOT(onSelectionChanged(qint64,qint64)));
+
     connect(recorder, SIGNAL(saveProject(qint64,qint64)), this, SLOT(onSaveProject(qint64,qint64)));
     connect(&addTrackButton, SIGNAL(clicked()), pa, SLOT(onAddTrack()));
     connect(&plotSettingsButton, SIGNAL(clicked()), pa, SLOT(onPlotSettings()));
@@ -442,12 +404,6 @@ void MainWindow::onSaveProject(qint64 start, qint64 end)
 {
     // initiate save (project file)
     save(true, start, end);
-}
-
-void MainWindow::onSelectionChanged(qint64 begin, qint64 end)
-{
-    selectionBegin = begin;
-    selectionEnd = end;
 }
 
 void MainWindow::onFollowData()
