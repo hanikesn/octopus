@@ -103,8 +103,10 @@ public:
         if(event->orientation() == Qt::Horizontal) {
             timeManager.forwardEventToScrollbar(event);
         } else if(event->orientation() == Qt::Vertical &&
-                  event->modifiers() == Qt::ControlModifier) {
-            timeManager.onZoom(event->delta());
+                  event->modifiers() == Qt::ControlModifier &&
+                  timeManager.isValidPos(event->pos().x()))
+        {
+            timeManager.zoom(event->delta(), timeManager.convertPosToTime(event->pos().x()));
             event->accept();
         }
     }
@@ -222,7 +224,12 @@ bool PresentationArea::eventFilter(QObject* obj, QEvent* event)
             viewportMouseHandler->mouseDoubleClickEvent(dynamic_cast<QMouseEvent*>(event));
             break;
         case QEvent::Wheel:
+            // We need to detect wether we handled the event
+            event->ignore();
             viewportMouseHandler->wheelEvent(dynamic_cast<QWheelEvent*>(event));
+            // If we handled it we need to stop the progpagation or else the area will be scrolled
+            if(event->isAccepted())
+                return true;
             break;
         default:
             break;

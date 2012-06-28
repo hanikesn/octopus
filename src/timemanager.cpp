@@ -126,10 +126,28 @@ int TimeManager::getStepSize()
     return getTimePerPx() * 50;
 }
 
-void TimeManager::onZoom(int factor)
+/**
+ * @brief zoom in around time
+ */
+void TimeManager::zoom(int factor, qint64 time)
 {
+    if(time == -1)
+        time = lowVisRange + (highVisRange - lowVisRange) / 2;
+
     timePerPx -= factor * 50;
     timePerPx = qMax(1000LL, timePerPx);
+
+    int x = (width - marginLeft - marginRight) * timePerPx;
+
+    double f = (double)(time -lowVisRange) / (highVisRange - lowVisRange);
+
+    lowVisRange = time - x*(f);
+    highVisRange = time + x*(1-f);
+
+    if(lowVisRange < 0) {
+        highVisRange += -lowVisRange;
+        lowVisRange = 0;
+    }
 
     // initiate redraw according to new range
     onNewWidth(width);

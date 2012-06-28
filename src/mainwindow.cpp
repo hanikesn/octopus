@@ -318,6 +318,7 @@ void MainWindow::setUpView()
     connect(timeManager, SIGNAL(newMax(qint64)), ui.hScrollBar, SLOT(onNewMax(qint64)));
     connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)), ui.hScrollBar, SLOT(onRangeChanged(qint64,qint64)));
     connect(ui.hScrollBar, SIGNAL(rangeChanged(qint64,qint64)), timeManager, SLOT(setRange(qint64,qint64)));
+    ui.hScrollBar->onRangeChanged(timeManager->getLowVisRange(), timeManager->getHighVisRange());
 
     pa = new PresentationArea(*dataProvider, timeManager, this);
     recorder = new Recorder(timeManager, this);
@@ -334,7 +335,7 @@ void MainWindow::setUpView()
     mapZoom->setMapping(&zoomOutButton, -100);
     connect(&zoomOutButton, SIGNAL(clicked()), mapZoom, SLOT(map()));
     connect(&zoomInButton, SIGNAL(clicked()), mapZoom, SLOT(map()));
-    connect(mapZoom, SIGNAL(mapped(int)),   timeManager, SLOT(onZoom(int)));
+    connect(mapZoom, SIGNAL(mapped(int)),   timeManager, SLOT(zoom(int)));
     connect(this, SIGNAL(follow(bool)),     timeManager, SLOT(onFollow(bool)));
 
     qRegisterMetaType<EIDescriptionWrapper>("EIDescriptionWrapper");
