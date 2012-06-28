@@ -1,6 +1,7 @@
 #include "gui/track.h"
 
 #include "abstractdataseries.h"
+#include "doubleseries.h"
 #include "plotsettings.h"
 #include "gui/discretegraph.h"
 #include "gui/interpolatinggraph.h"
@@ -116,11 +117,32 @@ QStringList Track::getFullDataSeriesNames()
 }
 
 void Track::addGraph(const DoubleSeries &s) {
-    graphs.append(new InterpolatingGraph(ui.plot, s));
+    Graph *g = new InterpolatingGraph(ui.plot, s);
+
+    PlotSettings settings;
+
+    settings.scalingMode = currentScalingMode;
+    settings.plotScaleType = PlotSettings::toScaleType(ui.plot->yAxis->scaleType());
+
+    if (currentScalingMode == PlotSettings::NOSCALING) {
+        settings.setScaleType(s.fullName(), settings.plotScaleType);
+    } else {
+        // TODO(Steffi): Die Graphen, die vorher auch schon drin waren, sollten ihre Einstellungen beibehalten!
+        settings.setScaleType(s.fullName(), s.defaultScaleType);
+    }
+
+    g->update(settings);
+    graphs.append(g);
+
+    if (currentScalingMode == PlotSettings::NOSCALING) {
+        ui.plot->rescaleValueAxes();
+    }
+    ui.plot->replot();
 }
 
 void Track::addGraph(const StringSeries &s) {
     graphs.append(new DiscreteGraph(ui.plot, s));
+    ui.plot->replot();
 }
 
 void Track::onDelete()
@@ -157,15 +179,7 @@ void Track::onPlotSettings()
     PlotSettings preset;
 
     preset.scalingMode = currentScalingMode;
-
-    switch (ui.plot->yAxis->scaleType()) {
-    case QCPAxis::stLinear:
-        preset.plotScaleType = PlotSettings::LINSCALE;
-        break;
-    case QCPAxis::stLogarithmic:
-        preset.plotScaleType = PlotSettings::LOGSCALE;
-        break;
-    }
+    preset.plotScaleType = PlotSettings::toScaleType(ui.plot->yAxis->scaleType());
 
     foreach (Graph *g, graphs) {
         preset.setOffset(g->dataSeriesName(), dataProvider.getDataSeries(g->dataSeriesName())->offset);
@@ -178,6 +192,7 @@ void Track::onPlotSettings()
         if (settings.scalingMode == PlotSettings::MINMAXSCALING) {
             // all graphs will scale their values to use the full height of the plot
             ui.plot->yAxis->setScaleType(QCPAxis::stLinear);
+            ui.plot->yAxis->setRange(0, 1);
             // set axis and gridlines invisible as they will have no informative value
             ui.plot->yAxis->setVisible(false);
             ui.plot->yAxis->setGrid(false);

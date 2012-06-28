@@ -34,7 +34,7 @@ private:
     double currentMin;
     double currentMax;
 
-    PlotSettings::ScalingMode currentScalingMode;    
+    PlotSettings::ScalingMode currentScalingMode;
     PlotSettings::ScaleType currentScaleType;
 
     void configureAppearance(QCPGraph *graph);
@@ -42,6 +42,9 @@ private:
 
     void rescale(PlotSettings::ScalingMode scalingMode, PlotSettings::ScaleType scaleType);
     void scaleToRange(double lower, double upper, PlotSettings::ScaleType scaleType);
+
+    void updateMetadata(double value);
+    void updatePlot(PlotSettings::ScalingMode scalingMode);
 };
 
 #endif // INTERPOLATINGGRAPH_H
