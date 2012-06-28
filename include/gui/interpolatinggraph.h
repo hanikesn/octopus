@@ -41,6 +41,9 @@ private:
 
     void rescale(PlotSettings::ScalingMode scalingMode, PlotSettings::ScaleType scaleType);
     void scaleToRange(double lower, double upper, PlotSettings::ScaleType scaleType);
+
+    void updateMetadata(double value);
+    void updatePlot(PlotSettings::ScalingMode scalingMode);
 };
 
 #endif // INTERPOLATINGGRAPH_H
