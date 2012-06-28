@@ -114,6 +114,8 @@ private:
 
     qint64 currentTime;
 
+    bool live;
+
     bool playing;
 
     bool autoScroll;
@@ -123,14 +125,14 @@ private:
 
     QTimer* timer;
 
-    TimeLine *timeLine;
-
     int marginLeft, marginRight;
     int width;
 
     // stores whether changes in the visual range have happened.
     bool unsavedChanges;
 
+    Clock::time_point absoluteStartTime;
+    /// The point of time when the playing started
     Clock::time_point startTime;
 
     qint64 getZoomFactor(bool zoomOut);
