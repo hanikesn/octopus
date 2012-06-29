@@ -26,12 +26,10 @@ void StringSeries::addData(qint64 timestamp, const Value& value)
 
 QMap<qint64, QString> StringSeries::getData() const
 {
-    // TODO(Steffi): Offset berücksichtigen!
-    return dp.getDB().getData<QString>(fullName());
+    return dp.getDB().getData<QString>(fullName(), offset);
 }
 
 QMap<qint64, QString> StringSeries::getData(qint64 begin, qint64 end) const
 {
-    // TODO(Steffi): Offset berücksichtigen!
-    return dp.getDB().getData<QString>(fullName(), begin, end);
+    return dp.getDB().getData<QString>(fullName(), begin, end, offset);
 }
