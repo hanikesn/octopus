@@ -139,13 +139,13 @@ void ViewManager::setUpView()
     scrollBar->setOrientation(Qt::Horizontal);
 
     if (networkAdapter)
-        timeManager = new TimeManager(scrollBar, networkAdapter->getStartTime(), this);
+        timeManager = new TimeManager(networkAdapter->getStartTime(), this);
     else
-        timeManager = new TimeManager(scrollBar, TimeManager::Clock::time_point(), this);
+        timeManager = new TimeManager(TimeManager::Clock::time_point(), this);
 
     scrollBar->onRangeChanged(timeManager->getLowVisRange(), timeManager->getHighVisRange());
 
-    presentationArea = new PresentationArea(*dataProvider, timeManager, this);
+    presentationArea = new PresentationArea(*dataProvider, timeManager, scrollBar, this);
     recorder = new Recorder(timeManager, this);
 
     this->layout()->addWidget(presentationArea);
