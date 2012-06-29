@@ -291,13 +291,14 @@ void DatabaseAdapter::copy(QString other, qint64 begin, qint64 end)
     if(db.execute("INSERT OR REPLACE INTO other.series SELECT * FROM main.series;") != db.Done)
         throw std::exception();
 
-    stmt = db.prepare("INSERT INTO other.data_string SELECT * FROM main.data_string WHERE time>=? and time<=?;");
-    stmt << begin << end;
+    // Don't forget to adjust the offsets
+    stmt = db.prepare("INSERT INTO other.data_string SELECT name, time + ?, value FROM main.data_string WHERE time>=? and time<=?;");
+    stmt << -begin << begin << end;
     if(stmt.execute() != stmt.done())
         throw std::exception();
 
-    stmt = db.prepare("INSERT INTO other.data_float SELECT * FROM main.data_float WHERE time>=? and time<=?;");
-    stmt << begin << end;
+    stmt = db.prepare("INSERT INTO other.data_float SELECT name, time + ?, value FROM main.data_float WHERE time>=? and time<=?;");
+    stmt << -begin << begin << end;
     if(stmt.execute() != stmt.done())
         throw std::exception();
 
