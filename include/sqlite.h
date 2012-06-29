@@ -15,11 +15,13 @@ class Row;
 class Exception : public std::exception
 {
 public:
-    Exception(int code) : code(code) {}
+    Exception(sqlite3* db) : code(sqlite3_extended_errcode(db)), msg(sqlite3_errmsg(db))  {}
+    Exception(int code, const char * msg) : code(code), msg(msg) {}
 
     virtual const char *what() const throw();
 
     const int code;
+    const std::string msg;
 };
 
 class Row
@@ -54,7 +56,7 @@ class PreparedStatement
     // only Sqlite is allowed to make new prepared statements
     friend class DB;
     friend class Row;
-    PreparedStatement(sqlite3_stmt* stmt);
+    PreparedStatement(sqlite3* db, sqlite3_stmt* stmt);
 public:
     PreparedStatement();
     ~PreparedStatement();
@@ -97,6 +99,7 @@ public:
     QueryIterator done();
 
 private:
+    sqlite3* db;
     sqlite3_stmt* stmt;
     int index;
 };
