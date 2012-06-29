@@ -37,7 +37,7 @@ protected:
 private slots:        
     void onSave();
     void onSaveAs();
-    void onLoad();
+    QString onLoad();
     void onNew();    
     void onRecord();
     /**

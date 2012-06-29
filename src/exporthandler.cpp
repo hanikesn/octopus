@@ -59,8 +59,11 @@ void ExportHandler::onExport(qint64 begin, qint64 end)
     if (dialog.exec())
         fileNames = dialog.selectedFiles();
 
-    if(fileNames.isEmpty())
+    if (fileNames.isEmpty())
         return;
+
+    if (!fileNames.first().endsWith(".csv"))
+        fileNames.first().append(".csv");
 
     QFile file(fileNames.first());
     if(!file.open(QIODevice::WriteOnly)) {
