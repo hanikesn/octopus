@@ -8,13 +8,22 @@
 #include <QDir>
 #include <cmath>
 
-DataProvider::DataProvider(QString const& filename, QObject *parent) :
-    QObject(parent), db(new DatabaseAdapter(filename)), filename(filename), currentMax(0)
+DataProvider::DataProvider(QString const& file, QObject *parent) :
+    QObject(parent),
+    currentMax(0),
+    temporaryDB(file.isNull())
 {
     setObjectName("DataProvider");
-    QList<EI::Description> list = db->getSenders();
 
-    foreach(EI::Description const& d, list)
+    if(temporaryDB) {
+        filename = QDir::tempPath() + "/Octopus-" + QDateTime::currentDateTime().toString("yyyyMMdd_hhmmsszzz");
+    } else {
+        filename = file;
+    }
+
+    db = std::unique_ptr<DatabaseAdapter>(new DatabaseAdapter(filename));
+
+    foreach(EI::Description const& d, db->getSenders())
     {
         foreach(EI::DataSeriesInfoMap::value_type const& info, d.getDataSeries())
         {
@@ -31,6 +40,11 @@ DataProvider::~DataProvider()
     foreach(AbstractDataSeries* d, dataSeries)
     {
         d->deleteLater();
+    }
+
+    if(temporaryDB) {
+        db.reset();
+        QFile::remove(filename);
     }
 }
 
@@ -97,6 +111,8 @@ void DataProvider::copyDB(QString filename, qint64 begin, qint64 end)
 
 void DataProvider::moveDB(QString const& newFilename)
 {
+    temporaryDB = false;
+
     if(newFilename == filename)
         return;
 

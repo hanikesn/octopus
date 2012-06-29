@@ -75,6 +75,11 @@ void ViewManager::saveDB(QString dbname, qint64 begin, qint64 end)
     }
 }
 
+QString ViewManager::getDBName()
+{
+    return dataProvider->getDBFileName();
+}
+
 bool ViewManager::hasUnsavedChanges()
 {
     return presentationArea->hasUnsavedChanges() || timeManager->hasUnsavedChanges();
@@ -111,17 +116,13 @@ void ViewManager::createNewView(QString dbfile)
             dataProvider->deleteLater();
         }
         // create a temporary file for the db
-        dataProvider = new DataProvider(QDir::tempPath() + "/Octopus-" + QDateTime::currentDateTime().toString("yyyyMMdd_hhmmsszzz"), this);
+        dataProvider = new DataProvider(dbfile, this);
         networkAdapter = new NetworkAdapter(this);
 
     } else { // load-action
         DataProvider* olddataProvider = dataProvider;
-        try {
-            dataProvider = new DataProvider(dbfile, this);
-        } catch(std::exception& e) {
-            qDebug() << "Loading of DB failed.";
-            return;
-        }
+        dataProvider = new DataProvider(dbfile, this);
+
         if(olddataProvider) {
             olddataProvider->closeDB();
             olddataProvider->deleteLater();

@@ -165,14 +165,22 @@ QString MainWindow::onLoad()
         return "";
     }
 
-    QString dbfile = result["dbfile"].toString();
+
+    QString dbfile = QFileInfo(file).absolutePath() + "/" + result["dbfile"].toString();
+
+    ViewManager* tmp;
+    try {
+        tmp = new ViewManager(this, dbfile);
+    } catch(std::exception const& e) {
+        QMessageBox::critical(this, tr("Octopus"), tr("Could not load DB."));
+        return projectPath;
+    }
 
     if(viewManager)
         viewManager->deleteLater();
 
-    viewManager = new ViewManager(this, dbfile);
+    viewManager = tmp;
 
-    // at this point loading was successful --> delete old presentationArea and create new one.
     projectPath = fileName;
 
     setTitle(QFileInfo(projectPath).completeBaseName().remove(".oct"));
@@ -241,15 +249,16 @@ void MainWindow::save(bool saveAs, qint64 begin, qint64 end)
     QString fileName = getSaveFileName(saveAs);
     if (fileName.isEmpty()) return;  // dialog cancelled
 
-    // The db lies in a temporary file. We might need to move it.
     QString dbname = fileName + ".db";
     dbname.remove(QRegExp(".oct$"));
+
+    QString relative_dbname = QFileInfo(fileName).dir().relativeFilePath(dbname);
 
     QVariantMap pName; // Map with the projects settings    
     if ((begin == -1) && (end == -1)) { // save all
         projectPath = fileName;
         viewManager->saveDB(dbname, -1, -1);
-        pName.insert("dbfile", dbname);
+        pName.insert("dbfile", relative_dbname);
 
         if (writeProjectSettings(pName, projectPath)) { // in case save was successfull ...
             viewManager->setUnsavedChanges(false);
@@ -257,7 +266,7 @@ void MainWindow::save(bool saveAs, qint64 begin, qint64 end)
     } else { // save range
         QString subProjectPath = fileName;        
         viewManager->saveDB(dbname, begin, end);
-        pName.insert("dbfile", dbname);
+        pName.insert("dbfile", relative_dbname);
         writeProjectSettings(pName, subProjectPath);
     }
 }
