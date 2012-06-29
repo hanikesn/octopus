@@ -8,6 +8,7 @@
 #include <QSignalMapper>
 #include <QCloseEvent>
 
+#include "ui_mainwindow.h"
 #include "dataprovider.h"
 #include "gui/presentationarea.h"
 #include "serializer.h"
@@ -22,27 +23,10 @@ const QString MainWindow::TITLE = "Octopus 0.1";
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),        
-    selectionBegin(-1),
-    selectionEnd(-1)
+    viewManager(0)
 {    
-    ui.setupUi(this);
-
-    viewManager = new ViewManager(this, ui.hScrollBar);
-    connect(viewManager, SIGNAL(newMax(qint64)), ui.hScrollBar, SLOT(onNewMax(qint64)));
-    connect(viewManager, SIGNAL(rangeChanged(qint64,qint64)), ui.hScrollBar, SLOT(onRangeChanged(qint64,qint64)));
-    connect(ui.hScrollBar, SIGNAL(rangeChanged(qint64,qint64)), viewManager, SIGNAL(setRange(qint64,qint64)));
-
-    QSignalMapper* mapZoom = new QSignalMapper(this);
-    mapZoom->setMapping(&zoomInButton, 100);
-    mapZoom->setMapping(&zoomOutButton, -100);
-    connect(&zoomOutButton, SIGNAL(clicked()), mapZoom, SLOT(map()));
-    connect(&zoomInButton, SIGNAL(clicked()), mapZoom, SLOT(map()));
-    connect(mapZoom, SIGNAL(mapped(int)),   viewManager, SIGNAL(zoom(int)));
-    connect(this, SIGNAL(follow(bool)),     viewManager, SIGNAL(follow(bool)));
-
-
-    connect(viewManager, SIGNAL(saveProject(qint64,qint64)), this, SLOT(onSaveProject(qint64,qint64)));
-
+    ui = new Ui::MainWindow();
+    ui->setupUi(this);
 
     saveAction = new QAction(tr("&Save"), this);
     saveAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_S));
@@ -65,6 +49,7 @@ MainWindow::MainWindow(QWidget *parent) :
     setUpMenu();
 
     //TODO(domi): Kommentare wegmachen
+    //TODO(steffen): an neuen viewmanager anpassen
 //    StartScreen *s = new StartScreen(this);
 //    if (s->showScreen() == StartScreen::LOAD) {
 //        viewManager->createNewView();
@@ -77,13 +62,12 @@ MainWindow::MainWindow(QWidget *parent) :
 //        viewManager->createNewView();
 //        onNew();
 //    }
-    viewManager->createNewView();
     onNew();
 }
 
 MainWindow::~MainWindow()
 {
-
+    delete ui;
 }
 
 void MainWindow::setUpButtonBars()
@@ -113,13 +97,6 @@ void MainWindow::setUpButtonBars()
     followDataButton.setCheckable(true);
     followDataButton.setText(tr("ADf"));
 
-    // corresponding connect-statements:
-    connect(&addTrackButton, SIGNAL(clicked()), viewManager, SIGNAL(addTrack()));
-    connect(&plotSettingsButton, SIGNAL(clicked()), viewManager, SIGNAL(plotSettings()));
-    connect(&playButton, SIGNAL(clicked()), viewManager, SIGNAL(play()));
-    connect(&recButton, SIGNAL(clicked()), viewManager, SLOT(onRecord()));
-    connect(&exportButton, SIGNAL(clicked()), viewManager, SIGNAL(exportData()));
-
     // add buttons to the vertical layout in the toolbar
     layout.addWidget(&addTrackButton);
     layout.addWidget(&plotSettingsButton);
@@ -132,11 +109,11 @@ void MainWindow::setUpButtonBars()
     // set up spacers so they get as much space as possible (buttons between are then centered)
     spacerLeft = new QSpacerItem(100, 1, QSizePolicy::MinimumExpanding, QSizePolicy::Maximum);
     spacerRight = new QSpacerItem(100, 1, QSizePolicy::MinimumExpanding, QSizePolicy::Maximum);
-    ui.bottomButtonBar->addSpacerItem(spacerLeft);
-    ui.bottomButtonBar->addWidget(&followDataButton);
-    ui.bottomButtonBar->addWidget(&playButton);
-    ui.bottomButtonBar->addWidget(&recButton);
-    ui.bottomButtonBar->addSpacerItem(spacerRight);
+    ui->bottomButtonBar->addSpacerItem(spacerLeft);
+    ui->bottomButtonBar->addWidget(&followDataButton);
+    ui->bottomButtonBar->addWidget(&playButton);
+    ui->bottomButtonBar->addWidget(&recButton);
+    ui->bottomButtonBar->addSpacerItem(spacerRight);
 
     toolBarWidget.setLayout(&layout);
 
@@ -145,8 +122,8 @@ void MainWindow::setUpButtonBars()
     connect(&followDataButton, SIGNAL(clicked()), this, SLOT(onFollowData()));
     connect(&playButton, SIGNAL(clicked()), this, SLOT(onPlay()));
 
-    ui.mainToolBar->addWidget(&toolBarWidget);
-    addToolBar(Qt::LeftToolBarArea, ui.mainToolBar);
+    ui->mainToolBar->addWidget(&toolBarWidget);
+    addToolBar(Qt::LeftToolBarArea, ui->mainToolBar);
 }
 
 void MainWindow::setUpMenu()
@@ -157,7 +134,7 @@ void MainWindow::setUpMenu()
     menu.addAction(saveAction);    
     menu.addAction(saveAsAction);
     menu.addAction(quitAction);
-    ui.menuBar->addMenu(&menu);
+    ui->menuBar->addMenu(&menu);
 }
 
 void MainWindow::onSave()
@@ -190,7 +167,10 @@ QString MainWindow::onLoad()
 
     QString dbfile = result["dbfile"].toString();
 
-    if (viewManager->createNewView(dbfile) == 0) return "";
+    if(viewManager)
+        viewManager->deleteLater();
+
+    viewManager = new ViewManager(this, dbfile);
 
     // at this point loading was successful --> delete old presentationArea and create new one.
     projectPath = fileName;
@@ -201,7 +181,8 @@ QString MainWindow::onLoad()
 
     // no recording in a loaded project.
     recButton.setEnabled(false);
-    ui.verticalLayout_2->insertWidget(0, viewManager->getPresentationArea());
+
+    setUpView();
     return fileName;
 }
 
@@ -209,13 +190,18 @@ void MainWindow::onNew()
 {
     if (checkForUnsavedChanges() == QMessageBox::Abort) return;
 
-    ui.verticalLayout_2->insertWidget(0, viewManager->createNewView());
-
     projectPath = "";
     setTitle("");
 
     // enable recording
     recButton.setEnabled(true);
+
+    if(viewManager)
+        viewManager->deleteLater();
+
+    viewManager = new ViewManager(this);
+
+    setUpView();
 }
 
 void MainWindow::setTitle(QString pName)
@@ -226,6 +212,28 @@ void MainWindow::setTitle(QString pName)
 
     windowTitle += pName;
     setWindowTitle(windowTitle);
+}
+
+void MainWindow::setUpView()
+{
+    QSignalMapper* mapZoom = new QSignalMapper(this);
+    mapZoom->setMapping(&zoomInButton, 100);
+    mapZoom->setMapping(&zoomOutButton, -100);
+    connect(&zoomOutButton, SIGNAL(clicked()), mapZoom, SLOT(map()));
+    connect(&zoomInButton, SIGNAL(clicked()), mapZoom, SLOT(map()));
+    connect(mapZoom, SIGNAL(mapped(int)),   viewManager, SIGNAL(zoom(int)));
+    connect(this, SIGNAL(follow(bool)),     viewManager, SIGNAL(follow(bool)));
+
+    connect(viewManager, SIGNAL(saveProject(qint64,qint64)), this, SLOT(onSaveProject(qint64,qint64)));
+
+    // corresponding connect-statements:
+    connect(&addTrackButton, SIGNAL(clicked()), viewManager, SIGNAL(addTrack()));
+    connect(&plotSettingsButton, SIGNAL(clicked()), viewManager, SIGNAL(plotSettings()));
+    connect(&playButton, SIGNAL(clicked()), viewManager, SIGNAL(play()));
+    connect(&recButton, SIGNAL(clicked()), viewManager, SLOT(onRecord()));
+    connect(&exportButton, SIGNAL(clicked()), viewManager, SIGNAL(exportData()));
+
+    ui->centralWidgetLayout->insertWidget(0, viewManager);
 }
 
 void MainWindow::save(bool saveAs, qint64 begin, qint64 end)
@@ -256,7 +264,7 @@ void MainWindow::save(bool saveAs, qint64 begin, qint64 end)
 
 int MainWindow::checkForUnsavedChanges()
 {        
-    if (!viewManager->hasUnsavedChanges()) return -1;
+    if (viewManager && !viewManager->hasUnsavedChanges()) return -1;
 
     QMessageBox msg;
     msg.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Abort);

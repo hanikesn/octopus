@@ -1,7 +1,7 @@
 #ifndef VIEWMANAGER_H
 #define VIEWMANAGER_H
 
-#include <QObject>
+#include <QWidget>
 
 #include "serializable.h"
 
@@ -14,11 +14,17 @@ class Recorder;
 class TimeScrollbar;
 class MainWindow;
 
-class ViewManager : public QObject, public Serializable
+class ViewManager : public QWidget, public Serializable
 {
     Q_OBJECT
 public:
-    explicit ViewManager(MainWindow *parent, TimeScrollbar *sb);
+    /**
+      * Creates a new view (dataProvider, exportHandler, presentationArea, timeManager, recorder)
+      * and if necessary a networkAdapter (not necessary if a database is loaded).
+      * If dbfile is not empty, the dataProvider tries to load the specified file.
+      * @param dbfile - The dbfile to be loaded.
+      */
+    explicit ViewManager(QWidget *parent, QString dbfile = QString());
     ~ViewManager();
 
     void load(QVariantMap *qvm);
@@ -31,21 +37,8 @@ public:
 
     bool isRecording();
 
-    PresentationArea* getPresentationArea() {return presentationArea;}
-
-    /**
-      * Creates a new view (dataProvider, exportHandler, presentationArea, timeManager, recorder)
-      * and if necessary a networkAdapter (not necessary if a database is loaded).
-      * If dbfile is not empty, the dataProvider tries to load the specified file.
-      * @param dbfile - The dbfile to be loaded.
-      */
-    PresentationArea* createNewView(QString dbfile = "");
-
 signals:
-    void newMax(qint64 max);
-    void rangeChanged(qint64 begin, qint64 end);
     void saveProject(qint64,qint64);
-    void setRange(qint64 begin, qint64 end);
 
     // activated by button in mainwindow
     void addTrack();
@@ -77,6 +70,8 @@ private:
     void setUpView();
 
     void makeConnects();
+
+    void createNewView(QString dbfile);
 
 };
 
