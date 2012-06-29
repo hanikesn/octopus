@@ -271,7 +271,17 @@ void PresentationArea::onPlotSettings()
         preset.setScaleType(series->fullName(), series->defaultScaleType);
     }
 
-    PlotSettingsDialog::getSettings(dataSeriesNames, preset);
+    PlotSettings settings = PlotSettingsDialog::getSettings(dataSeriesNames, preset);
+
+    if (!settings.isEmpty()) {
+        foreach (QString name, dataSeriesNames) {
+            AbstractDataSeries *series = dataProvider.getDataSeries(name);
+            if (series) {
+                series->offset = settings.offset(name);
+                series->defaultScaleType = settings.scaleType(name);
+            }
+        }
+    }
 }
 
 Track* PresentationArea::add(const QList<QString>& fullDataSeriesNames)
