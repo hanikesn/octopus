@@ -9,30 +9,19 @@ namespace Sqlite
 
 const char *Exception::what() const throw()
 {
-    switch(code) {
-    case 0:
-        return "SQLITE_OK";
-    case 1:
-        return "SQLITE_ERROR";
-    case 2:
-        return "SQLITE_INTERNAL";
-    case 14:
-        return "SQLITE_CANTOPEN";
-    case 21:
-        return "SQLITE_MISUSE";
-    case 25:
-        return "SQLITE_RANGE";
-    default:
-        return "Unknown error";
-    }
+    return msg.c_str();
 
 }
 
 DB::DB(std::string file)
 {
     int ret = sqlite3_open(file.c_str(), &db);
-    if(ret != SQLITE_OK)
-        throw Exception(ret);
+    if(ret != SQLITE_OK) {
+        sqlite3_close(db);
+        throw Exception(db);
+    }
+
+    sqlite3_extended_result_codes(db, true);
 }
 
 DB::~DB()
@@ -49,9 +38,9 @@ PreparedStatement DB::prepare(const std::string& query) const
     // sqlite expects the null terminator to be included in the lenght
     int ret = sqlite3_prepare_v2(db, query.c_str(), query.length() + 1, &stmt, &unused);
     if(ret != SQLITE_OK)
-        throw Exception(ret);
+        throw Exception(db);
 
-    return std::move(PreparedStatement(stmt));
+    return std::move(PreparedStatement(db, stmt));
 }
 
 PreparedStatement::PreparedStatement()
@@ -79,8 +68,8 @@ PreparedStatement::QueryIterator DB::execute(std::string const& query)
 }
 
 
-PreparedStatement::PreparedStatement(sqlite3_stmt* stmt) :
-    stmt(stmt), index(0)
+PreparedStatement::PreparedStatement(sqlite3* db, sqlite3_stmt* stmt) :
+    db(db), stmt(stmt), index(0)
 {
 }
 
@@ -103,21 +92,21 @@ void PreparedStatement::bind(int index, double value)
 {
     int ret = sqlite3_bind_double(stmt, index, value);
     if(ret != SQLITE_OK)
-        throw Exception(ret);
+        throw Exception(db);
 }
 
 void PreparedStatement::bind(int index, sqlite3_int64 value)
 {
     int ret = sqlite3_bind_int64(stmt, index, value);
     if(ret != SQLITE_OK)
-        throw Exception(ret);
+        throw Exception(db);
 }
 
 void PreparedStatement::bind(int index, const std::string& value)
 {
     int ret = sqlite3_bind_text(stmt, index, value.c_str(), value.length(), SQLITE_TRANSIENT);
     if(ret != SQLITE_OK)
-        throw Exception(ret);
+        throw Exception(db);
 }
 
 void PreparedStatement::reset()
@@ -152,7 +141,7 @@ PreparedStatement::QueryIterator& PreparedStatement::QueryIterator::operator++()
     if(stmt != nullptr) {
         int ret = sqlite3_step(stmt->stmt);
         if(ret == SQLITE_BUSY || ret == SQLITE_ERROR || ret == SQLITE_MISUSE || ret == SQLITE_CONSTRAINT) {
-            throw Exception(ret);
+            throw Exception(stmt->db);
         } else if(ret == SQLITE_DONE) {
             stmt = nullptr;
         } else {

@@ -6,6 +6,8 @@
 DoubleSeries::DoubleSeries(const DataProvider &dp, const QString &deviceName, const QString &name, Data::Properties properties) :
     AbstractDataSeries(dp, deviceName, name, properties)
 {
+    defaultScaleType = PlotSettings::LINSCALE;
+
     setObjectName("DoubleSeries");
 }
 
