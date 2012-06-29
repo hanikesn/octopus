@@ -79,6 +79,8 @@ private:
     QString filename;
 
     qint64 currentMax;
+
+    bool temporaryDB;
 };
 
 #endif // DATAPROVIDER_H

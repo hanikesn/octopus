@@ -32,7 +32,9 @@ class PresentationArea : public QScrollArea, public Serializable
     Q_OBJECT
 public:
     explicit PresentationArea(const DataProvider &dataProvider,
-                              TimeManager *timeManager, QWidget *parent = 0);
+                              TimeManager *timeManager,
+                              QScrollBar* scrollbar,
+                              QWidget *parent = 0);
     ~PresentationArea();
 
     void save(QVariantMap *qvm);

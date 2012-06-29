@@ -8,14 +8,16 @@
 #include "gui/sourcedialog.h"
 #include "gui/timeline.h"
 #include "gui/track.h"
+#include <QScrollBar>
 
 class EventHandler : public MouseEventHandler
 {
 public:
-    EventHandler(TimeManager& timeManager, Cursor &cursor, Selection& selection)
+    EventHandler(TimeManager& timeManager, Cursor &cursor, Selection& selection, QScrollBar* scrollbar)
         : timeManager(timeManager),
           selection(selection),
           cursor(cursor),
+          scrollbar(scrollbar),
           createSelection(false),
           dragging(false)
     {}
@@ -85,7 +87,7 @@ public:
     void mouseMoveEvent(QMouseEvent *event)
     {
         if(dragging) {
-            timeManager.movePx((dragLastPos.x() - event->pos().x())*10);
+            scrollbar->setValue(scrollbar->value() + (dragLastPos.x() - event->pos().x())*10);
 
             dragLastPos = event->pos();
             event->accept();
@@ -101,7 +103,7 @@ public:
     virtual void wheelEvent(QWheelEvent* event)
     {
         if(event->orientation() == Qt::Horizontal) {
-            timeManager.forwardEventToScrollbar(event);
+            scrollbar->event(event);
         } else if(event->orientation() == Qt::Vertical &&
                   event->modifiers() == Qt::ControlModifier &&
                   timeManager.isValidPos(event->pos().x()))
@@ -120,6 +122,7 @@ private:
     TimeManager& timeManager;
     Selection& selection;
     Cursor& cursor;
+    QScrollBar* scrollbar;
 
     bool createSelection;
     bool dragging;
@@ -127,7 +130,9 @@ private:
 };
 
 PresentationArea::PresentationArea(const DataProvider &dataProvider,
-                                   TimeManager *timeManager, QWidget *parent):
+                                   TimeManager *timeManager,
+                                   QScrollBar* scrollbar,
+                                   QWidget *parent):
     QScrollArea(parent),
     dataProvider(dataProvider),
     timeManager(timeManager),
@@ -157,7 +162,7 @@ PresentationArea::PresentationArea(const DataProvider &dataProvider,
     maxCursor->raise();
     cursor->raise();
 
-    viewportMouseHandler = new EventHandler(*timeManager, *cursor, *selection);
+    viewportMouseHandler = new EventHandler(*timeManager, *cursor, *selection, scrollbar);
     viewport()->installEventFilter(this);
 
     connect(timeManager, SIGNAL(currentTimeChanged(qint64)), cursor, SLOT(setTime(qint64)));
