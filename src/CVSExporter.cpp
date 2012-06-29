@@ -8,7 +8,7 @@
 
 QString CVSExporter::getFileType()
 {
-    return QObject::tr("CVC (*.cvs)");
+    return QObject::tr("CSV (*.csv)");
 }
 
 void CVSExporter::write(QIODevice &file, const DataProvider &dp, const QStringList &dataSeries, qint64 begin, qint64 end)

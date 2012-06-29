@@ -6,7 +6,7 @@
 
 #include <algorithm>
 
-InterpolatingGraph::InterpolatingGraph(QCustomPlot *plot, const DoubleSeries &d) :
+InterpolatingGraph::InterpolatingGraph(QCustomPlot *plot, const DoubleSeries &d, PlotSettings::ScalingMode scalingMode, PlotSettings::ScaleType scaleType) :
     Graph(plot),
     series(d),
     plot(plot),
@@ -14,7 +14,7 @@ InterpolatingGraph::InterpolatingGraph(QCustomPlot *plot, const DoubleSeries &d)
     currentMin(std::numeric_limits<double>::max()),
     currentMax(std::numeric_limits<double>::min()),
     currentScalingMode(PlotSettings::NOSCALING),
-    currentScaleType(d.defaultScaleType)
+    currentScaleType(PlotSettings::LINSCALE)
 {
     setObjectName("InterpolatingGraph");
     connect(&series, SIGNAL(newData(qint64)), this, SLOT(onNewData(qint64)));
@@ -24,13 +24,9 @@ InterpolatingGraph::InterpolatingGraph(QCustomPlot *plot, const DoubleSeries &d)
 
     configureAppearance(graph);
     initialize(graph, series);
+    rescale(scalingMode, scaleType);
 
-    updatePlot(currentScalingMode);
-}
-
-InterpolatingGraph::~InterpolatingGraph()
-{
-    qDebug() << "Interpolating Graph destroyed";
+    updatePlot(scalingMode);
 }
 
 QCPGraph* InterpolatingGraph::getGraph()

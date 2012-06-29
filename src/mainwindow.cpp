@@ -49,11 +49,19 @@ MainWindow::MainWindow(QWidget *parent) :
     setUpMenu();
 
     //TODO(domi): Kommentare wegmachen
+    //TODO(steffen): an neuen viewmanager anpassen
 //    StartScreen *s = new StartScreen(this);
-//    if (s->showScreen() == StartScreen::LOAD)
-//            onLoad();
-//    else
+//    if (s->showScreen() == StartScreen::LOAD) {
+//        viewManager->createNewView();
+//        if (onLoad().isEmpty()) { // file choose dialog was cancelled
+//            viewManager->createNewView();
+//            onNew();
+//        }
+//    }
+//    else {
+//        viewManager->createNewView();
 //        onNew();
+//    }
     onNew();
 }
 
@@ -139,12 +147,12 @@ void MainWindow::onSaveAs()
     save(true);
 }
 
-void MainWindow::onLoad()
+QString MainWindow::onLoad()
 {    
-    if (checkForUnsavedChanges() == QMessageBox::Abort) return;
+    if (checkForUnsavedChanges() == QMessageBox::Abort) return "";
     QString fileName = QFileDialog::getOpenFileName(this, tr("Load File"),
                                                     projectPath, "Octopus (*.oct)");
-    if(fileName.isEmpty()) return;
+    if(fileName.isEmpty()) return fileName;
     QFile file(fileName);
     file.open(QIODevice::ReadOnly);    
 
@@ -153,8 +161,8 @@ void MainWindow::onLoad()
     bool ok;
     QVariantMap result = parser.parse(json, &ok).toMap();
     if(!ok){
-        qDebug() << "Could not parse config file! Aborting...";
-        return;
+        qDebug() << "Could not parse config file:" << fileName << " ! Aborting...";
+        return "";
     }
 
     QString dbfile = result["dbfile"].toString();
@@ -175,6 +183,7 @@ void MainWindow::onLoad()
     recButton.setEnabled(false);
 
     setUpView();
+    return fileName;
 }
 
 void MainWindow::onNew()
@@ -292,11 +301,11 @@ QString MainWindow::getSaveFileName(bool saveAs)
 void MainWindow::closeEvent(QCloseEvent *ce)
 {
     //TODO(domi): Kommentare wegmachen:
-//    if (recorder->isRecording()) { // ask whether recording should be stopped
+//    if (viewManager->isRecording()) { // ask whether recording should be stopped
 //        // simulate button click
-//        recorder->toggleRecording();
+//        viewManager->onRecord();
 
-//        if (recorder->isRecording()) { // if there is still a running recording, the user continued!
+//        if (viewManager->isRecording()) { // if there is still a running recording, the user continued!
 //            ce->ignore();
 //            return; // dont exit the program
 //        }
