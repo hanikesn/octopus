@@ -182,6 +182,9 @@ QString MainWindow::onLoad()
     // no recording in a loaded project.
     recButton.setEnabled(false);
 
+    // we can't follow new data.
+    followDataButton.setEnabled(false);
+
     setUpView();
     return fileName;
 }
@@ -195,6 +198,9 @@ void MainWindow::onNew()
 
     // enable recording
     recButton.setEnabled(true);
+
+    // enable data following
+    followDataButton.setEnabled(true);
 
     if(viewManager)
         viewManager->deleteLater();

@@ -129,7 +129,7 @@ void ViewManager::createNewView(QString dbfile)
     }
     exportHandler = new ExportHandler(this, dataProvider);
     setUpView();
-    //    addData(*dataProvider);
+        addData(*dataProvider);
 }
 
 void ViewManager::setUpView()
