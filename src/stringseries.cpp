@@ -7,6 +7,7 @@
 StringSeries::StringSeries(const DataProvider &dp, const QString &deviceName, const QString &name, Data::Properties properties) :
     AbstractDataSeries(dp, deviceName, name, properties)
 {
+    defaultScaleType = PlotSettings::NOT_SCALABLE;
 }
 
 void StringSeries::accept(DataSeriesVisitor *v)
