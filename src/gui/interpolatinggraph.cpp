@@ -166,23 +166,19 @@ void InterpolatingGraph::onNewData(qint64 timestamp)
 {
     auto const& data = series.getData(lastUpdate, timestamp);
 
-    switch (currentScalingMode) {
-    case PlotSettings::NOSCALING:
-        for (auto i = data.constBegin(); i != data.constEnd(); ++i) {
-            updateMetadata(i.value());
+    for (auto i = data.constBegin(); i != data.constEnd(); ++i) {
+        updateMetadata(i.value());
+        switch (currentScalingMode) {
+        case PlotSettings::NOSCALING:
             graph->addData(i.key(), i.value());
+            break;
+        case PlotSettings::MINMAXSCALING:
+            scaleToRange(0.0, 1.0, currentScaleType);
+            break;
         }
-
-        lastUpdate = timestamp;
-        break;
-    case PlotSettings::MINMAXSCALING:
-        for (auto i = data.constBegin(); i != data.constEnd(); ++i) {
-            updateMetadata(i.value());
-        }
-        scaleToRange(0.0, 1.0, currentScaleType);
-        break;
     }
 
+    lastUpdate = timestamp;
     updatePlot(currentScalingMode);
 }
 
