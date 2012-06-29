@@ -344,9 +344,9 @@ void PresentationArea::updatePlotMargins()
     emit marginsChanged(tracks.first()->getMarginLeft(), tracks.first()->getMarginRight());
 }
 
-void PresentationArea::onNewMax(qint64 max)
+void PresentationArea::onNewMax(qint64 /*max*/)
 {
-        unsavedChanges = true;
+    unsavedChanges = true;
 }
 
 void PresentationArea::save(QVariantMap *qvm)

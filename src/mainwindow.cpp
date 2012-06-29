@@ -298,7 +298,7 @@ QString MainWindow::getSaveFileName(bool saveAs)
         return projectPath;
 }
 
-void MainWindow::closeEvent(QCloseEvent *ce)
+void MainWindow::closeEvent(QCloseEvent */*ce*/)
 {
     //TODO(domi): Kommentare wegmachen:
 //    if (viewManager->isRecording()) { // ask whether recording should be stopped
