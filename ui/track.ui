@@ -40,8 +40,17 @@
    </property>
    <item>
     <layout class="QVBoxLayout" name="verticalLayout">
+     <property name="spacing">
+      <number>8</number>
+     </property>
      <property name="sizeConstraint">
       <enum>QLayout::SetMinimumSize</enum>
+     </property>
+     <property name="leftMargin">
+      <number>3</number>
+     </property>
+     <property name="rightMargin">
+      <number>3</number>
      </property>
      <item>
       <spacer name="verticalSpacer">
@@ -91,7 +100,14 @@
         </size>
        </property>
        <property name="text">
-        <string>src</string>
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../rc/resources.qrc">
+         <normaloff>:/buttons/toolbar/icons/add_16.png</normaloff>:/buttons/toolbar/icons/add_16.png</iconset>
+       </property>
+       <property name="flat">
+        <bool>false</bool>
        </property>
       </widget>
      </item>
