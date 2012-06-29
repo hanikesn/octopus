@@ -12,11 +12,12 @@ class DB;
 class PreparedStatement;
 class Row;
 
-class Exception : public std::exception
+class Exception : public virtual std::exception
 {
 public:
     Exception(sqlite3* db) : code(sqlite3_extended_errcode(db)), msg(sqlite3_errmsg(db))  {}
     Exception(int code, const char * msg) : code(code), msg(msg) {}
+    ~Exception() throw () {}
 
     virtual const char *what() const throw();
 

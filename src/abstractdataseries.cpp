@@ -4,7 +4,7 @@
 
 AbstractDataSeries::AbstractDataSeries(const DataProvider &dp, const QString &deviceName, const QString &name, Data::Properties properties):
     offset(0),
-    defaultScaleType(PlotSettings::LINSCALE),
+    defaultScaleType(PlotSettings::NOT_SCALABLE),
     deviceName(deviceName),
     dataSeriesName(name),
     props(properties),

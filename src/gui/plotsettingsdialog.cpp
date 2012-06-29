@@ -25,7 +25,7 @@ PlotSettingsDialog::PlotSettingsDialog(const QStringList &dataSeriesNames,
 
     setupSourceTable(dataSeriesNames, preset, offsetsEditable);
     ui->sameScaleOption->setVisible(showScalingOption);
-    ui->sameScaleOption->setChecked(preset.scalingMode == PlotSettings::NOSCALING);
+    ui->sameScaleOption->setChecked(showScalingOption && preset.scalingMode == PlotSettings::NOSCALING);
 
     switch (preset.plotScaleType) {
     case PlotSettings::LINSCALE:
@@ -34,8 +34,8 @@ PlotSettingsDialog::PlotSettingsDialog(const QStringList &dataSeriesNames,
     case PlotSettings::LOGSCALE:
         ui->logChoice->setChecked(true);
         break;
-    case PlotSettings::NOT_SCALABLE:
-        // no button for that :)
+    default:
+        // if it's none of the above, we have no button for it :)
         break;
     }
 

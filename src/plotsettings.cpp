@@ -5,7 +5,7 @@ const QStringList PlotSettings::scaleTypeNames = QStringList() << "lin" << "log"
 
 PlotSettings::PlotSettings() :
     scalingMode(NOSCALING),
-    plotScaleType(NOT_SCALABLE)
+    plotScaleType(LINSCALE)
 {
 }
 
