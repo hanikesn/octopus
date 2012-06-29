@@ -53,7 +53,7 @@ private:
 
     qint64 timePerPx;
 
-    enum TimeRepresentation {SECOND_PART, SECOND_FULL, MILLISECOND};
+    enum TimeRepresentation {SECOND, MILLISECOND};
     TimeRepresentation timeRepresentation;
 
     void drawTicks(QPainter *painter);
