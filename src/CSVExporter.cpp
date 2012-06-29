@@ -1,4 +1,4 @@
-#include "CVSExporter.h"
+#include "CSVExporter.h"
 #include <QString>
 #include <QObject>
 #include "dataprovider.h"
@@ -6,12 +6,12 @@
 #include "DBUtil.h"
 #include "value.h"
 
-QString CVSExporter::getFileType()
+QString CSVExporter::getFileType()
 {
     return QObject::tr("CSV (*.csv)");
 }
 
-void CVSExporter::write(QIODevice &file, const DataProvider &dp, const QStringList &dataSeries, qint64 begin, qint64 end)
+void CSVExporter::write(QIODevice &file, const DataProvider &dp, const QStringList &dataSeries, qint64 begin, qint64 end)
 {
     QTextStream stream(&file);
 

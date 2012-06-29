@@ -1,9 +1,9 @@
-#ifndef CVSEXPORTER_H
-#define CVSEXPORTER_H
+#ifndef CSVEXPORTER_H
+#define CSVEXPORTER_H
 
 #include "exporter.h"
 
-class CVSExporter : public Exporter
+class CSVExporter : public Exporter
 {
 public:
     virtual QString getFileType();
@@ -11,4 +11,4 @@ public:
     virtual void write(QIODevice& file, DataProvider const& dp, QStringList const& DataSeries, qint64 begin, qint64 end);
 };
 
-#endif // CVSEXPORTER_H
+#endif // CSVEXPORTER_H

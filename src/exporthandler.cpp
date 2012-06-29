@@ -4,7 +4,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 
-#include "CVSExporter.h"
+#include "CSVExporter.h"
 #include "databaseadapter.h"
 #include "gui/sourcedialog.h"
 #include "dataprovider.h"
@@ -14,7 +14,7 @@ ExportHandler::ExportHandler(DataProvider *dp):
     end(-1),
     dataProvider(dp)
 {
-    exporterFactory.addExporter(std::unique_ptr<Exporter>(new CVSExporter()));
+    exporterFactory.addExporter(std::unique_ptr<Exporter>(new CSVExporter()));
 }
 
 ExportHandler::~ExportHandler()
