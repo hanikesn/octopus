@@ -27,12 +27,10 @@ void DoubleSeries::addData(qint64 timestamp, const Value& value)
 
 QMap<qint64, double> DoubleSeries::getData() const
 {
-    // TODO(Steffi): Offset berücksichtigen!
-    return dp.getDB().getData<double>(fullName());
+    return dp.getDB().getData<double>(fullName(), offset);
 }
 
 QMap<qint64, double> DoubleSeries::getData(qint64 begin, qint64 end) const
 {
-    // TODO(Steffi): Offset berücksichtigen!
-    return dp.getDB().getData<double>(fullName(), begin, end);
+    return dp.getDB().getData<double>(fullName(), begin, end, offset);
 }
