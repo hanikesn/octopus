@@ -52,12 +52,6 @@ ViewManager::ViewManager(QWidget *parent, QString dbfile):
     createNewView(dbfile);
 }
 
-ViewManager::~ViewManager()
-{
-    if (networkAdapter) networkAdapter->deleteLater();
-    if (exportHandler) exportHandler->deleteLater();
-}
-
 void ViewManager::load(QVariantMap *qvm)
 {
     dataProvider->load(qvm);
@@ -118,7 +112,7 @@ void ViewManager::createNewView(QString dbfile)
         }
         // create a temporary file for the db
         dataProvider = new DataProvider(QDir::tempPath() + "/Octopus-" + QDateTime::currentDateTime().toString("yyyyMMdd_hhmmsszzz"), this);
-        networkAdapter = new NetworkAdapter();
+        networkAdapter = new NetworkAdapter(this);
 
     } else { // load-action
         DataProvider* olddataProvider = dataProvider;
@@ -133,7 +127,7 @@ void ViewManager::createNewView(QString dbfile)
             olddataProvider->deleteLater();
         }
     }
-    exportHandler = new ExportHandler(dataProvider);
+    exportHandler = new ExportHandler(this, dataProvider);
     setUpView();
     //    addData(*dataProvider);
 }

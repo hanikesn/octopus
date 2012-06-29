@@ -25,7 +25,6 @@ public:
       * @param dbfile - The dbfile to be loaded.
       */
     explicit ViewManager(QWidget *parent, QString dbfile = QString());
-    ~ViewManager();
 
     void load(QVariantMap *qvm);
     void save(QVariantMap *qvm);
