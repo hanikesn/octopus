@@ -265,31 +265,38 @@ void Track::setPlotMarginLeft(int margin)
 }
 
 void Track::save(QVariantMap *qvm)
-{    
+{        
     QVariantList graphList;
     foreach (Graph *g, graphs) {
         QVariantMap graph;
         graph.insert("name", g->dataSeriesName());
-        graph.insert("scaling", g->getScaleType());
+        graph.insert("scaling", g->getScaleType());        
 
         graphList << graph;
     }    
-    qvm->insert("dataSeries", graphList);
+    qvm->insert("scalingMode", currentScalingMode);
+    qvm->insert("graphList", graphList);
+
 }
 
 void Track::load(QVariantMap *qvm)
 {
     QVariantMap map = qvm->find("track").value().toMap();
-    QVariantList graphList = map.find("dataSeries").value().toList();
+    QVariantList graphList = map.find("graphList").value().toList();
+
+    int scalingMode = map.find("scalingMode").value().toInt();
+    currentScalingMode = (PlotSettings::ScalingMode) scalingMode;
 
     foreach (QVariant entry, graphList) {
         QVariantMap graph = entry.toMap(); // one graph object (contains dataSeries + Scaling)
         QString name(graph.find("name").value().toString()); // name of the series
         addSource(name);
         int scaling = graph.find("scaling").value().toInt();
-        foreach (Graph *g, graphs) { // look for the graph which was just added.
+
+        // look for the graph which was just added.
+        foreach (Graph *g, graphs) {
             if (g->dataSeriesName() == name) {
-                g->setScaleType((PlotSettings::ScaleType) scaling);
+                g->setScaleType((PlotSettings::ScaleType) scaling);                
                 break; // there won't be the same graph in this track again --> we can quit the loop
             }
         }

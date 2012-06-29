@@ -22,7 +22,7 @@ TimeLine::TimeLine(TimeManager& timeManager, QWidget * parent):
     mediumTickAmount(1000000), // one second in µs
     smallTickAmount(200000), // 0,2 seconds in µs
     timePerPx(40000), // Amount of time which one pixel represents 40 milliseconds in µs
-    timeRepresentation(SECOND_FULL)
+    timeRepresentation(SECOND)
 {
     setObjectName("TimeLine");
     setAttribute(Qt::WA_TransparentForMouseEvents);
@@ -131,13 +131,20 @@ void TimeLine::onRangeChanged(qint64 begin, qint64 end)
 
 void TimeLine::onStepSizeChanged(qint64 microSeconds)
 {
+    // <magic coefficient calculation>
+    qint64 div = 4000000;
+    qint64 quotient = (microSeconds/div) + 1;
+    largeTickAmount = (quotient * div) / 2; // 2 seconds if no zoom has been applied so far
+    mediumTickAmount = largeTickAmount / 2;
+    smallTickAmount = mediumTickAmount / 5;
+    // <\magic coefficient calculation>
     timePerPx = microSeconds/50;    
 
     if (microSeconds % 1000000 == 0)
-        timeRepresentation = SECOND_FULL;
+        timeRepresentation = SECOND;
     else if (microSeconds > 100000)
-        timeRepresentation = SECOND_PART;
-    else
+        timeRepresentation = SECOND;
+    else if (microSeconds <= 100000)
         timeRepresentation = MILLISECOND;
 
     update();
