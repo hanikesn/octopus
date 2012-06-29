@@ -3,6 +3,7 @@
 #include "common.h"
 #include "DBUtil.h"
 
+#include <QFile>
 #include <QPair>
 #include <QStringList>
 
@@ -279,6 +280,7 @@ void DatabaseAdapter::getMinMaxTimeStamp(qint64 &min, qint64 &max) const
 void DatabaseAdapter::copy(QString other, qint64 begin, qint64 end)
 {
     {
+        QFile::remove(other);
         // Create and close a DB
         Sqlite::DB otherDB(toStdString(other));
         initDB(otherDB);

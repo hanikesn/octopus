@@ -152,6 +152,10 @@ QString MainWindow::onLoad()
     if (checkForUnsavedChanges() == QMessageBox::Abort) return "";
     QString fileName = QFileDialog::getOpenFileName(this, tr("Load File"),
                                                     projectPath, "Octopus (*.oct)");
+
+    if(QFileInfo(fileName) == QFileInfo(projectPath))
+        return projectPath;
+
     if(fileName.isEmpty()) return fileName;
     QFile file(fileName);
     file.open(QIODevice::ReadOnly);    
