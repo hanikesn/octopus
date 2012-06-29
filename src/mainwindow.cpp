@@ -8,29 +8,41 @@
 #include <QSignalMapper>
 #include <QCloseEvent>
 
-#include "gui/sourcedialog.h"
 #include "dataprovider.h"
 #include "gui/presentationarea.h"
 #include "serializer.h"
 #include "parser.h"
-#include "CVSExporter.h"
 #include "gui/startscreen.h"
 #include "timemanager.h"
 #include "recorder.h"
+#include "exporthandler.h"
+#include "viewmanager.h"
 
 const QString MainWindow::TITLE = "Octopus 0.1";
 
 MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent),
-    pa(0),
-    dataProvider(0),
-    networkAdapter(0),
-    timeManager(0),
-    recorder(0),
+    QMainWindow(parent),        
     selectionBegin(-1),
     selectionEnd(-1)
 {    
     ui.setupUi(this);
+
+    viewManager = new ViewManager(this, ui.hScrollBar);
+    connect(viewManager, SIGNAL(newMax(qint64)), ui.hScrollBar, SLOT(onNewMax(qint64)));
+    connect(viewManager, SIGNAL(rangeChanged(qint64,qint64)), ui.hScrollBar, SLOT(onRangeChanged(qint64,qint64)));
+    connect(ui.hScrollBar, SIGNAL(rangeChanged(qint64,qint64)), viewManager, SIGNAL(setRange(qint64,qint64)));
+
+    QSignalMapper* mapZoom = new QSignalMapper(this);
+    mapZoom->setMapping(&zoomInButton, 100);
+    mapZoom->setMapping(&zoomOutButton, -100);
+    connect(&zoomOutButton, SIGNAL(clicked()), mapZoom, SLOT(map()));
+    connect(&zoomInButton, SIGNAL(clicked()), mapZoom, SLOT(map()));
+    connect(mapZoom, SIGNAL(mapped(int)),   viewManager, SIGNAL(zoom(int)));
+    connect(this, SIGNAL(follow(bool)),     viewManager, SIGNAL(follow(bool)));
+
+
+    connect(viewManager, SIGNAL(saveProject(qint64,qint64)), this, SLOT(onSaveProject(qint64,qint64)));
+
 
     saveAction = new QAction(tr("&Save"), this);
     saveAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_S));
@@ -49,8 +61,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(newAction, SIGNAL(triggered()), this, SLOT(onNew()));
     connect(quitAction, SIGNAL(triggered()), this, SLOT(close()));
 
-    exporterFactory.addExporter(std::unique_ptr<Exporter>(new CVSExporter()));
-
     setUpButtonBars();
     setUpMenu();
 
@@ -60,17 +70,13 @@ MainWindow::MainWindow(QWidget *parent) :
 //            onLoad();
 //    else
 //        onNew();
+    viewManager->createNewView();
     onNew();
 }
 
 MainWindow::~MainWindow()
 {
-    if (networkAdapter) networkAdapter->deleteLater();
-}
 
-void MainWindow::onExportAction()
-{
-    onExportRange(selectionBegin, selectionEnd);
 }
 
 void MainWindow::setUpButtonBars()
@@ -100,7 +106,14 @@ void MainWindow::setUpButtonBars()
     followDataButton.setCheckable(true);
     followDataButton.setText(tr("ADf"));
 
-    // add buttons to the horizontal layout in the toolbar
+    // corresponding connect-statements:
+    connect(&addTrackButton, SIGNAL(clicked()), viewManager, SIGNAL(addTrack()));
+    connect(&plotSettingsButton, SIGNAL(clicked()), viewManager, SIGNAL(plotSettings()));
+    connect(&playButton, SIGNAL(clicked()), viewManager, SIGNAL(play()));
+    connect(&recButton, SIGNAL(clicked()), viewManager, SLOT(onRecord()));
+    connect(&exportButton, SIGNAL(clicked()), viewManager, SIGNAL(exportData()));
+
+    // add buttons to the vertical layout in the toolbar
     layout.addWidget(&addTrackButton);
     layout.addWidget(&plotSettingsButton);
     layout.addWidget(&loadButton);
@@ -109,7 +122,7 @@ void MainWindow::setUpButtonBars()
     layout.addWidget(&zoomOutButton);
 
     // buttonBar at the bottom:
-    // set up spacers so they get as much space as possible (button between is then centered)
+    // set up spacers so they get as much space as possible (buttons between are then centered)
     spacerLeft = new QSpacerItem(100, 1, QSizePolicy::MinimumExpanding, QSizePolicy::Maximum);
     spacerRight = new QSpacerItem(100, 1, QSizePolicy::MinimumExpanding, QSizePolicy::Maximum);
     ui.bottomButtonBar->addSpacerItem(spacerLeft);
@@ -121,53 +134,12 @@ void MainWindow::setUpButtonBars()
     toolBarWidget.setLayout(&layout);
 
     connect(&loadButton, SIGNAL(clicked()), this, SLOT(onLoad()));
-    connect(&exportButton, SIGNAL(clicked()), this, SLOT(onExportAction()));
     connect(&recButton, SIGNAL(clicked()), this, SLOT(onRecord()));
     connect(&followDataButton, SIGNAL(clicked()), this, SLOT(onFollowData()));
     connect(&playButton, SIGNAL(clicked()), this, SLOT(onPlay()));
 
     ui.mainToolBar->addWidget(&toolBarWidget);
     addToolBar(Qt::LeftToolBarArea, ui.mainToolBar);
-}
-
-void MainWindow::onExportRange(qint64 begin, qint64 end)
-{    
-    if (begin == -1 && end == -1) { // export all data
-        const DatabaseAdapter& da = dataProvider->getDB();
-        da.getMinMaxTimeStamp(begin, end);
-    }
-
-    if (begin > end)
-        std::swap(begin, end);
-
-    QList<QStringList> res = SourceDialog::getSources(*dataProvider, tr("Export"), false, QStringList(), this);
-
-    if(res.isEmpty())
-        return;
-
-    QStringList sources = res.front();
-
-    QFileDialog dialog(this, tr("Export"));
-    dialog.setFileMode(QFileDialog::AnyFile);
-    dialog.setAcceptMode(QFileDialog::AcceptSave);
-
-    dialog.setNameFilters(exporterFactory.names());
-    QStringList fileNames;
-    if (dialog.exec())
-        fileNames = dialog.selectedFiles();
-
-    if(fileNames.isEmpty())
-        return;
-
-    QFile file(fileNames.first());
-    if(!file.open(QIODevice::WriteOnly)) {
-        QMessageBox::critical(this,tr("Error"), tr("Could not save file."));
-        return;
-    }
-
-    exporterFactory.getExporter(dialog.selectedNameFilter()).write(file, *dataProvider, sources, begin, end);
-
-    qDebug() << "MainWindow::onExportRange " << begin << ":" << end << fileNames << sources;
 }
 
 void MainWindow::setUpMenu()
@@ -208,82 +180,29 @@ void MainWindow::onLoad()
         qDebug() << "Could not parse config file! Aborting...";
         return;
     }
-    DataProvider* olddataProvider = dataProvider;
+
     QString dbfile = result["dbfile"].toString();
-    // load the db might fail
-    try {
-        dataProvider = new DataProvider(dbfile, this);
-    } catch(std::exception& e) {
-        qDebug() << "Loading of DB failed.";
-        return;
-    }
-    // in case there is a networkAdapter, delete it. We opened an old project --> no new data accepted!
-    if (networkAdapter) {
-        networkAdapter->deleteLater();
-        networkAdapter = 0;
-    }
+
+    if (viewManager->createNewView(dbfile) == 0) return;
 
     // at this point loading was successful --> delete old presentationArea and create new one.
     projectPath = fileName;
 
-    if(olddataProvider) {
-        olddataProvider->closeDB();
-        olddataProvider->deleteLater();
-    }
-
-    setUpView();
     setTitle(QFileInfo(projectPath).completeBaseName().remove(".oct"));
 
-    dataProvider->load(&result);
-    pa->load(&result);
-    pa->setUnsavedChanges(false);
-    timeManager->setUnsavedChanges(false);
+    viewManager->load(&result);
 
     // no recording in a loaded project.
     recButton.setEnabled(false);
-}
-
-static void addData(DataProvider& dp)
-{
-    EI::Description desc1("Dummy", "dum");
-    desc1.addDataSeries("Interpolatable.x", EI::DataSeriesInfo(EI::Value::DOUBLE, EI::DataSeriesInfo::INTERPOLATABLE,""));
-    desc1.addDataSeries("Interpolatable.y", EI::DataSeriesInfo(EI::Value::DOUBLE, EI::DataSeriesInfo::INTERPOLATABLE,""));
-    desc1.addDataSeries("Discrete", EI::DataSeriesInfo(EI::Value::DOUBLE, EI::DataSeriesInfo::STATEFUL,""));
-    dp.onNewSender(desc1);
-
-    EI::Description desc2("Dummy-2", "dum");
-    desc2.addDataSeries("Interpolatable.x", EI::DataSeriesInfo(EI::Value::DOUBLE, EI::DataSeriesInfo::INTERPOLATABLE,""));
-    desc2.addDataSeries("Interpolatable.y", EI::DataSeriesInfo(EI::Value::DOUBLE, EI::DataSeriesInfo::INTERPOLATABLE,""));
-    dp.onNewSender(desc2);
-
-     for (int j=0; j<500; ++j)
-    {
-      double d = j/15.0 * 5*3.14 + 0.01;
-      dp.onNewData(d*1000000, "Dummy.Interpolatable.x", Value(14*sin(d)/d + 3));
-      dp.onNewData(d*1000000, "Dummy.Interpolatable.y", Value(-7*sin(d)/d));
-      dp.onNewData(d*1000000, "Dummy.Discrete", Value("ping"));
-    }
+    ui.verticalLayout_2->insertWidget(0, viewManager->getPresentationArea());
 }
 
 void MainWindow::onNew()
 {
     if (checkForUnsavedChanges() == QMessageBox::Abort) return;
 
-    if (dataProvider) {
-        dataProvider->closeDB();
-        dataProvider->deleteLater();
-    }
+    ui.verticalLayout_2->insertWidget(0, viewManager->createNewView());
 
-    if (networkAdapter) {
-        networkAdapter->deleteLater();
-    }
-
-    // create a temporary file for the db
-    dataProvider = new DataProvider(QDir::tempPath() + "/Octopus-" + QDateTime::currentDateTime().toString("yyyyMMdd_hhmmsszzz"), this);
-    networkAdapter = new NetworkAdapter();
-
-    setUpView();
-    addData(*dataProvider);
     projectPath = "";
     setTitle("");
 
@@ -301,54 +220,6 @@ void MainWindow::setTitle(QString pName)
     setWindowTitle(windowTitle);
 }
 
-void MainWindow::setUpView()
-{
-    if(recorder)
-        recorder->deleteLater();
-    if (pa)
-        pa->deleteLater();
-    if(timeManager)
-        timeManager->deleteLater();
-
-    if(networkAdapter)
-        timeManager = new TimeManager(ui.hScrollBar, networkAdapter->getStartTime(), this);
-    else
-        timeManager = new TimeManager(ui.hScrollBar, TimeManager::Clock::time_point(), this);
-
-    connect(timeManager, SIGNAL(newMax(qint64)), ui.hScrollBar, SLOT(onNewMax(qint64)));
-    connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)), ui.hScrollBar, SLOT(onRangeChanged(qint64,qint64)));
-    connect(ui.hScrollBar, SIGNAL(rangeChanged(qint64,qint64)), timeManager, SLOT(setRange(qint64,qint64)));
-    ui.hScrollBar->onRangeChanged(timeManager->getLowVisRange(), timeManager->getHighVisRange());
-
-    pa = new PresentationArea(*dataProvider, timeManager, this);
-    recorder = new Recorder(timeManager, this);
-    ui.verticalLayout_2->insertWidget(0, pa);
-
-    connect(pa, SIGNAL(exportRange(qint64,qint64)), this, SLOT(onExportRange(qint64,qint64)));
-    connect(pa, SIGNAL(selectionChanged(qint64,qint64)), this, SLOT(onSelectionChanged(qint64,qint64)));
-    connect(recorder, SIGNAL(saveProject(qint64,qint64)), this, SLOT(onSaveProject(qint64,qint64)));
-    connect(&addTrackButton, SIGNAL(clicked()), pa, SLOT(onAddTrack()));
-    connect(&plotSettingsButton, SIGNAL(clicked()), pa, SLOT(onPlotSettings()));
-
-    QSignalMapper* mapZoom = new QSignalMapper(this);
-    mapZoom->setMapping(&zoomInButton, 100);
-    mapZoom->setMapping(&zoomOutButton, -100);
-    connect(&zoomOutButton, SIGNAL(clicked()), mapZoom, SLOT(map()));
-    connect(&zoomInButton, SIGNAL(clicked()), mapZoom, SLOT(map()));
-    connect(mapZoom, SIGNAL(mapped(int)),   timeManager, SLOT(zoom(int)));
-    connect(this, SIGNAL(follow(bool)),     timeManager, SLOT(onFollow(bool)));
-
-    qRegisterMetaType<EIDescriptionWrapper>("EIDescriptionWrapper");
-    qRegisterMetaType<Value>("Value");
-
-    if (networkAdapter) {
-        connect(networkAdapter, SIGNAL(onNewSender(EIDescriptionWrapper)),  dataProvider, SLOT(onNewSender(EIDescriptionWrapper)), Qt::QueuedConnection);
-        connect(networkAdapter, SIGNAL(onNewData(qint64,QString,Value)),    dataProvider, SLOT(onNewData(qint64,QString,Value)), Qt::QueuedConnection);
-        networkAdapter->discoverSenders();
-    }
-    connect(&playButton, SIGNAL(clicked()), timeManager, SLOT(onPlay()));    
-}
-
 void MainWindow::save(bool saveAs, qint64 begin, qint64 end)
 {
     QString fileName = getSaveFileName(saveAs);
@@ -360,26 +231,24 @@ void MainWindow::save(bool saveAs, qint64 begin, qint64 end)
 
     QVariantMap pName; // Map with the projects settings    
     if ((begin == -1) && (end == -1)) { // save all
-        projectPath = fileName;       
-        dataProvider->moveDB(dbname); // move tmp-database if we save all        
+        projectPath = fileName;
+        viewManager->saveDB(dbname, -1, -1);
         pName.insert("dbfile", dbname);
 
         if (writeProjectSettings(pName, projectPath)) { // in case save was successfull ...
-            pa->setUnsavedChanges(false); // ... clear flag in PresentationArea
-            timeManager->setUnsavedChanges(false);
+            viewManager->setUnsavedChanges(false);
         }
     } else { // save range
-        QString subProjectPath = fileName;
-        dataProvider->copyDB(dbname, begin, end);
+        QString subProjectPath = fileName;        
+        viewManager->saveDB(dbname, begin, end);
         pName.insert("dbfile", dbname);
         writeProjectSettings(pName, subProjectPath);
     }
 }
 
 int MainWindow::checkForUnsavedChanges()
-{
-    if(!pa || (!pa->hasUnsavedChanges() && !timeManager->hasUnsavedChanges()))
-        return -1;
+{        
+    if (!viewManager->hasUnsavedChanges()) return -1;
 
     QMessageBox msg;
     msg.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Abort);
@@ -436,19 +305,13 @@ void MainWindow::closeEvent(QCloseEvent *ce)
 
 void MainWindow::onRecord()
 {        
-    recButton.setChecked(recorder->toggleRecording());
+    recButton.setChecked(viewManager->isRecording());
 }
 
 void MainWindow::onSaveProject(qint64 start, qint64 end)
 {
     // initiate save (project file)
     save(true, start, end);
-}
-
-void MainWindow::onSelectionChanged(qint64 begin, qint64 end)
-{
-    selectionBegin = begin;
-    selectionEnd = end;
 }
 
 void MainWindow::onFollowData()
@@ -465,8 +328,7 @@ void MainWindow::onPlay()
 
 bool MainWindow::writeProjectSettings(QVariantMap pName, QString path)
 {
-    pa->save(&pName);
-    dataProvider->save(&pName);
+    viewManager->save(&pName);
 
     QJson::Serializer serializer;
     serializer.setIndentMode(QJson::IndentFull);

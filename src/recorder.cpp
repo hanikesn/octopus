@@ -38,7 +38,7 @@ bool Recorder::toggleRecording()
         recordEnd = timeManager->getMaximum();
         // end recording, show record dialog
         int result = showRecordDialog();
-        if (result == QMessageBox::Save) {                        
+        if (result == QMessageBox::Save) {
             emit saveProject(recordStart, recordEnd);
             recording = false;
         } else if (result == QMessageBox::Discard) // discard recording

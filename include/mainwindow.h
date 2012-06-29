@@ -15,12 +15,13 @@
 #include <QWidget>
 #include <QMenu>
 #include <QAction>
-#include <exporterfactory.h>
 
 
 class TrackScene;
 class PresentationArea;
 class Recorder;
+class ExportHandler;
+class ViewManager;
 
 class MainWindow : public QMainWindow
 {
@@ -33,13 +34,11 @@ public:
 protected:
     void closeEvent(QCloseEvent *ce);
     
-private slots:    
-    void onExportAction();
+private slots:        
     void onSave();
     void onSaveAs();
     void onLoad();
-    void onNew();
-    void onExportRange(qint64 begin, qint64 end);
+    void onNew();    
     void onRecord();
     /**
       * This saves the recorded data into a new project (project file and new database is created).
@@ -47,8 +46,6 @@ private slots:
       * @param end Timestamp for the end of the recorded data.
       */
     void onSaveProject(qint64 start, qint64 end);
-
-    void onSelectionChanged(qint64 begin, qint64 end);
 
     void onFollowData();
 
@@ -76,9 +73,6 @@ private:
     QSpacerItem *spacerLeft;
     QSpacerItem *spacerRight;
 
-    // Area for the tracks
-    PresentationArea *pa;
-
     // Menu
     QMenu menu;
     QAction *saveAction;
@@ -87,15 +81,7 @@ private:
     QAction *newAction;
     QAction *quitAction;
 
-    DataProvider *dataProvider;
-
-    NetworkAdapter *networkAdapter;
-
-    TimeManager* timeManager;
-
-    ExporterFactory exporterFactory;
-
-    Recorder* recorder;
+    ViewManager *viewManager;
 
     Ui::MainWindow ui;
 
@@ -110,12 +96,6 @@ private:
     void setUpMenu();
 
     void setTitle(QString pName);
-
-    /**
-      * Deletes and sets new objects for: pa, dataProvider trackScene.
-      * Reconnects necessary signals.
-      */
-    void setUpView();
 
     /**
       * Saves the current projects configuration (position of cursor, view range...).
