@@ -44,9 +44,13 @@ private:
     int offset;
     QPen pen;
 
+    // Number of microseconds between two large ticks.
     qint64 largeTickAmount;
+    // Number of microseconds between a medium tick an the next large tick (largeTickAmount/2)
     qint64 mediumTickAmount;
+    // Number of microseconds between two small ticks.
     qint64 smallTickAmount;
+
     qint64 timePerPx;
 
     enum TimeRepresentation {SECOND_PART, SECOND_FULL, MILLISECOND};

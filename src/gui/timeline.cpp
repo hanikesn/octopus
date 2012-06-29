@@ -131,10 +131,11 @@ void TimeLine::onRangeChanged(qint64 begin, qint64 end)
 
 void TimeLine::onStepSizeChanged(qint64 microSeconds)
 {
+
     // <magic coefficient calculation>
     qint64 div = 4000000;
     qint64 quotient = (microSeconds/div) + 1;
-    largeTickAmount = (quotient * div) / 2;
+    largeTickAmount = (quotient * div) / 2; // 2 seconds if no zoom has been applied so far
     mediumTickAmount = largeTickAmount / 2;
     smallTickAmount = mediumTickAmount / 5;
     // <\magic coefficient calculation>
