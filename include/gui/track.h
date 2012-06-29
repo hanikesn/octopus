@@ -57,6 +57,7 @@ private:
     void addSource(const QString &fullDataSeriesName);
 
     QStringList getFullDataSeriesNames();
+    PlotSettings currentSettings();
 
 private slots:
     void onDelete();

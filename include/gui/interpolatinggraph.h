@@ -12,8 +12,7 @@ class InterpolatingGraph : public Graph
 {
     Q_OBJECT
 public:
-    explicit InterpolatingGraph(QCustomPlot *plot, const DoubleSeries &d);
-    ~InterpolatingGraph();
+    explicit InterpolatingGraph(QCustomPlot *plot, const DoubleSeries &d, PlotSettings::ScalingMode scalingMode, PlotSettings::ScaleType scaleType);
 
     QCPGraph* getGraph();
     PlotSettings::ScaleType getScaleType() const;
