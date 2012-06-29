@@ -41,33 +41,16 @@
    <property name="layoutDirection">
     <enum>Qt::LeftToRight</enum>
    </property>
-   <layout class="QGridLayout" name="gridLayout">
-    <item row="0" column="0">
-     <layout class="QVBoxLayout" name="verticalLayout_2">
-      <item>
-       <widget class="TimeScrollbar" name="hScrollBar">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item row="1" column="0">
+   <layout class="QVBoxLayout" name="centralWidgetLayout">
+    <property name="margin">
+     <number>6</number>
+    </property>
+    <item>
      <layout class="QHBoxLayout" name="bottomButtonBar"/>
     </item>
    </layout>
   </widget>
-  <widget class="QMenuBar" name="menuBar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>1031</width>
-     <height>23</height>
-    </rect>
-   </property>
-  </widget>
+  <widget class="QMenuBar" name="menuBar"/>
   <widget class="QToolBar" name="mainToolBar">
    <property name="enabled">
     <bool>true</bool>
@@ -96,13 +79,6 @@
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <customwidgets>
-  <customwidget>
-   <class>TimeScrollbar</class>
-   <extends>QScrollBar</extends>
-   <header>gui/timescrollbar.h</header>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>

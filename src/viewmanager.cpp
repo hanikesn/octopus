@@ -35,18 +35,21 @@ static void addData(DataProvider& dp)
     }
 }
 
-ViewManager::ViewManager(MainWindow *parent, TimeScrollbar *sb):
-    QObject(parent),
-    parent(parent),
+ViewManager::ViewManager(QWidget *parent, QString dbfile):
+    QWidget(parent),
     dataProvider(0),
     networkAdapter(0),
     exportHandler(0),
     presentationArea(0),
     timeManager(0),
     recorder(0),
-    scrollBar(sb)
+    scrollBar(0)
 {
+    setLayout(new QVBoxLayout());
+    layout()->setMargin(0);
+    layout()->setSpacing(0);
 
+    createNewView(dbfile);
 }
 
 ViewManager::~ViewManager()
@@ -99,7 +102,7 @@ void ViewManager::onRecord()
     recorder->toggleRecording();
 }
 
-PresentationArea *ViewManager::createNewView(QString dbfile)
+void ViewManager::createNewView(QString dbfile)
 {
     if (networkAdapter) {
         networkAdapter->deleteLater();
@@ -123,7 +126,7 @@ PresentationArea *ViewManager::createNewView(QString dbfile)
             dataProvider = new DataProvider(dbfile, this);
         } catch(std::exception& e) {
             qDebug() << "Loading of DB failed.";
-            return 0;
+            return;
         }
         if(olddataProvider) {
             olddataProvider->closeDB();
@@ -133,17 +136,12 @@ PresentationArea *ViewManager::createNewView(QString dbfile)
     exportHandler = new ExportHandler(dataProvider);
     setUpView();
     //    addData(*dataProvider);
-    return presentationArea;
 }
 
 void ViewManager::setUpView()
 {
-    if (recorder)
-        recorder->deleteLater();
-    if (presentationArea)
-        presentationArea->deleteLater();
-    if (timeManager)
-        timeManager->deleteLater();
+    scrollBar = new TimeScrollbar(this);
+    scrollBar->setOrientation(Qt::Horizontal);
 
     if (networkAdapter)
         timeManager = new TimeManager(scrollBar, networkAdapter->getStartTime(), this);
@@ -152,8 +150,11 @@ void ViewManager::setUpView()
 
     scrollBar->onRangeChanged(timeManager->getLowVisRange(), timeManager->getHighVisRange());
 
-    presentationArea = new PresentationArea(*dataProvider, timeManager, parent);
+    presentationArea = new PresentationArea(*dataProvider, timeManager, this);
     recorder = new Recorder(timeManager, this);
+
+    this->layout()->addWidget(presentationArea);
+    this->layout()->addWidget(scrollBar);
 
     makeConnects();
 }
@@ -164,13 +165,12 @@ void ViewManager::makeConnects()
     connect(this, SIGNAL(exportData()), exportHandler, SLOT(onExport()));
 
     // timeManager
-    connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)), this, SIGNAL(rangeChanged(qint64,qint64)));
-    connect(timeManager, SIGNAL(newMax(qint64)), this, SIGNAL(newMax(qint64)));
-    connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)), this, SIGNAL(rangeChanged(qint64,qint64)));
+    connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)), scrollBar, SLOT(onRangeChanged(qint64,qint64)));
+    connect(timeManager, SIGNAL(newMax(qint64)), scrollBar, SLOT(onNewMax(qint64)));
     connect(this, SIGNAL(play()), timeManager, SLOT(onPlay()));
-    connect(this, SIGNAL(setRange(qint64,qint64)), timeManager, SLOT(setRange(qint64,qint64)));
     connect(this, SIGNAL(follow(bool)), timeManager, SLOT(onFollow(bool)));
     connect(this, SIGNAL(zoom(int)), timeManager, SLOT(zoom(int)));
+    connect(scrollBar, SIGNAL(rangeChanged(qint64,qint64)), timeManager, SLOT(setRange(qint64,qint64)));
 
     // presentationArea
     connect(this, SIGNAL(plotSettings()), presentationArea, SLOT(onPlotSettings()));

@@ -4,7 +4,6 @@
 #include "dataprovider.h"
 #include "networkadapter.h"
 #include "mainwindow.h"
-#include "ui_mainwindow.h"
 #include "gui/presentationarea.h"
 
 #include <QAction>
@@ -22,6 +21,10 @@ class PresentationArea;
 class Recorder;
 class ExportHandler;
 class ViewManager;
+
+namespace Ui {
+    class MainWindow;
+}
 
 class MainWindow : public QMainWindow
 {
@@ -83,19 +86,19 @@ private:
 
     ViewManager *viewManager;
 
-    Ui::MainWindow ui;
+    Ui::MainWindow* ui;
 
     QString projectPath;
 
     const static QString TITLE;
-
-    qint64 selectionBegin, selectionEnd;
 
     void setUpButtonBars();
 
     void setUpMenu();
 
     void setTitle(QString pName);
+
+    void setUpView();
 
     /**
       * Saves the current projects configuration (position of cursor, view range...).
