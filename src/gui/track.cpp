@@ -116,23 +116,37 @@ QStringList Track::getFullDataSeriesNames()
     return list;
 }
 
-void Track::addGraph(const DoubleSeries &s) {
-    Graph *g = new InterpolatingGraph(ui.plot, s);
-
+PlotSettings Track::currentSettings()
+{
     PlotSettings settings;
 
     settings.scalingMode = currentScalingMode;
     settings.plotScaleType = PlotSettings::toScaleType(ui.plot->yAxis->scaleType());
 
-    if (currentScalingMode == PlotSettings::NOSCALING) {
-        settings.setScaleType(s.fullName(), settings.plotScaleType);
-    } else {
-        // TODO(Steffi): Die Graphen, die vorher auch schon drin waren, sollten ihre Einstellungen beibehalten!
-        settings.setScaleType(s.fullName(), s.defaultScaleType);
+    foreach (Graph *g, graphs) {
+        settings.setOffset(g->dataSeriesName(), dataProvider.getDataSeries(g->dataSeriesName())->offset);
+        settings.setScaleType(g->dataSeriesName(), g->getScaleType());
     }
 
-    g->update(settings);
-    graphs.append(g);
+    return settings;
+}
+
+void Track::addGraph(const DoubleSeries &s) {
+    PlotSettings::ScaleType desiredScaleType;
+    switch (currentScalingMode) {
+    case PlotSettings::NOSCALING:
+        desiredScaleType = PlotSettings::toScaleType(ui.plot->yAxis->scaleType());
+        break;
+    case PlotSettings::MINMAXSCALING:
+        desiredScaleType = s.defaultScaleType;
+        break;
+    default:
+        // unknown scaling mode
+        desiredScaleType = PlotSettings::NOT_SCALABLE;
+        break;
+    }
+
+    graphs.append(new InterpolatingGraph(ui.plot, s, currentScalingMode, desiredScaleType));
 
     if (currentScalingMode == PlotSettings::NOSCALING) {
         ui.plot->rescaleValueAxes();
@@ -157,36 +171,41 @@ void Track::onSources()
                                                           false,
                                                           getFullDataSeriesNames());
     if (!sources.isEmpty()) {
-        while (!graphs.isEmpty()) {
-            Graph* graph = graphs.takeFirst();
-            ui.plot->removeGraph(graph->getGraph());
-            graph->deleteLater();
+        QStringList sourcesToAdd = sources.first();
+        QList<Graph*> graphsToRemove;
+        foreach (Graph *g, graphs) {
+            if (!sources.first().contains(g->dataSeriesName())) {
+                // data series is not in the list anymore
+                graphsToRemove.append(g);
+            } else {
+                // data series is still in the list, but not new
+                sourcesToAdd.removeAll(g->dataSeriesName());
+            }
         }
 
-        foreach (QString source, sources.first()) {
+        foreach (Graph *g, graphsToRemove) {
+            graphs.removeAll(g);
+            ui.plot->removeGraph(g->getGraph());
+            g->deleteLater();
+        }
+
+        foreach (QString source, sourcesToAdd) {
             addSource(source);
         }
-        // only show the legend if the track is not empty
-        ui.plot->legend->setVisible(!sources.first().isEmpty());
 
-        ui.plot->rescaleValueAxes();
+        // only show the legend if the track is not empty
+        ui.plot->legend->setVisible(ui.plot->graphCount() > 0);
+
+        if (currentScalingMode == PlotSettings::NOSCALING) {
+            ui.plot->rescaleValueAxes();
+        }
         ui.plot->replot();
     }
 }
 
 void Track::onPlotSettings()
 {
-    PlotSettings preset;
-
-    preset.scalingMode = currentScalingMode;
-    preset.plotScaleType = PlotSettings::toScaleType(ui.plot->yAxis->scaleType());
-
-    foreach (Graph *g, graphs) {
-        preset.setOffset(g->dataSeriesName(), dataProvider.getDataSeries(g->dataSeriesName())->offset);
-        preset.setScaleType(g->dataSeriesName(), g->getScaleType());
-    }
-
-    PlotSettings settings = PlotSettingsDialog::getSettings(getFullDataSeriesNames(), preset, true, false);
+    PlotSettings settings = PlotSettingsDialog::getSettings(getFullDataSeriesNames(), currentSettings(), true, false);
 
     if (!settings.isEmpty()) {
         if (settings.scalingMode == PlotSettings::MINMAXSCALING) {
@@ -194,7 +213,8 @@ void Track::onPlotSettings()
             ui.plot->yAxis->setScaleType(QCPAxis::stLinear);
             ui.plot->yAxis->setRange(0, 1);
             // set axis and gridlines invisible as they will have no informative value
-            ui.plot->yAxis->setVisible(false);
+            // TODO(Steffi): reaktivieren
+//            ui.plot->yAxis->setVisible(false);
             ui.plot->yAxis->setGrid(false);
         } else if (settings.scalingMode == PlotSettings::NOSCALING) {
             if (settings.plotScaleType == PlotSettings::LOGSCALE) {
