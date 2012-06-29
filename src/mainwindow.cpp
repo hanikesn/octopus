@@ -263,8 +263,8 @@ void MainWindow::save(bool saveAs, qint64 begin, qint64 end)
 }
 
 int MainWindow::checkForUnsavedChanges()
-{        
-    if (viewManager && !viewManager->hasUnsavedChanges()) return -1;
+{
+    if (!viewManager || !viewManager->hasUnsavedChanges()) return -1;
 
     QMessageBox msg;
     msg.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Abort);
