@@ -6,9 +6,10 @@
 #include <iostream>
 #include <QDebug>
 
-NetworkAdapter::NetworkAdapter()
-    : receiver(EI::StringMap()),
-      startTime(Clock::now())
+NetworkAdapter::NetworkAdapter(QObject* parent) :
+    QObject(parent),
+    receiver(EI::StringMap()),
+    startTime(Clock::now())
 {
     knownSenders.insert("Receiver");
     receiver.addCommunicationListener(this);

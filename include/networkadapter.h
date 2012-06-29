@@ -18,7 +18,7 @@ class NetworkAdapter : public QObject, public EI::DataListener, public EI::Commu
 {
     Q_OBJECT
 public:
-    NetworkAdapter();
+    NetworkAdapter(QObject* parent);
     ~NetworkAdapter();
 
     typedef boost::chrono::high_resolution_clock Clock;

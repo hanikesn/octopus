@@ -9,7 +9,8 @@
 #include "gui/sourcedialog.h"
 #include "dataprovider.h"
 
-ExportHandler::ExportHandler(DataProvider *dp):
+ExportHandler::ExportHandler(QObject *parent, DataProvider *dp) :
+    QObject(parent),
     begin(-1),
     end(-1),
     dataProvider(dp)

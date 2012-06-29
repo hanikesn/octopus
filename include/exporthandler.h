@@ -12,7 +12,7 @@ class ExportHandler : public QObject
 {
     Q_OBJECT
 public:
-    ExportHandler(DataProvider *dp);
+    ExportHandler(QObject* parent, DataProvider *dp);
     ~ExportHandler();
 
 private:
