@@ -8,7 +8,7 @@
 
 namespace bc = boost::chrono;
 
-TimeManager::TimeManager(QScrollBar *hScrollBar, Clock::time_point startTime, QObject* parent):
+TimeManager::TimeManager(Clock::time_point startTime, QObject* parent):
     QObject(parent),
     lowVisRange(0),
     highVisRange(30000000),
@@ -18,7 +18,6 @@ TimeManager::TimeManager(QScrollBar *hScrollBar, Clock::time_point startTime, QO
     live(startTime != Clock::time_point()),
     playing(false),
     following(false),
-    hScrollBar(hScrollBar),
     timer(new QTimer(this)),
     absoluteStartTime(startTime)
 {
@@ -150,12 +149,7 @@ void TimeManager::zoom(int factor, qint64 time)
     }
 
     // initiate redraw according to new range
-    onNewWidth(width);
-}
-
-void TimeManager::movePx(int px)
-{
-    hScrollBar->setValue(hScrollBar->value() + px);
+    setRange(lowVisRange, highVisRange);
 }
 
 void TimeManager::onTimeout()
@@ -213,11 +207,6 @@ void TimeManager::onFollow(bool following)
         playing = false;
     }
     this->following = following;
-}
-
-void TimeManager::forwardEventToScrollbar(QEvent *ev)
-{
-    hScrollBar->event(ev);
 }
 
 void TimeManager::onPlay()

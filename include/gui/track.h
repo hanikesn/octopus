@@ -58,6 +58,7 @@ private:
 
     QStringList getFullDataSeriesNames();
     PlotSettings currentSettings();
+    void update(PlotSettings settings);
 
 private slots:
     void onDelete();

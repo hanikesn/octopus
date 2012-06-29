@@ -21,13 +21,11 @@ public:
      *
      * Set startTime to zero to indicate that we don't do a live recording
      */
-    TimeManager(QScrollBar *hScrollBar, Clock::time_point startTime, QObject* parent);
+    TimeManager(Clock::time_point startTime, QObject* parent);
 
     qint64 getLowVisRange() {return lowVisRange;}
     qint64 getHighVisRange() {return highVisRange;}
     qint64 getMaximum() {return maximum;}
-
-    void movePx(int px);
 
     /**
       * Converts a position on the view into the corresponting point in time.
@@ -56,10 +54,6 @@ public:
 
     // determines how much time should be between 2 big ticks in the timeline (in microseconds)
     int getStepSize();
-
-    // TODO ugly, scrollbar sollte nicht im mainwindow sein, sondern der presentation area bekannt sein,
-    // damit man sie hier die events nicht vorwarden muss.
-    void forwardEventToScrollbar(QEvent *ev);
 
     bool hasUnsavedChanges() { return unsavedChanges; }
     void setUnsavedChanges(bool uc) { unsavedChanges = uc; }
@@ -119,8 +113,6 @@ private:
 
     bool playing;
     bool following;
-
-    QScrollBar *hScrollBar;
 
     QTimer* timer;
 

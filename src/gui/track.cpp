@@ -131,6 +131,37 @@ PlotSettings Track::currentSettings()
     return settings;
 }
 
+void Track::update(PlotSettings settings)
+{
+    if (settings.scalingMode != currentScalingMode) {
+        switch (settings.scalingMode) {
+        case PlotSettings::MINMAXSCALING:
+            // all graphs will scale their values to use the full height of the plot
+            ui.plot->yAxis->setScaleType(QCPAxis::stLinear);
+            ui.plot->yAxis->setRange(0, 1);
+            // set axis and gridlines invisible as they will have no informative value
+            // TODO(Steffi): reaktivieren
+            // ui.plot->yAxis->setVisible(false);
+            ui.plot->yAxis->setGrid(false);
+            break;
+        case PlotSettings::NOSCALING:
+            if (settings.plotScaleType == PlotSettings::LOGSCALE) {
+                ui.plot->yAxis->setScaleType(QCPAxis::stLogarithmic);
+            } else {
+                ui.plot->yAxis->setScaleType(QCPAxis::stLinear);
+            }
+            ui.plot->yAxis->setVisible(true);
+            ui.plot->yAxis->setGrid(true);
+        }
+    }
+
+    currentScalingMode = settings.scalingMode;
+
+    foreach (Graph *g, graphs) {
+        g->update(settings);
+    }
+}
+
 void Track::addGraph(const DoubleSeries &s) {
     PlotSettings::ScaleType desiredScaleType;
     switch (currentScalingMode) {
@@ -208,29 +239,7 @@ void Track::onPlotSettings()
     PlotSettings settings = PlotSettingsDialog::getSettings(getFullDataSeriesNames(), currentSettings(), true, false);
 
     if (!settings.isEmpty()) {
-        if (settings.scalingMode == PlotSettings::MINMAXSCALING) {
-            // all graphs will scale their values to use the full height of the plot
-            ui.plot->yAxis->setScaleType(QCPAxis::stLinear);
-            ui.plot->yAxis->setRange(0, 1);
-            // set axis and gridlines invisible as they will have no informative value
-            // TODO(Steffi): reaktivieren
-//            ui.plot->yAxis->setVisible(false);
-            ui.plot->yAxis->setGrid(false);
-        } else if (settings.scalingMode == PlotSettings::NOSCALING) {
-            if (settings.plotScaleType == PlotSettings::LOGSCALE) {
-                ui.plot->yAxis->setScaleType(QCPAxis::stLogarithmic);
-            } else {
-                ui.plot->yAxis->setScaleType(QCPAxis::stLinear);
-            }
-            ui.plot->yAxis->setVisible(true);
-            ui.plot->yAxis->setGrid(true);
-        }
-
-        currentScalingMode = settings.scalingMode;
-
-        foreach (Graph *g, graphs) {
-            g->update(settings);
-        }
+        update(settings);
     }
 }
 
@@ -270,11 +279,12 @@ void Track::save(QVariantMap *qvm)
     foreach (Graph *g, graphs) {
         QVariantMap graph;
         graph.insert("name", g->dataSeriesName());
-        graph.insert("scaling", g->getScaleType());        
+        graph.insert("scaleType", g->getScaleType());
 
         graphList << graph;
     }    
     qvm->insert("scalingMode", currentScalingMode);
+    qvm->insert("plotScaleType", ui.plot->yAxis->scaleType());
     qvm->insert("graphList", graphList);
 
 }
@@ -284,22 +294,17 @@ void Track::load(QVariantMap *qvm)
     QVariantMap map = qvm->find("track").value().toMap();
     QVariantList graphList = map.find("graphList").value().toList();
 
-    int scalingMode = map.find("scalingMode").value().toInt();
-    currentScalingMode = (PlotSettings::ScalingMode) scalingMode;
+    PlotSettings settings;
+    settings.scalingMode = (PlotSettings::ScalingMode) map.find("scalingMode").value().toInt();
+    settings.plotScaleType = (PlotSettings::ScaleType) map.find("plotScaleType").value().toInt();
 
     foreach (QVariant entry, graphList) {
         QVariantMap graph = entry.toMap(); // one graph object (contains dataSeries + Scaling)
         QString name(graph.find("name").value().toString()); // name of the series
         addSource(name);
-        int scaling = graph.find("scaling").value().toInt();
-
-        // look for the graph which was just added.
-        foreach (Graph *g, graphs) {
-            if (g->dataSeriesName() == name) {
-                g->setScaleType((PlotSettings::ScaleType) scaling);                
-                break; // there won't be the same graph in this track again --> we can quit the loop
-            }
-        }
+        settings.setScaleType(name, (PlotSettings::ScaleType) graph.find("scaleType").value().toInt());
     }
+
+    update(settings);
 }
 
