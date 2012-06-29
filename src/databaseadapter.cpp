@@ -72,8 +72,9 @@ static QMap<qint64, T> fillMap(Sqlite::PreparedStatement& stmt)
 }
 
 template<>
-QMap<qint64, double> DatabaseAdapter::getData(QString const& key) const
+QMap<qint64, double> DatabaseAdapter::getData(QString const& key, int offset) const
 {
+    // TODO(Steffen): Offset berücksichtigen
     stmtSelectDataFloat.reset();
     stmtSelectDataFloat << toStdString(key);
 
@@ -81,8 +82,9 @@ QMap<qint64, double> DatabaseAdapter::getData(QString const& key) const
 }
 
 template<>
-QMap<qint64, QString> DatabaseAdapter::getData(QString const& key) const
+QMap<qint64, QString> DatabaseAdapter::getData(QString const& key, int offset) const
 {
+    // TODO(Steffen): Offset berücksichtigen
     stmtSelectDataString.reset();
     stmtSelectDataString << toStdString(key);
 
@@ -90,8 +92,9 @@ QMap<qint64, QString> DatabaseAdapter::getData(QString const& key) const
 }
 
 template<>
-QMap<qint64, double> DatabaseAdapter::getData(QString const& key, qint64 start, qint64 end) const
+QMap<qint64, double> DatabaseAdapter::getData(QString const& key, qint64 start, qint64 end, int offset) const
 {
+    // TODO(Steffen): Offset berücksichtigen
     stmtSelectDataWithTimeFloat.reset();
     stmtSelectDataWithTimeFloat << toStdString(key) << start << end;
 
@@ -99,8 +102,9 @@ QMap<qint64, double> DatabaseAdapter::getData(QString const& key, qint64 start, 
 }
 
 template<>
-QMap<qint64, QString> DatabaseAdapter::getData(QString const& key, qint64 start, qint64 end) const
+QMap<qint64, QString> DatabaseAdapter::getData(QString const& key, qint64 start, qint64 end, int offset) const
 {
+    // TODO(Steffen): Offset berücksichtigen
     stmtSelectDataWithTimeString.reset();
     stmtSelectDataWithTimeString << toStdString(key) << start << end;
 
@@ -146,8 +150,10 @@ static std::string convert(EI::Value::Type t)
     return "EMPTY";
 }
 
-Sqlite::PreparedStatement DatabaseAdapter::getData(QStringList const& keys, qint64 start, qint64 end) const
+Sqlite::PreparedStatement DatabaseAdapter::getData(QStringList const& keys, qint64 start, qint64 end/*, int offset*/) const
 {
+    // TODO(Steffen): Offset berücksichtigen
+
     QString where = "WHERE time>=? and time<=?";
 
     if(keys.length() > 0) {
