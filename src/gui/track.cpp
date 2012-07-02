@@ -133,26 +133,24 @@ PlotSettings Track::currentSettings()
 
 void Track::update(PlotSettings settings)
 {
-    if (settings.scalingMode != currentScalingMode) {
-        switch (settings.scalingMode) {
-        case PlotSettings::MINMAXSCALING:
-            // all graphs will scale their values to use the full height of the plot
+    switch (settings.scalingMode) {
+    case PlotSettings::MINMAXSCALING:
+        // all graphs will scale their values to use the full height of the plot
+        ui.plot->yAxis->setScaleType(QCPAxis::stLinear);
+        ui.plot->yAxis->setRange(0, 1);
+        // set axis and gridlines invisible as they will have no informative value
+        // TODO(Steffi): reaktivieren
+        // ui.plot->yAxis->setVisible(false);
+        ui.plot->yAxis->setGrid(false);
+        break;
+    case PlotSettings::NOSCALING:
+        if (settings.plotScaleType == PlotSettings::LOGSCALE) {
+            ui.plot->yAxis->setScaleType(QCPAxis::stLogarithmic);
+        } else {
             ui.plot->yAxis->setScaleType(QCPAxis::stLinear);
-            ui.plot->yAxis->setRange(0, 1);
-            // set axis and gridlines invisible as they will have no informative value
-            // TODO(Steffi): reaktivieren
-            // ui.plot->yAxis->setVisible(false);
-            ui.plot->yAxis->setGrid(false);
-            break;
-        case PlotSettings::NOSCALING:
-            if (settings.plotScaleType == PlotSettings::LOGSCALE) {
-                ui.plot->yAxis->setScaleType(QCPAxis::stLogarithmic);
-            } else {
-                ui.plot->yAxis->setScaleType(QCPAxis::stLinear);
-            }
-            ui.plot->yAxis->setVisible(true);
-            ui.plot->yAxis->setGrid(true);
         }
+        ui.plot->yAxis->setVisible(true);
+        ui.plot->yAxis->setGrid(true);
     }
 
     currentScalingMode = settings.scalingMode;
