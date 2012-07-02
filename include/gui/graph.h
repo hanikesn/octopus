@@ -20,13 +20,14 @@ public:
     virtual void setScaleType(PlotSettings::ScaleType scaleType) = 0;
 
     virtual QString dataSeriesName() = 0;
-    virtual void update(const PlotSettings &settings) = 0;    
+    virtual void update(const PlotSettings &settings) = 0;
 
 protected:
     PlotSettings::ScaleType currentScaleType;
 
 protected slots:
     virtual void onNewData(qint64 timestamp) = 0;
+    virtual void onOffsetChanged() = 0;
 };
 
 #endif // GRAPH_H

@@ -15,6 +15,7 @@ DiscreteGraph::DiscreteGraph(QCustomPlot *plot, const StringSeries &s) :
     lastUpdate(-1)
 {
     connect(&series, SIGNAL(newData(qint64)), this, SLOT(onNewData(qint64)));
+    connect(&series, SIGNAL(offsetChanged()), this, SLOT(onOffsetChanged()));
 
     graph = plot->addGraph(plot->xAxis, plot->yAxis2);
     plot->yAxis2->setRange(RANGE);
@@ -111,5 +112,12 @@ void DiscreteGraph::onNewData(qint64 timestamp)
     }
 
     lastUpdate = timestamp;
+    plot->replot();
+}
+
+void DiscreteGraph::onOffsetChanged()
+{
+    graph->clearData();
+    initialize(graph, series);
     plot->replot();
 }

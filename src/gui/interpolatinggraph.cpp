@@ -18,6 +18,7 @@ InterpolatingGraph::InterpolatingGraph(QCustomPlot *plot, const DoubleSeries &d,
 {
     setObjectName("InterpolatingGraph");
     connect(&series, SIGNAL(newData(qint64)), this, SLOT(onNewData(qint64)));
+    connect(&series, SIGNAL(offsetChanged()), this, SLOT(onOffsetChanged()));
 
     graph = plot->addGraph();
     // Ensure value axis is visible.
@@ -185,6 +186,14 @@ void InterpolatingGraph::onNewData(qint64 timestamp)
     }
 
     lastUpdate = timestamp;
+    updatePlot(currentScalingMode);
+}
+
+void InterpolatingGraph::onOffsetChanged()
+{
+    graph->clearData();
+    initialize(graph, series);
+    rescale(currentScalingMode, currentScaleType);
     updatePlot(currentScalingMode);
 }
 

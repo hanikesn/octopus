@@ -25,6 +25,7 @@ public:
 
 protected slots:
     void onNewData(qint64 timestamp);
+    void onOffsetChanged();
 
 private:
     const StringSeries &series;

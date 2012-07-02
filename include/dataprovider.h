@@ -48,6 +48,7 @@ public:
      */
     void copyDB(QString filename, qint64 begin, qint64 end);
 
+    DatabaseAdapter& getDB();
     DatabaseAdapter const& getDB() const;
 
     void closeDB();
