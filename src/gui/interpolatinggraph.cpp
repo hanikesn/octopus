@@ -20,7 +20,9 @@ InterpolatingGraph::InterpolatingGraph(QCustomPlot *plot, const DoubleSeries &d,
     connect(&series, SIGNAL(newData(qint64)), this, SLOT(onNewData(qint64)));
 
     graph = plot->addGraph();
+    // Ensure value axis is visible.
     plot->yAxis->setVisible(true);
+    plot->yAxis->setGrid(true);
 
     configureAppearance(graph);
     initialize(graph, series);
@@ -85,6 +87,9 @@ void InterpolatingGraph::rescale(PlotSettings::ScalingMode scalingMode, PlotSett
             // The graph's individual scale type has no significance in this case;
             // the plot's scale type defines the appearance of its graphs.
         }
+        // Ensure value axis is visible.
+        plot->yAxis->setVisible(true);
+        plot->yAxis->setGrid(true);
         break;
     case PlotSettings::MINMAXSCALING:
         if (scalingMode != currentScalingMode || scaleType != currentScaleType) {
@@ -94,6 +99,7 @@ void InterpolatingGraph::rescale(PlotSettings::ScalingMode scalingMode, PlotSett
         } else {
             // Nothing to be done here, as neither scaling mode nor scale type have changed.
         }
+        // Don't need the axis in this case, as it would have no informative value.
         break;
     }
 

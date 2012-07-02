@@ -20,10 +20,6 @@ DiscreteGraph::DiscreteGraph(QCustomPlot *plot, const StringSeries &s) :
     plot->yAxis2->setRange(RANGE);
     plot->yAxis2->setVisible(false);
 
-    if (plot->graphCount() == 1) {
-        plot->yAxis->setVisible(false);
-    }
-
     configureAppearance(graph);
     initialize(graph, series);
 

@@ -81,6 +81,9 @@ void Track::setupPlot()
     ui.plot->setAutoMargin(false);
     connect(ui.plot, SIGNAL(optMarginsRecalculated(int,int,int,int)), this, SLOT(onOptPlotMarginsRecalculated(int,int,int,int)));
 
+    // if one of the graphs needs the axis, they should ensure it's visible
+    ui.plot->yAxis->setVisible(false);
+
     ui.plot->legend->setVisible(true);
     ui.plot->legend->setPositionStyle(QCPLegend::psTopLeft);
 }
@@ -138,10 +141,6 @@ void Track::update(PlotSettings settings)
         // all graphs will scale their values to use the full height of the plot
         ui.plot->yAxis->setScaleType(QCPAxis::stLinear);
         ui.plot->yAxis->setRange(0, 1);
-        // set axis and gridlines invisible as they will have no informative value
-        // TODO(Steffi): reaktivieren
-        // ui.plot->yAxis->setVisible(false);
-        ui.plot->yAxis->setGrid(false);
         break;
     case PlotSettings::NOSCALING:
         if (settings.plotScaleType == PlotSettings::LOGSCALE) {
@@ -149,9 +148,11 @@ void Track::update(PlotSettings settings)
         } else {
             ui.plot->yAxis->setScaleType(QCPAxis::stLinear);
         }
-        ui.plot->yAxis->setVisible(true);
-        ui.plot->yAxis->setGrid(true);
     }
+
+    // if one of the graphs needs the axis, they should ensure it's visible
+    ui.plot->yAxis->setVisible(false);
+    ui.plot->yAxis->setGrid(false);
 
     currentScalingMode = settings.scalingMode;
 
