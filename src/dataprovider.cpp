@@ -84,7 +84,6 @@ void DataProvider::load(QVariantMap *qvm)
     qint64 max;
     getDB().getMinMaxTimeStamp(min, max);
     emit newMax(max);
-
 }
 
 QList<QString> DataProvider::getDataSeriesList() const
