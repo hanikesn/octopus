@@ -118,7 +118,7 @@ void DatabaseAdapter::add(QString const& key, qint64 timestamp, Value const& val
 
     stmt->reset();
 
-    *stmt << toStdString(key) << timestamp + getOffset(key) << value;
+    *stmt << toStdString(key) << timestamp << value;
     if(stmt->execute() != stmt->done())
         throw std::exception();
 }
@@ -264,7 +264,6 @@ void DatabaseAdapter::getMinMaxTimeStamp(qint64 &min, qint64 &max) const
     Sqlite::Row r = (*stmt.execute());
     r >> min >> max;
 }
-
 
 void DatabaseAdapter::copy(QString other, qint64 begin, qint64 end)
 {

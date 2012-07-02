@@ -15,7 +15,7 @@ class AbstractDataSeries : public QObject, public Visitable
     Q_OBJECT
 public:
     virtual ~AbstractDataSeries() {}
-    AbstractDataSeries(const DataProvider &dp, const QString &deviceName, const QString &dataSeriesName, Data::Properties properties);
+    AbstractDataSeries(DataProvider &dp, const QString &deviceName, const QString &dataSeriesName, Data::Properties properties);
 
     /**
      * Visitor pattern.
@@ -42,7 +42,7 @@ signals:
     void illegalValueType();
 
 protected:
-    const DataProvider &dp;
+    DataProvider &dp;
 
 private:
     /**

@@ -3,7 +3,7 @@
 #include "dataprovider.h"
 #include "value.h"
 
-AbstractDataSeries::AbstractDataSeries(const DataProvider &dp, const QString &deviceName, const QString &name, Data::Properties properties):
+AbstractDataSeries::AbstractDataSeries(DataProvider &dp, const QString &deviceName, const QString &name, Data::Properties properties):
     defaultScaleType(PlotSettings::NOT_SCALABLE),
     dp(dp),
     deviceName(deviceName),
