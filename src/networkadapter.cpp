@@ -22,12 +22,6 @@ NetworkAdapter::~NetworkAdapter()
     receiver.removeCommunicationListener(this);
 }
 
-
-void NetworkAdapter::disconnectNotify(const char *signal)
-{
-    qDebug() << signal << "disconnected";
-}
-
 void NetworkAdapter::discoverSenders()
 {
     receiver.discoverSenders();
