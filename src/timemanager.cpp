@@ -138,7 +138,7 @@ void TimeManager::zoom(int factor, qint64 time)
 
     int x = (width - marginLeft - marginRight) * timePerPx;
 
-    double f = (double)(time -lowVisRange) / (highVisRange - lowVisRange);
+    double f = (double)(time - lowVisRange) / (highVisRange - lowVisRange);
 
     lowVisRange = time - x*(f);
     highVisRange = time + x*(1-f);
@@ -156,14 +156,14 @@ void TimeManager::onTimeout()
 {
     Clock::time_point now = Clock::now();
 
-    if(live) {
+    if (live) {
         onNewMax(bc::duration_cast<bc::microseconds>(now - absoluteStartTime).count());
     }
 
-    if(!playing)
+    if (!playing)
         return;
 
-    if(following)
+    if (following)
         currentTime = maximum;
     else {
         currentTime = bc::duration_cast<bc::microseconds>(now - startTime).count();
