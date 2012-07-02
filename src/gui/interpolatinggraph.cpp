@@ -45,6 +45,7 @@ PlotSettings::ScaleType InterpolatingGraph::getScaleType() const
 void InterpolatingGraph::setScaleType(PlotSettings::ScaleType scaleType)
 {
     rescale(currentScalingMode, scaleType);
+    updatePlot(currentScalingMode);
 }
 
 QString InterpolatingGraph::dataSeriesName()
@@ -55,6 +56,7 @@ QString InterpolatingGraph::dataSeriesName()
 void InterpolatingGraph::update(const PlotSettings &settings)
 {
     rescale(settings.scalingMode, settings.scaleType(series.fullName()));
+    updatePlot(settings.scalingMode);
 }
 
 void InterpolatingGraph::configureAppearance(QCPGraph *graph)
@@ -106,8 +108,6 @@ void InterpolatingGraph::rescale(PlotSettings::ScalingMode scalingMode, PlotSett
 
     currentScalingMode = scalingMode;
     currentScaleType = scaleType;
-
-    updatePlot(scalingMode);
 }
 
 void InterpolatingGraph::scaleToRange(double lower, double upper, PlotSettings::ScaleType scaleType)
