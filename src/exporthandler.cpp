@@ -69,7 +69,7 @@ void ExportHandler::onExport(qint64 begin, qint64 end)
         fileNames.first().append(exporter.getSuffix());
 
     QFile file(fileNames.first());
-    if(!file.open(QIODevice::WriteOnly)) {
+    if (!file.open(QIODevice::WriteOnly)) {
         QMessageBox::critical(0,tr("Error"), tr("Could not save file."));
         return;
     }

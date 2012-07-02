@@ -57,7 +57,7 @@ void TimeManager::setRange(qint64 begin, qint64 end)
 void TimeManager::ensureCursorVisibility()
 {
     // We need to adjust the range slightly so that the cursor stays visible
-    if((currentTime > highVisRange - getTimePerPx())) {
+    if ((currentTime > highVisRange - getTimePerPx())) {
         qint64 range = highVisRange - lowVisRange;
         highVisRange = currentTime + getTimePerPx();
         lowVisRange = highVisRange - range;
@@ -198,7 +198,7 @@ void TimeManager::onNewWidth(int w)
 
 void TimeManager::onFollow()
 {
-    if(!live)
+    if (!live)
         return;
 
     if (following) {
@@ -216,7 +216,7 @@ void TimeManager::onPlay()
 {    
     if(playing) {
         playing = false;
-        if(!live)
+        if (!live)
             timer->stop();
         following = false;
     } else {

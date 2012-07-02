@@ -95,7 +95,7 @@ void MainWindow::setUpButtonBars()
     recButton.setIcon(recButtonIcon);
 
     followDataButton.setCheckable(true);
-    followDataButton.setText(tr("ADf"));
+    followDataButton.setText(tr("Pin to new data"));
 
     // add buttons to the vertical layout in the toolbar
     layout.addWidget(&addTrackButton);
@@ -165,7 +165,7 @@ QString MainWindow::onLoad()
     QJson::Parser parser;
     bool ok;
     QVariantMap result = parser.parse(json, &ok).toMap();
-    if(!ok){
+    if (!ok){
         qDebug() << "Could not parse config file:" << fileName << " ! Aborting...";
         return "";
     }
@@ -226,7 +226,7 @@ void MainWindow::onNew()
 void MainWindow::setTitle(QString pName)
 {
     QString windowTitle(TITLE);
-    if(!pName.isEmpty())
+    if (!pName.isEmpty())
         windowTitle += " - ";
 
     windowTitle += pName;

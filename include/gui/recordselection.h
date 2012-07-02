@@ -12,11 +12,6 @@ class RecordSelection : public QWidget
 public:
     explicit RecordSelection(TimeManager *timeManager, QWidget *parent);
 
-    void hide();
-    void show();
-
-    void setRecording(bool rec) {recording = rec;}
-
 public slots:
     void setSelectionBegin(qint64 begin);
     void setSelectionEnd(qint64 end);
@@ -25,6 +20,13 @@ public slots:
 
     void onUpdate();
 
+    /**
+      * Determines in which state the record currently is. In case both timestamps are -1 and
+      * recording is false this object will be set invisible.
+      * @param start Start timestamp of the record
+      * @param end End timestamp of the record or -1 if the record hasn't ended so far.
+      * @param recording State of the recorder (recording/not recording)
+      */
     void onRecord(qint64 start, qint64 end, bool recording);
 
 protected:

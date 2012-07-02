@@ -1,6 +1,7 @@
 #include "gui/recordselection.h"
 
 #include <QPainter>
+#include <QDebug>
 
 #include "timemanager.h"
 
@@ -32,17 +33,15 @@ void RecordSelection::onUpdate()
 
 void RecordSelection::onRecord(qint64 start, qint64 end, bool recording)
 {
-    if (recording && end == -1) { // start record
+    if (recording && (end == -1)) { // start record
         setVisible(true);
         setSelectionBegin(start);
-        setRecording(recording);
     } else if (!recording && (start != -1) && (end != -1)) { // recording paused
         setSelectionEnd(end);
-        setRecording(recording);
     } else if (!recording && (start == -1) && (end == -1)) { // recording ended
         setVisible(false);
-        setRecording(recording);
     }
+    this->recording = recording;
 }
 
 void RecordSelection::paintEvent(QPaintEvent *)
@@ -58,21 +57,6 @@ void RecordSelection::paintEvent(QPaintEvent *)
 void RecordSelection::updateHeight(int h)
 {
     setFixedHeight(h);
-}
-
-void RecordSelection::show()
-{
-    setVisible(true);
-    onUpdate();
-}
-
-void RecordSelection::hide()
-{
-    if (!isVisible()) return;
-
-    setVisible(false);
-
-    onUpdate();
 }
 
 void RecordSelection::setSelectionBegin(qint64 time)
