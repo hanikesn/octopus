@@ -241,6 +241,7 @@ void MainWindow::setUpView()
     connect(&zoomInButton, SIGNAL(clicked()), mapZoom, SLOT(map()));
     connect(mapZoom, SIGNAL(mapped(int)),   viewManager, SIGNAL(zoom(int)));
     connect(this, SIGNAL(follow(bool)),     viewManager, SIGNAL(follow(bool)));
+    connect(this, SIGNAL(record()), viewManager, SLOT(onRecord()));
 
     connect(viewManager, SIGNAL(saveProject(qint64,qint64)), this, SLOT(onSaveProject(qint64,qint64)));
 
@@ -248,7 +249,6 @@ void MainWindow::setUpView()
     connect(&addTrackButton, SIGNAL(clicked()), viewManager, SIGNAL(addTrack()));
     connect(&plotSettingsButton, SIGNAL(clicked()), viewManager, SIGNAL(plotSettings()));
     connect(&playButton, SIGNAL(clicked()), viewManager, SIGNAL(play()));
-    connect(&recButton, SIGNAL(clicked()), viewManager, SLOT(onRecord()));
     connect(&exportButton, SIGNAL(clicked()), viewManager, SIGNAL(exportData()));
 
     ui->centralWidgetLayout->insertWidget(0, viewManager);
@@ -340,6 +340,7 @@ void MainWindow::closeEvent(QCloseEvent */*ce*/)
 
 void MainWindow::onRecord()
 {        
+    emit record();
     recButton.setChecked(viewManager->isRecording());
 }
 

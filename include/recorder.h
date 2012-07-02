@@ -15,6 +15,8 @@ public:
     
 signals:
     void saveProject(qint64 start, qint64 end);
+
+    void record(qint64 start, qint64 end, bool recording);
     
 public slots:
     /**
