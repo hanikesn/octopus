@@ -24,6 +24,7 @@ static void addData(DataProvider& dp)
     EI::Description desc2("Dummy-2", "dum");
     desc2.addDataSeries("Interpolatable.x", EI::DataSeriesInfo(EI::Value::DOUBLE, EI::DataSeriesInfo::INTERPOLATABLE,""));
     desc2.addDataSeries("Interpolatable.y", EI::DataSeriesInfo(EI::Value::DOUBLE, EI::DataSeriesInfo::INTERPOLATABLE,""));
+    desc2.addDataSeries("Discrete", EI::DataSeriesInfo(EI::Value::DOUBLE, EI::DataSeriesInfo::STATEFUL,""));
     dp.onNewSender(desc2);
 
      for (int j=0; j<500; ++j)
