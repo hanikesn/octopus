@@ -15,17 +15,12 @@ class AbstractDataSeries : public QObject, public Visitable
     Q_OBJECT
 public:
     virtual ~AbstractDataSeries() {}
-    AbstractDataSeries(const DataProvider &dp, const QString &deviceName, const QString &dataSeriesName, Data::Properties properties);
+    AbstractDataSeries(DataProvider &dp, const QString &deviceName, const QString &dataSeriesName, Data::Properties properties);
 
     /**
      * Visitor pattern.
      */
     virtual void accept(DataSeriesVisitor *v) = 0;
-
-    /**
-     * Offset in microseconds
-     */
-    int offset;
 
     /**
      * The default scale type to be used for plotting the data.
@@ -36,12 +31,18 @@ public:
     QString name() const;
     QString fullName() const;
     Data::Properties properties() const;
+    qint64 offset() const;
 
     virtual void addData(qint64 timeStamp, const Value &value) = 0;
+    virtual void setOffset(qint64 newOffset);
 
 signals:
     void newData(qint64 timestamp);
+    void offsetChanged();
     void illegalValueType();
+
+protected:
+    DataProvider &dp;
 
 private:
     /**
@@ -58,9 +59,6 @@ private:
      * Stores a combination of data property flags.
      */
     Data::Properties props;
-
-protected:
-    const DataProvider &dp;
 };
 
 #endif // ABSTRACTDATASERIES_H

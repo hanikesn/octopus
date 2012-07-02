@@ -18,6 +18,7 @@ InterpolatingGraph::InterpolatingGraph(QCustomPlot *plot, const DoubleSeries &d,
 {
     setObjectName("InterpolatingGraph");
     connect(&series, SIGNAL(newData(qint64)), this, SLOT(onNewData(qint64)));
+    connect(&series, SIGNAL(offsetChanged()), this, SLOT(onOffsetChanged()));
 
     graph = plot->addGraph();
     // Ensure value axis is visible.
@@ -44,6 +45,7 @@ PlotSettings::ScaleType InterpolatingGraph::getScaleType() const
 void InterpolatingGraph::setScaleType(PlotSettings::ScaleType scaleType)
 {
     rescale(currentScalingMode, scaleType);
+    updatePlot(currentScalingMode);
 }
 
 QString InterpolatingGraph::dataSeriesName()
@@ -54,6 +56,7 @@ QString InterpolatingGraph::dataSeriesName()
 void InterpolatingGraph::update(const PlotSettings &settings)
 {
     rescale(settings.scalingMode, settings.scaleType(series.fullName()));
+    updatePlot(settings.scalingMode);
 }
 
 void InterpolatingGraph::configureAppearance(QCPGraph *graph)
@@ -105,8 +108,6 @@ void InterpolatingGraph::rescale(PlotSettings::ScalingMode scalingMode, PlotSett
 
     currentScalingMode = scalingMode;
     currentScaleType = scaleType;
-
-    updatePlot(scalingMode);
 }
 
 void InterpolatingGraph::scaleToRange(double lower, double upper, PlotSettings::ScaleType scaleType)
@@ -185,6 +186,14 @@ void InterpolatingGraph::onNewData(qint64 timestamp)
     }
 
     lastUpdate = timestamp;
+    updatePlot(currentScalingMode);
+}
+
+void InterpolatingGraph::onOffsetChanged()
+{
+    graph->clearData();
+    initialize(graph, series);
+    rescale(currentScalingMode, currentScaleType);
     updatePlot(currentScalingMode);
 }
 

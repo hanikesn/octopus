@@ -61,7 +61,6 @@ void DataProvider::save(QVariantMap *qvm)
         QVariantMap tmp;
         tmp.insert("name", ads->fullName());
         tmp.insert("scaling", ads->defaultScaleType);
-        tmp.insert("offset", ads->offset);
         seriesList << tmp;
     }
     dataProvider.insert("dataSeries", seriesList);
@@ -77,10 +76,9 @@ void DataProvider::load(QVariantMap *qvm)
 
         int defScaleType = seriesMap.find("scaling").value().toInt();
         QString name(seriesMap.find("name").value().toString());
-        int offset = seriesMap.find("offset").value().toInt();
 
         getDataSeries(name)->defaultScaleType = (PlotSettings::ScaleType) defScaleType;
-        getDataSeries(name)->offset = offset;
+        getDataSeries(name)->setOffset(getDB().getOffset(name));
     }
     qint64 min;
     qint64 max;
@@ -97,6 +95,11 @@ QList<QString> DataProvider::getDataSeriesList() const
 QString DataProvider::getDBFileName()
 {
     return filename;
+}
+
+DatabaseAdapter &DataProvider::getDB()
+{
+    return *db;
 }
 
 const DatabaseAdapter &DataProvider::getDB() const

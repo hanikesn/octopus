@@ -280,7 +280,7 @@ void PresentationArea::onPlotSettings()
     QStringList dataSeriesNames;
     foreach (AbstractDataSeries *series, dataProvider.getDataSeries()) {
         dataSeriesNames.append(series->fullName());
-        preset.setOffset(series->fullName(), series->offset);
+        preset.setOffset(series->fullName(), series->offset());
         preset.setScaleType(series->fullName(), series->defaultScaleType);
     }
 
@@ -290,7 +290,7 @@ void PresentationArea::onPlotSettings()
         foreach (QString name, dataSeriesNames) {
             AbstractDataSeries *series = dataProvider.getDataSeries(name);
             if (series) {
-                series->offset = settings.offset(name);
+                series->setOffset(settings.offset(name));
                 series->defaultScaleType = settings.scaleType(name);
             }
         }

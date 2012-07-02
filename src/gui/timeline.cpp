@@ -20,7 +20,7 @@ TimeLine::TimeLine(TimeManager& timeManager, QWidget * parent):
     pen(Qt::black, 1, Qt::SolidLine),
     largeTickAmount(2000000), // two seconds in µs
     mediumTickAmount(1000000), // one second in µs
-    smallTickAmount(200000), // 0,2 seconds in µs
+    smallTickAmount(200000), // 0.2 seconds in µs
     timePerPx(40000), // Amount of time which one pixel represents 40 milliseconds in µs
     timeRepresentation(SECOND)
 {
@@ -47,7 +47,6 @@ void TimeLine::paintEvent(QPaintEvent *)
     painter.setPen(pen);
     painter.drawRect(frame);
 
-    // draw ticks:
     drawTicks(&painter);
 
     QRect rect = QRect(5, geometry().height() - 15, 50, 15);

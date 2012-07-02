@@ -127,7 +127,7 @@ PlotSettings Track::currentSettings()
     settings.plotScaleType = PlotSettings::toScaleType(ui.plot->yAxis->scaleType());
 
     foreach (Graph *g, graphs) {
-        settings.setOffset(g->dataSeriesName(), dataProvider.getDataSeries(g->dataSeriesName())->offset);
+        settings.setOffset(g->dataSeriesName(), dataProvider.getDataSeries(g->dataSeriesName())->offset());
         settings.setScaleType(g->dataSeriesName(), g->getScaleType());
     }
 

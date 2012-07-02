@@ -17,9 +17,9 @@ public:
     void add(QString const& key, qint64 timestamp, ::Value const& value);
 
     template<typename T>
-    QMap<qint64, T> getData(QString const& key, qint64 offset) const;
+    QMap<qint64, T> getData(QString const& key) const;
     template<typename T>
-    QMap<qint64, T> getData(QString const& key, qint64 start, qint64 end, qint64 offset) const;
+    QMap<qint64, T> getData(QString const& key, qint64 start, qint64 end) const;
 
     /**
      * Returns a query iterator for (name, time, value) from the db, the caller has to check the type of third column
@@ -33,7 +33,7 @@ public:
 
     void copy(QString other, qint64 begin, qint64 end);
 
-    qint64 getOffset(QString const& series);
+    qint64 getOffset(QString const& series) const;
 
     void changeOffset(QString const& series, qint64 offset);
 

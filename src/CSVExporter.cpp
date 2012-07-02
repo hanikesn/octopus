@@ -26,7 +26,7 @@ void CSVExporter::write(QIODevice &file, const DataProvider &dp, const QStringLi
 
     foreach(QString const& series, dataSeries)
     {
-        offsetMap.insert(series, dp.getDataSeries(series)->offset);
+        offsetMap.insert(series, dp.getDataSeries(series)->offset());
     }
 
     Sqlite::PreparedStatement stmt = dp.getDB().getRawData(dataSeries, begin, end);
