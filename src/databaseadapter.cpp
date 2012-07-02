@@ -324,3 +324,12 @@ void DatabaseAdapter::copy(QString other, qint64 begin, qint64 end)
     if(db.execute("DETACH DATABASE other;") != db.Done)
         throw std::exception();
 }
+
+qint64 DatabaseAdapter::getOffset(const QString &series)
+{
+    return 0;
+}
+
+void DatabaseAdapter::changeOffset(const QString &series, qint64 offset)
+{
+}
