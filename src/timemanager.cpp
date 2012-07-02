@@ -173,6 +173,7 @@ void TimeManager::onTimeout()
     if ((currentTime > getMaximum()) && !following) {
         currentTime = getMaximum();
         playing = false;
+        emit playEnabled(playing);
         timer->stop();
         return;
     }
