@@ -117,10 +117,11 @@ void MainWindow::setUpButtonBars()
 
     toolBarWidget.setLayout(&layout);
 
-    connect(&loadButton, SIGNAL(clicked()), this, SLOT(onLoad()));
-    connect(&recButton, SIGNAL(clicked()), this, SLOT(onRecord()));
-    connect(&followDataButton, SIGNAL(clicked()), this, SLOT(onFollowData()));
-    connect(&playButton, SIGNAL(clicked()), this, SLOT(onPlay()));
+    connect(&loadButton, SIGNAL(clicked()), this, SLOT(onLoad()));        
+
+    connect(&playButton, SIGNAL(clicked()), this, SIGNAL(play()));
+    connect(&recButton, SIGNAL(clicked()), this, SIGNAL(record()));
+    connect(&followDataButton, SIGNAL(clicked()), this, SIGNAL(follow()));
 
     ui->mainToolBar->addWidget(&toolBarWidget);
     addToolBar(Qt::LeftToolBarArea, ui->mainToolBar);
@@ -240,16 +241,20 @@ void MainWindow::setUpView()
     connect(&zoomOutButton, SIGNAL(clicked()), mapZoom, SLOT(map()));
     connect(&zoomInButton, SIGNAL(clicked()), mapZoom, SLOT(map()));
     connect(mapZoom, SIGNAL(mapped(int)),   viewManager, SIGNAL(zoom(int)));
-    connect(this, SIGNAL(follow(bool)),     viewManager, SIGNAL(follow(bool)));
-    connect(this, SIGNAL(record()), viewManager, SLOT(onRecord()));
+
+    connect(this, SIGNAL(follow()),         viewManager, SIGNAL(follow()));
+    connect(this, SIGNAL(play()),           viewManager, SIGNAL(play()));
+    connect(this, SIGNAL(record()),         viewManager, SLOT(onRecord()));
 
     connect(viewManager, SIGNAL(saveProject(qint64,qint64)), this, SLOT(onSaveProject(qint64,qint64)));
+    connect(viewManager, SIGNAL(recordEnabled(bool)), this, SLOT(onRecordEnabled(bool)));
+    connect(viewManager, SIGNAL(followEnabled(bool)), this, SLOT(onFollowEnabled(bool)));
+    connect(viewManager, SIGNAL(playEnabled(bool)), this, SLOT(onPlayEnabled(bool)));
 
     // corresponding connect-statements:
     connect(&addTrackButton, SIGNAL(clicked()), viewManager, SIGNAL(addTrack()));
-    connect(&plotSettingsButton, SIGNAL(clicked()), viewManager, SIGNAL(plotSettings()));
-    connect(&playButton, SIGNAL(clicked()), viewManager, SIGNAL(play()));
-    connect(&exportButton, SIGNAL(clicked()), viewManager, SIGNAL(exportData()));
+    connect(&plotSettingsButton, SIGNAL(clicked()), viewManager, SIGNAL(plotSettings()));    
+    connect(&exportButton, SIGNAL(clicked()), viewManager, SIGNAL(exportData()));    
 
     ui->centralWidgetLayout->insertWidget(0, viewManager);
 }
@@ -338,10 +343,9 @@ void MainWindow::closeEvent(QCloseEvent */*ce*/)
 //        ce->ignore();
 }
 
-void MainWindow::onRecord()
-{        
-    emit record();
-    recButton.setChecked(viewManager->isRecording());
+void MainWindow::onRecordEnabled(bool recording)
+{
+    recButton.setChecked(recording);
 }
 
 void MainWindow::onSaveProject(qint64 start, qint64 end)
@@ -350,16 +354,18 @@ void MainWindow::onSaveProject(qint64 start, qint64 end)
     save(true, start, end);
 }
 
-void MainWindow::onFollowData()
+void MainWindow::onFollowEnabled(bool follow)
 {
-    playButton.setChecked(followDataButton.isChecked());
-    emit follow(followDataButton.isChecked());
+    followDataButton.setChecked(follow);
+    playButton.setChecked(follow);
+
 }
 
-void MainWindow::onPlay()
+void MainWindow::onPlayEnabled(bool play)
 {
     if (followDataButton.isChecked())
         followDataButton.setChecked(false);
+    playButton.setChecked(play);
 }
 
 bool MainWindow::writeProjectSettings(QVariantMap pName, QString path)

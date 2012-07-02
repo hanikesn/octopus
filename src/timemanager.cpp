@@ -195,18 +195,20 @@ void TimeManager::onNewWidth(int w)
     setRange(lowVisRange, lowVisRange + timePerPx * (w - marginLeft - marginRight));
 }
 
-void TimeManager::onFollow(bool following)
+void TimeManager::onFollow()
 {
     if(!live)
         return;
 
     if (following) {
+        playing = false;
+        following = false;
+    } else {
         playing = true;
         startTime = absoluteStartTime;
-    } else {
-        playing = false;
+        following = true;
     }
-    this->following = following;
+    emit followEnabled(following);
 }
 
 void TimeManager::onPlay()
@@ -224,4 +226,7 @@ void TimeManager::onPlay()
         timer->start();
         startTime = Clock::now() - bc::microseconds(currentTime);
     }
+
+    emit followEnabled(following);
+    emit playEnabled(playing);
 }

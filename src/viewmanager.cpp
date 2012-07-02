@@ -99,7 +99,7 @@ bool ViewManager::isRecording()
 void ViewManager::onRecord()
 {
     recorder->toggleRecording();
-    emit record(recorder->isRecording(), timeManager->getMaximum());
+    emit recordEnabled(recorder->isRecording());
 }
 
 void ViewManager::createNewView(QString dbfile)
@@ -163,8 +163,10 @@ void ViewManager::makeConnects()
     // timeManager
     connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)), scrollBar, SLOT(onRangeChanged(qint64,qint64)));
     connect(timeManager, SIGNAL(newMax(qint64)), scrollBar, SLOT(onNewMax(qint64)));
+    connect(timeManager, SIGNAL(followEnabled(bool)), this, SIGNAL(followEnabled(bool)));
+    connect(timeManager, SIGNAL(playEnabled(bool)), this, SIGNAL(playEnabled(bool)));
     connect(this, SIGNAL(play()), timeManager, SLOT(onPlay()));
-    connect(this, SIGNAL(follow(bool)), timeManager, SLOT(onFollow(bool)));
+    connect(this, SIGNAL(follow()), timeManager, SLOT(onFollow()));
     connect(this, SIGNAL(zoom(int)), timeManager, SLOT(zoom(int)));
     connect(scrollBar, SIGNAL(rangeChanged(qint64,qint64)), timeManager, SLOT(setRange(qint64,qint64)));
 
