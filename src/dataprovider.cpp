@@ -97,11 +97,6 @@ QString DataProvider::getDBFileName()
     return filename;
 }
 
-DatabaseAdapter &DataProvider::getDB()
-{
-    return *db;
-}
-
 const DatabaseAdapter &DataProvider::getDB() const
 {
     return *db;
@@ -120,6 +115,11 @@ AbstractDataSeries* DataProvider::getDataSeries(const QString &fullName) const
 QList<AbstractDataSeries*> DataProvider::getDataSeries() const
 {
     return dataSeries.values();
+}
+
+void DataProvider::changeOffset(const QString &dataSeriesName, qint64 offset) const
+{
+    db->changeOffset(dataSeriesName, offset);
 }
 
 void DataProvider::onNewSender(EIDescriptionWrapper desc)
