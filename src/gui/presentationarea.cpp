@@ -5,6 +5,7 @@
 #include "gui/cursor.h"
 #include "gui/plotsettingsdialog.h"
 #include "gui/selection.h"
+#include "gui/recordselection.h"
 #include "gui/sourcedialog.h"
 #include "gui/timeline.h"
 #include "gui/track.h"
@@ -143,6 +144,7 @@ PresentationArea::PresentationArea(const DataProvider &dataProvider,
     selection = new Selection(timeManager, viewport());
     cursor = new Cursor(Qt::red, timeManager, viewport());
     maxCursor = new Cursor(Qt::gray, timeManager, viewport());
+    recSel = new RecordSelection(timeManager, viewport());
 
     setWidget(new QWidget(this));
     setWidgetResizable(true);
@@ -161,6 +163,7 @@ PresentationArea::PresentationArea(const DataProvider &dataProvider,
     selection->raise();
     maxCursor->raise();
     cursor->raise();
+    recSel->raise();
 
     viewportMouseHandler = new EventHandler(*timeManager, *cursor, *selection, scrollbar);
     viewport()->installEventFilter(this);
@@ -170,10 +173,13 @@ PresentationArea::PresentationArea(const DataProvider &dataProvider,
     connect(this, SIGNAL(changedViewHeight(int)), cursor, SLOT(updateHeight(int)));
     connect(this, SIGNAL(changedViewHeight(int)), maxCursor, SLOT(updateHeight(int)));
     connect(this, SIGNAL(changedViewHeight(int)), selection, SLOT(updateHeight(int)));
+    connect(this, SIGNAL(changedViewHeight(int)), recSel, SLOT(updateHeight(int)));
 
     connect(this, SIGNAL(marginsChanged(int,int)), timeManager, SLOT(onMarginsChanged(int,int)));
     connect(this, SIGNAL(changedViewWidth(int)), timeLine, SLOT(updateWidth(int)));
     connect(this, SIGNAL(changedViewWidth(int)), timeManager, SLOT(onNewWidth(int)));
+
+    connect(this, SIGNAL(record(qint64,qint64,bool)), recSel, SLOT(onRecord(qint64,qint64,bool)));
 
     connect(selection, SIGNAL(onExport(qint64,qint64)),         this, SIGNAL(exportRange(qint64,qint64)));
     connect(selection, SIGNAL(selectionChanged(qint64,qint64)), this, SIGNAL(selectionChanged(qint64,qint64)));
@@ -184,8 +190,10 @@ PresentationArea::PresentationArea(const DataProvider &dataProvider,
     connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)), cursor, SLOT(onUpdate()));
     connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)), maxCursor, SLOT(onUpdate()));
     connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)), selection, SLOT(onUpdate()));
+    connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)), recSel, SLOT(onUpdate()));
 
     connect(timeManager, SIGNAL(newMax(qint64)), maxCursor, SLOT(setTime(qint64)));
+    connect(timeManager, SIGNAL(newMax(qint64)), recSel, SLOT(setSelectionEnd(qint64)));
 
     connect(&dataProvider, SIGNAL(newMax(qint64)), timeManager, SLOT(onNewMax(qint64)));
     connect(&dataProvider, SIGNAL(newMax(qint64)), this, SLOT(onNewMax(qint64)));
@@ -310,6 +318,7 @@ Track* PresentationArea::add(const QList<QString>& fullDataSeriesNames)
     selection->raise();
     maxCursor->raise();
     cursor->raise();
+    recSel->raise();
 
     unsavedChanges = true;
     return t;

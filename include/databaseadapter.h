@@ -17,15 +17,14 @@ public:
     void add(QString const& key, qint64 timestamp, ::Value const& value);
 
     template<typename T>
-    QMap<qint64, T> getData(QString const& key, int offset) const;
+    QMap<qint64, T> getData(QString const& key, qint64 offset) const;
     template<typename T>
-    QMap<qint64, T> getData(QString const& key, qint64 start, qint64 end, int offset) const;
+    QMap<qint64, T> getData(QString const& key, qint64 start, qint64 end, qint64 offset) const;
 
     /**
      * Returns a query iterator for (name, time, value) from the db, the caller has to check the type of third column
      */
-    // TODO(Steffen): Offset berücksichtigen
-    Sqlite::PreparedStatement getData(QStringList const& keys, qint64 start, qint64 end/*, int offset*/) const;
+    Sqlite::PreparedStatement getRawData(QStringList const& keys, qint64 start, qint64 end) const;
 
     void addSender(EI::Description const& desc);
     QList<EI::Description> getSenders();

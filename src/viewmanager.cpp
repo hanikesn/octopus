@@ -100,6 +100,7 @@ bool ViewManager::isRecording()
 void ViewManager::onRecord()
 {
     recorder->toggleRecording();
+    emit record(recorder->isRecording(), timeManager->getMaximum());
 }
 
 void ViewManager::createNewView(QString dbfile)
@@ -170,12 +171,13 @@ void ViewManager::makeConnects()
 
     // presentationArea
     connect(this, SIGNAL(plotSettings()), presentationArea, SLOT(onPlotSettings()));
-    connect(this, SIGNAL(addTrack()), presentationArea, SLOT(onAddTrack()));
+    connect(this, SIGNAL(addTrack()), presentationArea, SLOT(onAddTrack()));    
     connect(presentationArea, SIGNAL(exportRange(qint64,qint64)), exportHandler, SLOT(onExport(qint64,qint64)));
     connect(presentationArea, SIGNAL(selectionChanged(qint64,qint64)), exportHandler, SLOT(onSelectionChanged(qint64,qint64)));
 
     // recorder
     connect(recorder, SIGNAL(saveProject(qint64,qint64)), this, SIGNAL(saveProject(qint64,qint64)));
+    connect(recorder, SIGNAL(record(qint64,qint64,bool)), presentationArea, SIGNAL(record(qint64,qint64,bool)));
 
     // networkAdapter if available
     if (networkAdapter) {

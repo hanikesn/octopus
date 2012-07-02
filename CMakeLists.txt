@@ -69,6 +69,7 @@ set(Octopus_SOURCES
   src/gui/startscreen.cpp
   src/exporthandler.cpp
   src/viewmanager.cpp
+  src/gui/recordselection.cpp
 )
 
 set(Octopus_HEADERS
@@ -107,6 +108,7 @@ set(Octopus_HEADERS
   include/gui/startscreen.h
   include/exporthandler.h
   include/viewmanager.h
+  include/gui/recordselection.h
 )
 
 set(Octopus_FORMS

@@ -5,7 +5,6 @@
 #include <QWidget>
 
 class QMenu;
-class PresentationItem;
 class TimeManager;
 
 class Selection : public QWidget

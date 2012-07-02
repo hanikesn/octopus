@@ -54,6 +54,8 @@ signals:
     // activated by button in mainwindow and mouse wheel
     void zoom(int z);
 
+    void record(bool rec, qint64 timestamp);
+
 public slots:
     void onRecord();
 

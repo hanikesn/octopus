@@ -55,61 +55,57 @@ void DatabaseAdapter::initDB(Sqlite::DB &db)
 }
 
 template<typename T>
-static QMap<qint64, T> fillMap(Sqlite::PreparedStatement& stmt)
+static QMap<qint64, T> fillMap(Sqlite::PreparedStatement& stmt, qint64 offset)
 {
     auto result = stmt.execute();
 
     QMap<qint64, T> map;
     std::for_each(result, stmt.done(),
-                  [&map](Sqlite::Row r)
+                  [&map,offset](Sqlite::Row r)
     {
         qint64 timestamp;
         T value;
         r >> timestamp >> value;
-        map.insert(timestamp, value);
+        map.insert(timestamp +  offset, value);
     });
 
     return std::move(map);
 }
 
 template<>
-QMap<qint64, double> DatabaseAdapter::getData(QString const& key, int offset) const
+QMap<qint64, double> DatabaseAdapter::getData(QString const& key, qint64 offset) const
 {
-    // TODO(Steffen): Offset berücksichtigen
     stmtSelectDataFloat.reset();
     stmtSelectDataFloat << toStdString(key);
 
-    return fillMap<double>(stmtSelectDataFloat);
+    return fillMap<double>(stmtSelectDataFloat, offset);
 }
 
 template<>
-QMap<qint64, QString> DatabaseAdapter::getData(QString const& key, int offset) const
+QMap<qint64, QString> DatabaseAdapter::getData(QString const& key, qint64 offset) const
 {
-    // TODO(Steffen): Offset berücksichtigen
     stmtSelectDataString.reset();
     stmtSelectDataString << toStdString(key);
 
-    return fillMap<QString>(stmtSelectDataString);
+    return fillMap<QString>(stmtSelectDataString, offset);
 }
 
 template<>
-QMap<qint64, double> DatabaseAdapter::getData(QString const& key, qint64 start, qint64 end, int offset) const
+QMap<qint64, double> DatabaseAdapter::getData(QString const& key, qint64 start, qint64 end, qint64 offset) const
 {
-    // TODO(Steffen): Offset berücksichtigen
     stmtSelectDataWithTimeFloat.reset();
-    stmtSelectDataWithTimeFloat << toStdString(key) << start << end;
+    stmtSelectDataWithTimeFloat << toStdString(key) << start + offset << end + offset;
 
-    return fillMap<double>(stmtSelectDataWithTimeFloat);
+    return fillMap<double>(stmtSelectDataWithTimeFloat, offset);
 }
 
 template<>
-QMap<qint64, QString> DatabaseAdapter::getData(QString const& key, qint64 start, qint64 end, int offset) const
+QMap<qint64, QString> DatabaseAdapter::getData(QString const& key, qint64 start, qint64 end, qint64 offset) const
 {
-    // TODO(Steffen): Offset berücksichtigen
     stmtSelectDataWithTimeString.reset();
-    stmtSelectDataWithTimeString << toStdString(key) << start << end;
+    stmtSelectDataWithTimeString << toStdString(key) << start + offset << end + offset;
 
-    return fillMap<QString>(stmtSelectDataWithTimeString);
+    return fillMap<QString>(stmtSelectDataWithTimeString, offset);
 }
 
 void DatabaseAdapter::add(QString const& key, qint64 timestamp, Value const& value)
@@ -151,10 +147,9 @@ static std::string convert(EI::Value::Type t)
     return "EMPTY";
 }
 
-Sqlite::PreparedStatement DatabaseAdapter::getData(QStringList const& keys, qint64 start, qint64 end/*, int offset*/) const
+Sqlite::PreparedStatement DatabaseAdapter::getRawData(QStringList const& keys, qint64 start, qint64 end) const
 {
-    // TODO(Steffen): Offset berücksichtigen
-
+    // TODO(steffen) offset beim abfragen beachten!
     QString where = "WHERE time>=? and time<=?";
 
     if(keys.length() > 0) {
