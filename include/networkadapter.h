@@ -30,10 +30,6 @@ public:
 
     Clock::time_point getStartTime();
 
-protected:
-    //TODO debug-only
-    void disconnectNotify(const char *signal);
-
 signals:
     void onNewSender(EIDescriptionWrapper);
 
