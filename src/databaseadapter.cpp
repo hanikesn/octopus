@@ -118,7 +118,7 @@ void DatabaseAdapter::add(QString const& key, qint64 timestamp, Value const& val
 
     stmt->reset();
 
-    *stmt << toStdString(key) << timestamp << value;
+    *stmt << toStdString(key) << timestamp + getOffset(key) << value;
     if(stmt->execute() != stmt->done())
         throw std::exception();
 }
