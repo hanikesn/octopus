@@ -33,7 +33,7 @@ void RecordSelection::onUpdate()
 
 void RecordSelection::onRecord(qint64 start, qint64 end, bool recording)
 {
-    if (recording && end == -1) { // start record
+    if (recording && (end == -1)) { // start record
         setVisible(true);
         setSelectionBegin(start);
     } else if (!recording && (start != -1) && (end != -1)) { // recording paused
