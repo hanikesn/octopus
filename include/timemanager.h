@@ -72,6 +72,9 @@ signals:
 
     void newMax(qint64 time);
 
+    void followEnabled(bool);
+    void playEnabled(bool);
+
 public slots:
     void onNewMax(qint64 timestamp);
 
@@ -90,7 +93,7 @@ public slots:
 
     void onNewWidth(int width);
 
-    void onFollow(bool following);
+    void onFollow();
 
     void setRange(qint64 start, qint64 end);
 

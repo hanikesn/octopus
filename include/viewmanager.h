@@ -48,13 +48,16 @@ signals:
     // activated by button in mainwindow
     void play();
     // activated by button in mainwindow
-    void follow(bool follow);
+    void follow();
     // activated by button in mainwindow
     void plotSettings();
     // activated by button in mainwindow and mouse wheel
     void zoom(int z);
 
-    void record(bool rec, qint64 timestamp);
+
+    void recordEnabled(bool recording);
+    void followEnabled(bool f);
+    void playEnabled(bool f);
 
 public slots:
     void onRecord();

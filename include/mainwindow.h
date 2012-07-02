@@ -42,7 +42,6 @@ private slots:
     void onSaveAs();
     QString onLoad();
     void onNew();    
-    void onRecord();
     /**
       * This saves the recorded data into a new project (project file and new database is created).
       * @param start Timestamp for the begin of the recorded data.
@@ -50,9 +49,11 @@ private slots:
       */
     void onSaveProject(qint64 start, qint64 end);
 
-    void onFollowData();
+    void onRecordEnabled(bool recording);
 
-    void onPlay();
+    void onFollowEnabled(bool follow);
+
+    void onPlayEnabled(bool play);
 
 private:
     QVBoxLayout *trackLayout;
@@ -121,8 +122,9 @@ private:
 
 signals:
     void timeStepChanged(int);
-    void follow(bool following);
+    void follow();
     void record();
+    void play();
 };
 
 #endif // MAINWINDOW_H
