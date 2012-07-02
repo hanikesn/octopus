@@ -154,9 +154,6 @@ QString MainWindow::onLoad()
     QString fileName = QFileDialog::getOpenFileName(this, tr("Load File"),
                                                     projectPath, "Octopus (*.oct)");
 
-    if(QFileInfo(fileName) == QFileInfo(projectPath))
-        return projectPath;
-
     if(fileName.isEmpty()) return fileName;
     QFile file(fileName);
     file.open(QIODevice::ReadOnly);    
@@ -198,6 +195,9 @@ QString MainWindow::onLoad()
     // we can't follow new data.
     followDataButton.setEnabled(false);
 
+    // enable saving
+    saveAction->setEnabled(true);
+
     setUpView();
     return fileName;
 }
@@ -214,6 +214,9 @@ void MainWindow::onNew()
 
     // enable data following
     followDataButton.setEnabled(true);
+
+    // disable saving
+    saveAction->setEnabled(false);
 
     if(viewManager)
         viewManager->deleteLater();
