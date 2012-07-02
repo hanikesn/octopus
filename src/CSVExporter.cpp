@@ -24,7 +24,7 @@ void CSVExporter::write(QIODevice &file, const DataProvider &dp, const QStringLi
         offsetMap.insert(series, dp.getDataSeries(series)->offset);
     }
 
-    Sqlite::PreparedStatement stmt = dp.getDB().getData(dataSeries, begin, end);
+    Sqlite::PreparedStatement stmt = dp.getDB().getRawData(dataSeries, begin, end);
 
     QString name;
     qint64 timestamp;
