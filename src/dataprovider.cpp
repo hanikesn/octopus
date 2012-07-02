@@ -114,9 +114,18 @@ QList<AbstractDataSeries*> DataProvider::getDataSeries() const
     return dataSeries.values();
 }
 
-void DataProvider::changeOffset(const QString &dataSeriesName, qint64 offset) const
+void DataProvider::changeOffset(const QString &dataSeriesName, qint64 offset)
 {
     db->changeOffset(dataSeriesName, offset);
+
+    qint64 minAfter;
+    qint64 maxAfter;
+    db->getMinMaxTimeStamp(minAfter, maxAfter);
+
+    if (maxAfter != currentMax) {
+        currentMax = maxAfter;
+        emit newMax(maxAfter);
+    }
 }
 
 void DataProvider::onNewSender(EIDescriptionWrapper desc)
@@ -159,14 +168,17 @@ void DataProvider::onNewData(qint64 timestamp, QString fullDataSeriesName, Value
 {
     if(!db)
         return;
-    db->add(fullDataSeriesName, timestamp, value);
+
+    qint64 timestampWithOffset = timestamp + db->getOffset(fullDataSeriesName);
+
+    db->add(fullDataSeriesName, timestampWithOffset, value);
 
     if (dataSeries.contains(fullDataSeriesName)) {
-        dataSeries.value(fullDataSeriesName)->addData(timestamp, value);
+        dataSeries.value(fullDataSeriesName)->addData(timestampWithOffset, value);
 
-        if (timestamp > currentMax) {
-            currentMax = timestamp;
-            emit newMax(timestamp);
+        if (timestampWithOffset > currentMax) {
+            currentMax = timestampWithOffset;
+            emit newMax(timestampWithOffset);
         }
     } else {
         emit unknownDataSeries();

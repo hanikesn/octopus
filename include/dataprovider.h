@@ -37,7 +37,7 @@ public:
      */
     QList<AbstractDataSeries*> getDataSeries() const;
 
-    void changeOffset(const QString &dataSeriesName, qint64 offset) const;
+    void changeOffset(const QString &dataSeriesName, qint64 offset);
 
     /**
      * @return the filename of the used database
