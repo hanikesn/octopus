@@ -90,6 +90,7 @@ PreparedStatement::QueryIterator PreparedStatement::done()
 
 void PreparedStatement::bind(int index, double value)
 {
+    assert(index <=  sqlite3_bind_parameter_count(stmt));
     int ret = sqlite3_bind_double(stmt, index, value);
     if(ret != SQLITE_OK)
         throw Exception(db);
@@ -97,6 +98,7 @@ void PreparedStatement::bind(int index, double value)
 
 void PreparedStatement::bind(int index, sqlite3_int64 value)
 {
+    assert(index <=  sqlite3_bind_parameter_count(stmt));
     int ret = sqlite3_bind_int64(stmt, index, value);
     if(ret != SQLITE_OK)
         throw Exception(db);
@@ -104,6 +106,7 @@ void PreparedStatement::bind(int index, sqlite3_int64 value)
 
 void PreparedStatement::bind(int index, const std::string& value)
 {
+    assert(index <=  sqlite3_bind_parameter_count(stmt));
     int ret = sqlite3_bind_text(stmt, index, value.c_str(), value.length(), SQLITE_TRANSIENT);
     if(ret != SQLITE_OK)
         throw Exception(db);
