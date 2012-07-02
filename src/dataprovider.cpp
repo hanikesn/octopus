@@ -109,25 +109,6 @@ void DataProvider::copyDB(QString filename, qint64 begin, qint64 end)
     db->copy(filename, begin, end);
 }
 
-void DataProvider::moveDB(QString const& newFilename)
-{
-    temporaryDB = false;
-
-    if(newFilename == filename)
-        return;
-
-    // delete the dbadapter so that the db connection is closed
-    db.reset();
-
-    if(QDir().rename(filename, newFilename)) {
-        QDir().remove(filename + "-wal");
-        QDir().remove(filename + "-shm");
-        filename = newFilename;
-    }
-
-    db = std::unique_ptr<DatabaseAdapter>(new DatabaseAdapter(filename));
-}
-
 AbstractDataSeries* DataProvider::getDataSeries(const QString &fullName) const
 {
     return dataSeries.value(fullName);
