@@ -297,7 +297,7 @@ void DatabaseAdapter::copy(QString other, qint64 begin, qint64 end)
     }
 
     // Don't forget to adjust the offsets
-    stmt = db.prepare("INSERT INTO other.data_string SELECT name, time + ?, value FROM main.data_string;" + where + ";");
+    stmt = db.prepare("INSERT INTO other.data_string SELECT name, time + ?, value FROM main.data_string" + where + ";");
     if(where.length() > 0) {
         stmt << -begin << begin << end;
     } else {
