@@ -122,6 +122,7 @@ private:
 signals:
     void timeStepChanged(int);
     void follow(bool following);
+    void record();
 };
 
 #endif // MAINWINDOW_H

@@ -15,6 +15,7 @@ class TimeLine;
 class TimeManager;
 class Cursor;
 class Selection;
+class RecordSelection;
 
 class MouseEventHandler
 {
@@ -54,6 +55,8 @@ signals:
 
     void zoomIn(qint64 start, qint64 end);
 
+    void record(qint64 start, qint64 end, bool recording);
+
 private slots:
     void onAddTrack();
     void onDelete(Track *t);
@@ -87,6 +90,7 @@ private:
     Selection *selection;
     Cursor *cursor;
     Cursor* maxCursor;
+    RecordSelection *recSel;
 
     TimeManager *timeManager;
 
