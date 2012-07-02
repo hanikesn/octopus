@@ -12,12 +12,12 @@ DatabaseAdapter::DatabaseAdapter(const QString &file)
 {
     initDB(db);
 
-    stmtAddDataFloat = db.prepare("INSERT INTO data_float (name, time, value) VALUES (?,?,?);");
-    stmtAddDataString = db.prepare("INSERT INTO data_string (name, time, value) VALUES (?,?,?);");
-    stmtSelectDataWithTimeFloat = db.prepare("SELECT time, value FROM data_float WHERE name=? and time>=? and time<=?;");
-    stmtSelectDataWithTimeString = db.prepare("SELECT time, value FROM data_string WHERE name=? and time>=? and time<=?;");
-    stmtSelectDataFloat = db.prepare("SELECT time, value FROM data_float WHERE name=?;");
-    stmtSelectDataString = db.prepare("SELECT time, value FROM data_string WHERE name=?;");
+    stmtAddDataFloat = db.prepare("INSERT INTO data_float (fullname, time, value) VALUES (?,?,?);");
+    stmtAddDataString = db.prepare("INSERT INTO data_string (fullname, time, value) VALUES (?,?,?);");
+    stmtSelectDataWithTimeFloat = db.prepare("SELECT time, value FROM data_float WHERE fullname=? and time>=? and time<=?;");
+    stmtSelectDataWithTimeString = db.prepare("SELECT time, value FROM data_string WHERE fullname=? and time>=? and time<=?;");
+    stmtSelectDataFloat = db.prepare("SELECT time, value FROM data_float WHERE fullname=?;");
+    stmtSelectDataString = db.prepare("SELECT time, value FROM data_string WHERE fullname=?;");
 }
 
 void DatabaseAdapter::initDB(Sqlite::DB &db)
@@ -27,24 +27,26 @@ void DatabaseAdapter::initDB(Sqlite::DB &db)
     db.execute("PRAGMA synchronous=OFF;");
     db.execute("PRAGMA foreign_keys = ON;");
 
-    if(db.execute("CREATE TABLE IF NOT EXISTS data_string (name TEXT, time INT, value TEXT);") != Sqlite::DB::Done)
+    if(db.execute("CREATE TABLE IF NOT EXISTS data_string (fullname TEXT, time INT, value TEXT);") != Sqlite::DB::Done)
         throw std::exception();
-    if(db.execute("CREATE INDEX IF NOT EXISTS time_name_idx on data_string(name,time);") != Sqlite::DB::Done)
+    if(db.execute("CREATE INDEX IF NOT EXISTS time_fullname_idx on data_string(fullname,time);") != Sqlite::DB::Done)
         throw std::exception();
 
-    if(db.execute("CREATE TABLE IF NOT EXISTS data_float (name TEXT, time INT, value FLOAT);") != Sqlite::DB::Done)
+    if(db.execute("CREATE TABLE IF NOT EXISTS data_float (fullname TEXT, time INT, value FLOAT);") != Sqlite::DB::Done)
         throw std::exception();
-    if(db.execute("CREATE INDEX IF NOT EXISTS time_name_idx on data_float(name,time);") != Sqlite::DB::Done)
+    if(db.execute("CREATE INDEX IF NOT EXISTS time_fullname_idx on data_float(fullname,time);") != Sqlite::DB::Done)
         throw std::exception();
 
     if(db.execute("CREATE TABLE IF NOT EXISTS senders (name TEXT PRIMARY KEY, devicetype TEXT);") != Sqlite::DB::Done)
         throw std::exception();
-    if(db.execute("CREATE INDEX IF NOT EXISTS name_idx on senders(name);") != Sqlite::DB::Done)
+    if(db.execute("CREATE INDEX IF NOT EXISTS fullname_idx on senders(name);") != Sqlite::DB::Done)
         throw std::exception();
 
-    if(db.execute("CREATE TABLE IF NOT EXISTS series (name TEXT, type TEXT, properties INT, misc TEXT, min FLOAT, max FLOAT, offset INT, sender TEXT, FOREIGN KEY(sender) REFERENCES senders(name));") != Sqlite::DB::Done)
+    if(db.execute("CREATE TABLE IF NOT EXISTS series (name TEXT, fullname TEXT, type TEXT, properties INT, misc TEXT, min FLOAT, max FLOAT, offset INT, sender TEXT, FOREIGN KEY(sender) REFERENCES senders(name));") != Sqlite::DB::Done)
         throw std::exception();
     if(db.execute("CREATE INDEX IF NOT EXISTS sender_name_idx on series(sender, name);") != Sqlite::DB::Done)
+        throw std::exception();
+    if(db.execute("CREATE INDEX IF NOT EXISTS fullname_idx on series(fullname);") != Sqlite::DB::Done)
         throw std::exception();
 }
 
@@ -146,19 +148,19 @@ Sqlite::PreparedStatement DatabaseAdapter::getRawData(QStringList const& keys, q
     QString where = "WHERE time>=? and time<=?";
 
     if(keys.length() > 0) {
-        where += " and (name=?";
+        where += " and (fullname=?";
     }
     for(int i = 1; i < keys.length(); i++) {
-        where += " OR name=?";
+        where += " OR fullname=?";
     }
     if(keys.length() > 0) {
         where += ") ";
     }
 
     QString query = "SELECT * FROM ( "
-            " SELECT name, time, value FROM data_float " + where +
+            " SELECT fullname, time, value FROM data_float " + where +
             " UNION ALL "
-            " SELECT name, time, value FROM data_string " + where +
+            " SELECT fullname, time, value FROM data_string " + where +
             " ) tmp ORDER BY tmp.time";
 
     Sqlite::PreparedStatement stmt = db.prepare(toStdString(query));
@@ -189,13 +191,14 @@ void DatabaseAdapter::addSender(EI::Description const& desc)
     if(stmtAddSender.execute() != stmtAddSender.done())
         throw std::exception();
 
-    Sqlite::PreparedStatement stmtAddSeries = db.prepare("INSERT OR REPLACE INTO series (name, type, properties, misc, min, max, offset, sender) VALUES (?,?,?,?,?,?,?,?)");
+    Sqlite::PreparedStatement stmtAddSeries = db.prepare("INSERT OR REPLACE INTO series (name, fullname, type, properties, misc, min, max, offset, sender) VALUES (?,?,?,?,?,?,?,?,?)");
 
     foreach(EI::DataSeriesInfoMap::value_type series, desc.getDataSeries())
     {
         //name TEXT, type TEXT, properties INT, misc TEXT, min FLOAT, max FLOAT, sender TEXT
         stmtAddSeries.reset();
         stmtAddSeries << series.first
+                      << desc.getSender() + "." + series.first
                       << convert(series.second.getType())
                       << (sqlite3_int64)series.second.getProperties()
                       << series.second.getMisc()
@@ -295,7 +298,7 @@ void DatabaseAdapter::copy(QString other, qint64 begin, qint64 end)
     }
 
     // Don't forget to adjust the offsets
-    stmt = db.prepare("INSERT INTO other.data_string SELECT name, time + ?, value FROM main.data_string" + where + ";");
+    stmt = db.prepare("INSERT INTO other.data_string SELECT fullname, time + ?, value FROM main.data_string" + where + ";");
     if(where.length() > 0) {
         stmt << -begin << begin << end;
     } else {
@@ -304,7 +307,7 @@ void DatabaseAdapter::copy(QString other, qint64 begin, qint64 end)
     if(stmt.execute() != stmt.done())
         throw std::exception();
 
-    stmt = db.prepare("INSERT INTO other.data_float SELECT name, time + ?, value FROM main.data_float" + where + ";");
+    stmt = db.prepare("INSERT INTO other.data_float SELECT fullname, time + ?, value FROM main.data_float" + where + ";");
     if(where.length() > 0) {
         stmt << -begin << begin << end;
     } else {
@@ -318,10 +321,10 @@ void DatabaseAdapter::copy(QString other, qint64 begin, qint64 end)
         throw std::exception();
 }
 
-qint64 DatabaseAdapter::getOffset(const QString &series) const
+qint64 DatabaseAdapter::getOffset(const QString& series) const
 {
-    Sqlite::PreparedStatement stmt = db.prepare("SELECT offset FROM series WHERE name=?;");
-    stmt << toStdString(series);
+    Sqlite::PreparedStatement stmt = db.prepare("SELECT offset FROM series WHERE fullname=?;");
+    stmt << series;
 
     qint64 offset;
 
@@ -338,24 +341,24 @@ qint64 DatabaseAdapter::getOffset(const QString &series) const
     return offset;
 }
 
-void DatabaseAdapter::changeOffset(const QString &series, qint64 offset)
+void DatabaseAdapter::changeOffset(const QString& series, qint64 offset)
 {
     db.execute("BEGIN;");
 
     qint64 newOffset = offset - getOffset(series);
 
-    Sqlite::PreparedStatement stmt = db.prepare("UPDATE data_float set time=time+? WHERE name=?;");
-    stmt << newOffset << toStdString(series);
+    Sqlite::PreparedStatement stmt = db.prepare("UPDATE data_float set time=time+? WHERE fullname=?;");
+    stmt << newOffset << series;
     if(stmt.execute() != stmt.done())
         throw std::exception();
 
-    stmt = db.prepare("UPDATE data_string set time=time+? WHERE name=?;");
-    stmt << newOffset << toStdString(series);
+    stmt = db.prepare("UPDATE data_string set time=time+? WHERE fullname=?;");
+    stmt << newOffset << series;
     if(stmt.execute() != stmt.done())
         throw std::exception();
 
-    stmt = db.prepare("UPDATE series SET offset=? WHERE name=?;");
-    stmt << offset << toStdString(series);
+    stmt = db.prepare("UPDATE series SET offset=? WHERE fullname=?;");
+    stmt << offset << series;
     if(stmt.execute() != stmt.done())
         throw std::exception();
 

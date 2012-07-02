@@ -38,6 +38,12 @@ inline Sqlite::Row& operator >>(Sqlite::Row& row, Value& value)
     return row;
 }
 
+inline Sqlite::PreparedStatement& operator <<(Sqlite::PreparedStatement& stmt, QString const& value)
+{
+    stmt << toStdString(value);
+    return stmt;
+}
+
 inline Sqlite::PreparedStatement& operator <<(Sqlite::PreparedStatement& stmt, Value const& value)
 {
     switch(value.getType())
@@ -46,7 +52,7 @@ inline Sqlite::PreparedStatement& operator <<(Sqlite::PreparedStatement& stmt, V
         stmt << value.asDouble();
         break;
     case Value::STRING:
-        stmt << toStdString(value.asString());
+        stmt << value.asString();
         break;
     case Value::EMPTY:
         break;

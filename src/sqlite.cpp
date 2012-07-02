@@ -35,7 +35,7 @@ PreparedStatement DB::prepare(const std::string& query) const
 {
     sqlite3_stmt* stmt;
     const char* unused;
-    // sqlite expects the null terminator to be included in the lenght
+    // sqlite expects the null terminator to be included in the length
     int ret = sqlite3_prepare_v2(db, query.c_str(), query.length() + 1, &stmt, &unused);
     if(ret != SQLITE_OK)
         throw Exception(db);
@@ -108,6 +108,14 @@ void PreparedStatement::bind(int index, const std::string& value)
 {
     assert(index <=  sqlite3_bind_parameter_count(stmt));
     int ret = sqlite3_bind_text(stmt, index, value.c_str(), value.length(), SQLITE_TRANSIENT);
+    if(ret != SQLITE_OK)
+        throw Exception(db);
+}
+
+void PreparedStatement::bind(int index, const char* value, int n)
+{
+    assert(index <=  sqlite3_bind_parameter_count(stmt));
+    int ret = sqlite3_bind_text(stmt, index, value, n, SQLITE_TRANSIENT);
     if(ret != SQLITE_OK)
         throw Exception(db);
 }

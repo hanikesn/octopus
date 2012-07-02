@@ -33,9 +33,9 @@ public:
 
     void copy(QString other, qint64 begin, qint64 end);
 
-    qint64 getOffset(QString const& series) const;
+    qint64 getOffset(const QString& series) const;
 
-    void changeOffset(QString const& series, qint64 offset);
+    void changeOffset(const QString& series, qint64 offset);
 
 private:
     void initDB(Sqlite::DB& db);
