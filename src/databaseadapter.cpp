@@ -321,9 +321,44 @@ void DatabaseAdapter::copy(QString other, qint64 begin, qint64 end)
 
 qint64 DatabaseAdapter::getOffset(const QString &series) const
 {
-    return 0;
+    Sqlite::PreparedStatement stmt = db.prepare("SELECT offset FROM series WHERE name=?;");
+    stmt << toStdString(series);
+
+    qint64 offset;
+
+    Sqlite::PreparedStatement::QueryIterator it = stmt.execute();
+
+    // no result, default to zero
+    if(it == stmt.done())
+        return 0;
+
+    Sqlite::Row r = *it;
+
+    r >> offset;
+
+    return offset;
 }
 
 void DatabaseAdapter::changeOffset(const QString &series, qint64 offset)
 {
+    db.execute("BEGIN;");
+
+    qint64 newOffset = offset - getOffset(series);
+
+    Sqlite::PreparedStatement stmt = db.prepare("UPDATE data_float set time=time+? WHERE name=?;");
+    stmt << newOffset << toStdString(series);
+    if(stmt.execute() != stmt.done())
+        throw std::exception();
+
+    stmt = db.prepare("UPDATE data_string set time=time+? WHERE name=?;");
+    stmt << newOffset << toStdString(series);
+    if(stmt.execute() != stmt.done())
+        throw std::exception();
+
+    stmt = db.prepare("UPDATE series SET offset=? WHERE name=?;");
+    stmt << offset << toStdString(series);
+    if(stmt.execute() != stmt.done())
+        throw std::exception();
+
+    db.execute("END;");
 }
