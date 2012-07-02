@@ -35,6 +35,8 @@ private:
     qint64 begin;
     qint64 end;
     qint64 max;
+
+    int currentVal();
 };
 
 #endif // TIMESCROLLBAR_H
