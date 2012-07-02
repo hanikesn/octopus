@@ -3,7 +3,7 @@
 #include "dataprovider.h"
 #include "value.h"
 
-AbstractDataSeries::AbstractDataSeries(DataProvider &dp, const QString &deviceName, const QString &name, Data::Properties properties):
+AbstractDataSeries::AbstractDataSeries(const DataProvider &dp, const QString &deviceName, const QString &name, Data::Properties properties):
     defaultScaleType(PlotSettings::NOT_SCALABLE),
     dp(dp),
     deviceName(deviceName),
@@ -40,7 +40,7 @@ qint64 AbstractDataSeries::offset() const
 void AbstractDataSeries::setOffset(qint64 newOffset)
 {
     if (newOffset != offset()) {
-        dp.getDB().changeOffset(fullName(), newOffset);
+        dp.changeOffset(fullName(), newOffset);
         emit offsetChanged();
     }
 }
