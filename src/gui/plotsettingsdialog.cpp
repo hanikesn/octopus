@@ -76,8 +76,9 @@ void PlotSettingsDialog::setupSourceTable(const QStringList &dataSeriesNames, co
         ui->sourceTable->setItem(row, SOURCENAMECOL, sourceItem);
 
         QSpinBox *offsetSpinner = new QSpinBox(ui->sourceTable);
-        offsetSpinner->setValue(preset.offset(sourceName));
+        // helps to set the max before you set the value ;)
         offsetSpinner->setMaximum(std::numeric_limits<int>::max());
+        offsetSpinner->setValue(preset.offset(sourceName));
         offsetSpinner->setEnabled(offsetsEditable);
         ui->sourceTable->setCellWidget(row, OFFSETCOL, offsetSpinner);
 
