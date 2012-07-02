@@ -1,10 +1,12 @@
 #include "CSVExporter.h"
 #include <QString>
+#include <QStringList>
 #include <QObject>
 #include "dataprovider.h"
 #include "qtextstream.h"
 #include "DBUtil.h"
 #include "value.h"
+#include "abstractdataseries.h"
 
 QString CSVExporter::getFileType()
 {
@@ -15,7 +17,14 @@ void CSVExporter::write(QIODevice &file, const DataProvider &dp, const QStringLi
 {
     QTextStream stream(&file);
 
-    Sqlite::PreparedStatement stmt = dp.getDB().getData(dataSeries, begin, end);
+    QMap<QString, qint64> offsetMap;
+
+    foreach(QString const& series, dataSeries)
+    {
+        offsetMap.insert(series, dp.getDataSeries(series)->offset);
+    }
+
+    Sqlite::PreparedStatement stmt = dp.getDB().getRawData(dataSeries, begin, end);
 
     QString name;
     qint64 timestamp;
@@ -24,6 +33,9 @@ void CSVExporter::write(QIODevice &file, const DataProvider &dp, const QStringLi
     for (auto it = stmt.execute(); it != Sqlite::DB::Done; ++it) {
         Sqlite::Row r = *it;
         r >> name >> timestamp >> val;
+        if(offsetMap.contains(name)) {
+            timestamp += offsetMap[name];
+        }
         stream << name << ";" << timestamp << ";" << val.asString() << "\n";
     }
 }
