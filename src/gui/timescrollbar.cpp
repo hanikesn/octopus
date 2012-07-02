@@ -19,8 +19,7 @@ void TimeScrollbar::onRangeChanged(qint64 begin, qint64 end)
     this->begin = begin;
     this->end = end;
 
-    int val = max / timePerTick() - pageStep();
-    setMaximum(qMax(0, val));
+    setMaximum(maximumValue());
 
     blockSignals(true);
     setValue(begin/timePerTick());
@@ -28,10 +27,9 @@ void TimeScrollbar::onRangeChanged(qint64 begin, qint64 end)
 }
 
 void TimeScrollbar::onNewMax(qint64 max)
-{
+{    
     this->max = max;
-    int val = max / timePerTick() - pageStep();
-    setMaximum(qMax(0, val));
+    setMaximum(maximumValue());
 }
 
 void TimeScrollbar::onScroll(int val)
@@ -45,5 +43,12 @@ void TimeScrollbar::onScroll(int val)
 void TimeScrollbar::resizeEvent(QResizeEvent *)
 {
     setPageStep(width());
+}
+
+int TimeScrollbar::maximumValue()
+{
+    qint64 tmp = qMax(end, max);
+    int val = tmp / timePerTick() - pageStep();
+    return qMax(0, val);
 }
 
