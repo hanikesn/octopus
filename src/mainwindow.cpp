@@ -95,7 +95,7 @@ void MainWindow::setUpButtonBars()
     recButton.setIcon(recButtonIcon);
 
     followDataButton.setCheckable(true);
-    followDataButton.setText(tr("ADf"));
+    followDataButton.setText(tr("Pin to new data"));
 
     // add buttons to the vertical layout in the toolbar
     layout.addWidget(&addTrackButton);
