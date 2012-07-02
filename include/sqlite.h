@@ -89,6 +89,7 @@ public:
     void reset();
 
     void bind(int index, const std::string& value);
+    void bind(int index, const char*, int n);
     void bind(int index, sqlite3_int64 value);
     void bind(int index, double value);
 
