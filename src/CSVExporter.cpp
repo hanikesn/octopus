@@ -13,6 +13,11 @@ QString CSVExporter::getFileType()
     return QObject::tr("CSV (*.csv)");
 }
 
+QString CSVExporter::getSuffix()
+{
+    return "csv";
+}
+
 void CSVExporter::write(QIODevice &file, const DataProvider &dp, const QStringList &dataSeries, qint64 begin, qint64 end)
 {
     QTextStream stream(&file);
