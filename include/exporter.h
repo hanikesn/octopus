@@ -20,6 +20,8 @@ public:
      */
     virtual QString getFileType() = 0;
 
+    virtual QString getSuffix() = 0;
+
     virtual void write(QIODevice& file, DataProvider const& dp, QStringList const& DataSeries, qint64 begin, qint64 end) = 0;
 };
 
