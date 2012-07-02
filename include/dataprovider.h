@@ -43,12 +43,8 @@ public:
     QString getDBFileName();
 
     /**
-     * @brief Moves the database to a new location
-     */
-    void moveDB(QString const& newFilename);
-
-    /**
      * @brief Copy all data within a given range to a new DB
+     * if range is -1, -1 copy all data
      */
     void copyDB(QString filename, qint64 begin, qint64 end);
 

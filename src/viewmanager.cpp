@@ -68,11 +68,7 @@ void ViewManager::save(QVariantMap *qvm)
 
 void ViewManager::saveDB(QString dbname, qint64 begin, qint64 end)
 {
-    if ((begin == -1) && (end == -1)) { // save all
-        dataProvider->moveDB(dbname);
-    } else {
-        dataProvider->copyDB(dbname, begin, end);
-    }
+    dataProvider->copyDB(dbname, begin, end);
 }
 
 QString ViewManager::getDBName()
@@ -131,7 +127,7 @@ void ViewManager::createNewView(QString dbfile)
     }
     exportHandler = new ExportHandler(this, dataProvider);
     setUpView();
-        addData(*dataProvider);
+        //addData(*dataProvider);
 }
 
 void ViewManager::setUpView()
