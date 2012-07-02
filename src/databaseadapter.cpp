@@ -94,7 +94,7 @@ template<>
 QMap<qint64, double> DatabaseAdapter::getData(QString const& key, qint64 start, qint64 end, qint64 offset) const
 {
     stmtSelectDataWithTimeFloat.reset();
-    stmtSelectDataWithTimeFloat << toStdString(key) << start << end;
+    stmtSelectDataWithTimeFloat << toStdString(key) << start + offset << end + offset;
 
     return fillMap<double>(stmtSelectDataWithTimeFloat, offset);
 }
@@ -103,7 +103,7 @@ template<>
 QMap<qint64, QString> DatabaseAdapter::getData(QString const& key, qint64 start, qint64 end, qint64 offset) const
 {
     stmtSelectDataWithTimeString.reset();
-    stmtSelectDataWithTimeString << toStdString(key) << start << end;
+    stmtSelectDataWithTimeString << toStdString(key) << start + offset << end + offset;
 
     return fillMap<QString>(stmtSelectDataWithTimeString, offset);
 }
@@ -149,6 +149,7 @@ static std::string convert(EI::Value::Type t)
 
 Sqlite::PreparedStatement DatabaseAdapter::getRawData(QStringList const& keys, qint64 start, qint64 end) const
 {
+    // TODO(steffen) offset beim abfragen beachten!
     QString where = "WHERE time>=? and time<=?";
 
     if(keys.length() > 0) {
