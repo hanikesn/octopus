@@ -12,11 +12,6 @@ class RecordSelection : public QWidget
 public:
     explicit RecordSelection(TimeManager *timeManager, QWidget *parent);
 
-    void hide();
-    void show();
-
-    void setRecording(bool rec) {recording = rec;}
-
 public slots:
     void setSelectionBegin(qint64 begin);
     void setSelectionEnd(qint64 end);
