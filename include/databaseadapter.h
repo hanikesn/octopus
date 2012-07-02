@@ -48,12 +48,6 @@ private:
     mutable Sqlite::PreparedStatement stmtSelectDataWithTimeFloat;
     mutable Sqlite::PreparedStatement stmtSelectDataString;
     mutable Sqlite::PreparedStatement stmtSelectDataFloat;
-
-    mutable Sqlite::PreparedStatement stmtAddSender;
-    mutable Sqlite::PreparedStatement stmtSelectSender;
-
-    mutable Sqlite::PreparedStatement stmtAddSeries;
-    mutable Sqlite::PreparedStatement stmtSelectSeries;
 };
 
 #endif // DATABASEADAPTER_H

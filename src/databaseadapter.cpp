@@ -12,18 +12,12 @@ DatabaseAdapter::DatabaseAdapter(const QString &file)
 {
     initDB(db);
 
-    stmtAddDataFloat = db.prepare("INSERT INTO data_float VALUES (?,?,?);");
-    stmtAddDataString = db.prepare("INSERT INTO data_string VALUES (?,?,?);");
+    stmtAddDataFloat = db.prepare("INSERT INTO data_float (name, time, value) VALUES (?,?,?);");
+    stmtAddDataString = db.prepare("INSERT INTO data_string (name, time, value) VALUES (?,?,?);");
     stmtSelectDataWithTimeFloat = db.prepare("SELECT time, value FROM data_float WHERE name=? and time>=? and time<=?;");
     stmtSelectDataWithTimeString = db.prepare("SELECT time, value FROM data_string WHERE name=? and time>=? and time<=?;");
     stmtSelectDataFloat = db.prepare("SELECT time, value FROM data_float WHERE name=?;");
     stmtSelectDataString = db.prepare("SELECT time, value FROM data_string WHERE name=?;");
-
-    stmtAddSender = db.prepare("INSERT OR REPLACE INTO senders VALUES (?,?)");
-    stmtSelectSender = db.prepare("SELECT * from senders");
-
-    stmtAddSeries = db.prepare("INSERT OR REPLACE INTO series VALUES (?,?,?,?,?,?,?)");
-    stmtSelectSeries = db.prepare("SELECT * from series where sender=?");
 }
 
 void DatabaseAdapter::initDB(Sqlite::DB &db)
@@ -48,7 +42,7 @@ void DatabaseAdapter::initDB(Sqlite::DB &db)
     if(db.execute("CREATE INDEX IF NOT EXISTS name_idx on senders(name);") != Sqlite::DB::Done)
         throw std::exception();
 
-    if(db.execute("CREATE TABLE IF NOT EXISTS series (name TEXT, type TEXT, properties INT, misc TEXT, min FLOAT, max FLOAT, sender TEXT, FOREIGN KEY(sender) REFERENCES senders(name));") != Sqlite::DB::Done)
+    if(db.execute("CREATE TABLE IF NOT EXISTS series (name TEXT, type TEXT, properties INT, misc TEXT, min FLOAT, max FLOAT, offset INT, sender TEXT, FOREIGN KEY(sender) REFERENCES senders(name));") != Sqlite::DB::Done)
         throw std::exception();
     if(db.execute("CREATE INDEX IF NOT EXISTS sender_name_idx on series(sender, name);") != Sqlite::DB::Done)
         throw std::exception();
@@ -190,10 +184,12 @@ static EI::Value::Type convertType(std::string const& str)
 
 void DatabaseAdapter::addSender(EI::Description const& desc)
 {
-    stmtAddSender.reset();
+    Sqlite::PreparedStatement stmtAddSender = db.prepare("INSERT OR REPLACE INTO senders (name, devicetype) VALUES (?,?)");
     stmtAddSender << desc.getSender() << desc.getDeviceType();
     if(stmtAddSender.execute() != stmtAddSender.done())
         throw std::exception();
+
+    Sqlite::PreparedStatement stmtAddSeries = db.prepare("INSERT OR REPLACE INTO series (name, type, properties, misc, min, max, offset, sender) VALUES (?,?,?,?,?,?,?,?)");
 
     foreach(EI::DataSeriesInfoMap::value_type series, desc.getDataSeries())
     {
@@ -205,6 +201,7 @@ void DatabaseAdapter::addSender(EI::Description const& desc)
                       << series.second.getMisc()
                       << series.second.getMin()
                       << series.second.getMax()
+                      << (sqlite3_int64)0 // default offset is zero
                       << desc.getSender();
         if(stmtAddSeries.execute() != stmtAddSeries.done())
             throw std::exception();
@@ -213,9 +210,8 @@ void DatabaseAdapter::addSender(EI::Description const& desc)
 
 QList<EI::Description> DatabaseAdapter::getSenders()
 {
-    stmtSelectSender.reset();
+    Sqlite::PreparedStatement stmtSelectSender = db.prepare("SELECT * from senders");
     auto result = stmtSelectSender.execute();
-
 
     QList<QPair<std::string, std::string>> senders;
     std::for_each(result, stmtSelectSender.done(),
@@ -226,8 +222,8 @@ QList<EI::Description> DatabaseAdapter::getSenders()
         senders.append(QPair<std::string, std::string>(name, device_type));
     });
 
+    Sqlite::PreparedStatement stmtSelectSeries = db.prepare("SELECT name, type, properties, misc, min, max from series where sender=?");
     QList<EI::Description> list;
-
     foreach(auto const& p, senders)
     {
         // name TEXT, type TEXT, properties INT, misc TEXT, min FLOAT, max FLOAT, sender TEXT
@@ -238,7 +234,7 @@ QList<EI::Description> DatabaseAdapter::getSenders()
         std::for_each(series_result, stmtSelectSeries.done(),
                       [&list, &desc](Sqlite::Row r)
         {
-            std::string name, type, misc, muell;
+            std::string name, type, misc;
             sqlite3_int64 props;
             double min, max;
             r >> name
@@ -246,8 +242,7 @@ QList<EI::Description> DatabaseAdapter::getSenders()
               >> props
               >> misc
               >> min
-              >> max
-              >> muell;
+              >> max;
             desc.addDataSeries(name, EI::DataSeriesInfo(convertType(type),props, misc, min, max));
         });
         list.append(desc);
