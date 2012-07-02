@@ -30,9 +30,6 @@ DataProvider::DataProvider(QString const& file, QObject *parent) :
             addSeries(fromStdString(d.getSender()), fromStdString(info.first), info.second);
         }
     }
-
-    qint64 min, max;
-    db->getMinMaxTimeStamp(min, max);
 }
 
 DataProvider::~DataProvider()
