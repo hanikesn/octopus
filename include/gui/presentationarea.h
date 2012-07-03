@@ -111,6 +111,7 @@ private slots:
     void onDelete(Track *t);
 
     void onPlotSettings();
+
     /**
       * Is called when the signal rangeChange(qint64, qint64) is emitted by the timeManager.
       * Updates the tracks to the new range.
