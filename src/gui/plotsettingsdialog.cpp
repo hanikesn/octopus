@@ -4,14 +4,16 @@
 
 #include <QComboBox>
 #include <QDebug>
+#include <QDoubleSpinBox>
 #include <QRadioButton>
-#include <QSpinBox>
+#include <QSettings>
 #include <limits>
 
 static const int SOURCENAMECOL = 0;
 static const int OFFSETCOL = 1;
 static const int SCALECOL = 2;
 static const int COLCOUNT = 3;
+static const int OFFSETDIVISOR = 1000;
 
 PlotSettingsDialog::PlotSettingsDialog(const QStringList &dataSeriesNames,
                                        const PlotSettings &preset,
@@ -58,7 +60,7 @@ void PlotSettingsDialog::setupSourceTable(const QStringList &dataSeriesNames, co
     ui->sourceTable->setHorizontalHeaderItem(SOURCENAMECOL, sourceNameColHeader);
 
     QTableWidgetItem *offsetColHeader = new QTableWidgetItem(tr("Offset"));
-    offsetColHeader->setToolTip(tr("The offset in microseconds.\n\n"
+    offsetColHeader->setToolTip(tr("The offset in milliseconds.\n\n"
                                    "This value is added to each timestamp\n"
                                    "of the respective data series.\n"
                                    "You can use this for example to adjust for\n"
@@ -66,7 +68,11 @@ void PlotSettingsDialog::setupSourceTable(const QStringList &dataSeriesNames, co
     ui->sourceTable->setHorizontalHeaderItem(OFFSETCOL, offsetColHeader);
 
     QTableWidgetItem *scaleColHeader = new QTableWidgetItem(tr("Scale Type"));
-    scaleColHeader->setToolTip(tr("The type of scale to be used for the data series."));
+    if (offsetsEditable) {
+        scaleColHeader->setToolTip(tr("The <i>default</i> type of scale to be used for the data series."));
+    } else {
+        scaleColHeader->setToolTip(tr("The type of scale to be used for the data series."));
+    }
     ui->sourceTable->setHorizontalHeaderItem(SCALECOL, scaleColHeader);
 
     QHeaderView *hHeader = ui->sourceTable->horizontalHeader();
@@ -74,6 +80,7 @@ void PlotSettingsDialog::setupSourceTable(const QStringList &dataSeriesNames, co
     hHeader->setResizeMode(SOURCENAMECOL, QHeaderView::Stretch);
     hHeader->setResizeMode(OFFSETCOL, QHeaderView::ResizeToContents);
     hHeader->setResizeMode(SCALECOL, QHeaderView::ResizeToContents);
+    hHeader->setMinimumSectionSize(120);
 
     QHeaderView *vHeader = ui->sourceTable->verticalHeader();
     vHeader->setVisible(false);
@@ -87,10 +94,13 @@ void PlotSettingsDialog::setupSourceTable(const QStringList &dataSeriesNames, co
         sourceItem->setFlags(sourceItem->flags() & ~Qt::ItemIsEditable);
         ui->sourceTable->setItem(row, SOURCENAMECOL, sourceItem);
 
-        QSpinBox *offsetSpinner = new QSpinBox(ui->sourceTable);
-        // helps to set the max before you set the value ;)
-        offsetSpinner->setMaximum(std::numeric_limits<int>::max());
-        offsetSpinner->setValue(preset.offset(sourceName));
+        QDoubleSpinBox *offsetSpinner = new QDoubleSpinBox(ui->sourceTable);
+        offsetSpinner->setAlignment(Qt::AlignRight);
+        // helps to set the min/max before you set the value ;)
+        offsetSpinner->setMinimum(0.0);
+        offsetSpinner->setMaximum(std::numeric_limits<double>::max());
+        offsetSpinner->setDecimals(qRound(qLn(OFFSETDIVISOR)/qLn(10)));
+        offsetSpinner->setValue(preset.offset(sourceName)/OFFSETDIVISOR);
         offsetSpinner->setEnabled(offsetsEditable);
         ui->sourceTable->setCellWidget(row, OFFSETCOL, offsetSpinner);
 
@@ -142,9 +152,9 @@ PlotSettings PlotSettingsDialog::getResult()
     for (int row = 0; row < ui->sourceTable->rowCount(); row++) {
         QString sourceName = ui->sourceTable->item(row, SOURCENAMECOL)->text();
 
-        QSpinBox *offsetSpinner = qobject_cast<QSpinBox*>(ui->sourceTable->cellWidget(row, OFFSETCOL));
+        QDoubleSpinBox *offsetSpinner = qobject_cast<QDoubleSpinBox*>(ui->sourceTable->cellWidget(row, OFFSETCOL));
         if (offsetSpinner) {
-            settings.setOffset(sourceName, offsetSpinner->value());
+            settings.setOffset(sourceName, offsetSpinner->value()*OFFSETDIVISOR);
         }
 
         QComboBox *scaleCombo = qobject_cast<QComboBox*>(ui->sourceTable->cellWidget(row, SCALECOL));
