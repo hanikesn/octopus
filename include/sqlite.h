@@ -5,6 +5,9 @@
 #include <string>
 #include <iterator>
 
+/**
+ * A thin wrapper for sqlite
+ */
 namespace Sqlite
 {
 
@@ -25,6 +28,10 @@ public:
     const std::string msg;
 };
 
+/**
+ * @brief Use this class to access the rows in the result of a query
+ *
+ */
 class Row
 {
     friend class PreparedStatement;
@@ -65,6 +72,9 @@ public:
     PreparedStatement(PreparedStatement &&);
     PreparedStatement& operator=(PreparedStatement&&);
 
+    /**
+     * A QueryIterator is invalid as soon as the PreparedStatement that created it is destroyed.
+     */
     class QueryIterator : public std::iterator< std::input_iterator_tag, Row >
     {
         friend class PreparedStatement;
@@ -106,6 +116,10 @@ private:
     int index;
 };
 
+/**
+ * @brief Open a SQlite database and execute queries on it
+ *
+ */
 class DB
 {
     // no copy
@@ -115,7 +129,7 @@ public:
     DB(std::string name);
     ~DB();
 
-    PreparedStatement::QueryIterator execute(std::string const& query);
+    bool execute(std::string const& query);
 
     PreparedStatement prepare(const std::string& query) const;
 

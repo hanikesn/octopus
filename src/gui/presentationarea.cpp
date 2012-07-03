@@ -198,7 +198,7 @@ PresentationArea::PresentationArea(const DataProvider &dataProvider,
     connect(&dataProvider, SIGNAL(newMax(qint64)), timeManager, SLOT(onNewMax(qint64)));
     connect(&dataProvider, SIGNAL(newMax(qint64)), this, SLOT(onNewMax(qint64)));
 
-    timeManager->onMarginsChanged(50, 50);
+    timeManager->onMarginsChanged(50, 0);
 }
 
 PresentationArea::~PresentationArea()
