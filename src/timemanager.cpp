@@ -168,9 +168,8 @@ void TimeManager::onTimeout()
 
     if (following)
         currentTime = maximum;
-    else {
-        currentTime = bc::duration_cast<bc::microseconds>(now - startTime).count();
-    }
+    else
+        currentTime = bc::duration_cast<bc::microseconds>(now - startTime).count();    
 
     // stop playing if end is reached and we are not expecting new data
     if ((currentTime > getMaximum()) && !following) {
@@ -221,9 +220,10 @@ void TimeManager::onPlay()
         playing = false;
         if (!live)
             timer->stop();
-        following = false;
+        following = false; // following can't be active if playing isn't active
     } else {
         playing = true;        
+        // change the visible range in case currentTime is not visible
         if (currentTime > getHighVisRange() || currentTime < getLowVisRange()) {
             center(currentTime);
         }
