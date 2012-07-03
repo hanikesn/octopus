@@ -1,7 +1,9 @@
 #ifndef STARTSCREEN_H
 #define STARTSCREEN_H
 
-#include "ui_startscreen.h"
+namespace Ui {
+    class StartScreen;
+}
 
 #include <QDialog>
 
@@ -10,15 +12,14 @@ class StartScreen : public QDialog
     Q_OBJECT
 public:
     explicit StartScreen(QWidget *parent);
+    ~StartScreen();
 
-    enum Type {LOAD, NEW};
+    enum Type {CANCEL, LOAD, NEW};
 
     Type showScreen();
 
-public slots:
-
 private:
-    Ui::StartScreen ui;
+    Ui::StartScreen* ui;
     Type type;
 
 private slots:

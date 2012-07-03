@@ -4,7 +4,7 @@
 #include "dataprovider.h"
 #include "networkadapter.h"
 #include "mainwindow.h"
-#include "gui/presentationarea.h"
+#include "gui/startscreen.h"
 
 #include <QAction>
 #include <QVBoxLayout>
@@ -17,7 +17,6 @@
 
 
 class TrackScene;
-class PresentationArea;
 class Recorder;
 class ExportHandler;
 class ViewManager;
@@ -31,7 +30,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
     
 public:
-    explicit MainWindow(QWidget *parent = 0);
+    explicit MainWindow(StartScreen::Type type, QWidget *parent = 0);
     ~MainWindow();
 
 protected:
