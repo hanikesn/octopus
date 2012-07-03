@@ -63,7 +63,7 @@ void ExportHandler::onExport(qint64 begin, qint64 end)
     Exporter& exporter = exporterFactory.getExporter(dialog.selectedNameFilter());
 
     if (!fileNames.first().endsWith(exporter.getSuffix()))
-        fileNames.first().append(exporter.getSuffix());
+        fileNames.first().append("." + exporter.getSuffix());
 
     QFile file(fileNames.first());
     if (!file.open(QIODevice::WriteOnly)) {
