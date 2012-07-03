@@ -35,7 +35,7 @@ void CSVExporter::write(QIODevice &file, const DataProvider &dp, const QStringLi
     qint64 timestamp;
     Value val;
 
-    for (auto it = stmt.execute(); it != Sqlite::DB::Done; ++it) {
+    for (auto it = stmt.execute(); it != stmt.done(); ++it) {
         Sqlite::Row r = *it;
         r >> name >> timestamp >> val;
         if(offsetMap.contains(name)) {

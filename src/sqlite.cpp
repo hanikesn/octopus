@@ -29,8 +29,6 @@ DB::~DB()
     sqlite3_close(db);
 }
 
-const PreparedStatement::QueryIterator DB::Done;
-
 PreparedStatement DB::prepare(const std::string& query) const
 {
     sqlite3_stmt* stmt;
@@ -64,7 +62,7 @@ PreparedStatement& PreparedStatement::operator =(PreparedStatement && other)
 
 bool DB::execute(std::string const& query)
 {
-    return prepare(query).execute() == Done;
+    return prepare(query).execute() == PreparedStatement::QueryIterator();
 }
 
 
