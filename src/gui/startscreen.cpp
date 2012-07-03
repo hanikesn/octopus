@@ -1,19 +1,19 @@
 #include "gui/startscreen.h"
+#include "ui_startscreen.h"
 
 #include <QSpinBox>
-#include <QDebug>
 
 StartScreen::StartScreen(QWidget *parent) :
     QDialog(parent),
-    type(NEW)
+    type(CANCEL)
 {
-    ui.setupUi(this);
+    ui = new Ui::StartScreen;
+    ui->setupUi(this);
+}
 
-    ui.newButton->setStyleSheet("border: 0; margin: 0px;");
-    ui.loadButton->setStyleSheet("border: 0; margin: 0px;");
-
-    ui.newButton->setFocusPolicy(Qt::ClickFocus);
-    ui.loadButton->setFocusPolicy(Qt::ClickFocus);
+StartScreen::~StartScreen()
+{
+    delete ui;
 }
 
 StartScreen::Type StartScreen::showScreen()

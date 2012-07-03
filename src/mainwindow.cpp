@@ -21,10 +21,10 @@
 
 const QString MainWindow::TITLE = "Octopus 0.1";
 
-MainWindow::MainWindow(QWidget *parent) :
+MainWindow::MainWindow(StartScreen::Type type, QWidget *parent) :
     QMainWindow(parent),        
     viewManager(0)
-{    
+{
     ui = new Ui::MainWindow();
     ui->setupUi(this);
 
@@ -48,21 +48,12 @@ MainWindow::MainWindow(QWidget *parent) :
     setUpButtonBars();
     setUpMenu();
 
-    //TODO(domi): Kommentare wegmachen
-    //TODO(steffen): an neuen viewmanager anpassen
-//    StartScreen *s = new StartScreen(this);
-//    if (s->showScreen() == StartScreen::LOAD) {
-//        viewManager->createNewView();
-//        if (onLoad().isEmpty()) { // file choose dialog was cancelled
-//            viewManager->createNewView();
-//            onNew();
-//        }
-//    }
-//    else {
-//        viewManager->createNewView();
-//        onNew();
-//    }
-    onNew();
+    if(type == StartScreen::LOAD) {
+        if(onLoad().isEmpty())
+            onNew();
+    } else {
+        onNew();
+    }
 }
 
 MainWindow::~MainWindow()
@@ -291,7 +282,7 @@ void MainWindow::save(bool saveAs, qint64 begin, qint64 end)
 
 int MainWindow::checkForUnsavedChanges()
 {
-    if (!viewManager || !viewManager->hasUnsavedChanges()) return -1;
+    if (!viewManager || !viewManager->hasUnsavedChanges()) return QMessageBox::Discard;
 
     QMessageBox msg;
     msg.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Abort);
@@ -325,25 +316,23 @@ QString MainWindow::getSaveFileName(bool saveAs)
         return projectPath;
 }
 
-void MainWindow::closeEvent(QCloseEvent */*ce*/)
+void MainWindow::closeEvent(QCloseEvent *ce)
 {
-    //TODO(domi): Kommentare wegmachen:
-//    if (viewManager->isRecording()) { // ask whether recording should be stopped
-//        // simulate button click
-//        viewManager->onRecord();
+    if (viewManager && viewManager->isRecording()) { // ask whether recording should be stopped
+        // simulate button click
+        viewManager->onRecord();
 
-//        if (viewManager->isRecording()) { // if there is still a running recording, the user continued!
-//            ce->ignore();
-//            return; // dont exit the program
-//        }
-//        onRecord(); // in case the recording was stopped, set corresponding state of rec button.
-//    }
+        if (viewManager->isRecording()) { // if there is still a running recording, the user continued!
+            ce->ignore();
+            return; // dont exit the program
+        }
+    }
 
-//    // usual check for unsaved changes in the project
-//    if (checkForUnsavedChanges() != QMessageBox::Abort)
-//        QMainWindow::closeEvent(ce);
-//    else
-//        ce->ignore();
+    // usual check for unsaved changes in the project
+    if (checkForUnsavedChanges() != QMessageBox::Abort)
+        QMainWindow::closeEvent(ce);
+    else
+        ce->ignore();
 }
 
 void MainWindow::onRecordEnabled(bool recording)
