@@ -37,6 +37,9 @@ public:
      */
     QList<AbstractDataSeries*> getDataSeries() const;
 
+    /**
+     * Change the offset of a series
+     */
     void changeOffset(const QString &dataSeriesName, qint64 offset);
 
     /**
@@ -52,6 +55,9 @@ public:
 
     DatabaseAdapter const& getDB() const;
 
+    /**
+     * close the DB explicitly this is used because if we use deleteLater the DB would be closed to late.
+     */
     void closeDB();
 
     void save(QVariantMap *qvm);
@@ -60,6 +66,9 @@ public:
 signals:
     void unknownDataSeries();
 
+    /**
+     * emitted when a new data packet arrived
+     */
     void newMax(qint64 maxTimestamp);
 
 public slots:

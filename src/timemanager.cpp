@@ -19,6 +19,9 @@ TimeManager::TimeManager(Clock::time_point startTime, QObject* parent):
     playing(false),
     following(false),
     timer(new QTimer(this)),
+    marginLeft(0), marginRight(0),
+    width(0),
+    unsavedChanges(false),
     absoluteStartTime(startTime)
 {
     timer->setSingleShot(false);

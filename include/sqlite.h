@@ -5,6 +5,9 @@
 #include <string>
 #include <iterator>
 
+/**
+ * A thin wrapper for sqlite
+ */
 namespace Sqlite
 {
 
@@ -12,6 +15,9 @@ class DB;
 class PreparedStatement;
 class Row;
 
+/**
+ * @brief This exception is thrown whenever a problem with sqlite occurs
+ */
 class Exception : public virtual std::exception
 {
 public:
@@ -25,6 +31,10 @@ public:
     const std::string msg;
 };
 
+/**
+ * @brief Use this class to access the rows in the result of a query
+ *
+ */
 class Row
 {
     friend class PreparedStatement;
@@ -37,8 +47,14 @@ public:
 
     std::string getText(int index);
 
+    /**
+     * @brief Get the sqlite type of the current column
+     */
     int getType();
 
+    /**
+     * @brief Use these method to query the columns one after another
+     */
     Row& operator>>(std::string& value);
     Row& operator>>(double& value);
     Row& operator>>(sqlite3_int64& value);
@@ -65,6 +81,11 @@ public:
     PreparedStatement(PreparedStatement &&);
     PreparedStatement& operator=(PreparedStatement&&);
 
+    /**
+     * Use this class for access to the result rows.
+     *
+     * A QueryIterator is invalid as soon as the PreparedStatement that created it is destroyed.
+     */
     class QueryIterator : public std::iterator< std::input_iterator_tag, Row >
     {
         friend class PreparedStatement;
@@ -73,6 +94,9 @@ public:
     public:
         QueryIterator() : stmt(0) {}
 
+        /**
+         * Warning: Rows will be invalid once the query is incremented or is destroyed
+         */
         Row operator*();
         Row operator->();
 
@@ -86,18 +110,34 @@ public:
         PreparedStatement* stmt;
     };
 
+    /**
+     * @brief reset the statement so that it can be used again.
+     */
     void reset();
 
+    /**
+     * @brief Use these methods to bind the values manually to the statement.
+     */
     void bind(int index, const std::string& value);
     void bind(int index, const char*, int n);
     void bind(int index, sqlite3_int64 value);
     void bind(int index, double value);
 
+    /**
+     * @brief "feed" new to data into the query. Use these methods to bind values one after another to the statement.
+     */
     PreparedStatement& operator<<(std::string const& value);
     PreparedStatement& operator<<(sqlite3_int64 value);
     PreparedStatement& operator<<(double value);
 
+    /**
+     * @brief execute a query and get a iterator to the result.
+     * The Iterator should be incremented until it equals done()
+     */
     QueryIterator execute();
+    /**
+     * @brief Check against this iterator to know wether the query was successful
+     */
     QueryIterator done();
 
 private:
@@ -106,6 +146,10 @@ private:
     int index;
 };
 
+/**
+ * @brief Open a SQlite database and execute queries on it
+ *
+ */
 class DB
 {
     // no copy
@@ -115,11 +159,16 @@ public:
     DB(std::string name);
     ~DB();
 
-    PreparedStatement::QueryIterator execute(std::string const& query);
+    /**
+     * Execute a simple query without results.
+     * @return true if successful
+     */
+    bool execute(std::string const& query);
 
+    /**
+     * @brief Prepare a new query
+     */
     PreparedStatement prepare(const std::string& query) const;
-
-    static const PreparedStatement::QueryIterator Done;
 
 private:
     sqlite3* db;

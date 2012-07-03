@@ -291,7 +291,8 @@ int MainWindow::checkForUnsavedChanges()
     msg.setButtonText(QMessageBox::Discard, tr("Discard"));
     msg.setButtonText(QMessageBox::Abort, tr("Cancel"));
     msg.setDefaultButton(QMessageBox::Save);
-    msg.setText(tr("This project contains unsaved changes or new data which has been received in the background. Do you wish to save the current state?"));
+    msg.setText(tr("This project contains unsaved changes or new data which have been received in the background.\n"
+                   "Do you wish to save the current state?"));
     int result = msg.exec();
     if (result == QMessageBox::Save)
         save(false);

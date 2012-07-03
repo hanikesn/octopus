@@ -39,7 +39,9 @@ public:
                 (event->modifiers() == Qt::ShiftModifier)) {
             createSelection = true;
             selection.show();
-            selection.setSelectionBegin(timeManager.convertPosToTime(event->pos().x()));
+            qint64 time = timeManager.convertPosToTime(event->pos().x());
+            selection.setSelectionBegin(time);
+            selection.setSelectionEnd(time);
             event->accept();
         }
 
@@ -198,7 +200,7 @@ PresentationArea::PresentationArea(const DataProvider &dataProvider,
     connect(&dataProvider, SIGNAL(newMax(qint64)), timeManager, SLOT(onNewMax(qint64)));
     connect(&dataProvider, SIGNAL(newMax(qint64)), this, SLOT(onNewMax(qint64)));
 
-    timeManager->onMarginsChanged(50, 50);
+    timeManager->onMarginsChanged(50, 0);
 }
 
 PresentationArea::~PresentationArea()

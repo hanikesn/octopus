@@ -42,12 +42,6 @@ PlotSettings::ScaleType InterpolatingGraph::getScaleType() const
     return currentScaleType;
 }
 
-void InterpolatingGraph::setScaleType(PlotSettings::ScaleType scaleType)
-{
-    rescale(currentScalingMode, scaleType);
-    updatePlot(currentScalingMode);
-}
-
 QString InterpolatingGraph::dataSeriesName()
 {
     return series.fullName();
@@ -72,7 +66,7 @@ void InterpolatingGraph::initialize(QCPGraph *graph, const DoubleSeries &series)
 
     auto const& data = series.getData();
     for (auto i = data.constBegin(); i != data.constEnd(); ++i) {
-        updateMetadata(i.value());
+//        updateMetadata(i.value());
         graph->addData(i.key(), i.value());
     }
 }
@@ -117,9 +111,18 @@ void InterpolatingGraph::scaleToRange(double lower, double upper, PlotSettings::
         return;
     }
 
+    if (lower > upper) {
+        // not a valid range
+        return;
+    }
+
     graph->clearData();
 
     auto const& data = series.getData();
+    if (data.keys().takeLast() != lastUpdate) {
+        updateMetadata(series.getData(lastUpdate, data.keys().takeLast()));
+    }
+
     // rescale to new range
     for (auto i = data.constBegin(); i != data.constEnd(); ++i) {
         double scaledValue = i.value();
@@ -135,7 +138,7 @@ void InterpolatingGraph::scaleToRange(double lower, double upper, PlotSettings::
                 // negative interval is wider
 
                 // The log scale boundaries may never be zero or carry the wrong sign.
-                // Cut off above rangeFac or rangeFac*currentMin, whichever is closer to zero.
+                // Cut off above rangeFac or currentMax, whichever is closer to zero (while still negative).
                 double logScaleMin = std::min(-rangeFac, currentMin);
                 double logScaleMax = std::min(-rangeFac, currentMax);
 
@@ -149,11 +152,12 @@ void InterpolatingGraph::scaleToRange(double lower, double upper, PlotSettings::
                 // positive interval is wider
 
                 // The log scale boundaries may never be zero or carry the wrong sign.
-                // Cut off below rangeFac or rangeFac*currentMax, whichever is closer to zero.
+                // Cut off below rangeFac or currentMin, whichever is closer to zero (while still positive).
                 double logScaleMin = std::max(rangeFac, currentMin);
                 double logScaleMax = std::max(rangeFac, currentMax);
 
                 if (i.value() < logScaleMin) {
+                    // invalid value. Draw outside visible area.
                     scaledValue = lower - (upper - lower)*0.75;
                 } else {
                     scaledValue = lower + ((qLn(i.value()/logScaleMin)/log10) / (qLn(logScaleMax/logScaleMin)/log10)) * (upper - lower);
@@ -195,6 +199,13 @@ void InterpolatingGraph::onOffsetChanged()
     initialize(graph, series);
     rescale(currentScalingMode, currentScaleType);
     updatePlot(currentScalingMode);
+}
+
+void InterpolatingGraph::updateMetadata(QMap<qint64, double> data)
+{
+    for (QMap<qint64, double>::const_iterator i = data.constBegin(); i != data.constEnd(); i++) {
+        updateMetadata(i.value());
+    }
 }
 
 void InterpolatingGraph::updateMetadata(double value)
