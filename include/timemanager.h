@@ -41,13 +41,13 @@ public:
 
     /**
       * Loads the necessary information(low-/highVisRange and cursor time) from the QVariantMap
-      * @param qvm The map in which the information needs to be stored.
+      * @param qvm The map in which the information is stored.
       */
     void load(QVariantMap *qvm);
 
     /**
       * Stores the necessary information(low-/highVisRange and cursor time) to the QVariantMap
-      * @param qvm The map in which the information is stored.
+      * @param qvm The map in which the information needs to be stored.
       */
     void save(QVariantMap *qvm);
 
