@@ -62,9 +62,9 @@ PreparedStatement& PreparedStatement::operator =(PreparedStatement && other)
     return *this;
 }
 
-PreparedStatement::QueryIterator DB::execute(std::string const& query)
+bool DB::execute(std::string const& query)
 {
-    return prepare(query).execute();
+    return prepare(query).execute() == Done;
 }
 
 
@@ -159,6 +159,7 @@ PreparedStatement::QueryIterator& PreparedStatement::QueryIterator::operator++()
             assert(ret==SQLITE_ROW);
         }
     }
+
     return *this;
 }
 

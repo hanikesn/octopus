@@ -27,26 +27,26 @@ void DatabaseAdapter::initDB(Sqlite::DB &db)
     db.execute("PRAGMA synchronous=OFF;");
     db.execute("PRAGMA foreign_keys = ON;");
 
-    if(db.execute("CREATE TABLE IF NOT EXISTS data_string (fullname TEXT, time INT, value TEXT);") != Sqlite::DB::Done)
+    if(!db.execute("CREATE TABLE IF NOT EXISTS data_string (fullname TEXT, time INT, value TEXT);"))
         throw std::exception();
-    if(db.execute("CREATE INDEX IF NOT EXISTS time_fullname_idx on data_string(fullname,time);") != Sqlite::DB::Done)
-        throw std::exception();
-
-    if(db.execute("CREATE TABLE IF NOT EXISTS data_float (fullname TEXT, time INT, value FLOAT);") != Sqlite::DB::Done)
-        throw std::exception();
-    if(db.execute("CREATE INDEX IF NOT EXISTS time_fullname_idx on data_float(fullname,time);") != Sqlite::DB::Done)
+    if(!db.execute("CREATE INDEX IF NOT EXISTS time_fullname_idx on data_string(fullname,time);"))
         throw std::exception();
 
-    if(db.execute("CREATE TABLE IF NOT EXISTS senders (name TEXT PRIMARY KEY, devicetype TEXT);") != Sqlite::DB::Done)
+    if(!db.execute("CREATE TABLE IF NOT EXISTS data_float (fullname TEXT, time INT, value FLOAT);"))
         throw std::exception();
-    if(db.execute("CREATE INDEX IF NOT EXISTS fullname_idx on senders(name);") != Sqlite::DB::Done)
+    if(!db.execute("CREATE INDEX IF NOT EXISTS time_fullname_idx on data_float(fullname,time);"))
         throw std::exception();
 
-    if(db.execute("CREATE TABLE IF NOT EXISTS series (name TEXT, fullname TEXT, type TEXT, properties INT, misc TEXT, min FLOAT, max FLOAT, offset INT, sender TEXT, FOREIGN KEY(sender) REFERENCES senders(name));") != Sqlite::DB::Done)
+    if(!db.execute("CREATE TABLE IF NOT EXISTS senders (name TEXT PRIMARY KEY, devicetype TEXT);"))
         throw std::exception();
-    if(db.execute("CREATE INDEX IF NOT EXISTS sender_name_idx on series(sender, name);") != Sqlite::DB::Done)
+    if(!db.execute("CREATE INDEX IF NOT EXISTS fullname_idx on senders(name);"))
         throw std::exception();
-    if(db.execute("CREATE INDEX IF NOT EXISTS fullname_idx on series(fullname);") != Sqlite::DB::Done)
+
+    if(!db.execute("CREATE TABLE IF NOT EXISTS series (name TEXT, fullname TEXT, type TEXT, properties INT, misc TEXT, min FLOAT, max FLOAT, offset INT, sender TEXT, FOREIGN KEY(sender) REFERENCES senders(name));"))
+        throw std::exception();
+    if(!db.execute("CREATE INDEX IF NOT EXISTS sender_name_idx on series(sender, name);"))
+        throw std::exception();
+    if(!db.execute("CREATE INDEX IF NOT EXISTS fullname_idx on series(fullname);"))
         throw std::exception();
 }
 
@@ -284,10 +284,10 @@ void DatabaseAdapter::copy(QString other, qint64 begin, qint64 end)
     if(stmt.execute() != stmt.done())
         throw std::exception();
 
-    if(db.execute("INSERT OR REPLACE INTO other.senders SELECT * FROM main.senders;") != db.Done)
+    if(!db.execute("INSERT OR REPLACE INTO other.senders SELECT * FROM main.senders;"))
         throw std::exception();
 
-    if(db.execute("INSERT OR REPLACE INTO other.series SELECT * FROM main.series;") != db.Done)
+    if(!db.execute("INSERT OR REPLACE INTO other.series SELECT * FROM main.series;"))
         throw std::exception();
 
     std::string where;
@@ -317,7 +317,7 @@ void DatabaseAdapter::copy(QString other, qint64 begin, qint64 end)
         throw std::exception();
 
     // TODO should always execute
-    if(db.execute("DETACH DATABASE other;") != db.Done)
+    if(!db.execute("DETACH DATABASE other;"))
         throw std::exception();
 }
 
