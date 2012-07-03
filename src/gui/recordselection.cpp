@@ -67,8 +67,8 @@ void RecordSelection::setSelectionBegin(qint64 time)
 }
 
 void RecordSelection::setSelectionEnd(qint64 time)
-{
-    if (!recording) return;
+{    
+    if (!recording) return; // When there is no recording, the recorded range can't change!
     end = time;
     onUpdate();
 }
