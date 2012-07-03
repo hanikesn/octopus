@@ -17,6 +17,7 @@ Selection::Selection(TimeManager* timeManager, QWidget *parent):
 {
     setObjectName("Selection");
 
+    // Set up and connect menu items
     menu = new QMenu(this);
     QAction* exportAction = new QAction(tr("Export Range"), this);
     QAction* zoomInAction = new QAction(tr("Zoom In"), this);
@@ -25,13 +26,12 @@ Selection::Selection(TimeManager* timeManager, QWidget *parent):
     connect(exportAction, SIGNAL(triggered()), this, SLOT(exportTriggered()));
     connect(zoomInAction, SIGNAL(triggered()), this, SLOT(onZoomIn()));
 
-    setObjectName("Selection");
-
     setVisible(false);
 }
 
 void Selection::onUpdate()
 {
+    // Determine left and right coordinates
     int left = timeManager->clipPos(timeManager->convertTimeToPos(begin));
     int right = timeManager->clipPos(timeManager->convertTimeToPos(end));
 
