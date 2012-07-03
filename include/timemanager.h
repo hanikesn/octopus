@@ -104,14 +104,14 @@ signals:
 
     /**
       * This signal is enabled whenever the follow-function (cursor is pinned to new data) is
-      * de-/activated.
+      * (de)activated.
       * @param True in case following is enabled, false otherwise
       */
     void followEnabled(bool);
 
     /**
       * This signal is enabled whenever the play-function (cursor moves over recorded data) is
-      * de-/activated.
+      * (de)activated.
       * @param True in case play is enabled, false otherwise
       */
     void playEnabled(bool);
