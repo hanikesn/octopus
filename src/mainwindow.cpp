@@ -3,19 +3,14 @@
 #include <QDebug>
 #include <QFileDialog>
 #include <QMessageBox>
-#include <sstream>
-#include <QDateTime>
 #include <QSignalMapper>
 #include <QCloseEvent>
 
 #include "ui_mainwindow.h"
-#include "dataprovider.h"
-#include "gui/presentationarea.h"
 #include "serializer.h"
 #include "parser.h"
 #include "gui/startscreen.h"
 #include "timemanager.h"
-#include "recorder.h"
 #include "exporthandler.h"
 #include "viewmanager.h"
 

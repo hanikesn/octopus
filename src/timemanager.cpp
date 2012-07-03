@@ -2,8 +2,6 @@
 
 #include "gui/timeline.h"
 
-#include <QDebug>
-#include <QScrollBar>
 #include <QTimer>
 
 namespace bc = boost::chrono;

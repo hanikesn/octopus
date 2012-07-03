@@ -1,9 +1,5 @@
 #include "viewmanager.h"
 
-#include <QFileDialog>
-#include <QDateTime>
-
-
 #include "dataprovider.h"
 #include "networkadapter.h"
 #include "exporthandler.h"
