@@ -45,7 +45,7 @@ void Selection::onUpdate()
 
 void Selection::exportTriggered()
 {
-    emit onExport(begin, end);
+    emit onExport(left, right);
 }
 
 void Selection::paintEvent(QPaintEvent *)
@@ -60,7 +60,7 @@ void Selection::paintEvent(QPaintEvent *)
 
 void Selection::onZoomIn()
 {
-    emit zoomIn(begin, end);
+    emit zoomIn(left, right);
 }
 
 void Selection::updateHeight(int h)
