@@ -9,6 +9,9 @@
 
 class QStringList;
 
+/**
+ * A factory for Exporter classes
+ */
 class ExporterFactory
 {
     Q_DISABLE_COPY(ExporterFactory)
@@ -17,6 +20,9 @@ public:
 
     void addExporter(std::unique_ptr<Exporter> exporter);
 
+    /**
+     * You can use the StringList as value for QFileDialog::setNameFilters
+     */
     QStringList names();
 
     Exporter& getExporter(QString const& name);

@@ -39,7 +39,9 @@ public:
                 (event->modifiers() == Qt::ShiftModifier)) {
             createSelection = true;
             selection.show();
-            selection.setSelectionBegin(timeManager.convertPosToTime(event->pos().x()));
+            qint64 time = timeManager.convertPosToTime(event->pos().x());
+            selection.setSelectionBegin(time);
+            selection.setSelectionEnd(time);
             event->accept();
         }
 
