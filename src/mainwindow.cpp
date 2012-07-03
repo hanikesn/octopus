@@ -23,9 +23,9 @@ const QString MainWindow::TITLE = "Octopus 0.1";
 
 MainWindow::MainWindow(StartScreen::Type type, QWidget *parent) :
     QMainWindow(parent),        
+    ui(new Ui::MainWindow()),
     viewManager(0)
 {
-    ui = new Ui::MainWindow();
     ui->setupUi(this);
 
     saveAction = new QAction(tr("&Save"), this);

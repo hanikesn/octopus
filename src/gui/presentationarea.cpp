@@ -1,4 +1,5 @@
 #include "gui/presentationarea.h"
+#include <QVBoxLayout>
 
 #include "dataprovider.h"
 #include "timemanager.h"
@@ -348,8 +349,8 @@ void PresentationArea::updatePlotMargins()
     // determine the optimal plot margin over all tracks
     int optMargin = 0;
     foreach (Track *t, tracks) {
-        if (optMargin < t->optPlotMarginLeft) {
-            optMargin = t->optPlotMarginLeft;
+        if (optMargin < t->getOptPlotMarginLeft()) {
+            optMargin = t->getOptPlotMarginLeft();
         }
     }
 

@@ -5,9 +5,9 @@
 
 StartScreen::StartScreen(QWidget *parent) :
     QDialog(parent),
+    ui(new Ui::StartScreen()),
     type(CANCEL)
 {
-    ui = new Ui::StartScreen;
     ui->setupUi(this);
 }
 

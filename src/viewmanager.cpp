@@ -72,11 +72,6 @@ void ViewManager::saveDB(QString dbname, qint64 begin, qint64 end)
     dataProvider->copyDB(dbname, begin, end);
 }
 
-QString ViewManager::getDBName()
-{
-    return dataProvider->getDBFileName();
-}
-
 bool ViewManager::hasUnsavedChanges()
 {
     return presentationArea->hasUnsavedChanges() || timeManager->hasUnsavedChanges();

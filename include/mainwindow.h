@@ -55,6 +55,8 @@ private slots:
     void onPlayEnabled(bool play);
 
 private:
+    Ui::MainWindow* ui;
+
     QVBoxLayout *trackLayout;
 
     // Buttons and layout for toolbar:
@@ -85,8 +87,6 @@ private:
     QAction *quitAction;
 
     ViewManager *viewManager;
-
-    Ui::MainWindow* ui;
 
     QString projectPath;
 

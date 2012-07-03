@@ -1,11 +1,13 @@
 #ifndef SOURCEDIALOG_H
 #define SOURCEDIALOG_H
 
-#include "ui_sourcedialog.h"
-
 #include <QDialog>
 
 class DataProvider;
+class QTreeWidgetItem;
+namespace Ui {
+    class SourceDialog;
+}
 
 class SourceDialog : public QDialog
 {
@@ -16,6 +18,8 @@ public:
                           bool allInOneOption,
                           const QStringList &preselected,
                           QWidget *parent = 0);
+
+    ~SourceDialog();
 
     /**
      * @return One list per track to be changed or created, with the full names
@@ -29,7 +33,7 @@ public:
                                          QWidget *parent = 0);
 
 private:
-    Ui::SourceDialog ui;
+    Ui::SourceDialog* ui;
 
     QList<QTreeWidgetItem*> checkedItems;
 

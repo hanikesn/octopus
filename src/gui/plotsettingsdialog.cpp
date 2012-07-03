@@ -1,6 +1,7 @@
 #include "gui/plotsettingsdialog.h"
 
 #include "plotsettings.h"
+#include "ui_plotsettingsdialog.h"
 
 #include <QComboBox>
 #include <QDebug>

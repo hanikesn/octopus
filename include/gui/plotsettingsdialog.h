@@ -3,7 +3,6 @@
 
 #include "abstractdataseries.h"
 #include "plotsettings.h"
-#include "ui_plotsettingsdialog.h"
 
 #include <QDialog>
 

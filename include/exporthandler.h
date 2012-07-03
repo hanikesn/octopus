@@ -5,9 +5,6 @@
 
 #include "exporterfactory.h"
 
-
-#include <QDebug>
-
 class ExportHandler : public QObject
 {
     Q_OBJECT

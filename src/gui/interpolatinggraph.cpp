@@ -4,8 +4,6 @@
 #include "plotsettings.h"
 #include "gui/qcustomplot.h"
 
-#include <algorithm>
-
 InterpolatingGraph::InterpolatingGraph(QCustomPlot *plot, const DoubleSeries &d, PlotSettings::ScalingMode scalingMode, PlotSettings::ScaleType scaleType) :
     Graph(plot),
     series(d),
