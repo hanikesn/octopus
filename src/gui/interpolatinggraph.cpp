@@ -42,12 +42,6 @@ PlotSettings::ScaleType InterpolatingGraph::getScaleType() const
     return currentScaleType;
 }
 
-void InterpolatingGraph::setScaleType(PlotSettings::ScaleType scaleType)
-{
-    rescale(currentScalingMode, scaleType);
-    updatePlot(currentScalingMode);
-}
-
 QString InterpolatingGraph::dataSeriesName()
 {
     return series.fullName();
@@ -72,7 +66,7 @@ void InterpolatingGraph::initialize(QCPGraph *graph, const DoubleSeries &series)
 
     auto const& data = series.getData();
     for (auto i = data.constBegin(); i != data.constEnd(); ++i) {
-        updateMetadata(i.value());
+//        updateMetadata(i.value());
         graph->addData(i.key(), i.value());
     }
 }
@@ -117,9 +111,18 @@ void InterpolatingGraph::scaleToRange(double lower, double upper, PlotSettings::
         return;
     }
 
+    if (lower > upper) {
+        // not a valid range
+        return;
+    }
+
     graph->clearData();
 
     auto const& data = series.getData();
+    if (data.keys().takeLast() != lastUpdate) {
+        updateMetadata(series.getData(lastUpdate, data.keys().takeLast()));
+    }
+
     // rescale to new range
     for (auto i = data.constBegin(); i != data.constEnd(); ++i) {
         double scaledValue = i.value();
@@ -196,6 +199,13 @@ void InterpolatingGraph::onOffsetChanged()
     initialize(graph, series);
     rescale(currentScalingMode, currentScaleType);
     updatePlot(currentScalingMode);
+}
+
+void InterpolatingGraph::updateMetadata(QMap<qint64, double> data)
+{
+    for (QMap<qint64, double>::const_iterator i = data.constBegin(); i != data.constEnd(); i++) {
+        updateMetadata(i.value());
+    }
 }
 
 void InterpolatingGraph::updateMetadata(double value)
