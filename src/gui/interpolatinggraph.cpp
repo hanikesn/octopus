@@ -135,7 +135,7 @@ void InterpolatingGraph::scaleToRange(double lower, double upper, PlotSettings::
                 // negative interval is wider
 
                 // The log scale boundaries may never be zero or carry the wrong sign.
-                // Cut off above rangeFac or rangeFac*currentMin, whichever is closer to zero.
+                // Cut off above rangeFac or currentMax, whichever is closer to zero (while still negative).
                 double logScaleMin = std::min(-rangeFac, currentMin);
                 double logScaleMax = std::min(-rangeFac, currentMax);
 
@@ -149,11 +149,12 @@ void InterpolatingGraph::scaleToRange(double lower, double upper, PlotSettings::
                 // positive interval is wider
 
                 // The log scale boundaries may never be zero or carry the wrong sign.
-                // Cut off below rangeFac or rangeFac*currentMax, whichever is closer to zero.
+                // Cut off below rangeFac or currentMin, whichever is closer to zero (while still positive).
                 double logScaleMin = std::max(rangeFac, currentMin);
                 double logScaleMax = std::max(rangeFac, currentMax);
 
                 if (i.value() < logScaleMin) {
+                    // invalid value. Draw outside visible area.
                     scaledValue = lower - (upper - lower)*0.75;
                 } else {
                     scaledValue = lower + ((qLn(i.value()/logScaleMin)/log10) / (qLn(logScaleMax/logScaleMin)/log10)) * (upper - lower);
