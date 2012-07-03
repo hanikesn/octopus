@@ -1,9 +1,5 @@
 #include "viewmanager.h"
 
-#include <QFileDialog>
-#include <QDateTime>
-
-
 #include "dataprovider.h"
 #include "networkadapter.h"
 #include "exporthandler.h"
@@ -75,11 +71,6 @@ void ViewManager::save(QVariantMap *qvm)
 void ViewManager::saveDB(QString dbname, qint64 begin, qint64 end)
 {
     dataProvider->copyDB(dbname, begin, end);
-}
-
-QString ViewManager::getDBName()
-{
-    return dataProvider->getDBFileName();
 }
 
 bool ViewManager::hasUnsavedChanges()

@@ -7,6 +7,7 @@
 #include "gui/interpolatinggraph.h"
 #include "gui/plotsettingsdialog.h"
 #include "gui/sourcedialog.h"
+#include "ui_track.h"
 
 #include "dataprovider.h"
 #include "common.h"
@@ -22,6 +23,7 @@ const QString Track::ICON_AS_BUTTON = QString(
 
 Track::Track(const DataProvider &dataProvider, QWidget *parent) :
     QWidget(parent),
+    ui(new Ui::Track()),
     optPlotMarginLeft(0),
     dataProvider(dataProvider),
     currentScalingMode(PlotSettings::NOSCALING)
@@ -31,6 +33,7 @@ Track::Track(const DataProvider &dataProvider, QWidget *parent) :
 
 Track::Track(const DataProvider &dataProvider, const QString &fullDataSeriesName, QWidget *parent) :
     QWidget(parent),
+    ui(new Ui::Track()),
     optPlotMarginLeft(0),
     dataProvider(dataProvider),
     currentScalingMode(PlotSettings::NOSCALING)
@@ -42,6 +45,7 @@ Track::Track(const DataProvider &dataProvider, const QString &fullDataSeriesName
 
 Track::Track(const DataProvider &dataProvider, const QStringList &fullDataSeriesNames, QWidget *parent) :
     QWidget(parent),
+    ui(new Ui::Track()),
     optPlotMarginLeft(0),
     dataProvider(dataProvider),
     currentScalingMode(PlotSettings::NOSCALING)
@@ -53,11 +57,16 @@ Track::Track(const DataProvider &dataProvider, const QStringList &fullDataSeries
     }
 }
 
+Track::~Track()
+{
+    delete ui;
+}
+
 void Track::init()
 {
-    ui.setupUi(this);
+    ui->setupUi(this);
 
-    ui.plot->setAttribute(Qt::WA_TransparentForMouseEvents);
+    ui->plot->setAttribute(Qt::WA_TransparentForMouseEvents);
 
     setupButtons();
     setupPlot();
@@ -65,37 +74,37 @@ void Track::init()
 
 void Track::setupButtons()
 {
-    ui.delButton->setStyleSheet(ICON_AS_BUTTON);
-    connect(ui.delButton, SIGNAL(clicked()), this, SLOT(onDelete()));
+    ui->delButton->setStyleSheet(ICON_AS_BUTTON);
+    connect(ui->delButton, SIGNAL(clicked()), this, SLOT(onDelete()));
 
     // TODO(Steffi): srcButton-Label korrigieren
-    ui.srcButton->setStyleSheet(ICON_AS_BUTTON);
-    connect(ui.srcButton, SIGNAL(clicked()), this, SLOT(onSources()));
+    ui->srcButton->setStyleSheet(ICON_AS_BUTTON);
+    connect(ui->srcButton, SIGNAL(clicked()), this, SLOT(onSources()));
 
-    ui.setButton->setStyleSheet(ICON_AS_BUTTON);
-    connect(ui.setButton, SIGNAL(clicked()), this, SLOT(onPlotSettings()));
+    ui->setButton->setStyleSheet(ICON_AS_BUTTON);
+    connect(ui->setButton, SIGNAL(clicked()), this, SLOT(onPlotSettings()));
 }
 
 void Track::setupPlot()
 {
-    ui.plot->setAutoMargin(false);
-    connect(ui.plot, SIGNAL(optMarginsRecalculated(int,int,int,int)), this, SLOT(onOptPlotMarginsRecalculated(int,int,int,int)));
+    ui->plot->setAutoMargin(false);
+    connect(ui->plot, SIGNAL(optMarginsRecalculated(int,int,int,int)), this, SLOT(onOptPlotMarginsRecalculated(int,int,int,int)));
 
     // if one of the graphs needs the axis, they should ensure it's visible
-    ui.plot->yAxis->setVisible(false);
+    ui->plot->yAxis->setVisible(false);
 
-    ui.plot->legend->setVisible(true);
-    ui.plot->legend->setPositionStyle(QCPLegend::psTopLeft);
+    ui->plot->legend->setVisible(true);
+    ui->plot->legend->setPositionStyle(QCPLegend::psTopLeft);
 }
 
 void Track::setPlotRange(qint64 begin, qint64 end)
 {
-    if (ui.plot->xAxis->range().lower != begin
-            || ui.plot->xAxis->range().lower != end) {
-        ui.plot->xAxis->setRange(begin, end);
+    if (ui->plot->xAxis->range().lower != begin
+            || ui->plot->xAxis->range().lower != end) {
+        ui->plot->xAxis->setRange(begin, end);
         {
             MEASURE("plot");
-            ui.plot->replot();
+            ui->plot->replot();
         }
     }
 }
@@ -124,7 +133,7 @@ PlotSettings Track::currentSettings()
     PlotSettings settings;
 
     settings.scalingMode = currentScalingMode;
-    settings.plotScaleType = PlotSettings::toScaleType(ui.plot->yAxis->scaleType());
+    settings.plotScaleType = PlotSettings::toScaleType(ui->plot->yAxis->scaleType());
 
     foreach (Graph *g, graphs) {
         settings.setOffset(g->dataSeriesName(), dataProvider.getDataSeries(g->dataSeriesName())->offset());
@@ -139,20 +148,20 @@ void Track::update(PlotSettings settings)
     switch (settings.scalingMode) {
     case PlotSettings::MINMAXSCALING:
         // all graphs will scale their values to use the full height of the plot
-        ui.plot->yAxis->setScaleType(QCPAxis::stLinear);
-        ui.plot->yAxis->setRange(0, 1);
+        ui->plot->yAxis->setScaleType(QCPAxis::stLinear);
+        ui->plot->yAxis->setRange(0, 1);
         break;
     case PlotSettings::NOSCALING:
         if (settings.plotScaleType == PlotSettings::LOGSCALE) {
-            ui.plot->yAxis->setScaleType(QCPAxis::stLogarithmic);
+            ui->plot->yAxis->setScaleType(QCPAxis::stLogarithmic);
         } else {
-            ui.plot->yAxis->setScaleType(QCPAxis::stLinear);
+            ui->plot->yAxis->setScaleType(QCPAxis::stLinear);
         }
     }
 
     // if one of the graphs needs the axis, they should ensure it's visible
-    ui.plot->yAxis->setVisible(false);
-    ui.plot->yAxis->setGrid(false);
+    ui->plot->yAxis->setVisible(false);
+    ui->plot->yAxis->setGrid(false);
 
     currentScalingMode = settings.scalingMode;
 
@@ -165,7 +174,7 @@ void Track::addGraph(const DoubleSeries &s) {
     PlotSettings::ScaleType desiredScaleType;
     switch (currentScalingMode) {
     case PlotSettings::NOSCALING:
-        desiredScaleType = PlotSettings::toScaleType(ui.plot->yAxis->scaleType());
+        desiredScaleType = PlotSettings::toScaleType(ui->plot->yAxis->scaleType());
         break;
     case PlotSettings::MINMAXSCALING:
         desiredScaleType = s.defaultScaleType;
@@ -176,17 +185,17 @@ void Track::addGraph(const DoubleSeries &s) {
         break;
     }
 
-    graphs.append(new InterpolatingGraph(ui.plot, s, currentScalingMode, desiredScaleType));
+    graphs.append(new InterpolatingGraph(ui->plot, s, currentScalingMode, desiredScaleType));
 
     if (currentScalingMode == PlotSettings::NOSCALING) {
-        ui.plot->rescaleValueAxes();
+        ui->plot->rescaleValueAxes();
     }
-    ui.plot->replot();
+    ui->plot->replot();
 }
 
 void Track::addGraph(const StringSeries &s) {
-    graphs.append(new DiscreteGraph(ui.plot, s));
-    ui.plot->replot();
+    graphs.append(new DiscreteGraph(ui->plot, s));
+    ui->plot->replot();
 }
 
 void Track::onDelete()
@@ -215,7 +224,7 @@ void Track::onSources()
 
         foreach (Graph *g, graphsToRemove) {
             graphs.removeAll(g);
-            ui.plot->removeGraph(g->getGraph());
+            ui->plot->removeGraph(g->getGraph());
             g->deleteLater();
         }
 
@@ -224,12 +233,12 @@ void Track::onSources()
         }
 
         // only show the legend if the track is not empty
-        ui.plot->legend->setVisible(ui.plot->graphCount() > 0);
+        ui->plot->legend->setVisible(ui->plot->graphCount() > 0);
 
         if (currentScalingMode == PlotSettings::NOSCALING) {
-            ui.plot->rescaleValueAxes();
+            ui->plot->rescaleValueAxes();
         }
-        ui.plot->replot();
+        ui->plot->replot();
     }
 }
 
@@ -244,9 +253,9 @@ void Track::onPlotSettings()
 
 void Track::onOptPlotMarginsRecalculated(int left, int /*right*/, int top, int bottom)
 {
-    ui.plot->setMarginRight(0);
-    ui.plot->setMarginTop(top);
-    ui.plot->setMarginBottom(bottom);
+    ui->plot->setMarginRight(0);
+    ui->plot->setMarginTop(top);
+    ui->plot->setMarginBottom(bottom);
 
     if (optPlotMarginLeft != left) {
         optPlotMarginLeft = left;
@@ -256,20 +265,20 @@ void Track::onOptPlotMarginsRecalculated(int left, int /*right*/, int top, int b
 
 int Track::getMarginLeft()
 {
-    return ui.plot->pos().x() + ui.plot->marginLeft();
+    return ui->plot->pos().x() + ui->plot->marginLeft();
 }
 
 int Track::getMarginRight()
 {
-    return ui.plot->marginRight();
+    return ui->plot->marginRight();
 }
 
 void Track::setPlotMarginLeft(int margin)
 {
-    if (margin != ui.plot->marginLeft()) {
-        ui.plot->setMarginLeft(margin);
+    if (margin != ui->plot->marginLeft()) {
+        ui->plot->setMarginLeft(margin);
     }
-    ui.plot->replot();
+    ui->plot->replot();
 }
 
 void Track::save(QVariantMap *qvm)
@@ -283,7 +292,7 @@ void Track::save(QVariantMap *qvm)
         graphList << graph;
     }    
     qvm->insert("scalingMode", currentScalingMode);
-    qvm->insert("plotScaleType", ui.plot->yAxis->scaleType());
+    qvm->insert("plotScaleType", ui->plot->yAxis->scaleType());
     qvm->insert("graphList", graphList);
 
 }

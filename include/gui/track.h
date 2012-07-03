@@ -2,7 +2,6 @@
 #define Track_H
 
 #include "plotsettings.h"
-#include "ui_track.h"
 #include "visitor.h"
 #include "serializable.h"
 
@@ -12,15 +11,18 @@ class Graph;
 class DataProvider;
 class AbstractDataSeries;
 
+namespace Ui {
+    class Track;
+}
+
 class Track : public QWidget, public DataSeriesVisitor, public Serializable
 {
     Q_OBJECT
 public:
-    int optPlotMarginLeft;
-
     Track(const DataProvider &dataProvider, QWidget *parent = 0);
     Track(const DataProvider &dataProvider, const QString &fullDataSeriesName, QWidget *parent = 0);
     Track(const DataProvider &dataProvider, const QStringList &fullDataSeriesNames, QWidget *parent = 0);
+    ~Track();
 
     /**
      * Visitor pattern.
@@ -35,6 +37,8 @@ public:
     void save(QVariantMap *qvm);
     void load(QVariantMap *qvm);
 
+    int getOptPlotMarginLeft() const {return optPlotMarginLeft;}
+
 signals:
     void optPlotMarginsChanged();
     void del(Track*);
@@ -43,7 +47,8 @@ public slots:
     void setPlotRange(qint64 begin, qint64 end);
 
 private:
-    Ui::Track ui;
+    Ui::Track* ui;
+    int optPlotMarginLeft;
     static const QString ICON_AS_BUTTON;
 
     const DataProvider &dataProvider;

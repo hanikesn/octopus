@@ -46,8 +46,6 @@ public:
       */
     void saveDB(QString dbname, qint64 begin, qint64 end);
 
-    QString getDBName();
-
     bool hasUnsavedChanges();
     void setUnsavedChanges(bool uc);
 

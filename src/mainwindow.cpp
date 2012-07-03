@@ -3,19 +3,14 @@
 #include <QDebug>
 #include <QFileDialog>
 #include <QMessageBox>
-#include <sstream>
-#include <QDateTime>
 #include <QSignalMapper>
 #include <QCloseEvent>
 
 #include "ui_mainwindow.h"
-#include "dataprovider.h"
-#include "gui/presentationarea.h"
 #include "serializer.h"
 #include "parser.h"
 #include "gui/startscreen.h"
 #include "timemanager.h"
-#include "recorder.h"
 #include "exporthandler.h"
 #include "viewmanager.h"
 
@@ -23,9 +18,9 @@ const QString MainWindow::TITLE = "Octopus 0.1";
 
 MainWindow::MainWindow(StartScreen::Type type, QWidget *parent) :
     QMainWindow(parent),        
+    ui(new Ui::MainWindow()),
     viewManager(0)
 {
-    ui = new Ui::MainWindow();
     ui->setupUi(this);
 
     saveAction = new QAction(tr("&Save"), this);
