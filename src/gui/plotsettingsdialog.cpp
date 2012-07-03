@@ -53,9 +53,21 @@ void PlotSettingsDialog::setupSourceTable(const QStringList &dataSeriesNames, co
 {
     ui->sourceTable->setColumnCount(COLCOUNT);
 
-    ui->sourceTable->setHorizontalHeaderItem(SOURCENAMECOL, new QTableWidgetItem(tr("Data Series Name")));
-    ui->sourceTable->setHorizontalHeaderItem(OFFSETCOL, new QTableWidgetItem(tr("Offset")));
-    ui->sourceTable->setHorizontalHeaderItem(SCALECOL, new QTableWidgetItem(tr("Scale Type")));
+    QTableWidgetItem *sourceNameColHeader = new QTableWidgetItem(tr("Data Series Name"));
+    sourceNameColHeader->setToolTip(tr("The name of the data series."));
+    ui->sourceTable->setHorizontalHeaderItem(SOURCENAMECOL, sourceNameColHeader);
+
+    QTableWidgetItem *offsetColHeader = new QTableWidgetItem(tr("Offset"));
+    offsetColHeader->setToolTip(tr("The offset in microseconds.\n\n"
+                                   "This value is added to each timestamp\n"
+                                   "of the respective data series.\n"
+                                   "You can use this for example to adjust for\n"
+                                   "time lags in the transmission of signals."));
+    ui->sourceTable->setHorizontalHeaderItem(OFFSETCOL, offsetColHeader);
+
+    QTableWidgetItem *scaleColHeader = new QTableWidgetItem(tr("Scale Type"));
+    scaleColHeader->setToolTip(tr("The type of scale to be used for the data series."));
+    ui->sourceTable->setHorizontalHeaderItem(SCALECOL, scaleColHeader);
 
     QHeaderView *hHeader = ui->sourceTable->horizontalHeader();
     hHeader->setDefaultAlignment(Qt::AlignLeft);
