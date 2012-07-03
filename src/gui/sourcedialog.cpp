@@ -18,7 +18,8 @@ SourceDialog::SourceDialog(const DataProvider &dataProvider,
     connect(ui.sourceTree, SIGNAL(itemChanged(QTreeWidgetItem*,int)), this, SLOT(onItemChanged(QTreeWidgetItem*,int)));
 
     ui.allInOneOption->setVisible(allInOneOption);
-    // If option is visible, default checkState is Qt::Unchecked. If option is invisible, default checkState is Qt::Checked.
+    // If option is visible, default checkState is Qt::Unchecked.
+    // If option is invisible, default checkState is Qt::Checked.
     ui.allInOneOption->setChecked(!allInOneOption);
 }
 
