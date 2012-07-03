@@ -23,6 +23,7 @@ MainWindow::MainWindow(StartScreen::Type type, QWidget *parent) :
 {
     ui->setupUi(this);
 
+    // create and connect actions:
     saveAction = new QAction(tr("&Save"), this);
     saveAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_S));
     saveAsAction = new QAction(tr("Save As ..."), this);
@@ -40,6 +41,7 @@ MainWindow::MainWindow(StartScreen::Type type, QWidget *parent) :
     connect(newAction, SIGNAL(triggered()), this, SLOT(onNew()));
     connect(quitAction, SIGNAL(triggered()), this, SLOT(close()));
 
+    // Init buttons and menu
     setUpButtonBars();
     setUpMenu();
 
@@ -141,6 +143,8 @@ QString MainWindow::onLoad()
                                                     projectPath, "Octopus (*.oct)");
 
     if(fileName.isEmpty()) return fileName;
+
+    // open specified file:
     QFile file(fileName);
     file.open(QIODevice::ReadOnly);    
 
@@ -157,6 +161,7 @@ QString MainWindow::onLoad()
     QString dbfile = QFileInfo(file).absolutePath() + "/" + result["dbfile"].toString();
 
     ViewManager* tmp;
+    // loading of db can fail:
     try {
         tmp = new ViewManager(this, dbfile);
     } catch(std::exception const& e) {
@@ -173,6 +178,7 @@ QString MainWindow::onLoad()
 
     setTitle(QFileInfo(projectPath).completeBaseName().remove(".oct"));
 
+    // propagate load
     viewManager->load(&result);
 
     // no recording in a loaded project.
@@ -224,6 +230,7 @@ void MainWindow::setTitle(QString pName)
 
 void MainWindow::setUpView()
 {
+    // make connects between MainWindow and ViewManager
     QSignalMapper* mapZoom = new QSignalMapper(this);
     mapZoom->setMapping(&zoomInButton, 100);
     mapZoom->setMapping(&zoomOutButton, -100);
@@ -245,6 +252,7 @@ void MainWindow::setUpView()
     connect(&plotSettingsButton, SIGNAL(clicked()), viewManager, SIGNAL(plotSettings()));    
     connect(&exportButton, SIGNAL(clicked()), viewManager, SIGNAL(exportData()));    
 
+    // add ViewManager to UI
     ui->centralWidgetLayout->insertWidget(0, viewManager);
 }
 
@@ -258,20 +266,20 @@ void MainWindow::save(bool saveAs, qint64 begin, qint64 end)
 
     QString relative_dbname = QFileInfo(fileName).dir().relativeFilePath(dbname);
 
-    QVariantMap pName; // Map with the projects settings    
+    QVariantMap config; // Map with the projects settings
     if ((begin == -1) && (end == -1)) { // save all
         projectPath = fileName;
         viewManager->saveDB(dbname, -1, -1);
-        pName.insert("dbfile", relative_dbname);
+        config.insert("dbfile", relative_dbname);
 
-        if (writeProjectSettings(pName, projectPath)) { // in case save was successfull ...
+        if (writeProjectSettings(config, projectPath)) { // in case save was successfull ...
             viewManager->setUnsavedChanges(false);
         }
     } else { // save range
         QString subProjectPath = fileName;        
         viewManager->saveDB(dbname, begin, end);
-        pName.insert("dbfile", relative_dbname);
-        writeProjectSettings(pName, subProjectPath);
+        config.insert("dbfile", relative_dbname);
+        writeProjectSettings(config, subProjectPath);
     }
 }
 
@@ -308,7 +316,7 @@ QString MainWindow::getSaveFileName(bool saveAs)
         if (!saveAs)
             setTitle(QFileInfo(fileName).completeBaseName().remove(".oct"));
         return fileName;
-    } else
+    } else // return current filename
         return projectPath;
 }
 
@@ -344,25 +352,27 @@ void MainWindow::onSaveProject(qint64 start, qint64 end)
 
 void MainWindow::onFollowEnabled(bool follow)
 {
+    // if follow is enabled, play has to be enabled also
     followDataButton.setChecked(follow);
     playButton.setChecked(follow);
 
 }
 
 void MainWindow::onPlayEnabled(bool play)
-{
+{    
     if (followDataButton.isChecked())
         followDataButton.setChecked(false);
+    // play can be enabled individually (unlike follow)
     playButton.setChecked(play);
 }
 
-bool MainWindow::writeProjectSettings(QVariantMap pName, QString path)
+bool MainWindow::writeProjectSettings(QVariantMap config, QString path)
 {
-    viewManager->save(&pName);
+    viewManager->save(&config);
 
     QJson::Serializer serializer;
     serializer.setIndentMode(QJson::IndentFull);
-    QByteArray json = serializer.serialize(pName);
+    QByteArray json = serializer.serialize(config);
 
     // open/create the file
     QFile file(path);
