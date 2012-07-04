@@ -1,37 +1,16 @@
 #include "viewmanager.h"
 
 #include "dataprovider.h"
-#include "networkadapter.h"
 #include "exporthandler.h"
-#include "gui/presentationarea.h"
+#include "mainwindow.h"
+#include "networkadapter.h"
 #include "timemanager.h"
 #include "recorder.h"
-#include "mainwindow.h"
+#include "gui/presentationarea.h"
 #include "gui/timescrollbar.h"
 
-// Debug function
-static void addData(DataProvider& dp)
-{
-    EI::Description desc1("Dummy", "dum");
-    desc1.addDataSeries("Interpolatable.x", EI::DataSeriesInfo(EI::Value::DOUBLE, EI::DataSeriesInfo::INTERPOLATABLE,""));
-    desc1.addDataSeries("Interpolatable.y", EI::DataSeriesInfo(EI::Value::DOUBLE, EI::DataSeriesInfo::INTERPOLATABLE,""));
-    desc1.addDataSeries("Discrete", EI::DataSeriesInfo(EI::Value::DOUBLE, EI::DataSeriesInfo::STATEFUL,""));
-    dp.onNewSender(desc1);
-
-    EI::Description desc2("Dummy-2", "dum");
-    desc2.addDataSeries("Interpolatable.x", EI::DataSeriesInfo(EI::Value::DOUBLE, EI::DataSeriesInfo::INTERPOLATABLE,""));
-    desc2.addDataSeries("Interpolatable.y", EI::DataSeriesInfo(EI::Value::DOUBLE, EI::DataSeriesInfo::INTERPOLATABLE,""));
-    desc2.addDataSeries("Discrete", EI::DataSeriesInfo(EI::Value::DOUBLE, EI::DataSeriesInfo::STATEFUL,""));
-    dp.onNewSender(desc2);
-
-     for (int j=0; j<500; ++j)
-    {
-      double d = j/15.0 * 5*3.14 + 0.01;
-      dp.onNewData(d*1000000, "Dummy.Interpolatable.x", Value(14*sin(d)/d + 3));
-      dp.onNewData(d*1000000, "Dummy.Interpolatable.y", Value(-7*sin(d)/d));
-      dp.onNewData(d*1000000, "Dummy.Discrete", Value("ping"));
-    }
-}
+#include <QDateTime>
+#include <QFileDialog>
 
 ViewManager::ViewManager(QWidget *parent, QString dbfile):
     QWidget(parent),
@@ -129,9 +108,6 @@ void ViewManager::createViewAndModel(QString dbfile)
 
     // create view-relevant objects:
     setUpView();
-
-    // debug function:
-    //addData(*dataProvider);
 }
 
 void ViewManager::setUpView()

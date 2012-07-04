@@ -1,3 +1,8 @@
+/*
+  The plot settings dialog shows the user the current settings for the plot and allows him to change them.
+  What parameters can be edited depends on the parameters passed to the dialog by the caller.
+*/
+
 #ifndef PLOTSETTINGSDIALOG_H
 #define PLOTSETTINGSDIALOG_H
 
@@ -36,9 +41,17 @@ private:
     Ui::PlotSettingsDialog *ui;
 
     void setupSourceTable(const QStringList &dataSeriesNames, const PlotSettings &preset, bool offsetsEditable);
+
+    /**
+     * @return A plot settings object containing the settings chosen by the user.
+     *      An empty plot settings object if the dialog was canceled.
+     */
     PlotSettings getResult();
 
 private slots:
+    /**
+     * Adjusts the dialog's appearance according to the state of the same scale option.
+     */
     void onSameScaleStateChanged(int state);
 };
 
