@@ -75,13 +75,24 @@ void Track::init()
 void Track::setupButtons()
 {
     ui->delButton->setStyleSheet(ICON_AS_BUTTON);
+    ui->delButton->setPalette(setToolTipColors(ui->delButton->palette(), Qt::black, Qt::white));
     connect(ui->delButton, SIGNAL(clicked()), this, SLOT(onDelete()));
 
     ui->srcButton->setStyleSheet(ICON_AS_BUTTON);
+    ui->srcButton->setPalette(setToolTipColors(ui->srcButton->palette(), Qt::black, Qt::white));
     connect(ui->srcButton, SIGNAL(clicked()), this, SLOT(onSources()));
 
     ui->setButton->setStyleSheet(ICON_AS_BUTTON);
+    ui->setButton->setPalette(setToolTipColors(ui->setButton->palette(), Qt::black, Qt::white));
     connect(ui->setButton, SIGNAL(clicked()), this, SLOT(onPlotSettings()));
+}
+
+QPalette Track::setToolTipColors(QPalette palette, const QColor baseColor, const QColor textColor)
+{
+    palette.setColor(QPalette::ToolTipBase, baseColor);
+    palette.setColor(QPalette::ToolTipText, textColor);
+
+    return palette;
 }
 
 void Track::setupPlot()

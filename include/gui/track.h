@@ -100,6 +100,11 @@ private:
     void setupButtons();
 
     /**
+     * Sets the tool tip colors to the given colors.
+     */
+    QPalette setToolTipColors(QPalette palette, const QColor baseColor, const QColor textColor);
+
+    /**
      * Sets up the track's plot.
      */
     void setupPlot();
