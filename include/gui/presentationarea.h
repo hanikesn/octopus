@@ -123,8 +123,8 @@ private slots:
     void updatePlotMargins();
 
     /**
-      * Sets 'unsavedChanges' to true when new data is received (even if it's no shown in a track).
-      * This works because the maximum is growing continiously.
+      * Sets 'unsavedChanges' to true when new data are received (even if they are not shown in a track).
+      * This works because the maximum is growing continuously.
       * @param max New maximum
       */
     void onNewMax(qint64 max);
