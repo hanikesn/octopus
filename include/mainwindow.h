@@ -150,8 +150,9 @@ private:
       *               project hasn't been saved before.
       * @param begin Timestamp for the begin of the recorded data.
       * @param end Timestamp for the end of the recorded data.
+      * @return The filename of the file to save in.
       */
-    void save(bool saveAs, qint64 begin = -1, qint64 end = -1);
+    QString save(bool saveAs, qint64 begin = -1, qint64 end = -1);
 
 
     /**
@@ -160,6 +161,13 @@ private:
       * @return The dialogs result value.
       */
     int checkForUnsavedChanges();
+
+    /**
+      * Checks whether there is a running record.
+      * In case there is running record the user has the chance to save/discard/abort.
+      * @return The dialogs result value.
+      */
+    int checkForActiveRecord();
 
     /**
       * Shows a dialog where the user can choose the file to save in. If the user has previously
