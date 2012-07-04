@@ -138,6 +138,7 @@ void MainWindow::onSaveAs()
 
 QString MainWindow::onLoad()
 {    
+    if (checkForActiveRecord() == QMessageBox::Abort) return "";
     if (checkForUnsavedChanges() == QMessageBox::Abort) return "";
     QString fileName = QFileDialog::getOpenFileName(this, tr("Load File"),
                                                     projectPath, "Octopus (*.oct)");
@@ -196,6 +197,7 @@ QString MainWindow::onLoad()
 
 void MainWindow::onNew()
 {
+    if (checkForActiveRecord() == QMessageBox::Abort) return;
     if (checkForUnsavedChanges() == QMessageBox::Abort) return;
 
     projectPath = "";
@@ -256,10 +258,10 @@ void MainWindow::setUpView()
     ui->centralWidgetLayout->insertWidget(0, viewManager);
 }
 
-void MainWindow::save(bool saveAs, qint64 begin, qint64 end)
+QString MainWindow::save(bool saveAs, qint64 begin, qint64 end)
 {
     QString fileName = getSaveFileName(saveAs);
-    if (fileName.isEmpty()) return;  // dialog cancelled
+    if (fileName.isEmpty()) return QString();  // dialog cancelled
 
     QString dbname = fileName + ".db";
     dbname.remove(QRegExp(".oct$"));
@@ -274,13 +276,14 @@ void MainWindow::save(bool saveAs, qint64 begin, qint64 end)
 
         if (writeProjectSettings(config, projectPath)) { // in case save was successfull ...
             viewManager->setUnsavedChanges(false);
-        }
+        }        
     } else { // save range
         QString subProjectPath = fileName;        
         viewManager->saveDB(dbname, begin, end);
         config.insert("dbfile", relative_dbname);
         writeProjectSettings(config, subProjectPath);
     }
+    return fileName;
 }
 
 int MainWindow::checkForUnsavedChanges()
@@ -297,9 +300,26 @@ int MainWindow::checkForUnsavedChanges()
     msg.setText(tr("This project contains unsaved changes or new data which have been received in the background.\n"
                    "Do you wish to save the current state?"));
     int result = msg.exec();
-    if (result == QMessageBox::Save)
-        save(false);
+    if (result == QMessageBox::Save) {
+        QString fileName = save(false);
+        if (fileName.isEmpty()) return QMessageBox::Abort; // Dialog cancelled
+    }
     return result;
+}
+
+int MainWindow::checkForActiveRecord()
+{
+    if (!viewManager) return QMessageBox::Discard;
+
+    if (viewManager->isRecording()) { // ask whether recording should be stopped
+        // simulate button click
+        viewManager->onRecord();
+
+        if (viewManager->isRecording()) { // if there is still a running recording, the user continued!
+            return QMessageBox::Abort;
+        }
+    }
+    return QMessageBox::Ok;
 }
 
 QString MainWindow::getSaveFileName(bool saveAs)
@@ -322,18 +342,8 @@ QString MainWindow::getSaveFileName(bool saveAs)
 
 void MainWindow::closeEvent(QCloseEvent *ce)
 {
-    if (viewManager && viewManager->isRecording()) { // ask whether recording should be stopped
-        // simulate button click
-        viewManager->onRecord();
-
-        if (viewManager->isRecording()) { // if there is still a running recording, the user continued!
-            ce->ignore();
-            return; // dont exit the program
-        }
-    }
-
     // usual check for unsaved changes in the project
-    if (checkForUnsavedChanges() != QMessageBox::Abort)
+    if ((checkForActiveRecord() != QMessageBox::Abort) && (checkForUnsavedChanges() != QMessageBox::Abort))
         QMainWindow::closeEvent(ce);
     else
         ce->ignore();
@@ -346,7 +356,7 @@ void MainWindow::onRecordEnabled(bool recording)
 
 void MainWindow::onSaveProject(qint64 start, qint64 end)
 {
-    // initiate save (project file)
+    // initiate save (project file and db)
     save(true, start, end);
 }
 
