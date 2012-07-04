@@ -35,8 +35,9 @@ public slots:
     void updateHeight(int height);
 
     /**
-      * Calculates the x-coordinate according to 'currentTime' and moves to the new position.
-      * If this position is valid (visible) the cursor will be set visible otherwise invisible.
+      * This function needs to be called whenever the cursors position needs to be changed (for
+      * example if the current visible range was modified).
+      * Recalculates the cursors position according to 'currentTime' and moves it.
       */
     void onUpdate();
 

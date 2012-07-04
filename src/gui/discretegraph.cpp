@@ -3,8 +3,6 @@
 
 #include "gui/qcustomplot.h"
 
-#include <algorithm>
-
 const QCPRange RANGE(0.0, 1.0);
 const double IMPULSE_HEIGHT = RANGE.lower + 0.4 * RANGE.size();
 

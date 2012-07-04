@@ -94,6 +94,10 @@ private:
     // Current begin of the selection
     qint64 end;
 
+    qint64 left;
+    qint64 right;
+
+
     // Border color of the selection
     QPen pen;
     // Background color of the selection

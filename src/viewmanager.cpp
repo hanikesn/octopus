@@ -26,19 +26,23 @@ ViewManager::ViewManager(QWidget *parent, QString dbfile):
     layout()->setMargin(0);
     layout()->setSpacing(0);
 
-    createNewView(dbfile);
+    createViewAndModel(dbfile);
 }
 
 void ViewManager::load(QVariantMap *qvm)
 {
+    // propagate load-call
     dataProvider->load(qvm);
     presentationArea->load(qvm);
+
+    // no changes directly after loading:
     presentationArea->setUnsavedChanges(false);
     timeManager->setUnsavedChanges(false);
 }
 
 void ViewManager::save(QVariantMap *qvm)
 {
+    // propagate save-call
     presentationArea->save(qvm);
     dataProvider->save(qvm);
 }
@@ -46,11 +50,6 @@ void ViewManager::save(QVariantMap *qvm)
 void ViewManager::saveDB(QString dbname, qint64 begin, qint64 end)
 {
     dataProvider->copyDB(dbname, begin, end);
-}
-
-QString ViewManager::getDBName()
-{
-    return dataProvider->getDBFileName();
 }
 
 bool ViewManager::hasUnsavedChanges()
@@ -75,8 +74,9 @@ void ViewManager::onRecord()
     emit recordEnabled(recorder->isRecording());
 }
 
-void ViewManager::createNewView(QString dbfile)
+void ViewManager::createViewAndModel(QString dbfile)
 {
+    // delete previous objects:
     if (networkAdapter) {
         networkAdapter->deleteLater();
         networkAdapter = 0;
@@ -91,9 +91,10 @@ void ViewManager::createNewView(QString dbfile)
         }
         // create a temporary file for the db
         dataProvider = new DataProvider(dbfile, this);
+        // create networkAdapter because we expect new data
         networkAdapter = new NetworkAdapter(this);
 
-    } else { // load-action
+    } else { // load-action, we need no networkAdapter because we don't expect any new data
         DataProvider* olddataProvider = dataProvider;
         dataProvider = new DataProvider(dbfile, this);
 
@@ -101,8 +102,11 @@ void ViewManager::createNewView(QString dbfile)
             olddataProvider->closeDB();
             olddataProvider->deleteLater();
         }
-    }
+    }    
+    // We need to export stuff in any case:
     exportHandler = new ExportHandler(this, dataProvider);
+
+    // create view-relevant objects:
     setUpView();
 }
 

@@ -13,11 +13,27 @@ public:
     explicit RecordSelection(TimeManager *timeManager, QWidget *parent);
 
 public slots:
+    /**
+      * Sets the start(timestamp) and resizes the selection accordingly.
+      * @param begin The new begin of the selection (timestamp)
+      */
     void setSelectionBegin(qint64 begin);
+
+    /**
+      * Sets the end(timestamp) only when there is an active recording and resizes the selection
+      * accordingly.
+      * @param end The new end of the selection (timestamp)
+      */
     void setSelectionEnd(qint64 end);
 
+    /**
+      * Sets a fixed height 'h' for this selection.
+      */
     void updateHeight(int h);
 
+    /**
+      * Moves and resizes the selection.
+      */
     void onUpdate();
 
     /**
@@ -30,17 +46,26 @@ public slots:
     void onRecord(qint64 start, qint64 end, bool recording);
 
 protected:
+    /**
+      * Override of the QWidget function. (Custom drawing)
+      */
     void paintEvent(QPaintEvent *);
 
 private:
+    // Current begin of the selection
     qint64 begin;
+    // Current begin of the selection
     qint64 end;
 
+    // A flag to determine wheter there is an active recording
     bool recording;
 
+    // Border color of the selection
     QPen pen;
+    // Background color of the selection
     QBrush brush;
 
+    // Converts x-coordinates to timestamps
     TimeManager* timeManager;
 };
 

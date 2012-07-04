@@ -3,8 +3,6 @@
 #include "value.h"
 
 #include <algorithm>
-#include <iostream>
-#include <QDebug>
 
 NetworkAdapter::NetworkAdapter(QObject* parent) :
     QObject(parent),

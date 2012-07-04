@@ -57,19 +57,22 @@ void TimeLine::paintEvent(QPaintEvent *)
 void TimeLine::drawTicks(QPainter *painter)
 {    
     offset = timeManager.getMarginLeft();
-    currentPos = 0;
-    qint64 currentTime = beginRange;
+    currentPos = 0;    
+    qint64 currentTime = beginRange; // lowest visible timestamp
+
+    // determines top of bounding box for the labels underneath large ticks
     bottom = geometry().height() - 10;
 
     int stCounter = beginRange / smallTickAmount + 1;
     int mtCounter = beginRange / mediumTickAmount + 1;
     int ltCounter = beginRange / largeTickAmount + 1;
 
-    double timeFactor = 1000000;
+    // determine factor by which the currentTime is divided
+    double timeFactor = 1000000; // seconds
     if (timeRepresentation == MILLISECOND)
-        timeFactor = 1000;
+        timeFactor = 1000; // milliseconds
 
-    double output  = 0.0;
+    double output  = 0.0; // contains the second/millisecond which is drawn underneath large ticks
     if (currentTime % largeTickAmount == 0) {
         output = (double)currentTime / timeFactor;
         drawLargeTick(painter, output);
@@ -78,6 +81,7 @@ void TimeLine::drawTicks(QPainter *painter)
     else if (currentTime % smallTickAmount == 0)
         drawSmallTick(painter);
 
+    // go from left offset to right offset
     while (currentPos + offset < geometry().width() - timeManager.getMarginRight()) {
         if (currentTime / (ltCounter * largeTickAmount) >= 1) { // large tick
             ltCounter++;

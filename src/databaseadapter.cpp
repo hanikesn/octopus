@@ -20,6 +20,17 @@ DatabaseAdapter::DatabaseAdapter(const QString &file)
     stmtSelectDataString = db.prepare("SELECT time, value FROM data_string WHERE fullname=?;");
 }
 
+/**
+ * Data is stored in 4 tables:
+ * senders (name TEXT PRIMARY KEY, devicetype TEXT)
+ * series (name TEXT, fullname TEXT, type TEXT, properties INT, misc TEXT, min FLOAT, max FLOAT, offset INT, sender TEXT, FOREIGN KEY(sender) REFERENCES senders(name)
+ *
+ * and for the data two separate tables:
+ * data_string (fullname TEXT, time INT, value TEXT)
+ * data_float (fullname TEXT, time INT, value FLOAT)
+ *
+ * Two separate tables where choosen so that sqlite can efficiently store the data, instead of just putting everything in a blob column
+ */
 void DatabaseAdapter::initDB(Sqlite::DB &db)
 {
     db.execute("PRAGMA journal_mode=WAL;");

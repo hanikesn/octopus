@@ -1,4 +1,5 @@
 #include "gui/presentationarea.h"
+#include <QVBoxLayout>
 
 #include "dataprovider.h"
 #include "timemanager.h"
@@ -39,7 +40,9 @@ public:
                 (event->modifiers() == Qt::ShiftModifier)) {
             createSelection = true;
             selection.show();
-            selection.setSelectionBegin(timeManager.convertPosToTime(event->pos().x()));
+            qint64 time = timeManager.convertPosToTime(event->pos().x());
+            selection.setSelectionBegin(time);
+            selection.setSelectionEnd(time);
             event->accept();
         }
 
@@ -345,8 +348,8 @@ void PresentationArea::updatePlotMargins()
     // determine the optimal plot margin over all tracks
     int optMargin = 0;
     foreach (Track *t, tracks) {
-        if (optMargin < t->optPlotMarginLeft) {
-            optMargin = t->optPlotMarginLeft;
+        if (optMargin < t->getOptPlotMarginLeft()) {
+            optMargin = t->getOptPlotMarginLeft();
         }
     }
 

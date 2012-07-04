@@ -1,7 +1,5 @@
 #include <QMessageBox>
 
-#include <QDebug>
-
 #include "recorder.h"
 #include "timemanager.h"
 

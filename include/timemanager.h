@@ -39,9 +39,22 @@ public:
       */
     int convertTimeToPos(qint64 time);
 
+    /**
+      * Loads the necessary information(low-/highVisRange and cursor time) from the QVariantMap
+      * @param qvm The map in which the information is stored.
+      */
     void load(QVariantMap *qvm);
+
+    /**
+      * Stores the necessary information(low-/highVisRange and cursor time) to the QVariantMap
+      * @param qvm The map in which the information needs to be stored.
+      */
     void save(QVariantMap *qvm);
 
+    /**
+      * Centers the visible range around 'timestamp' and propagates the changed range.
+      * @param timestamp The new center of the visible range.
+      */
     void center(qint64 timestamp);
 
     bool isPlaying() {return playing;}
@@ -52,7 +65,10 @@ public:
     bool isValidPos(int pos) {return pos > marginLeft && pos < width - marginRight;}
     int clipPos(int pos) {return qMin(qMax(pos, marginLeft), width - marginRight);}
 
-    // determines how much time should be between 2 big ticks in the timeline (in microseconds)
+    /**
+      * Determines how much time should be between 2 large ticks in the timeline (in microseconds)
+      * @return Time between to large ticks.
+      */
     int getStepSize();
 
     bool hasUnsavedChanges() { return unsavedChanges; }
@@ -66,16 +82,45 @@ private:
     qint64 getTimePerPx() {return timePerPx;}
 
 signals:
+    /**
+      * This signal is emitted whenever the visible range changes.
+      * @param begin Begin of the visible range
+      * @param end End of the visible range
+      */
     void rangeChanged(qint64 begin, qint64 end);
 
+    /**
+      * This signal is emitted when the point of time which is represented by the cursor changes.
+      * @param time New time of the cursor
+      */
     void currentTimeChanged(qint64 time);
 
+    /**
+      * This signal is emitted when new data is received and the datas timestamp is greater than
+      * any previously received timestamp.
+      * @param time New maximum timestamp
+      */
     void newMax(qint64 time);
 
+    /**
+      * This signal is enabled whenever the follow-function (cursor is pinned to new data) is
+      * (de)activated.
+      * @param True in case following is enabled, false otherwise
+      */
     void followEnabled(bool);
+
+    /**
+      * This signal is enabled whenever the play-function (cursor moves over recorded data) is
+      * (de)activated.
+      * @param True in case play is enabled, false otherwise
+      */
     void playEnabled(bool);
 
 public slots:
+    /**
+      * This slot is called when new data is received.
+      * @param timestamp The timestamp of the new data.
+      */
     void onNewMax(qint64 timestamp);
 
     /**
@@ -85,19 +130,38 @@ public slots:
      */
     void zoom(int factor, qint64 pos = -1);
 
+    /**
+      * Sets the currentTime unless the follow-function is active. In case 'play' is active the
+      * cursor will be moved to the corresponding position and the playing will be continued
+      * from this position.
+      */
     void setTime(qint64);
 
+    /**
+      * This slot is called when the user presses the play-button in the gui.
+      * This function handles the states of 'playing' and 'following' and emits the
+      * followEnabled/playEnabled signals.
+      */
     void onPlay();
 
     void onMarginsChanged(int marginLeft, int marginRight);
 
     void onNewWidth(int width);
 
+    /**
+      * This slot is called when the user presses the follow-button("pin to new data") in the gui.
+      * This function handles the states of 'playing' and 'following' according to the new state
+      * the followEnabled(bool) signal is emitted.
+      */
     void onFollow();
 
     void setRange(qint64 start, qint64 end);
 
 private slots:
+    /**
+      * This slot is called when the timer emits a timeout. It sets the state of 'playing ' and
+      * 'currentTime'.
+      */
     void onTimeout();
 
 private:
@@ -114,8 +178,8 @@ private:
 
     bool live;
 
-    bool playing;
-    bool following;
+    bool playing; // True in case the play-back is active, false otherwise
+    bool following; // Flag to determine whether "Pin to new data" is active or not
 
     QTimer* timer;
 
@@ -129,8 +193,10 @@ private:
     /// The point of time when the playing started
     Clock::time_point startTime;
 
-    qint64 getZoomFactor(bool zoomOut);
-    void updateScrollBar();
+    /**
+      * In case the cursor is not visible this function adjusts the visible range slightly so that
+      * the cursor is visible again.
+      */
     void ensureCursorVisibility();
 };
 
