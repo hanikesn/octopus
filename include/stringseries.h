@@ -1,3 +1,7 @@
+/*
+  A string series contains data of type STRING.
+*/
+
 #ifndef STRINGSERIES_H
 #define STRINGSERIES_H
 
@@ -16,6 +20,9 @@ public:
      */
     void accept(DataSeriesVisitor *v);
 
+    /**
+     * Reimplemented from AbstractDataSeries.
+     */
     void addData(qint64 timestamp, const Value &value);
 
     /**

@@ -1,3 +1,7 @@
+/*
+  A double series contains data of type DOUBLE.
+*/
+
 #ifndef DOUBLESERIES_H
 #define DOUBLESERIES_H
 
@@ -16,6 +20,9 @@ public:
      */
     void accept(DataSeriesVisitor *v);
     
+    /**
+     * Reimplemented from AbstractDataSeries.
+     */
     void addData(qint64 timeStamp, const Value &value);
 
     /**

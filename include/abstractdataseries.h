@@ -1,3 +1,7 @@
+/*
+  All data series need to derive from this class.
+*/
+
 #ifndef ABSTRACTDATASERIES_H
 #define ABSTRACTDATASERIES_H
 
@@ -23,23 +27,54 @@ public:
     virtual void accept(DataSeriesVisitor *v) = 0;
 
     /**
-     * The default scale type to be used for plotting the data.
+     * @return The default scale type to be used for plotting the data.
      */
     PlotSettings::ScaleType defaultScaleType;
 
+    /**
+     * @return The device the data series belongs to.
+     */
     QString device() const;
+
+    /**
+     * @return The name of the data series without the device prefix.
+     */
     QString name() const;
+
+    /**
+     * @return The name of the data series with the device prefix.
+     */
     QString fullName() const;
+
+    /**
+     * @return This data series' data properties.
+     */
     Data::Properties properties() const;
+
+    /**
+     * @return The offset in microseconds that has been set for the data
+     *      series. This value is added to each time stamp and can for
+     *      example be used to compensate time lags in the signal transmission.
+     */
     qint64 offset() const;
 
     virtual void addData(qint64 timeStamp, const Value &value) = 0;
+
+    /**
+     * Changes the data series' offset to the given value.
+     */
     virtual void setOffset(qint64 newOffset);
 
 signals:
+    /**
+     * Emitted when the data series has new data.
+     */
     void newData(qint64 timestamp);
+
+    /**
+     * Emitted when the data series' offset has been changed.
+     */
     void offsetChanged();
-    void illegalValueType();
 
 protected:
     DataProvider &dp;

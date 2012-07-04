@@ -20,8 +20,6 @@ void DoubleSeries::addData(qint64 timestamp, const Value& value)
 {
     if (value.getType() == Value::DOUBLE) {
         emit newData(timestamp);
-    } else {
-        emit illegalValueType();
     }
 }
 
