@@ -81,8 +81,9 @@ void Track::setupPlot()
     ui.plot->setAutoMargin(false);
     connect(ui.plot, SIGNAL(optMarginsRecalculated(int,int,int,int)), this, SLOT(onOptPlotMarginsRecalculated(int,int,int,int)));
 
-    // if one of the graphs needs the axis, they should ensure it's visible
+    // if one of the graphs needs the axis and grid, they should ensure it's visible
     ui.plot->yAxis->setVisible(false);
+    ui.plot->yAxis->setGrid(false);
 
     ui.plot->legend->setVisible(true);
     ui.plot->legend->setPositionStyle(QCPLegend::psTopLeft);
@@ -244,7 +245,7 @@ void Track::onPlotSettings()
 
 void Track::onOptPlotMarginsRecalculated(int left, int /*right*/, int top, int bottom)
 {
-    ui.plot->setMarginRight(0);
+    ui.plot->setMarginRight(5);
     ui.plot->setMarginTop(top);
     ui.plot->setMarginBottom(bottom);
 
@@ -261,7 +262,7 @@ int Track::getMarginLeft()
 
 int Track::getMarginRight()
 {
-    return ui.plot->marginRight();
+    return width() - (ui.plot->pos().x() + ui.plot->width()) + ui.plot->marginRight();
 }
 
 void Track::setPlotMarginLeft(int margin)
