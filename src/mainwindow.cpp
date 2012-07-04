@@ -342,7 +342,6 @@ QString MainWindow::getSaveFileName(bool saveAs)
 
 void MainWindow::closeEvent(QCloseEvent *ce)
 {
-//    if (checkForActiveRecord() == QMessageBox::Abort) return;
     // usual check for unsaved changes in the project
     if ((checkForActiveRecord() != QMessageBox::Abort) && (checkForUnsavedChanges() != QMessageBox::Abort))
         QMainWindow::closeEvent(ce);
