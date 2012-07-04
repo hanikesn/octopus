@@ -3,8 +3,6 @@
 
 #include "gui/qcustomplot.h"
 
-#include <algorithm>
-
 const QCPRange RANGE(0.0, 1.0);
 const double IMPULSE_HEIGHT = RANGE.lower + 0.4 * RANGE.size();
 
@@ -15,14 +13,11 @@ DiscreteGraph::DiscreteGraph(QCustomPlot *plot, const StringSeries &s) :
     lastUpdate(-1)
 {
     connect(&series, SIGNAL(newData(qint64)), this, SLOT(onNewData(qint64)));
+    connect(&series, SIGNAL(offsetChanged()), this, SLOT(onOffsetChanged()));
 
     graph = plot->addGraph(plot->xAxis, plot->yAxis2);
     plot->yAxis2->setRange(RANGE);
     plot->yAxis2->setVisible(false);
-
-    if (plot->graphCount() == 1) {
-        plot->yAxis->setVisible(false);
-    }
 
     configureAppearance(graph);
     initialize(graph, series);
@@ -115,5 +110,12 @@ void DiscreteGraph::onNewData(qint64 timestamp)
     }
 
     lastUpdate = timestamp;
+    plot->replot();
+}
+
+void DiscreteGraph::onOffsetChanged()
+{
+    graph->clearData();
+    initialize(graph, series);
     plot->replot();
 }

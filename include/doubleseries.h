@@ -1,3 +1,7 @@
+/*
+  A double series contains data of type DOUBLE.
+*/
+
 #ifndef DOUBLESERIES_H
 #define DOUBLESERIES_H
 
@@ -9,13 +13,16 @@ class DoubleSeries : public AbstractDataSeries
 {
     Q_OBJECT
 public:
-    DoubleSeries(const DataProvider &dp, const QString &deviceName, const QString &name, Data::Properties properties);
+    DoubleSeries(DataProvider &dp, const QString &deviceName, const QString &name, Data::Properties properties);
 
     /**
      * Visitor pattern.
      */
     void accept(DataSeriesVisitor *v);
     
+    /**
+     * Reimplemented from AbstractDataSeries.
+     */
     void addData(qint64 timeStamp, const Value &value);
 
     /**

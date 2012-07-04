@@ -29,13 +29,11 @@ DB::~DB()
     sqlite3_close(db);
 }
 
-const PreparedStatement::QueryIterator DB::Done;
-
 PreparedStatement DB::prepare(const std::string& query) const
 {
     sqlite3_stmt* stmt;
     const char* unused;
-    // sqlite expects the null terminator to be included in the lenght
+    // sqlite expects the null terminator to be included in the length
     int ret = sqlite3_prepare_v2(db, query.c_str(), query.length() + 1, &stmt, &unused);
     if(ret != SQLITE_OK)
         throw Exception(db);
@@ -62,9 +60,9 @@ PreparedStatement& PreparedStatement::operator =(PreparedStatement && other)
     return *this;
 }
 
-PreparedStatement::QueryIterator DB::execute(std::string const& query)
+bool DB::execute(std::string const& query)
 {
-    return prepare(query).execute();
+    return prepare(query).execute() == PreparedStatement::QueryIterator();
 }
 
 
@@ -90,6 +88,7 @@ PreparedStatement::QueryIterator PreparedStatement::done()
 
 void PreparedStatement::bind(int index, double value)
 {
+    assert(index <=  sqlite3_bind_parameter_count(stmt));
     int ret = sqlite3_bind_double(stmt, index, value);
     if(ret != SQLITE_OK)
         throw Exception(db);
@@ -97,6 +96,7 @@ void PreparedStatement::bind(int index, double value)
 
 void PreparedStatement::bind(int index, sqlite3_int64 value)
 {
+    assert(index <=  sqlite3_bind_parameter_count(stmt));
     int ret = sqlite3_bind_int64(stmt, index, value);
     if(ret != SQLITE_OK)
         throw Exception(db);
@@ -104,7 +104,16 @@ void PreparedStatement::bind(int index, sqlite3_int64 value)
 
 void PreparedStatement::bind(int index, const std::string& value)
 {
+    assert(index <=  sqlite3_bind_parameter_count(stmt));
     int ret = sqlite3_bind_text(stmt, index, value.c_str(), value.length(), SQLITE_TRANSIENT);
+    if(ret != SQLITE_OK)
+        throw Exception(db);
+}
+
+void PreparedStatement::bind(int index, const char* value, int n)
+{
+    assert(index <=  sqlite3_bind_parameter_count(stmt));
+    int ret = sqlite3_bind_text(stmt, index, value, n, SQLITE_TRANSIENT);
     if(ret != SQLITE_OK)
         throw Exception(db);
 }
@@ -148,6 +157,7 @@ PreparedStatement::QueryIterator& PreparedStatement::QueryIterator::operator++()
             assert(ret==SQLITE_ROW);
         }
     }
+
     return *this;
 }
 

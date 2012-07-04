@@ -2,8 +2,6 @@
 
 #include "gui/timeline.h"
 
-#include <QDebug>
-#include <QScrollBar>
 #include <QTimer>
 
 namespace bc = boost::chrono;
@@ -19,6 +17,9 @@ TimeManager::TimeManager(Clock::time_point startTime, QObject* parent):
     playing(false),
     following(false),
     timer(new QTimer(this)),
+    marginLeft(0), marginRight(0),
+    width(0),
+    unsavedChanges(false),
     absoluteStartTime(startTime)
 {
     timer->setSingleShot(false);
@@ -57,7 +58,7 @@ void TimeManager::setRange(qint64 begin, qint64 end)
 void TimeManager::ensureCursorVisibility()
 {
     // We need to adjust the range slightly so that the cursor stays visible
-    if((currentTime > highVisRange - getTimePerPx())) {
+    if ((currentTime > highVisRange - getTimePerPx())) {
         qint64 range = highVisRange - lowVisRange;
         highVisRange = currentTime + getTimePerPx();
         lowVisRange = highVisRange - range;
@@ -138,7 +139,7 @@ void TimeManager::zoom(int factor, qint64 time)
 
     int x = (width - marginLeft - marginRight) * timePerPx;
 
-    double f = (double)(time -lowVisRange) / (highVisRange - lowVisRange);
+    double f = (double)(time - lowVisRange) / (highVisRange - lowVisRange);
 
     lowVisRange = time - x*(f);
     highVisRange = time + x*(1-f);
@@ -156,23 +157,23 @@ void TimeManager::onTimeout()
 {
     Clock::time_point now = Clock::now();
 
-    if(live) {
+    if (live) {
         onNewMax(bc::duration_cast<bc::microseconds>(now - absoluteStartTime).count());
     }
 
-    if(!playing)
+    if (!playing)
         return;
 
-    if(following)
+    if (following)
         currentTime = maximum;
-    else {
-        currentTime = bc::duration_cast<bc::microseconds>(now - startTime).count();
-    }
+    else
+        currentTime = bc::duration_cast<bc::microseconds>(now - startTime).count();    
 
     // stop playing if end is reached and we are not expecting new data
     if ((currentTime > getMaximum()) && !following) {
         currentTime = getMaximum();
         playing = false;
+        emit playEnabled(playing);
         timer->stop();
         return;
     }
@@ -195,33 +196,39 @@ void TimeManager::onNewWidth(int w)
     setRange(lowVisRange, lowVisRange + timePerPx * (w - marginLeft - marginRight));
 }
 
-void TimeManager::onFollow(bool following)
+void TimeManager::onFollow()
 {
-    if(!live)
+    if (!live)
         return;
 
     if (following) {
+        playing = false;
+        following = false;
+    } else {
         playing = true;
         startTime = absoluteStartTime;
-    } else {
-        playing = false;
+        following = true;
     }
-    this->following = following;
+    emit followEnabled(following);
 }
 
 void TimeManager::onPlay()
 {    
     if(playing) {
         playing = false;
-        if(!live)
+        if (!live)
             timer->stop();
-        following = false;
+        following = false; // following can't be active if playing isn't active
     } else {
         playing = true;        
+        // change the visible range in case currentTime is not visible
         if (currentTime > getHighVisRange() || currentTime < getLowVisRange()) {
             center(currentTime);
         }
         timer->start();
         startTime = Clock::now() - bc::microseconds(currentTime);
     }
+
+    emit followEnabled(following);
+    emit playEnabled(playing);
 }

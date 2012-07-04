@@ -41,9 +41,6 @@ void ExportHandler::onExport(qint64 begin, qint64 end)
         da.getMinMaxTimeStamp(begin, end);
     }
 
-    if (begin > end)
-        std::swap(begin, end);
-
     QList<QStringList> res = SourceDialog::getSources(*dataProvider, tr("Export"), false, QStringList());
 
     if(res.isEmpty())
@@ -63,16 +60,16 @@ void ExportHandler::onExport(qint64 begin, qint64 end)
     if (fileNames.isEmpty())
         return;
 
-    if (!fileNames.first().endsWith(".csv"))
-        fileNames.first().append(".csv");
+    Exporter& exporter = exporterFactory.getExporter(dialog.selectedNameFilter());
+
+    if (!fileNames.first().endsWith(exporter.getSuffix()))
+        fileNames.first().append("." + exporter.getSuffix());
 
     QFile file(fileNames.first());
-    if(!file.open(QIODevice::WriteOnly)) {
+    if (!file.open(QIODevice::WriteOnly)) {
         QMessageBox::critical(0,tr("Error"), tr("Could not save file."));
         return;
     }
 
-    exporterFactory.getExporter(dialog.selectedNameFilter()).write(file, *dataProvider, sources, begin, end);
-
-    qDebug() << Q_FUNC_INFO << begin << ":" << end << fileNames << sources;
+    exporter.write(file, *dataProvider, sources, begin, end);
 }

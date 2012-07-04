@@ -17,6 +17,7 @@ Selection::Selection(TimeManager* timeManager, QWidget *parent):
 {
     setObjectName("Selection");
 
+    // Set up and connect menu items
     menu = new QMenu(this);
     QAction* exportAction = new QAction(tr("Export Range"), this);
     QAction* zoomInAction = new QAction(tr("Zoom In"), this);
@@ -25,26 +26,26 @@ Selection::Selection(TimeManager* timeManager, QWidget *parent):
     connect(exportAction, SIGNAL(triggered()), this, SLOT(exportTriggered()));
     connect(zoomInAction, SIGNAL(triggered()), this, SLOT(onZoomIn()));
 
-    setObjectName("Selection");
-
     setVisible(false);
 }
 
 void Selection::onUpdate()
 {
-    int left = timeManager->clipPos(timeManager->convertTimeToPos(begin));
-    int right = timeManager->clipPos(timeManager->convertTimeToPos(end));
-
-    if(left > right)
+    left = begin;
+    right = end;
+    if (left > right)
         std::swap(left, right);
+    // Determine left and right coordinates
+    int l = timeManager->clipPos(timeManager->convertTimeToPos(left));
+    int r = timeManager->clipPos(timeManager->convertTimeToPos(right));
 
-    setFixedWidth(right-left);
-    move(left, 0);
+    setFixedWidth(r-l+1);
+    move(l, 0);
 }
 
 void Selection::exportTriggered()
 {
-    emit onExport(begin, end);
+    emit onExport(left, right);
 }
 
 void Selection::paintEvent(QPaintEvent *)
@@ -59,7 +60,7 @@ void Selection::paintEvent(QPaintEvent *)
 
 void Selection::onZoomIn()
 {
-    emit zoomIn(begin, end);
+    emit zoomIn(left, right);
 }
 
 void Selection::updateHeight(int h)
@@ -71,7 +72,8 @@ void Selection::show()
 {
     setVisible(true);
     onUpdate();
-    emit selectionChanged(begin, end);
+
+    emit selectionChanged(left, right);
 }
 
 void Selection::hide()
@@ -89,15 +91,19 @@ void Selection::setSelectionBegin(qint64 time)
 {
     begin = time;
     end = time;
+
     onUpdate();
-    emit selectionChanged(begin, end);
+
+    emit selectionChanged(left, right);
 }
 
 void Selection::setSelectionEnd(qint64 time)
 {
     end = time;
+
     onUpdate();
-    emit selectionChanged(begin, end);
+
+    emit selectionChanged(left, right);
 }
 
 void Selection::contextMenuEvent(QContextMenuEvent * event)

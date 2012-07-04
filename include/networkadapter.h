@@ -30,14 +30,10 @@ public:
 
     Clock::time_point getStartTime();
 
-protected:
-    //TODO debug-only
-    void disconnectNotify(const char *signal);
-
 signals:
-    void onNewSender(EIDescriptionWrapper);
+    void newSender(EIDescriptionWrapper);
 
-    void onNewData(qint64 timestamp, QString fullDataSeriesName, Value value);
+    void newData(qint64 timestamp, QString fullDataSeriesName, Value value);
 
 private:
     EI::Receiver receiver;

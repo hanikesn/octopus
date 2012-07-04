@@ -1,6 +1,7 @@
 #include "gui/sourcedialog.h"
 
 #include "dataprovider.h"
+#include "ui_sourcedialog.h"
 
 #include <QDebug>
 
@@ -10,16 +11,23 @@ SourceDialog::SourceDialog(const DataProvider &dataProvider,
                            const QStringList &preselected,
                            QWidget *parent) :
     QDialog(parent),
+    ui(new Ui::SourceDialog()),
     checkStateChangeSource(0)
 {
-    ui.setupUi(this);
+    ui->setupUi(this);
     setWindowTitle(dialogTitle);
     setUpSourceTree(dataProvider, preselected);
-    connect(ui.sourceTree, SIGNAL(itemChanged(QTreeWidgetItem*,int)), this, SLOT(onItemChanged(QTreeWidgetItem*,int)));
+    connect(ui->sourceTree, SIGNAL(itemChanged(QTreeWidgetItem*,int)), this, SLOT(onItemChanged(QTreeWidgetItem*,int)));
 
-    ui.allInOneOption->setVisible(allInOneOption);
-    // If option is visible, default checkState is Qt::Unchecked. If option is invisible, default checkState is Qt::Checked.
-    ui.allInOneOption->setChecked(!allInOneOption);
+    ui->allInOneOption->setVisible(allInOneOption);
+    // If option is visible, default checkState is Qt::Unchecked.
+    // If option is invisible, default checkState is Qt::Checked.
+    ui->allInOneOption->setChecked(!allInOneOption);
+}
+
+SourceDialog::~SourceDialog()
+{
+    delete ui;
 }
 
 void SourceDialog::setUpSourceTree(const DataProvider &dataProvider, const QStringList &preselectedItems)
@@ -32,10 +40,10 @@ void SourceDialog::setUpSourceTree(const DataProvider &dataProvider, const QStri
         QStringList components = s.split(".", QString::SkipEmptyParts);
 
         QString deviceName = components.takeFirst();
-        QList<QTreeWidgetItem*> itemsWithSameName = ui.sourceTree->findItems(deviceName, Qt::MatchFixedString);
+        QList<QTreeWidgetItem*> itemsWithSameName = ui->sourceTree->findItems(deviceName, Qt::MatchFixedString);
         QTreeWidgetItem *parentItem = 0;
         if (itemsWithSameName.isEmpty()) {
-            parentItem = new QTreeWidgetItem(ui.sourceTree);
+            parentItem = new QTreeWidgetItem(ui->sourceTree);
             parentItem->setCheckState(0, Qt::Unchecked);
             parentItem->setText(0, deviceName);
         } else {
@@ -56,6 +64,7 @@ void SourceDialog::setUpSourceTree(const DataProvider &dataProvider, const QStri
                 if (preselect && components.indexOf(comp) == components.length() - 1) {
                     childItem->setCheckState(0, Qt::Checked);
                     checkedItems.append(childItem);
+                    parentItem->setExpanded(true);
                 } else {
                     childItem->setCheckState(0, Qt::Unchecked);
                 }
@@ -65,9 +74,6 @@ void SourceDialog::setUpSourceTree(const DataProvider &dataProvider, const QStri
             parentItem = childItem;
         }
     }
-
-    // TODO(Steffi): Remove
-    ui.sourceTree->expandAll();
 }
 
 void SourceDialog::onItemChanged(QTreeWidgetItem *item, int /*column*/)
@@ -82,7 +88,7 @@ void SourceDialog::onItemChanged(QTreeWidgetItem *item, int /*column*/)
         checkedItems.removeAll(item);
 
         // If a non-top-level item was unchecked, uncheck its parent, too.
-        if (ui.sourceTree->indexOfTopLevelItem(item) == -1) {
+        if (ui->sourceTree->indexOfTopLevelItem(item) == -1) {
             item->parent()->setCheckState(0, Qt::Unchecked);
         }
     }
@@ -110,9 +116,9 @@ QList<QStringList> SourceDialog::getSources(const DataProvider &dataProvider,
 QList<QStringList> SourceDialog::getResult()
 {
     QList<QStringList> sources;
-    if (result() == QDialog::Accepted && ui.allInOneOption->checkState() == Qt::Checked) {
+    if (result() == QDialog::Accepted && ui->allInOneOption->checkState() == Qt::Checked) {
         sources.append(selectedSeries());
-    } else if (result() == QDialog::Accepted && ui.allInOneOption->checkState() == Qt::Unchecked) {
+    } else if (result() == QDialog::Accepted && ui->allInOneOption->checkState() == Qt::Unchecked) {
         foreach (QString s, selectedSeries()) {
             sources.append(QStringList(s));
         }

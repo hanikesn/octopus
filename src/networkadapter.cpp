@@ -3,8 +3,6 @@
 #include "value.h"
 
 #include <algorithm>
-#include <iostream>
-#include <QDebug>
 
 NetworkAdapter::NetworkAdapter(QObject* parent) :
     QObject(parent),
@@ -20,12 +18,6 @@ NetworkAdapter::~NetworkAdapter()
 {
     receiver.removeDataListener(this);
     receiver.removeCommunicationListener(this);
-}
-
-
-void NetworkAdapter::disconnectNotify(const char *signal)
-{
-    qDebug() << signal << "disconnected";
 }
 
 void NetworkAdapter::discoverSenders()
@@ -49,7 +41,7 @@ void NetworkAdapter::onMessage(EI::DataMessage msg)
     const QString prefix = fromStdString(msg.getSender()) + ".";
 
     foreach(auto const& p, msg.getContent()) {
-        emit onNewData(timestamp, QString(prefix +  fromStdString(p.first)), Value(p.second));
+        emit newData(timestamp, QString(prefix +  fromStdString(p.first)), Value(p.second));
     }
 }
 
@@ -59,7 +51,7 @@ void NetworkAdapter::onMessage(EI::Message const& msg)
     {
         auto const& d = dynamic_cast<EI::DescriptionMessage const&>(msg);
         auto const& desc = d.getDescription();
-        emit onNewSender(desc);
+        emit newSender(desc);
         knownSenders.insert(d.getSender());
     }
 }

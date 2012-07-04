@@ -1,3 +1,7 @@
+/*
+  A string series contains data of type STRING.
+*/
+
 #ifndef STRINGSERIES_H
 #define STRINGSERIES_H
 
@@ -9,13 +13,16 @@ class StringSeries : public AbstractDataSeries
 {
     Q_OBJECT
 public:
-    StringSeries(const DataProvider &dp, const QString& deviceName, const QString& dataSeriesName, Data::Properties properties);
+    StringSeries(DataProvider &dp, const QString& deviceName, const QString& dataSeriesName, Data::Properties properties);
 
     /**
      * Visitor pattern.
      */
     void accept(DataSeriesVisitor *v);
 
+    /**
+     * Reimplemented from AbstractDataSeries.
+     */
     void addData(qint64 timestamp, const Value &value);
 
     /**

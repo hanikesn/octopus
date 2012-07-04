@@ -1,39 +1,16 @@
 #include "viewmanager.h"
 
-#include <QFileDialog>
-#include <QDateTime>
-
-
 #include "dataprovider.h"
-#include "networkadapter.h"
 #include "exporthandler.h"
-#include "gui/presentationarea.h"
+#include "mainwindow.h"
+#include "networkadapter.h"
 #include "timemanager.h"
 #include "recorder.h"
-#include "mainwindow.h"
+#include "gui/presentationarea.h"
 #include "gui/timescrollbar.h"
 
-static void addData(DataProvider& dp)
-{
-    EI::Description desc1("Dummy", "dum");
-    desc1.addDataSeries("Interpolatable.x", EI::DataSeriesInfo(EI::Value::DOUBLE, EI::DataSeriesInfo::INTERPOLATABLE,""));
-    desc1.addDataSeries("Interpolatable.y", EI::DataSeriesInfo(EI::Value::DOUBLE, EI::DataSeriesInfo::INTERPOLATABLE,""));
-    desc1.addDataSeries("Discrete", EI::DataSeriesInfo(EI::Value::DOUBLE, EI::DataSeriesInfo::STATEFUL,""));
-    dp.onNewSender(desc1);
-
-    EI::Description desc2("Dummy-2", "dum");
-    desc2.addDataSeries("Interpolatable.x", EI::DataSeriesInfo(EI::Value::DOUBLE, EI::DataSeriesInfo::INTERPOLATABLE,""));
-    desc2.addDataSeries("Interpolatable.y", EI::DataSeriesInfo(EI::Value::DOUBLE, EI::DataSeriesInfo::INTERPOLATABLE,""));
-    dp.onNewSender(desc2);
-
-     for (int j=0; j<500; ++j)
-    {
-      double d = j/15.0 * 5*3.14 + 0.01;
-      dp.onNewData(d*1000000, "Dummy.Interpolatable.x", Value(14*sin(d)/d + 3));
-      dp.onNewData(d*1000000, "Dummy.Interpolatable.y", Value(-7*sin(d)/d));
-      dp.onNewData(d*1000000, "Dummy.Discrete", Value("ping"));
-    }
-}
+#include <QDateTime>
+#include <QFileDialog>
 
 ViewManager::ViewManager(QWidget *parent, QString dbfile):
     QWidget(parent),
@@ -49,35 +26,30 @@ ViewManager::ViewManager(QWidget *parent, QString dbfile):
     layout()->setMargin(0);
     layout()->setSpacing(0);
 
-    createNewView(dbfile);
+    createViewAndModel(dbfile);
 }
 
 void ViewManager::load(QVariantMap *qvm)
 {
+    // propagate load-call
     dataProvider->load(qvm);
     presentationArea->load(qvm);
+
+    // no changes directly after loading:
     presentationArea->setUnsavedChanges(false);
     timeManager->setUnsavedChanges(false);
 }
 
 void ViewManager::save(QVariantMap *qvm)
 {
+    // propagate save-call
     presentationArea->save(qvm);
     dataProvider->save(qvm);
 }
 
 void ViewManager::saveDB(QString dbname, qint64 begin, qint64 end)
 {
-    if ((begin == -1) && (end == -1)) { // save all
-        dataProvider->moveDB(dbname);
-    } else {
-        dataProvider->copyDB(dbname, begin, end);
-    }
-}
-
-QString ViewManager::getDBName()
-{
-    return dataProvider->getDBFileName();
+    dataProvider->copyDB(dbname, begin, end);
 }
 
 bool ViewManager::hasUnsavedChanges()
@@ -99,10 +71,12 @@ bool ViewManager::isRecording()
 void ViewManager::onRecord()
 {
     recorder->toggleRecording();
+    emit recordEnabled(recorder->isRecording());
 }
 
-void ViewManager::createNewView(QString dbfile)
+void ViewManager::createViewAndModel(QString dbfile)
 {
+    // delete previous objects:
     if (networkAdapter) {
         networkAdapter->deleteLater();
         networkAdapter = 0;
@@ -117,9 +91,10 @@ void ViewManager::createNewView(QString dbfile)
         }
         // create a temporary file for the db
         dataProvider = new DataProvider(dbfile, this);
+        // create networkAdapter because we expect new data
         networkAdapter = new NetworkAdapter(this);
 
-    } else { // load-action
+    } else { // load-action, we need no networkAdapter because we don't expect any new data
         DataProvider* olddataProvider = dataProvider;
         dataProvider = new DataProvider(dbfile, this);
 
@@ -127,10 +102,12 @@ void ViewManager::createNewView(QString dbfile)
             olddataProvider->closeDB();
             olddataProvider->deleteLater();
         }
-    }
+    }    
+    // We need to export stuff in any case:
     exportHandler = new ExportHandler(this, dataProvider);
+
+    // create view-relevant objects:
     setUpView();
-        addData(*dataProvider);
 }
 
 void ViewManager::setUpView()
@@ -162,26 +139,29 @@ void ViewManager::makeConnects()
     // timeManager
     connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)), scrollBar, SLOT(onRangeChanged(qint64,qint64)));
     connect(timeManager, SIGNAL(newMax(qint64)), scrollBar, SLOT(onNewMax(qint64)));
+    connect(timeManager, SIGNAL(followEnabled(bool)), this, SIGNAL(followEnabled(bool)));
+    connect(timeManager, SIGNAL(playEnabled(bool)), this, SIGNAL(playEnabled(bool)));
     connect(this, SIGNAL(play()), timeManager, SLOT(onPlay()));
-    connect(this, SIGNAL(follow(bool)), timeManager, SLOT(onFollow(bool)));
+    connect(this, SIGNAL(follow()), timeManager, SLOT(onFollow()));
     connect(this, SIGNAL(zoom(int)), timeManager, SLOT(zoom(int)));
     connect(scrollBar, SIGNAL(rangeChanged(qint64,qint64)), timeManager, SLOT(setRange(qint64,qint64)));
 
     // presentationArea
     connect(this, SIGNAL(plotSettings()), presentationArea, SLOT(onPlotSettings()));
-    connect(this, SIGNAL(addTrack()), presentationArea, SLOT(onAddTrack()));
+    connect(this, SIGNAL(addTrack()), presentationArea, SLOT(onAddTrack()));    
     connect(presentationArea, SIGNAL(exportRange(qint64,qint64)), exportHandler, SLOT(onExport(qint64,qint64)));
     connect(presentationArea, SIGNAL(selectionChanged(qint64,qint64)), exportHandler, SLOT(onSelectionChanged(qint64,qint64)));
 
     // recorder
     connect(recorder, SIGNAL(saveProject(qint64,qint64)), this, SIGNAL(saveProject(qint64,qint64)));
+    connect(recorder, SIGNAL(record(qint64,qint64,bool)), presentationArea, SIGNAL(record(qint64,qint64,bool)));
 
     // networkAdapter if available
     if (networkAdapter) {
         qRegisterMetaType<EIDescriptionWrapper>("EIDescriptionWrapper");
         qRegisterMetaType<Value>("Value");
-        connect(networkAdapter, SIGNAL(onNewSender(EIDescriptionWrapper)),  dataProvider, SLOT(onNewSender(EIDescriptionWrapper)), Qt::QueuedConnection);
-        connect(networkAdapter, SIGNAL(onNewData(qint64,QString,Value)),    dataProvider, SLOT(onNewData(qint64,QString,Value)), Qt::QueuedConnection);
+        connect(networkAdapter, SIGNAL(newSender(EIDescriptionWrapper)),  dataProvider, SLOT(onNewSender(EIDescriptionWrapper)), Qt::QueuedConnection);
+        connect(networkAdapter, SIGNAL(newData(qint64,QString,Value)),    dataProvider, SLOT(onNewData(qint64,QString,Value)), Qt::QueuedConnection);
         networkAdapter->discoverSenders();
     }
 }

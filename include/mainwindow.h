@@ -4,7 +4,7 @@
 #include "dataprovider.h"
 #include "networkadapter.h"
 #include "mainwindow.h"
-#include "gui/presentationarea.h"
+#include "gui/startscreen.h"
 
 #include <QAction>
 #include <QVBoxLayout>
@@ -17,7 +17,6 @@
 
 
 class TrackScene;
-class PresentationArea;
 class Recorder;
 class ExportHandler;
 class ViewManager;
@@ -31,18 +30,39 @@ class MainWindow : public QMainWindow
     Q_OBJECT
     
 public:
-    explicit MainWindow(QWidget *parent = 0);
+    explicit MainWindow(StartScreen::Type type, QWidget *parent = 0);
     ~MainWindow();
 
 protected:
+    /**
+      * Reimplemented from QWidget.
+      * Handles window close events.
+      */
     void closeEvent(QCloseEvent *ce);
     
 private slots:        
+    /**
+      * Calls save(bool, qint64, qint64).
+      */
     void onSave();
+
+    /**
+      * Calls save(bool, qint64, qint64).
+      */
     void onSaveAs();
+
+    /**
+      * Handles load-action (checking for unsaved changes, parsing config file, propagating
+      * load-call to necessary classes, creating view)
+      * @return FileName of the loaded config file.
+      */
     QString onLoad();
+
+    /**
+      * Checks for unsaved changes and creates new view.
+      */
     void onNew();    
-    void onRecord();
+
     /**
       * This saves the recorded data into a new project (project file and new database is created).
       * @param start Timestamp for the begin of the recorded data.
@@ -50,11 +70,24 @@ private slots:
       */
     void onSaveProject(qint64 start, qint64 end);
 
-    void onFollowData();
+    /**
+      * Set the state of the record button.
+      */
+    void onRecordEnabled(bool recording);
 
-    void onPlay();
+    /**
+      * Set the state of the follow button.
+      */
+    void onFollowEnabled(bool follow);
+
+    /**
+      * Set the state of the play button.
+      */
+    void onPlayEnabled(bool play);
 
 private:
+    Ui::MainWindow* ui;
+
     QVBoxLayout *trackLayout;
 
     // Buttons and layout for toolbar:
@@ -86,18 +119,25 @@ private:
 
     ViewManager *viewManager;
 
-    Ui::MainWindow* ui;
-
     QString projectPath;
 
     const static QString TITLE;
 
+    /**
+      * Sets icons/texts for the buttons and makes necessary connects.
+      */
     void setUpButtonBars();
 
+    /**
+      * Adds actions to menu
+      */
     void setUpMenu();
 
     void setTitle(QString pName);
 
+    /**
+      * Connects signals between ViewManager and MainWindow and adds the viewManager to the ui.
+      */
     void setUpView();
 
     /**
@@ -110,18 +150,58 @@ private:
       *               project hasn't been saved before.
       * @param begin Timestamp for the begin of the recorded data.
       * @param end Timestamp for the end of the recorded data.
+      * @return The filename of the file to save in.
       */
-    void save(bool saveAs, qint64 begin = -1, qint64 end = -1);
+    QString save(bool saveAs, qint64 begin = -1, qint64 end = -1);
 
+
+    /**
+      * Checks whether viewManager has unsaved changes and shows a dialog according to it.
+      * In case there are unsaved changes the user has the chance to save/discard/abort.
+      * @return The dialogs result value.
+      */
     int checkForUnsavedChanges();
 
+    /**
+      * Checks whether there is a running record.
+      * In case there is running record the user has the chance to save/discard/abort.
+      * @return The dialogs result value.
+      */
+    int checkForActiveRecord();
+
+    /**
+      * Shows a dialog where the user can choose the file to save in. If the user has previously
+      * saved this project and 'saveAs' is false, this function does not show any dialog but returns
+      * the path to the current config file.
+      * In case 'saveAs' is true the user will be prompted to specify a new file.
+      * @return Path to the config file.
+      */
     QString getSaveFileName(bool saveAs);
 
-    bool writeProjectSettings(QVariantMap pName, QString path);
+    /**
+      * Propagates the save-call to the viewManager and writes into the config file specified with
+      * 'path'.
+      * @param pName The QVariantMap in which the necessary data needs to be stored (propagated)
+      * @param path Path to a file in which will be written.
+      * @return true If write was successful, false otherwise.
+      */
+    bool writeProjectSettings(QVariantMap config, QString path);
 
 signals:
-    void timeStepChanged(int);
-    void follow(bool following);
+    /**
+      * This signal is emitted when the user presses the "pin to new data" button.
+      */
+    void follow();
+
+    /**
+      * This signal is emitted when the user presses the record button.
+      */
+    void record();
+
+    /**
+      * This signal is emitted when the user presses the play button.
+      */
+    void play();
 };
 
 #endif // MAINWINDOW_H

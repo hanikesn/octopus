@@ -3,31 +3,27 @@
 #include <QDebug>
 #include <QFileDialog>
 #include <QMessageBox>
-#include <sstream>
-#include <QDateTime>
 #include <QSignalMapper>
 #include <QCloseEvent>
 
 #include "ui_mainwindow.h"
-#include "dataprovider.h"
-#include "gui/presentationarea.h"
 #include "serializer.h"
 #include "parser.h"
 #include "gui/startscreen.h"
 #include "timemanager.h"
-#include "recorder.h"
 #include "exporthandler.h"
 #include "viewmanager.h"
 
 const QString MainWindow::TITLE = "Octopus 0.1";
 
-MainWindow::MainWindow(QWidget *parent) :
+MainWindow::MainWindow(StartScreen::Type type, QWidget *parent) :
     QMainWindow(parent),        
+    ui(new Ui::MainWindow()),
     viewManager(0)
-{    
-    ui = new Ui::MainWindow();
+{
     ui->setupUi(this);
 
+    // create and connect actions:
     saveAction = new QAction(tr("&Save"), this);
     saveAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_S));
     saveAsAction = new QAction(tr("Save As ..."), this);
@@ -45,24 +41,16 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(newAction, SIGNAL(triggered()), this, SLOT(onNew()));
     connect(quitAction, SIGNAL(triggered()), this, SLOT(close()));
 
+    // Init buttons and menu
     setUpButtonBars();
     setUpMenu();
 
-    //TODO(domi): Kommentare wegmachen
-    //TODO(steffen): an neuen viewmanager anpassen
-//    StartScreen *s = new StartScreen(this);
-//    if (s->showScreen() == StartScreen::LOAD) {
-//        viewManager->createNewView();
-//        if (onLoad().isEmpty()) { // file choose dialog was cancelled
-//            viewManager->createNewView();
-//            onNew();
-//        }
-//    }
-//    else {
-//        viewManager->createNewView();
-//        onNew();
-//    }
-    onNew();
+    if(type == StartScreen::LOAD) {
+        if(onLoad().isEmpty())
+            onNew();
+    } else {
+        onNew();
+    }
 }
 
 MainWindow::~MainWindow()
@@ -73,11 +61,17 @@ MainWindow::~MainWindow()
 void MainWindow::setUpButtonBars()
 {    
     addTrackButton.setIcon(QIcon(":/buttons/toolbar/icons/add_16.png"));
+    addTrackButton.setToolTip(tr("Select Data Series to Show"));
     plotSettingsButton.setIcon(QIcon(":/buttons/toolbar/settings"));
+    plotSettingsButton.setToolTip(tr("Global Plot Settings"));
     loadButton.setIcon(QIcon(":/buttons/toolbar/icons/document-open-3_16.png"));
+    loadButton.setToolTip(tr("Load Recording"));
     exportButton.setIcon(QIcon(":/buttons/toolbar/icons/document-export-4_16.png"));
+    exportButton.setToolTip(tr("Export Data"));
     zoomInButton.setIcon(QIcon(":/buttons/toolbar/icons/zoom-in_16.png"));
+    zoomInButton.setToolTip(tr("Zoom in"));
     zoomOutButton.setIcon(QIcon(":/buttons/toolbar/icons/zoom-out_16.png"));
+    zoomOutButton.setToolTip(tr("Zoom out"));
 
     playButtonIcon.addPixmap(QPixmap(":/buttons/toolbar/icons/play_16.png"), QIcon::Normal,
                              QIcon::Off);
@@ -95,7 +89,7 @@ void MainWindow::setUpButtonBars()
     recButton.setIcon(recButtonIcon);
 
     followDataButton.setCheckable(true);
-    followDataButton.setText(tr("ADf"));
+    followDataButton.setText(tr("Pin to new data"));
 
     // add buttons to the vertical layout in the toolbar
     layout.addWidget(&addTrackButton);
@@ -117,10 +111,11 @@ void MainWindow::setUpButtonBars()
 
     toolBarWidget.setLayout(&layout);
 
-    connect(&loadButton, SIGNAL(clicked()), this, SLOT(onLoad()));
-    connect(&recButton, SIGNAL(clicked()), this, SLOT(onRecord()));
-    connect(&followDataButton, SIGNAL(clicked()), this, SLOT(onFollowData()));
-    connect(&playButton, SIGNAL(clicked()), this, SLOT(onPlay()));
+    connect(&loadButton, SIGNAL(clicked()), this, SLOT(onLoad()));        
+
+    connect(&playButton, SIGNAL(clicked()), this, SIGNAL(play()));
+    connect(&recButton, SIGNAL(clicked()), this, SIGNAL(record()));
+    connect(&followDataButton, SIGNAL(clicked()), this, SIGNAL(follow()));
 
     ui->mainToolBar->addWidget(&toolBarWidget);
     addToolBar(Qt::LeftToolBarArea, ui->mainToolBar);
@@ -149,14 +144,14 @@ void MainWindow::onSaveAs()
 
 QString MainWindow::onLoad()
 {    
+    if (checkForActiveRecord() == QMessageBox::Abort) return "";
     if (checkForUnsavedChanges() == QMessageBox::Abort) return "";
     QString fileName = QFileDialog::getOpenFileName(this, tr("Load File"),
                                                     projectPath, "Octopus (*.oct)");
 
-    if(QFileInfo(fileName) == QFileInfo(projectPath))
-        return projectPath;
-
     if(fileName.isEmpty()) return fileName;
+
+    // open specified file:
     QFile file(fileName);
     file.open(QIODevice::ReadOnly);    
 
@@ -164,7 +159,7 @@ QString MainWindow::onLoad()
     QJson::Parser parser;
     bool ok;
     QVariantMap result = parser.parse(json, &ok).toMap();
-    if(!ok){
+    if (!ok){
         qDebug() << "Could not parse config file:" << fileName << " ! Aborting...";
         return "";
     }
@@ -173,6 +168,7 @@ QString MainWindow::onLoad()
     QString dbfile = QFileInfo(file).absolutePath() + "/" + result["dbfile"].toString();
 
     ViewManager* tmp;
+    // loading of db can fail:
     try {
         tmp = new ViewManager(this, dbfile);
     } catch(std::exception const& e) {
@@ -189,6 +185,7 @@ QString MainWindow::onLoad()
 
     setTitle(QFileInfo(projectPath).completeBaseName().remove(".oct"));
 
+    // propagate load
     viewManager->load(&result);
 
     // no recording in a loaded project.
@@ -197,12 +194,16 @@ QString MainWindow::onLoad()
     // we can't follow new data.
     followDataButton.setEnabled(false);
 
+    // enable saving
+    saveAction->setEnabled(true);
+
     setUpView();
     return fileName;
 }
 
 void MainWindow::onNew()
 {
+    if (checkForActiveRecord() == QMessageBox::Abort) return;
     if (checkForUnsavedChanges() == QMessageBox::Abort) return;
 
     projectPath = "";
@@ -213,6 +214,9 @@ void MainWindow::onNew()
 
     // enable data following
     followDataButton.setEnabled(true);
+
+    // disable saving
+    saveAction->setEnabled(false);
 
     if(viewManager)
         viewManager->deleteLater();
@@ -225,7 +229,7 @@ void MainWindow::onNew()
 void MainWindow::setTitle(QString pName)
 {
     QString windowTitle(TITLE);
-    if(!pName.isEmpty())
+    if (!pName.isEmpty())
         windowTitle += " - ";
 
     windowTitle += pName;
@@ -234,56 +238,63 @@ void MainWindow::setTitle(QString pName)
 
 void MainWindow::setUpView()
 {
+    // make connects between MainWindow and ViewManager
     QSignalMapper* mapZoom = new QSignalMapper(this);
     mapZoom->setMapping(&zoomInButton, 100);
     mapZoom->setMapping(&zoomOutButton, -100);
     connect(&zoomOutButton, SIGNAL(clicked()), mapZoom, SLOT(map()));
     connect(&zoomInButton, SIGNAL(clicked()), mapZoom, SLOT(map()));
     connect(mapZoom, SIGNAL(mapped(int)),   viewManager, SIGNAL(zoom(int)));
-    connect(this, SIGNAL(follow(bool)),     viewManager, SIGNAL(follow(bool)));
+
+    connect(this, SIGNAL(follow()),         viewManager, SIGNAL(follow()));
+    connect(this, SIGNAL(play()),           viewManager, SIGNAL(play()));
+    connect(this, SIGNAL(record()),         viewManager, SLOT(onRecord()));
 
     connect(viewManager, SIGNAL(saveProject(qint64,qint64)), this, SLOT(onSaveProject(qint64,qint64)));
+    connect(viewManager, SIGNAL(recordEnabled(bool)), this, SLOT(onRecordEnabled(bool)));
+    connect(viewManager, SIGNAL(followEnabled(bool)), this, SLOT(onFollowEnabled(bool)));
+    connect(viewManager, SIGNAL(playEnabled(bool)), this, SLOT(onPlayEnabled(bool)));
 
     // corresponding connect-statements:
     connect(&addTrackButton, SIGNAL(clicked()), viewManager, SIGNAL(addTrack()));
-    connect(&plotSettingsButton, SIGNAL(clicked()), viewManager, SIGNAL(plotSettings()));
-    connect(&playButton, SIGNAL(clicked()), viewManager, SIGNAL(play()));
-    connect(&recButton, SIGNAL(clicked()), viewManager, SLOT(onRecord()));
-    connect(&exportButton, SIGNAL(clicked()), viewManager, SIGNAL(exportData()));
+    connect(&plotSettingsButton, SIGNAL(clicked()), viewManager, SIGNAL(plotSettings()));    
+    connect(&exportButton, SIGNAL(clicked()), viewManager, SIGNAL(exportData()));    
 
+    // add ViewManager to UI
     ui->centralWidgetLayout->insertWidget(0, viewManager);
 }
 
-void MainWindow::save(bool saveAs, qint64 begin, qint64 end)
+QString MainWindow::save(bool saveAs, qint64 begin, qint64 end)
 {
     QString fileName = getSaveFileName(saveAs);
-    if (fileName.isEmpty()) return;  // dialog cancelled
+    if (fileName.isEmpty()) return QString();  // dialog cancelled
 
     QString dbname = fileName + ".db";
     dbname.remove(QRegExp(".oct$"));
 
     QString relative_dbname = QFileInfo(fileName).dir().relativeFilePath(dbname);
 
-    QVariantMap pName; // Map with the projects settings    
+    QVariantMap config; // Map with the projects settings
     if ((begin == -1) && (end == -1)) { // save all
         projectPath = fileName;
         viewManager->saveDB(dbname, -1, -1);
-        pName.insert("dbfile", relative_dbname);
+        config.insert("dbfile", relative_dbname);
 
-        if (writeProjectSettings(pName, projectPath)) { // in case save was successfull ...
+        if (writeProjectSettings(config, projectPath)) { // in case save was successfull ...
             viewManager->setUnsavedChanges(false);
-        }
+        }        
     } else { // save range
         QString subProjectPath = fileName;        
         viewManager->saveDB(dbname, begin, end);
-        pName.insert("dbfile", relative_dbname);
-        writeProjectSettings(pName, subProjectPath);
+        config.insert("dbfile", relative_dbname);
+        writeProjectSettings(config, subProjectPath);
     }
+    return fileName;
 }
 
 int MainWindow::checkForUnsavedChanges()
 {
-    if (!viewManager || !viewManager->hasUnsavedChanges()) return -1;
+    if (!viewManager || !viewManager->hasUnsavedChanges()) return QMessageBox::Discard;
 
     QMessageBox msg;
     msg.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Abort);
@@ -292,11 +303,29 @@ int MainWindow::checkForUnsavedChanges()
     msg.setButtonText(QMessageBox::Discard, tr("Discard"));
     msg.setButtonText(QMessageBox::Abort, tr("Cancel"));
     msg.setDefaultButton(QMessageBox::Save);
-    msg.setText(tr("There are some unsaved changes in this project. Do you wish to save these?"));
+    msg.setText(tr("This project contains unsaved changes or new data which have been received in the background.\n"
+                   "Do you wish to save the current state?"));
     int result = msg.exec();
-    if (result == QMessageBox::Save)
-        save(false);
+    if (result == QMessageBox::Save) {
+        QString fileName = save(false);
+        if (fileName.isEmpty()) return QMessageBox::Abort; // Dialog cancelled
+    }
     return result;
+}
+
+int MainWindow::checkForActiveRecord()
+{
+    if (!viewManager) return QMessageBox::Discard;
+
+    if (viewManager->isRecording()) { // ask whether recording should be stopped
+        // simulate button click
+        viewManager->onRecord();
+
+        if (viewManager->isRecording()) { // if there is still a running recording, the user continued!
+            return QMessageBox::Abort;
+        }
+    }
+    return QMessageBox::Ok;
 }
 
 QString MainWindow::getSaveFileName(bool saveAs)
@@ -313,61 +342,53 @@ QString MainWindow::getSaveFileName(bool saveAs)
         if (!saveAs)
             setTitle(QFileInfo(fileName).completeBaseName().remove(".oct"));
         return fileName;
-    } else
+    } else // return current filename
         return projectPath;
 }
 
-void MainWindow::closeEvent(QCloseEvent */*ce*/)
+void MainWindow::closeEvent(QCloseEvent *ce)
 {
-    //TODO(domi): Kommentare wegmachen:
-//    if (viewManager->isRecording()) { // ask whether recording should be stopped
-//        // simulate button click
-//        viewManager->onRecord();
-
-//        if (viewManager->isRecording()) { // if there is still a running recording, the user continued!
-//            ce->ignore();
-//            return; // dont exit the program
-//        }
-//        onRecord(); // in case the recording was stopped, set corresponding state of rec button.
-//    }
-
-//    // usual check for unsaved changes in the project
-//    if (checkForUnsavedChanges() != QMessageBox::Abort)
-//        QMainWindow::closeEvent(ce);
-//    else
-//        ce->ignore();
+    // usual check for unsaved changes in the project
+    if ((checkForActiveRecord() != QMessageBox::Abort) && (checkForUnsavedChanges() != QMessageBox::Abort))
+        QMainWindow::closeEvent(ce);
+    else
+        ce->ignore();
 }
 
-void MainWindow::onRecord()
-{        
-    recButton.setChecked(viewManager->isRecording());
+void MainWindow::onRecordEnabled(bool recording)
+{
+    recButton.setChecked(recording);
 }
 
 void MainWindow::onSaveProject(qint64 start, qint64 end)
 {
-    // initiate save (project file)
+    // initiate save (project file and db)
     save(true, start, end);
 }
 
-void MainWindow::onFollowData()
+void MainWindow::onFollowEnabled(bool follow)
 {
-    playButton.setChecked(followDataButton.isChecked());
-    emit follow(followDataButton.isChecked());
+    // if follow is enabled, play has to be enabled also
+    followDataButton.setChecked(follow);
+    playButton.setChecked(follow);
+
 }
 
-void MainWindow::onPlay()
-{
+void MainWindow::onPlayEnabled(bool play)
+{    
     if (followDataButton.isChecked())
         followDataButton.setChecked(false);
+    // play can be enabled individually (unlike follow)
+    playButton.setChecked(play);
 }
 
-bool MainWindow::writeProjectSettings(QVariantMap pName, QString path)
+bool MainWindow::writeProjectSettings(QVariantMap config, QString path)
 {
-    viewManager->save(&pName);
+    viewManager->save(&config);
 
     QJson::Serializer serializer;
     serializer.setIndentMode(QJson::IndentFull);
-    QByteArray json = serializer.serialize(pName);
+    QByteArray json = serializer.serialize(config);
 
     // open/create the file
     QFile file(path);

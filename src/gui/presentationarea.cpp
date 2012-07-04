@@ -1,10 +1,12 @@
 #include "gui/presentationarea.h"
+#include <QVBoxLayout>
 
 #include "dataprovider.h"
 #include "timemanager.h"
 #include "gui/cursor.h"
 #include "gui/plotsettingsdialog.h"
 #include "gui/selection.h"
+#include "gui/recordselection.h"
 #include "gui/sourcedialog.h"
 #include "gui/timeline.h"
 #include "gui/track.h"
@@ -38,7 +40,9 @@ public:
                 (event->modifiers() == Qt::ShiftModifier)) {
             createSelection = true;
             selection.show();
-            selection.setSelectionBegin(timeManager.convertPosToTime(event->pos().x()));
+            qint64 time = timeManager.convertPosToTime(event->pos().x());
+            selection.setSelectionBegin(time);
+            selection.setSelectionEnd(time);
             event->accept();
         }
 
@@ -143,6 +147,7 @@ PresentationArea::PresentationArea(const DataProvider &dataProvider,
     selection = new Selection(timeManager, viewport());
     cursor = new Cursor(Qt::red, timeManager, viewport());
     maxCursor = new Cursor(Qt::gray, timeManager, viewport());
+    recSel = new RecordSelection(timeManager, viewport());
 
     setWidget(new QWidget(this));
     setWidgetResizable(true);
@@ -161,6 +166,7 @@ PresentationArea::PresentationArea(const DataProvider &dataProvider,
     selection->raise();
     maxCursor->raise();
     cursor->raise();
+    recSel->raise();
 
     viewportMouseHandler = new EventHandler(*timeManager, *cursor, *selection, scrollbar);
     viewport()->installEventFilter(this);
@@ -170,10 +176,13 @@ PresentationArea::PresentationArea(const DataProvider &dataProvider,
     connect(this, SIGNAL(changedViewHeight(int)), cursor, SLOT(updateHeight(int)));
     connect(this, SIGNAL(changedViewHeight(int)), maxCursor, SLOT(updateHeight(int)));
     connect(this, SIGNAL(changedViewHeight(int)), selection, SLOT(updateHeight(int)));
+    connect(this, SIGNAL(changedViewHeight(int)), recSel, SLOT(updateHeight(int)));
 
     connect(this, SIGNAL(marginsChanged(int,int)), timeManager, SLOT(onMarginsChanged(int,int)));
     connect(this, SIGNAL(changedViewWidth(int)), timeLine, SLOT(updateWidth(int)));
     connect(this, SIGNAL(changedViewWidth(int)), timeManager, SLOT(onNewWidth(int)));
+
+    connect(this, SIGNAL(record(qint64,qint64,bool)), recSel, SLOT(onRecord(qint64,qint64,bool)));
 
     connect(selection, SIGNAL(onExport(qint64,qint64)),         this, SIGNAL(exportRange(qint64,qint64)));
     connect(selection, SIGNAL(selectionChanged(qint64,qint64)), this, SIGNAL(selectionChanged(qint64,qint64)));
@@ -184,13 +193,15 @@ PresentationArea::PresentationArea(const DataProvider &dataProvider,
     connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)), cursor, SLOT(onUpdate()));
     connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)), maxCursor, SLOT(onUpdate()));
     connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)), selection, SLOT(onUpdate()));
+    connect(timeManager, SIGNAL(rangeChanged(qint64,qint64)), recSel, SLOT(onUpdate()));
 
     connect(timeManager, SIGNAL(newMax(qint64)), maxCursor, SLOT(setTime(qint64)));
+    connect(timeManager, SIGNAL(newMax(qint64)), recSel, SLOT(setSelectionEnd(qint64)));
 
     connect(&dataProvider, SIGNAL(newMax(qint64)), timeManager, SLOT(onNewMax(qint64)));
     connect(&dataProvider, SIGNAL(newMax(qint64)), this, SLOT(onNewMax(qint64)));
 
-    timeManager->onMarginsChanged(50, 50);
+    timeManager->onMarginsChanged(50, 0);
 }
 
 PresentationArea::~PresentationArea()
@@ -260,8 +271,7 @@ void PresentationArea::addTracks(const QList<QString> &fullDataSeriesNames)
 
 void PresentationArea::onAddTrack()
 {
-    // TODO(Steffi) : Hier sollte keine Preselected-Liste mitgegeben werden.
-    foreach (QStringList list, SourceDialog::getSources(dataProvider, "Select Data Series to be Shown", true, dataProvider.getDataSeriesList())) {
+    foreach (QStringList list, SourceDialog::getSources(dataProvider, "Select Data Series to be Shown")) {
         add(list);
     }
 }
@@ -272,7 +282,7 @@ void PresentationArea::onPlotSettings()
     QStringList dataSeriesNames;
     foreach (AbstractDataSeries *series, dataProvider.getDataSeries()) {
         dataSeriesNames.append(series->fullName());
-        preset.setOffset(series->fullName(), series->offset);
+        preset.setOffset(series->fullName(), series->offset());
         preset.setScaleType(series->fullName(), series->defaultScaleType);
     }
 
@@ -282,7 +292,7 @@ void PresentationArea::onPlotSettings()
         foreach (QString name, dataSeriesNames) {
             AbstractDataSeries *series = dataProvider.getDataSeries(name);
             if (series) {
-                series->offset = settings.offset(name);
+                series->setOffset(settings.offset(name));
                 series->defaultScaleType = settings.scaleType(name);
             }
         }
@@ -310,6 +320,7 @@ Track* PresentationArea::add(const QList<QString>& fullDataSeriesNames)
     selection->raise();
     maxCursor->raise();
     cursor->raise();
+    recSel->raise();
 
     unsavedChanges = true;
     return t;
@@ -337,8 +348,8 @@ void PresentationArea::updatePlotMargins()
     // determine the optimal plot margin over all tracks
     int optMargin = 0;
     foreach (Track *t, tracks) {
-        if (optMargin < t->optPlotMarginLeft) {
-            optMargin = t->optPlotMarginLeft;
+        if (optMargin < t->getOptPlotMarginLeft()) {
+            optMargin = t->getOptPlotMarginLeft();
         }
     }
 

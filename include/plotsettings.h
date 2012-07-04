@@ -1,3 +1,7 @@
+/*
+  A plot settings object can store settings for a plot, such as scaling mode and scale type, as well as individual settings for specific data series.
+*/
+
 #ifndef PLOTSETTINGS_H
 #define PLOTSETTINGS_H
 
@@ -27,9 +31,20 @@ public:
         NOT_SCALABLE
     };
 
+    /**
+     * Strings for the different scale types, e.g. for use in drop down menus.
+     */
     static const QStringList scaleTypeNames;
 
+    /**
+     * The scaling mode for the plot. By default, this value is set to NOSCALING.
+     */
     ScalingMode scalingMode;
+
+    /**
+     * The scale type to be applied to the y axis of the plot. By default, this value
+     *      is set to LINSCALE.
+     */
     ScaleType plotScaleType;
 
     /**
@@ -37,16 +52,43 @@ public:
      */
     bool isEmpty();
 
+    /**
+     * Stores the offset for the given data series in the settings.
+     */
     void setOffset(const QString &fullDataSeriesName, int microSecs);
+
+    /**
+     * @return The offset for the given data series from the settings.
+     *      0 if there are no settings for the given data series.
+     */
     int offset(const QString &fullDataSeriesName) const;
 
+    /**
+     * Stores the scale type for the given data series in the settings.
+     */
     void setScaleType(const QString &fullDataSeriesName, ScaleType scaleType);
+
+    /**
+     * @return The scale type for the given data series from the settings.
+     *      NOT_SCALABLE if there are no settings for the given data series.
+     */
     ScaleType scaleType(const QString &fullDataSeriesName) const;
 
+    /**
+     * Converts a QCPAxis::ScaleType to a PlotSettings::ScaleType.
+     * @return The PlotSettings::ScaleType.
+     */
     static ScaleType toScaleType(QCPAxis::ScaleType scaleType);
 
 private:
+    /**
+     * A map of data series names and their respective offsets.
+     */
     QMap<QString, int> offsets;
+
+    /**
+     * A map of data series names and their respective scale types.
+     */
     QMap<QString, ScaleType> scaleTypes;
 };
 

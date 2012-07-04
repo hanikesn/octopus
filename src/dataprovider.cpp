@@ -30,9 +30,6 @@ DataProvider::DataProvider(QString const& file, QObject *parent) :
             addSeries(fromStdString(d.getSender()), fromStdString(info.first), info.second);
         }
     }
-
-    qint64 min, max;
-    db->getMinMaxTimeStamp(min, max);
 }
 
 DataProvider::~DataProvider()
@@ -61,7 +58,6 @@ void DataProvider::save(QVariantMap *qvm)
         QVariantMap tmp;
         tmp.insert("name", ads->fullName());
         tmp.insert("scaling", ads->defaultScaleType);
-        tmp.insert("offset", ads->offset);
         seriesList << tmp;
     }
     dataProvider.insert("dataSeries", seriesList);
@@ -77,16 +73,14 @@ void DataProvider::load(QVariantMap *qvm)
 
         int defScaleType = seriesMap.find("scaling").value().toInt();
         QString name(seriesMap.find("name").value().toString());
-        int offset = seriesMap.find("offset").value().toInt();
 
         getDataSeries(name)->defaultScaleType = (PlotSettings::ScaleType) defScaleType;
-        getDataSeries(name)->offset = offset;
+        getDataSeries(name)->setOffset(getDB().getOffset(name));
     }
     qint64 min;
     qint64 max;
     getDB().getMinMaxTimeStamp(min, max);
     emit newMax(max);
-
 }
 
 QList<QString> DataProvider::getDataSeriesList() const
@@ -106,26 +100,9 @@ const DatabaseAdapter &DataProvider::getDB() const
 
 void DataProvider::copyDB(QString filename, qint64 begin, qint64 end)
 {
-    db->copy(filename, begin, end);
-}
-
-void DataProvider::moveDB(QString const& newFilename)
-{
-    temporaryDB = false;
-
-    if(newFilename == filename)
+    if(this->filename == filename)
         return;
-
-    // delete the dbadapter so that the db connection is closed
-    db.reset();
-
-    if(QDir().rename(filename, newFilename)) {
-        QDir().remove(filename + "-wal");
-        QDir().remove(filename + "-shm");
-        filename = newFilename;
-    }
-
-    db = std::unique_ptr<DatabaseAdapter>(new DatabaseAdapter(filename));
+    db->copy(filename, begin, end);
 }
 
 AbstractDataSeries* DataProvider::getDataSeries(const QString &fullName) const
@@ -136,6 +113,20 @@ AbstractDataSeries* DataProvider::getDataSeries(const QString &fullName) const
 QList<AbstractDataSeries*> DataProvider::getDataSeries() const
 {
     return dataSeries.values();
+}
+
+void DataProvider::changeOffset(const QString &dataSeriesName, qint64 offset)
+{
+    db->changeOffset(dataSeriesName, offset);
+
+    qint64 minAfter;
+    qint64 maxAfter;
+    db->getMinMaxTimeStamp(minAfter, maxAfter);
+
+    if (maxAfter != currentMax) {
+        currentMax = maxAfter;
+        emit newMax(maxAfter);
+    }
 }
 
 void DataProvider::onNewSender(EIDescriptionWrapper desc)
@@ -178,14 +169,17 @@ void DataProvider::onNewData(qint64 timestamp, QString fullDataSeriesName, Value
 {
     if(!db)
         return;
-    db->add(fullDataSeriesName, timestamp, value);
+
+    qint64 timestampWithOffset = timestamp + db->getOffset(fullDataSeriesName);
+
+    db->add(fullDataSeriesName, timestampWithOffset, value);
 
     if (dataSeries.contains(fullDataSeriesName)) {
-        dataSeries.value(fullDataSeriesName)->addData(timestamp, value);
+        dataSeries.value(fullDataSeriesName)->addData(timestampWithOffset, value);
 
-        if (timestamp > currentMax) {
-            currentMax = timestamp;
-            emit newMax(timestamp);
+        if (timestampWithOffset > currentMax) {
+            currentMax = timestampWithOffset;
+            emit newMax(timestampWithOffset);
         }
     } else {
         emit unknownDataSeries();

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>525</width>
+    <height>337</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,6 +16,9 @@
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QCheckBox" name="sameScaleOption">
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If selected, all graphs will be displayed on the same scale.&lt;/p&gt;&lt;p&gt;Else, each graph will be scaled to use the full height of the plot.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
      <property name="text">
       <string>Same scale for all</string>
      </property>
@@ -25,6 +28,9 @@
     <layout class="QGridLayout" name="gridLayout">
      <item row="0" column="1">
       <widget class="QRadioButton" name="linChoice">
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Use a linear scale for the value axis.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
        <property name="text">
         <string>Linear scale</string>
        </property>
@@ -35,6 +41,9 @@
      </item>
      <item row="1" column="1">
       <widget class="QRadioButton" name="logChoice">
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Use a logarithmic scale for the value axis.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
        <property name="text">
         <string>Logarithmic scale</string>
        </property>

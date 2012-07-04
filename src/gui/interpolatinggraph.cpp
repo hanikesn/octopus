@@ -4,8 +4,6 @@
 #include "plotsettings.h"
 #include "gui/qcustomplot.h"
 
-#include <algorithm>
-
 InterpolatingGraph::InterpolatingGraph(QCustomPlot *plot, const DoubleSeries &d, PlotSettings::ScalingMode scalingMode, PlotSettings::ScaleType scaleType) :
     Graph(plot),
     series(d),
@@ -18,9 +16,12 @@ InterpolatingGraph::InterpolatingGraph(QCustomPlot *plot, const DoubleSeries &d,
 {
     setObjectName("InterpolatingGraph");
     connect(&series, SIGNAL(newData(qint64)), this, SLOT(onNewData(qint64)));
+    connect(&series, SIGNAL(offsetChanged()), this, SLOT(onOffsetChanged()));
 
     graph = plot->addGraph();
+    // Ensure value axis is visible.
     plot->yAxis->setVisible(true);
+    plot->yAxis->setGrid(true);
 
     configureAppearance(graph);
     initialize(graph, series);
@@ -39,11 +40,6 @@ PlotSettings::ScaleType InterpolatingGraph::getScaleType() const
     return currentScaleType;
 }
 
-void InterpolatingGraph::setScaleType(PlotSettings::ScaleType scaleType)
-{
-    rescale(currentScalingMode, scaleType);
-}
-
 QString InterpolatingGraph::dataSeriesName()
 {
     return series.fullName();
@@ -52,6 +48,7 @@ QString InterpolatingGraph::dataSeriesName()
 void InterpolatingGraph::update(const PlotSettings &settings)
 {
     rescale(settings.scalingMode, settings.scaleType(series.fullName()));
+    updatePlot(settings.scalingMode);
 }
 
 void InterpolatingGraph::configureAppearance(QCPGraph *graph)
@@ -67,7 +64,7 @@ void InterpolatingGraph::initialize(QCPGraph *graph, const DoubleSeries &series)
 
     auto const& data = series.getData();
     for (auto i = data.constBegin(); i != data.constEnd(); ++i) {
-        updateMetadata(i.value());
+//        updateMetadata(i.value());
         graph->addData(i.key(), i.value());
     }
 }
@@ -85,6 +82,9 @@ void InterpolatingGraph::rescale(PlotSettings::ScalingMode scalingMode, PlotSett
             // The graph's individual scale type has no significance in this case;
             // the plot's scale type defines the appearance of its graphs.
         }
+        // Ensure value axis is visible.
+        plot->yAxis->setVisible(true);
+        plot->yAxis->setGrid(true);
         break;
     case PlotSettings::MINMAXSCALING:
         if (scalingMode != currentScalingMode || scaleType != currentScaleType) {
@@ -94,13 +94,12 @@ void InterpolatingGraph::rescale(PlotSettings::ScalingMode scalingMode, PlotSett
         } else {
             // Nothing to be done here, as neither scaling mode nor scale type have changed.
         }
+        // Don't need the axis in this case, as it would have no informative value.
         break;
     }
 
     currentScalingMode = scalingMode;
     currentScaleType = scaleType;
-
-    updatePlot(scalingMode);
 }
 
 void InterpolatingGraph::scaleToRange(double lower, double upper, PlotSettings::ScaleType scaleType)
@@ -110,9 +109,18 @@ void InterpolatingGraph::scaleToRange(double lower, double upper, PlotSettings::
         return;
     }
 
+    if (lower > upper) {
+        // not a valid range
+        return;
+    }
+
     graph->clearData();
 
     auto const& data = series.getData();
+    if (data.keys().takeLast() != lastUpdate) {
+        updateMetadata(series.getData(lastUpdate, data.keys().takeLast()));
+    }
+
     // rescale to new range
     for (auto i = data.constBegin(); i != data.constEnd(); ++i) {
         double scaledValue = i.value();
@@ -128,7 +136,7 @@ void InterpolatingGraph::scaleToRange(double lower, double upper, PlotSettings::
                 // negative interval is wider
 
                 // The log scale boundaries may never be zero or carry the wrong sign.
-                // Cut off above rangeFac or rangeFac*currentMin, whichever is closer to zero.
+                // Cut off above rangeFac or currentMax, whichever is closer to zero (while still negative).
                 double logScaleMin = std::min(-rangeFac, currentMin);
                 double logScaleMax = std::min(-rangeFac, currentMax);
 
@@ -142,11 +150,12 @@ void InterpolatingGraph::scaleToRange(double lower, double upper, PlotSettings::
                 // positive interval is wider
 
                 // The log scale boundaries may never be zero or carry the wrong sign.
-                // Cut off below rangeFac or rangeFac*currentMax, whichever is closer to zero.
+                // Cut off below rangeFac or currentMin, whichever is closer to zero (while still positive).
                 double logScaleMin = std::max(rangeFac, currentMin);
                 double logScaleMax = std::max(rangeFac, currentMax);
 
                 if (i.value() < logScaleMin) {
+                    // invalid value. Draw outside visible area.
                     scaledValue = lower - (upper - lower)*0.75;
                 } else {
                     scaledValue = lower + ((qLn(i.value()/logScaleMin)/log10) / (qLn(logScaleMax/logScaleMin)/log10)) * (upper - lower);
@@ -180,6 +189,21 @@ void InterpolatingGraph::onNewData(qint64 timestamp)
 
     lastUpdate = timestamp;
     updatePlot(currentScalingMode);
+}
+
+void InterpolatingGraph::onOffsetChanged()
+{
+    graph->clearData();
+    initialize(graph, series);
+    rescale(currentScalingMode, currentScaleType);
+    updatePlot(currentScalingMode);
+}
+
+void InterpolatingGraph::updateMetadata(QMap<qint64, double> data)
+{
+    for (QMap<qint64, double>::const_iterator i = data.constBegin(); i != data.constEnd(); i++) {
+        updateMetadata(i.value());
+    }
 }
 
 void InterpolatingGraph::updateMetadata(double value)
