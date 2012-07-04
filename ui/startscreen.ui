@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>336</width>
-    <height>216</height>
+    <width>352</width>
+    <height>219</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -57,7 +57,7 @@
           </sizepolicy>
          </property>
          <property name="text">
-          <string>Neue Aufnahme</string>
+          <string>New Recording</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignHCenter|Qt::AlignTop</set>
@@ -92,7 +92,7 @@
        <item>
         <widget class="QLabel" name="loadLabel">
          <property name="text">
-          <string>Aufnahme laden</string>
+          <string>Load Recording</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignHCenter|Qt::AlignTop</set>
