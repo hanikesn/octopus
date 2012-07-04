@@ -268,8 +268,7 @@ void PresentationArea::addTracks(const QList<QString> &fullDataSeriesNames)
 
 void PresentationArea::onAddTrack()
 {
-    // TODO(Steffi) : Hier sollte keine Preselected-Liste mitgegeben werden.
-    foreach (QStringList list, SourceDialog::getSources(dataProvider, "Select Data Series to be Shown", true, dataProvider.getDataSeriesList())) {
+    foreach (QStringList list, SourceDialog::getSources(dataProvider, "Select Data Series to be Shown")) {
         add(list);
     }
 }

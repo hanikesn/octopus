@@ -66,9 +66,6 @@ void SourceDialog::setUpSourceTree(const DataProvider &dataProvider, const QStri
             parentItem = childItem;
         }
     }
-
-    // TODO(Steffi): Remove
-    ui.sourceTree->expandAll();
 }
 
 void SourceDialog::onItemChanged(QTreeWidgetItem *item, int /*column*/)

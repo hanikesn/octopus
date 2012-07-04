@@ -68,7 +68,6 @@ void Track::setupButtons()
     ui.delButton->setStyleSheet(ICON_AS_BUTTON);
     connect(ui.delButton, SIGNAL(clicked()), this, SLOT(onDelete()));
 
-    // TODO(Steffi): srcButton-Label korrigieren
     ui.srcButton->setStyleSheet(ICON_AS_BUTTON);
     connect(ui.srcButton, SIGNAL(clicked()), this, SLOT(onSources()));
 
