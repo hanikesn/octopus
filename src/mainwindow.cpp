@@ -61,11 +61,17 @@ MainWindow::~MainWindow()
 void MainWindow::setUpButtonBars()
 {    
     addTrackButton.setIcon(QIcon(":/buttons/toolbar/icons/add_16.png"));
+    addTrackButton.setToolTip(tr("Select Data Series to Show"));
     plotSettingsButton.setIcon(QIcon(":/buttons/toolbar/settings"));
+    plotSettingsButton.setToolTip(tr("Global Plot Settings"));
     loadButton.setIcon(QIcon(":/buttons/toolbar/icons/document-open-3_16.png"));
+    loadButton.setToolTip(tr("Load Recording"));
     exportButton.setIcon(QIcon(":/buttons/toolbar/icons/document-export-4_16.png"));
+    exportButton.setToolTip(tr("Export Data"));
     zoomInButton.setIcon(QIcon(":/buttons/toolbar/icons/zoom-in_16.png"));
+    zoomInButton.setToolTip(tr("Zoom in"));
     zoomOutButton.setIcon(QIcon(":/buttons/toolbar/icons/zoom-out_16.png"));
+    zoomOutButton.setToolTip(tr("Zoom out"));
 
     playButtonIcon.addPixmap(QPixmap(":/buttons/toolbar/icons/play_16.png"), QIcon::Normal,
                              QIcon::Off);
