@@ -100,6 +100,8 @@ const DatabaseAdapter &DataProvider::getDB() const
 
 void DataProvider::copyDB(QString filename, qint64 begin, qint64 end)
 {
+    if(this->filename == filename)
+        return;
     db->copy(filename, begin, end);
 }
 
