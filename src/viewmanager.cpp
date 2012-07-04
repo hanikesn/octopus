@@ -160,8 +160,8 @@ void ViewManager::makeConnects()
     if (networkAdapter) {
         qRegisterMetaType<EIDescriptionWrapper>("EIDescriptionWrapper");
         qRegisterMetaType<Value>("Value");
-        connect(networkAdapter, SIGNAL(onNewSender(EIDescriptionWrapper)),  dataProvider, SLOT(onNewSender(EIDescriptionWrapper)), Qt::QueuedConnection);
-        connect(networkAdapter, SIGNAL(onNewData(qint64,QString,Value)),    dataProvider, SLOT(onNewData(qint64,QString,Value)), Qt::QueuedConnection);
+        connect(networkAdapter, SIGNAL(newSender(EIDescriptionWrapper)),  dataProvider, SLOT(onNewSender(EIDescriptionWrapper)), Qt::QueuedConnection);
+        connect(networkAdapter, SIGNAL(newData(qint64,QString,Value)),    dataProvider, SLOT(onNewData(qint64,QString,Value)), Qt::QueuedConnection);
         networkAdapter->discoverSenders();
     }
 }

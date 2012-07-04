@@ -64,6 +64,7 @@ void SourceDialog::setUpSourceTree(const DataProvider &dataProvider, const QStri
                 if (preselect && components.indexOf(comp) == components.length() - 1) {
                     childItem->setCheckState(0, Qt::Checked);
                     checkedItems.append(childItem);
+                    parentItem->setExpanded(true);
                 } else {
                     childItem->setCheckState(0, Qt::Unchecked);
                 }
