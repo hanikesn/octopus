@@ -17,7 +17,6 @@ include(EnableWarnings)
 
 check_CXX11()
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX11_FLAG}")
-add_subdirectory(contrib)
 enable_Warnings()
 
 find_package(EIToolkit REQUIRED)
@@ -138,6 +137,7 @@ set(Octopus_LIBRARIES EIToolkit qjson ${Boost_LIBRARIES} ${SQLITE3_LIBRARIES} ${
 target_link_libraries(Octopus ${Octopus_LIBRARIES})
 
 if(FALSE)
+add_subdirectory(contrib)
 enable_testing()
 
 # set(<BINARY_NAME> <TEST_FILE_PATHS>)
