@@ -1,16 +1,16 @@
 <RCC>
     <qresource prefix="/buttons/toolbar">
         <file alias="delete">icons/delete.png</file>
-        <file alias="settings">icons/settings.png</file>
         <file alias="new">icons/document-new-4_128.png</file>
         <file alias="open">icons/document-open-3_128.png</file>
         <file>icons/document-export-4_16.png</file>
         <file>icons/document-open-3_16.png</file>
         <file>icons/add_16.png</file>
-        <file>icons/pause_16.png</file>
         <file>icons/play_16.png</file>
         <file>icons/zoom-in_16.png</file>
         <file>icons/zoom-out_16.png</file>
         <file>icons/record_16.png</file>
+        <file alias="settings">icons/settings.png</file>
+        <file>icons/pause_16.png</file>
     </qresource>
 </RCC>
