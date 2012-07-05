@@ -54,6 +54,9 @@ public:
 
     int getOptPlotMarginLeft() const {return optPlotMarginLeft;}
 
+    bool hasUnsavedChanges() {return unsavedChanges;}
+    void setUnsavedChanges(bool uc);
+
 signals:
     /**
      * Emitted when the optimal plot margins for this track have changed.
@@ -88,6 +91,8 @@ private:
     QList<Graph*> graphs;
 
     PlotSettings::ScalingMode currentScalingMode;
+
+    bool unsavedChanges;
 
     /**
      * Convenience function for reuse in every constructor.

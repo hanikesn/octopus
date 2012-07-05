@@ -55,7 +55,7 @@ public:
       */
     void load(QVariantMap *qvm);
 
-    bool hasUnsavedChanges(){return unsavedChanges;}
+    bool hasUnsavedChanges();
     void setUnsavedChanges(bool uc);
 
 signals:
