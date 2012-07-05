@@ -16,6 +16,9 @@
     <height>10</height>
    </size>
   </property>
+  <property name="contextMenuPolicy">
+   <enum>Qt::NoContextMenu</enum>
+  </property>
   <property name="windowTitle">
    <string comment="Octopus 0.1" extracomment="Octopus 0.1">Octopus 0.1</string>
   </property>
@@ -50,7 +53,16 @@
     </item>
    </layout>
   </widget>
-  <widget class="QMenuBar" name="menuBar"/>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1031</width>
+     <height>25</height>
+    </rect>
+   </property>
+  </widget>
   <widget class="QToolBar" name="mainToolBar">
    <property name="enabled">
     <bool>true</bool>

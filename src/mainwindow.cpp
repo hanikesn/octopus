@@ -174,7 +174,6 @@ QString MainWindow::onLoad()
         return "";
     }
 
-
     QString dbfile = QFileInfo(file).absolutePath() + "/" + result["dbfile"].toString();
 
     ViewManager* tmp;
