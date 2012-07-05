@@ -36,7 +36,7 @@ void TimeLine::paintEvent(QPaintEvent *)
 
     // paint a background rect (with gradient)
     QLinearGradient gradient(frame.topLeft(), frame.topLeft() + QPointF(200,200));
-    stops << QGradientStop(0.0, QColor(60, 60,  60));
+    stops << QGradientStop(0.0, QColor(100, 100, 100));
     stops << QGradientStop(frame.height()/2/frame.height(), QColor(150, 150, 150));    
     stops << QGradientStop(1.0, QColor(215, 215, 215));
     gradient.setStops(stops);
@@ -47,7 +47,7 @@ void TimeLine::paintEvent(QPaintEvent *)
 
     drawTicks(&painter);
 
-    QRect rect = QRect(5, geometry().height() - 15, 50, 15);
+    QRect rect = QRect(5, geometry().height()/4, 50, 15);
     QString text = timeRepresentation == MILLISECOND ? "ms" : "sec";
     painter.drawText(rect, text);
 }
