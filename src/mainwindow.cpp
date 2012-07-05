@@ -1,11 +1,5 @@
 #include "mainwindow.h"
 
-#include <QDebug>
-#include <QFileDialog>
-#include <QMessageBox>
-#include <QSignalMapper>
-#include <QCloseEvent>
-
 #include "ui_mainwindow.h"
 #include "serializer.h"
 #include "parser.h"
@@ -13,6 +7,13 @@
 #include "timemanager.h"
 #include "exporthandler.h"
 #include "viewmanager.h"
+
+#include <QDebug>
+#include <QCloseEvent>
+#include <QFileDialog>
+#include <QMessageBox>
+#include <QSettings>
+#include <QSignalMapper>
 
 const QString MainWindow::TITLE = "Octopus 1.0";
 
@@ -146,10 +147,16 @@ QString MainWindow::onLoad()
 {    
     if (checkForActiveRecord() == QMessageBox::Abort) return "";
     if (checkForUnsavedChanges() == QMessageBox::Abort) return "";
+
+    QSettings settings;
     QString fileName = QFileDialog::getOpenFileName(this, tr("Load File"),
-                                                    projectPath, "Octopus (*.oct)");
+                                                    settings.value("lastLoadDir", projectPath).toString(),
+                                                    "Octopus (*.oct)");
 
     if(fileName.isEmpty()) return fileName;
+
+    // remember the directory from which the project was loaded for future reference
+    settings.setValue("lastLoadDir", QFileInfo(fileName).dir().absolutePath());
 
     // open specified file:
     QFile file(fileName);
