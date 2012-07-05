@@ -9,6 +9,9 @@ PresentationArea).
 
 class TimeManager;
 
+/**
+ * @brief This class handles the separate recording
+ */
 class Recorder : public QObject
 {
     Q_OBJECT
