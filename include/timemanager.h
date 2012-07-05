@@ -67,7 +67,7 @@ public:
     int getMarginLeft() {return marginLeft;}
     int getMarginRight() {return marginRight;}
 
-    bool isValidPos(int pos) {return pos > marginLeft && pos < width - marginRight;}
+    bool isValidPos(int pos) {return pos >= marginLeft && pos <= width - marginRight;}
     int clipPos(int pos) {return qMin(qMax(pos, marginLeft), width - marginRight);}
 
     /**
