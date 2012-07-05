@@ -19,6 +19,9 @@
 
 class AbstractDataSeries;
 
+/**
+ * @brief This class provides easy access to the underlying DB
+ */
 class DataProvider : public QObject, public Serializable
 {
     Q_OBJECT

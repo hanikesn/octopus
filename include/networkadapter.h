@@ -14,6 +14,9 @@
 class Value;
 class QString;
 
+/**
+ * @brief This class handles everything related to the EIToolkit
+ */
 class NetworkAdapter : public QObject, public EI::DataListener, public EI::CommunicationListener
 {
     Q_OBJECT

@@ -8,6 +8,9 @@ class QIODevice;
 class QStringList;
 class DataProvider;
 
+/**
+ * @brief Interface for various Exporters
+ */
 class Exporter
 {
     Q_DISABLE_COPY(Exporter)

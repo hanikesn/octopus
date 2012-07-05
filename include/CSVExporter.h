@@ -3,6 +3,9 @@
 
 #include "exporter.h"
 
+/**
+ * @brief Exports the data in standard CSV format
+ */
 class CSVExporter : public Exporter
 {
 public:
