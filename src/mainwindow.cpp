@@ -81,6 +81,7 @@ void MainWindow::setUpButtonBars()
     playButton.setCheckable(true);
     playButton.setIcon(playButtonIcon);    
     playButton.setShortcut(QKeySequence(Qt::Key_Space));
+    playButton.setToolTip(tr("Play/Pause"));
 
     recButtonIcon.addPixmap(QPixmap(":/buttons/toolbar/icons/record_16.png"), QIcon::Normal,
                              QIcon::Off);
@@ -88,9 +89,11 @@ void MainWindow::setUpButtonBars()
                              QIcon::On);
     recButton.setCheckable(true);
     recButton.setIcon(recButtonIcon);
+    recButton.setToolTip(tr("Start/Stop Separate Recording"));
 
     followDataButton.setCheckable(true);
-    followDataButton.setText(tr("Pin to new data"));
+    followDataButton.setText(tr("Pin to New Data"));
+    followDataButton.setToolTip(tr("Pin the Cursor to the Newest Data"));
 
     // add buttons to the vertical layout in the toolbar
     layout.addWidget(&addTrackButton);
