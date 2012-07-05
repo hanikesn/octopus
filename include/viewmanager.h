@@ -1,3 +1,7 @@
+/*
+Contains all objects which are necessary to display data on the screen (PresentationArea and data
+model)
+*/
 #ifndef VIEWMANAGER_H
 #define VIEWMANAGER_H
 

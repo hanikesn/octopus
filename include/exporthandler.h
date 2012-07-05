@@ -1,3 +1,7 @@
+/*
+Receives signals to export (either to export all data or just a specified range).
+Shows a dialog to get the desired file to write to.
+*/
 #ifndef EXPORTHANDLER_H
 #define EXPORTHANDLER_H
 

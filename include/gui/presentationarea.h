@@ -1,3 +1,7 @@
+/*
+Contains the visible items of Octopus (Tracks, Cursors, Selections).
+Handles MouseInput on mentioned objects.
+*/
 #ifndef PRESENTATIONAREA_H
 #define PRESENTATIONAREA_H
 
