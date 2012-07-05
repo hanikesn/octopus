@@ -291,8 +291,10 @@ QString MainWindow::save(bool saveAs, qint64 begin, qint64 end)
         config.insert("dbfile", relative_dbname);
 
         if (writeProjectSettings(config, projectPath, begin, end)) { // in case save was successfull ...
-            viewManager->setUnsavedChanges(false);
-        }        
+            if (!saveAs) {
+                viewManager->setUnsavedChanges(false);
+            }
+        }
     } else { // save range
         QString subProjectPath = fileName;        
         viewManager->saveDB(dbname, begin, end);
