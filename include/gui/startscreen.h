@@ -1,3 +1,6 @@
+/*
+Splash/Start-Screen at the begin.
+*/
 #ifndef STARTSCREEN_H
 #define STARTSCREEN_H
 

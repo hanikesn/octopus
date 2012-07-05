@@ -1,3 +1,6 @@
+/*
+Marks the area which the user has selected (via mouse) to export or zoom into.
+*/
 #ifndef SELECTION_H
 #define SELECTION_H
 

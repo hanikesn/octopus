@@ -1,3 +1,7 @@
+/*
+Saves start- and endtimestamps from the record and emits corresponding signals (to MainWindow and
+PresentationArea).
+*/
 #ifndef RECORDER_H
 #define RECORDER_H
 

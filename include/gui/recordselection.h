@@ -1,3 +1,7 @@
+/*
+This selections marks the area which is currently being recorded.
+It disappears whenever the recording is discarded or saved.
+*/
 #ifndef RECORDSELECTION_H
 #define RECORDSELECTION_H
 

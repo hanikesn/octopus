@@ -1,3 +1,7 @@
+/*
+MainWindow of Octopus. Contains the buttons, toolbar, and the ViewManager.
+Handles save/load/close actions.
+*/
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
