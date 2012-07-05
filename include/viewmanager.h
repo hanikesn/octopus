@@ -40,7 +40,7 @@ public:
       * Propagates the save-call to presentationArea and dataProvider.
       * @param qvm The map in which the information needs to be stored.
       */
-    void save(QVariantMap *qvm);
+    void save(QVariantMap *qvm, qint64 begin, qint64 end);
 
     /**
       * Makes a copy of the current database with all data which have begin <= timestamp <= end.

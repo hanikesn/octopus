@@ -279,7 +279,7 @@ void Track::setPlotMarginLeft(int margin)
     ui->plot->replot();
 }
 
-void Track::save(QVariantMap *qvm)
+void Track::save(QVariantMap *qvm, qint64 /*begin*/, qint64 /*end*/)
 {        
     QVariantList graphList;
     foreach (Graph *g, graphs) {

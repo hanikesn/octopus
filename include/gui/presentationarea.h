@@ -47,7 +47,7 @@ public:
       * Propagates the save-call to the timeManager and to each of the current tracks.
       * @param qvm The map in which the necessary data needs to be stored.
       */
-    void save(QVariantMap *qvm);
+    void save(QVariantMap *qvm, qint64 begin, qint64 end);
 
     /**
       * Propagates the load-call to the timeManager and to each of the current tracks.

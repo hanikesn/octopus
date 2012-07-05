@@ -274,20 +274,20 @@ QString MainWindow::save(bool saveAs, qint64 begin, qint64 end)
 
     QString relative_dbname = QFileInfo(fileName).dir().relativeFilePath(dbname);
 
-    QVariantMap config; // Map with the projects settings
+    QVariantMap config; // Map with the project settings
     if ((begin == -1) && (end == -1)) { // save all
         projectPath = fileName;
         viewManager->saveDB(dbname, -1, -1);
         config.insert("dbfile", relative_dbname);
 
-        if (writeProjectSettings(config, projectPath)) { // in case save was successfull ...
+        if (writeProjectSettings(config, projectPath, begin, end)) { // in case save was successfull ...
             viewManager->setUnsavedChanges(false);
         }        
     } else { // save range
         QString subProjectPath = fileName;        
         viewManager->saveDB(dbname, begin, end);
         config.insert("dbfile", relative_dbname);
-        writeProjectSettings(config, subProjectPath);
+        writeProjectSettings(config, subProjectPath, begin, end);
     }
     return fileName;
 }
@@ -382,9 +382,9 @@ void MainWindow::onPlayEnabled(bool play)
     playButton.setChecked(play);
 }
 
-bool MainWindow::writeProjectSettings(QVariantMap config, QString path)
+bool MainWindow::writeProjectSettings(QVariantMap config, QString path, qint64 begin, qint64 end)
 {
-    viewManager->save(&config);
+    viewManager->save(&config, begin, end);
 
     QJson::Serializer serializer;
     serializer.setIndentMode(QJson::IndentFull);

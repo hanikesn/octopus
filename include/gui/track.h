@@ -49,7 +49,7 @@ public:
      */
     void setPlotMarginLeft(int margin);
 
-    void save(QVariantMap *qvm);
+    void save(QVariantMap *qvm, qint64 , qint64 );
     void load(QVariantMap *qvm);
 
     int getOptPlotMarginLeft() const {return optPlotMarginLeft;}

@@ -189,7 +189,7 @@ private:
       * @param path Path to a file in which will be written.
       * @return true If write was successful, false otherwise.
       */
-    bool writeProjectSettings(QVariantMap config, QString path);
+    bool writeProjectSettings(QVariantMap config, QString path, qint64 begin, qint64 end);
 
 signals:
     /**

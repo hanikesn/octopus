@@ -54,7 +54,7 @@ public:
       * Stores the necessary information(low-/highVisRange and cursor time) to the QVariantMap
       * @param qvm The map in which the information needs to be stored.
       */
-    void save(QVariantMap *qvm);
+    void save(QVariantMap *qvm, qint64 begin, qint64 end);
 
     /**
       * Centers the visible range around 'timestamp' and propagates the changed range.

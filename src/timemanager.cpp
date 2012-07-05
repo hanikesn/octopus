@@ -78,13 +78,21 @@ void TimeManager::load(QVariantMap *qvm)
     emit currentTimeChanged(currentTime);
 }
 
-void TimeManager::save(QVariantMap *qvm)
-{
+void TimeManager::save(QVariantMap *qvm, qint64 begin, qint64 end)
+{    
     QVariantMap visibleArea;
-    visibleArea.insert("low", lowVisRange);
-    visibleArea.insert("high", highVisRange);
-    qvm->insert("visibleArea", visibleArea);
-    qvm->insert("cursorPos", currentTime);
+    if ((begin == -1) && (end == -1)) { // save whole project --> visible area stays the same
+        visibleArea.insert("low", lowVisRange);
+        visibleArea.insert("high", highVisRange);
+        qvm->insert("visibleArea", visibleArea);
+        qvm->insert("cursorPos", currentTime);
+    } else {
+        qint64 range = highVisRange - lowVisRange;
+        visibleArea.insert("low", 0);
+        visibleArea.insert("high", 0 + range);
+        qvm->insert("visibleArea", visibleArea);
+        qvm->insert("cursorPos", 0);
+    }
 }
 
 void TimeManager::center(qint64 timestamp)

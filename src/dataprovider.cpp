@@ -50,7 +50,7 @@ void DataProvider::closeDB()
     db.reset();
 }
 
-void DataProvider::save(QVariantMap *qvm)
+void DataProvider::save(QVariantMap *qvm, qint64 /*begin*/, qint64 /*end*/)
 {
     QVariantMap dataProvider;
     QVariantList seriesList;

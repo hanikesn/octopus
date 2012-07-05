@@ -365,15 +365,15 @@ void PresentationArea::onNewMax(qint64 /*max*/)
     unsavedChanges = true;
 }
 
-void PresentationArea::save(QVariantMap *qvm)
+void PresentationArea::save(QVariantMap *qvm, qint64 begin, qint64 end)
 {
-    timeManager->save(qvm);
+    timeManager->save(qvm, begin, end);
     // save tracks in array
     QVariantList trackList;
     foreach(Track *t, tracks){
         // each track stores its information in a map (a object in JSON)
         QVariantMap track;
-        t->save(&track);
+        t->save(&track, begin, end);
         trackList << track;
     }
     // add array of tracks to map

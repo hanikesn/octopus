@@ -40,11 +40,11 @@ void ViewManager::load(QVariantMap *qvm)
     timeManager->setUnsavedChanges(false);
 }
 
-void ViewManager::save(QVariantMap *qvm)
+void ViewManager::save(QVariantMap *qvm, qint64 begin, qint64 end)
 {
     // propagate save-call
-    presentationArea->save(qvm);
-    dataProvider->save(qvm);
+    presentationArea->save(qvm, begin, end);
+    dataProvider->save(qvm, begin, end);
 }
 
 void ViewManager::saveDB(QString dbname, qint64 begin, qint64 end)
