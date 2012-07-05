@@ -14,7 +14,7 @@
 #include "exporthandler.h"
 #include "viewmanager.h"
 
-const QString MainWindow::TITLE = "Octopus 0.1";
+const QString MainWindow::TITLE = "Octopus 1.0";
 
 MainWindow::MainWindow(StartScreen::Type type, QWidget *parent) :
     QMainWindow(parent),        
