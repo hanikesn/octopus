@@ -1,3 +1,8 @@
+/*
+  The data provider provides information on which data series are currently available.
+  It also provides access to the database.
+*/
+
 #ifndef DATAPROVIDER_H
 #define DATAPROVIDER_H
 

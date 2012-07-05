@@ -1,5 +1,9 @@
 /*
   All data series need to derive from this class.
+  Essentially, a data series provides access to its data.
+  It also contains metainformation on its data, such as the name of the
+device sending the data and the name of the data series itself, as well
+as information on the properties of its data.
 */
 
 #ifndef ABSTRACTDATASERIES_H

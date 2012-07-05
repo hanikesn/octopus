@@ -1,6 +1,6 @@
 /*
   The plot settings dialog shows the user the current settings for the plot and allows him to change them.
-  What parameters can be edited depends on the parameters passed to the dialog by the caller.
+  Which settings can be edited depends on the parameters passed to the dialog by the caller.
 */
 
 #ifndef PLOTSETTINGSDIALOG_H

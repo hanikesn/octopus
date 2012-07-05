@@ -1,5 +1,5 @@
 /*
-  A track consists of a number of buttons and a plot, containing one graph per data series to be shown in this track.
+  A track consists of a number of buttons and a plot, containing one graph per data series to be shown on that plot.
 */
 
 #ifndef Track_H
