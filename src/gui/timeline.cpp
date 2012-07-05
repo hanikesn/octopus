@@ -3,7 +3,6 @@
 #include <QPainter>
 #include <QPen>
 #include "timemanager.h"
-#include "measure.h"
 
 #include <QDebug>
 
@@ -30,7 +29,6 @@ TimeLine::TimeLine(TimeManager& timeManager, QWidget * parent):
 
 void TimeLine::paintEvent(QPaintEvent *)
 {
-    MEASURE("TIMELINE");
     QPainter painter(this);
 
     QRectF frame(QPointF(0,0), geometry().size());

@@ -11,7 +11,6 @@
 
 #include "dataprovider.h"
 #include "common.h"
-#include "measure.h"
 
 #include <cmath>
 #include <QDebug>
@@ -103,10 +102,7 @@ void Track::setPlotRange(qint64 begin, qint64 end)
     if (ui->plot->xAxis->range().lower != begin
             || ui->plot->xAxis->range().lower != end) {
         ui->plot->xAxis->setRange(begin, end);
-        {
-            MEASURE("plot");
-            ui->plot->replot();
-        }
+        ui->plot->replot();
     }
 }
 
