@@ -387,7 +387,7 @@ void PresentationArea::load(QVariantMap *qvm)
     QVariantList trackList = qvm->find("tracks").value().toList();
 
     foreach(QVariant track, trackList){
-        // add new track to presentationarea set it to the current size
+        // add new track to presentation area and set it to the current size
         t = add(QList<QString>());
         // 'load(QVariantMap)' needs a map --> put current track in a new map
         QVariantMap trackMap;
@@ -395,9 +395,27 @@ void PresentationArea::load(QVariantMap *qvm)
         t->load(&trackMap);
     }
     timeManager->load(qvm);
+
+    // no unsaved changes directly after loading
+    // need to reset the tracks, too, because the time manager's signals may
+    // have affected them.
+    setUnsavedChanges(false);
+}
+
+bool PresentationArea::hasUnsavedChanges()
+{
+    foreach (Track *t, tracks) {
+        unsavedChanges |= t->hasUnsavedChanges();
+    }
+
+    return unsavedChanges;
 }
 
 void PresentationArea::setUnsavedChanges(bool uc)
 {
     unsavedChanges = uc;
+
+    foreach (Track *t, tracks) {
+        t->setUnsavedChanges(uc);
+    }
 }

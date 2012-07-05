@@ -162,14 +162,14 @@ private:
     /**
       * Checks whether viewManager has unsaved changes and shows a dialog according to it.
       * In case there are unsaved changes the user has the chance to save/discard/abort.
-      * @return The dialogs result value.
+      * @return The dialog's result value.
       */
     int checkForUnsavedChanges();
 
     /**
       * Checks whether there is a running record.
       * In case there is running record the user has the chance to save/discard/abort.
-      * @return The dialogs result value.
+      * @return The dialog's result value.
       */
     int checkForActiveRecord();
 

@@ -1,6 +1,6 @@
-/**
- * Implementation of the visitor pattern.
- */
+/*
+  Implementation of the visitor pattern.
+*/
 
 #ifndef VISITOR_H
 #define VISITOR_H

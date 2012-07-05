@@ -1,3 +1,7 @@
+/*
+  All graphs need to derive from this class. A graph is responsible for the graphic representation of a data series on a plot.
+*/
+
 #ifndef GRAPH_H
 #define GRAPH_H
 

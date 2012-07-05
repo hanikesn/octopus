@@ -1,5 +1,5 @@
 /*
-  A track consists of a number of buttons and a plot, containing one graph per data series to be shown in this track.
+  A track consists of a number of buttons and a plot, containing one graph per data series to be shown on that plot.
 */
 
 #ifndef Track_H
@@ -54,6 +54,9 @@ public:
 
     int getOptPlotMarginLeft() const {return optPlotMarginLeft;}
 
+    bool hasUnsavedChanges() {return unsavedChanges;}
+    void setUnsavedChanges(bool uc);
+
 signals:
     /**
      * Emitted when the optimal plot margins for this track have changed.
@@ -88,6 +91,8 @@ private:
     QList<Graph*> graphs;
 
     PlotSettings::ScalingMode currentScalingMode;
+
+    bool unsavedChanges;
 
     /**
      * Convenience function for reuse in every constructor.

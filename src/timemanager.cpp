@@ -76,6 +76,9 @@ void TimeManager::load(QVariantMap *qvm)
 
     currentTime =  qvm->find("cursorPos").value().toLongLong();
     emit currentTimeChanged(currentTime);
+
+    // no unsaved changes directly after loading
+    unsavedChanges = false;
 }
 
 void TimeManager::save(QVariantMap *qvm, qint64 begin, qint64 end)

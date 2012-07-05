@@ -1,5 +1,5 @@
 /*
-A discrete graph shows discrete events as impulses with a label describing the event.
+  A discrete graph shows discrete events as impulses with a label describing the event.
 */
 
 #ifndef DISCRETEGRAPH_H

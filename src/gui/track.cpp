@@ -11,7 +11,6 @@
 
 #include "dataprovider.h"
 #include "common.h"
-#include "measure.h"
 
 #include <cmath>
 #include <QDebug>
@@ -24,7 +23,8 @@ Track::Track(const DataProvider &dataProvider, QWidget *parent) :
     ui(new Ui::Track()),
     optPlotMarginLeft(0),
     dataProvider(dataProvider),
-    currentScalingMode(PlotSettings::NOSCALING)
+    currentScalingMode(PlotSettings::NOSCALING),
+    unsavedChanges(false)
 {
     init();
 }
@@ -34,7 +34,8 @@ Track::Track(const DataProvider &dataProvider, const QString &fullDataSeriesName
     ui(new Ui::Track()),
     optPlotMarginLeft(0),
     dataProvider(dataProvider),
-    currentScalingMode(PlotSettings::NOSCALING)
+    currentScalingMode(PlotSettings::NOSCALING),
+    unsavedChanges(false)
 {
     init();
 
@@ -46,7 +47,8 @@ Track::Track(const DataProvider &dataProvider, const QStringList &fullDataSeries
     ui(new Ui::Track()),
     optPlotMarginLeft(0),
     dataProvider(dataProvider),
-    currentScalingMode(PlotSettings::NOSCALING)
+    currentScalingMode(PlotSettings::NOSCALING),
+    unsavedChanges(false)
 {
     init();
 
@@ -100,10 +102,7 @@ void Track::setPlotRange(qint64 begin, qint64 end)
     if (ui->plot->xAxis->range().lower != begin
             || ui->plot->xAxis->range().lower != end) {
         ui->plot->xAxis->setRange(begin, end);
-        {
-            MEASURE("plot");
-            ui->plot->replot();
-        }
+        ui->plot->replot();
     }
 }
 
@@ -166,6 +165,8 @@ void Track::update(PlotSettings settings)
     foreach (Graph *g, graphs) {
         g->update(settings);
     }
+
+    setUnsavedChanges(true);
 }
 
 void Track::addGraph(const DoubleSeries &s) {
@@ -189,11 +190,15 @@ void Track::addGraph(const DoubleSeries &s) {
         ui->plot->rescaleValueAxes();
     }
     ui->plot->replot();
+
+    setUnsavedChanges(true);
 }
 
 void Track::addGraph(const StringSeries &s) {
     graphs.append(new DiscreteGraph(ui->plot, s));
     ui->plot->replot();
+
+    setUnsavedChanges(true);
 }
 
 void Track::onDelete()
@@ -237,6 +242,8 @@ void Track::onSources()
             ui->plot->rescaleValueAxes();
         }
         ui->plot->replot();
+
+        setUnsavedChanges(true);
     }
 }
 
@@ -312,5 +319,12 @@ void Track::load(QVariantMap *qvm)
     }
 
     update(settings);
+
+    // no unsaved changes directly after loading
+    setUnsavedChanges(false);
 }
 
+void Track::setUnsavedChanges(bool uc)
+{
+    unsavedChanges = uc;
+}

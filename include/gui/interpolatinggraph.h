@@ -1,5 +1,5 @@
 /*
-An interpolating graph shows its data as dots connected by a line.
+  An interpolating graph shows its data as dots connected by a line.
 */
 
 #ifndef INTERPOLATINGGRAPH_H

@@ -34,10 +34,6 @@ void ViewManager::load(QVariantMap *qvm)
     // propagate load-call
     dataProvider->load(qvm);
     presentationArea->load(qvm);
-
-    // no changes directly after loading:
-    presentationArea->setUnsavedChanges(false);
-    timeManager->setUnsavedChanges(false);
 }
 
 void ViewManager::save(QVariantMap *qvm, qint64 begin, qint64 end)
