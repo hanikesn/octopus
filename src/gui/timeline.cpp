@@ -47,9 +47,12 @@ void TimeLine::paintEvent(QPaintEvent *)
 
     drawTicks(&painter);
 
-    QRect rect = QRect(5, geometry().height()/4, 50, 15);
+    QRect rect = QRect(QPoint(0, 0), QSize(offset, geometry().height()));
     QString text = timeRepresentation == MILLISECOND ? "ms" : "sec";
-    painter.drawText(rect, text);
+    QTextOption option;
+    option.setAlignment(Qt::AlignHCenter);
+    option.setAlignment(Qt::AlignCenter);
+    painter.drawText(rect, text, option);
 }
 
 void TimeLine::drawTicks(QPainter *painter)
