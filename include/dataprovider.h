@@ -71,6 +71,10 @@ public:
     void save(QVariantMap *qvm, qint64 , qint64 );
     void load(QVariantMap *qvm);
 
+    bool hasUnsavedChanges() {return unsavedChanges;}
+    void setUnsavedChanges(bool uc);
+    void discardChanges();
+
 signals:
     void unknownDataSeries();
 
@@ -96,6 +100,10 @@ private:
     qint64 currentMax;
 
     bool temporaryDB;
+
+    bool unsavedChanges;
+
+    QMap<QString, qint64> offsetsLastSaved;
 };
 
 #endif // DATAPROVIDER_H

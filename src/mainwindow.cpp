@@ -309,6 +309,8 @@ int MainWindow::checkForUnsavedChanges()
     if (result == QMessageBox::Save) {
         QString fileName = save(false);
         if (fileName.isEmpty()) return QMessageBox::Abort; // Dialog cancelled
+    } else if (result == QMessageBox::Discard) {
+        viewManager->discardChanges();
     }
     return result;
 }

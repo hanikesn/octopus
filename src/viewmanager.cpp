@@ -50,13 +50,19 @@ void ViewManager::saveDB(QString dbname, qint64 begin, qint64 end)
 
 bool ViewManager::hasUnsavedChanges()
 {
-    return presentationArea->hasUnsavedChanges() || timeManager->hasUnsavedChanges();
+    return dataProvider->hasUnsavedChanges() || presentationArea->hasUnsavedChanges() || timeManager->hasUnsavedChanges();
 }
 
 void ViewManager::setUnsavedChanges(bool uc)
 {
+    dataProvider->setUnsavedChanges(uc);
     presentationArea->setUnsavedChanges(uc);
     timeManager->setUnsavedChanges(uc);
+}
+
+void ViewManager::discardChanges()
+{
+    dataProvider->discardChanges();
 }
 
 bool ViewManager::isRecording()
