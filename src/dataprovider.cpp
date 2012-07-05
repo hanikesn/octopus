@@ -11,7 +11,8 @@
 DataProvider::DataProvider(QString const& file, QObject *parent) :
     QObject(parent),
     currentMax(0),
-    temporaryDB(file.isNull())
+    temporaryDB(file.isNull()),
+    unsavedChanges(false)
 {
     setObjectName("DataProvider");
 
@@ -83,6 +84,30 @@ void DataProvider::load(QVariantMap *qvm)
     emit newMax(max);
 }
 
+void DataProvider::setUnsavedChanges(bool uc)
+{
+    if (uc == false) {
+        foreach (QString dataSeriesName, offsetsLastSaved.keys()) {
+            offsetsLastSaved.insert(dataSeriesName, db->getOffset(dataSeriesName));
+        }
+    }
+
+    unsavedChanges = true;
+}
+
+void DataProvider::discardChanges()
+{
+    if (unsavedChanges) {
+        QMap<QString, qint64>::const_iterator i = offsetsLastSaved.constBegin();
+        while (i != offsetsLastSaved.constEnd()) {
+            db->changeOffset(i.key(), i.value());
+            i++;
+        }
+    }
+
+    setUnsavedChanges(false);
+}
+
 QList<QString> DataProvider::getDataSeriesList() const
 {
     return dataSeries.keys();
@@ -127,6 +152,8 @@ void DataProvider::changeOffset(const QString &dataSeriesName, qint64 offset)
         currentMax = maxAfter;
         emit newMax(maxAfter);
     }
+
+    setUnsavedChanges(true);
 }
 
 void DataProvider::onNewSender(EIDescriptionWrapper desc)
@@ -163,6 +190,7 @@ void DataProvider::addSeries(QString const& device_name, QString const& name, EI
     }
 
     dataSeries.insert(id, series);
+    offsetsLastSaved.insert(id, db->getOffset(id));
 }
 
 void DataProvider::onNewData(qint64 timestamp, QString fullDataSeriesName, Value value)

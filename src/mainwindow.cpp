@@ -1,11 +1,5 @@
 #include "mainwindow.h"
 
-#include <QDebug>
-#include <QFileDialog>
-#include <QMessageBox>
-#include <QSignalMapper>
-#include <QCloseEvent>
-
 #include "ui_mainwindow.h"
 #include "serializer.h"
 #include "parser.h"
@@ -13,6 +7,13 @@
 #include "timemanager.h"
 #include "exporthandler.h"
 #include "viewmanager.h"
+
+#include <QDebug>
+#include <QCloseEvent>
+#include <QFileDialog>
+#include <QMessageBox>
+#include <QSettings>
+#include <QSignalMapper>
 
 const QString MainWindow::TITLE = "Octopus 1.0";
 
@@ -80,6 +81,7 @@ void MainWindow::setUpButtonBars()
     playButton.setCheckable(true);
     playButton.setIcon(playButtonIcon);    
     playButton.setShortcut(QKeySequence(Qt::Key_Space));
+    playButton.setToolTip(tr("Play/Pause"));
 
     recButtonIcon.addPixmap(QPixmap(":/buttons/toolbar/icons/record_16.png"), QIcon::Normal,
                              QIcon::Off);
@@ -87,9 +89,11 @@ void MainWindow::setUpButtonBars()
                              QIcon::On);
     recButton.setCheckable(true);
     recButton.setIcon(recButtonIcon);
+    recButton.setToolTip(tr("Start/Stop Separate Recording"));
 
     followDataButton.setCheckable(true);
-    followDataButton.setText(tr("Pin to new data"));
+    followDataButton.setText(tr("Pin to New Data"));
+    followDataButton.setToolTip(tr("Pin the Cursor to the Newest Data"));
 
     // add buttons to the vertical layout in the toolbar
     layout.addWidget(&addTrackButton);
@@ -146,10 +150,16 @@ QString MainWindow::onLoad()
 {    
     if (checkForActiveRecord() == QMessageBox::Abort) return "";
     if (checkForUnsavedChanges() == QMessageBox::Abort) return "";
+
+    QSettings settings;
     QString fileName = QFileDialog::getOpenFileName(this, tr("Load File"),
-                                                    projectPath, "Octopus (*.oct)");
+                                                    settings.value("lastLoadDir", projectPath).toString(),
+                                                    "Octopus (*.oct)");
 
     if(fileName.isEmpty()) return fileName;
+
+    // remember the directory from which the project was loaded for future reference
+    settings.setValue("lastLoadDir", QFileInfo(fileName).dir().absolutePath());
 
     // open specified file:
     QFile file(fileName);
@@ -281,8 +291,10 @@ QString MainWindow::save(bool saveAs, qint64 begin, qint64 end)
         config.insert("dbfile", relative_dbname);
 
         if (writeProjectSettings(config, projectPath, begin, end)) { // in case save was successfull ...
-            viewManager->setUnsavedChanges(false);
-        }        
+            if (!saveAs) {
+                viewManager->setUnsavedChanges(false);
+            }
+        }
     } else { // save range
         QString subProjectPath = fileName;        
         viewManager->saveDB(dbname, begin, end);
@@ -309,6 +321,8 @@ int MainWindow::checkForUnsavedChanges()
     if (result == QMessageBox::Save) {
         QString fileName = save(false);
         if (fileName.isEmpty()) return QMessageBox::Abort; // Dialog cancelled
+    } else if (result == QMessageBox::Discard) {
+        viewManager->discardChanges();
     }
     return result;
 }
@@ -333,9 +347,14 @@ QString MainWindow::getSaveFileName(bool saveAs)
     QString caption = saveAs ? tr("Save as") : tr("Save");
 
     if (projectPath.isEmpty() || saveAs) { // determine new filename
+        QSettings settings;
         QString fileName = QFileDialog::getSaveFileName(this, caption,
-                                                        projectPath, "Octopus (*.oct)");
+                                                        settings.value("lastSaveDir", projectPath).toString(),
+                                                        "Octopus (*.oct)");
         if (fileName.isEmpty()) return fileName;
+
+        // remember the directory to which the project was saved for future reference
+        settings.setValue("lastSaveDir", QFileInfo(fileName).dir().absolutePath());
 
         if (fileName.endsWith(".oct") == false)
             fileName += ".oct";

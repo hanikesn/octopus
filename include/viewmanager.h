@@ -52,6 +52,7 @@ public:
 
     bool hasUnsavedChanges();
     void setUnsavedChanges(bool uc);
+    void discardChanges();
 
     bool isRecording();
 
