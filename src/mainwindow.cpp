@@ -152,9 +152,13 @@ QString MainWindow::onLoad()
     if (checkForUnsavedChanges() == QMessageBox::Abort) return "";
 
     QSettings settings;
-    QString fileName = QFileDialog::getOpenFileName(this, tr("Load File"),
+    // non-native dialog
+    QString fileName = QFileDialog::getOpenFileName(this,
+                                                    tr("Load File"),
                                                     settings.value("lastLoadDir", projectPath).toString(),
-                                                    "Octopus (*.oct)");
+                                                    "Octopus (*.oct)",
+                                                    0,
+                                                    QFileDialog::DontUseNativeDialog);
 
     if(fileName.isEmpty()) return fileName;
 
@@ -347,18 +351,15 @@ QString MainWindow::getSaveFileName(bool saveAs)
 
     if (projectPath.isEmpty() || saveAs) { // determine new filename
         QSettings settings;
-        QFileDialog *d = new QFileDialog;
-        d->setWindowTitle(caption);
-        d->setDirectory(settings.value("lastSaveDir", projectPath).toString());
-        d->setAcceptMode(QFileDialog::AcceptSave);
-        d->setFilter("Octopus (*.oct)");
-        QString fileName;
-        if (d->exec()) {
-            fileName = d->selectedFiles()[0];
-        }
-//        QString fileName = QFileDialog::getSaveFileName(this, caption,
-//                                                        settings.value("lastSaveDir", projectPath).toString(),
-//                                                        "Octopus (*.oct)");
+
+        // non-native dialog
+        // the native dialog may freeze while the view is updated in the background
+        QString fileName = QFileDialog::getSaveFileName(this,
+                                                        caption,
+                                                        settings.value("lastSaveDir", projectPath).toString(),
+                                                        "Octopus (*.oct)",
+                                                        0,
+                                                        QFileDialog::DontUseNativeDialog);
         if (fileName.isEmpty()) return fileName;
 
         // remember the directory to which the project was saved for future reference
