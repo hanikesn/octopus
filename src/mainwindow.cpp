@@ -347,9 +347,18 @@ QString MainWindow::getSaveFileName(bool saveAs)
 
     if (projectPath.isEmpty() || saveAs) { // determine new filename
         QSettings settings;
-        QString fileName = QFileDialog::getSaveFileName(this, caption,
-                                                        settings.value("lastSaveDir", projectPath).toString(),
-                                                        "Octopus (*.oct)");
+        QFileDialog *d = new QFileDialog;
+        d->setWindowTitle(caption);
+        d->setDirectory(settings.value("lastSaveDir", projectPath).toString());
+        d->setAcceptMode(QFileDialog::AcceptSave);
+        d->setFilter("Octopus (*.oct)");
+        QString fileName;
+        if (d->exec()) {
+            fileName = d->selectedFiles()[0];
+        }
+//        QString fileName = QFileDialog::getSaveFileName(this, caption,
+//                                                        settings.value("lastSaveDir", projectPath).toString(),
+//                                                        "Octopus (*.oct)");
         if (fileName.isEmpty()) return fileName;
 
         // remember the directory to which the project was saved for future reference
