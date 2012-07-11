@@ -15,6 +15,11 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
 include(EnableCXX11)
 include(EnableWarnings)
 
+option(ENABLE_DOCUMENTATION "Build documentation")
+if(ENABLE_DOCUMENTATION)
+  add_subdirectory(doc)
+endif()
+
 check_CXX11()
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX11_FLAG}")
 enable_Warnings()
