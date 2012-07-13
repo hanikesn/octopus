@@ -15,7 +15,7 @@ class ExportHandler;
 class PresentationArea;
 class TimeManager;
 class Recorder;
-class TimeScrollbar;
+class TimeScrollBar;
 class MainWindow;
 
 class ViewManager : public QWidget, public Serializable
@@ -106,7 +106,7 @@ private:
     TimeManager *timeManager;
     Recorder *recorder;
 
-    TimeScrollbar *scrollBar;
+    TimeScrollBar *scrollBar;
 
     /**
       * Creates the view which includes: ScrollBar, PresentationArea, TimeManager and the Recorder

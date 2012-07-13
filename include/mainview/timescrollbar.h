@@ -5,11 +5,11 @@
 
 class TimeManager;
 
-class TimeScrollbar : public QScrollBar
+class TimeScrollBar : public QScrollBar
 {
     Q_OBJECT
 public:
-    explicit TimeScrollbar(QWidget *parent = 0);
+    explicit TimeScrollBar(QWidget *parent = 0);
 
 signals:
     void rangeChanged(qint64 begin, qint64 end);

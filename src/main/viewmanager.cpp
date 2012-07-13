@@ -114,7 +114,7 @@ void ViewManager::createViewAndModel(QString dbfile)
 
 void ViewManager::setUpView()
 {
-    scrollBar = new TimeScrollbar(this);
+    scrollBar = new TimeScrollBar(this);
     scrollBar->setOrientation(Qt::Horizontal);
 
     if (networkAdapter)
