@@ -45,82 +45,84 @@ find_package(Sqlite3 REQUIRED)
 include_directories(${SQLITE3_INCLUDE_DIR})
 
 set(Octopus_SOURCES
-  src/abstractdataseries.cpp
-  src/CSVExporter.cpp
-  src/databaseadapter.cpp
-  src/dataprovider.cpp
-  src/doubleseries.cpp
-  src/plotsettings.cpp
-  src/exporterfactory.cpp
-  src/recorder.cpp
-  src/gui/cursor.cpp
-  src/gui/discretegraph.cpp
-  src/gui/interpolatinggraph.cpp
-  src/gui/plotsettingsdialog.cpp
-  src/gui/presentationarea.cpp
-  src/gui/qcustomplot.cpp
-  src/gui/selection.cpp
-  src/gui/sourcedialog.cpp
-  src/gui/timeline.cpp
-  src/gui/timescrollbar.cpp
-  src/gui/track.cpp
-  src/mainwindow.cpp
-  src/networkadapter.cpp
-  src/sqlite.cpp
-  src/stringseries.cpp
-  src/value.cpp
-  src/timemanager.cpp
-  src/gui/startscreen.cpp
-  src/exporthandler.cpp
-  src/viewmanager.cpp
-  src/gui/recordselection.cpp
+  src/common/plotsettings.cpp
+  src/common/value.cpp
+  src/datamodel/abstractdataseries.cpp
+  src/datamodel/databaseadapter.cpp
+  src/datamodel/dataprovider.cpp
+  src/datamodel/doubleseries.cpp
+  src/datamodel/sqlite.cpp
+  src/datamodel/stringseries.cpp
+  src/dialogs/plotsettingsdialog.cpp
+  src/dialogs/sourcedialog.cpp
+  src/export/CSVExporter.cpp
+  src/export/exporterfactory.cpp
+  src/export/exporthandler.cpp
+  src/record/recorder.cpp
+  src/main/main.cpp
+  src/main/mainwindow.cpp
+  src/main/startscreen.cpp
+  src/main/viewmanager.cpp
+  src/mainview/cursor.cpp
+  src/mainview/presentationarea.cpp
+  src/mainview/recordselection.cpp
+  src/mainview/selection.cpp
+  src/mainview/timeline.cpp
+  src/mainview/timescrollbar.cpp
+  src/mainview/tracks/discretegraph.cpp
+  src/mainview/tracks/interpolatinggraph.cpp
+  src/mainview/tracks/qcustomplot.cpp
+  src/mainview/tracks/track.cpp
+  src/network/networkadapter.cpp
+  src/time/timemanager.cpp
 )
 
 set(Octopus_HEADERS
-  include/abstractdataseries.h
-  include/common.h
-  include/CSVExporter.h
-  include/exporter.h
-  include/DBUtil.h
-  include/recorder.h
-  include/exporterfactory.h
-  include/databaseadapter.h
-  include/dataprovider.h
-  include/doubleseries.h
-  include/plotsettings.h
-  include/gui/cursor.h
-  include/gui/discretegraph.h
-  include/gui/graph.h
-  include/gui/interpolatinggraph.h
-  include/gui/plotsettingsdialog.h
-  include/gui/presentationarea.h
-  include/gui/qcustomplot.h
-  include/gui/selection.h
-  include/gui/sourcedialog.h
-  include/gui/timeline.h
-  include/gui/timescrollbar.h
-  include/gui/track.h
-  include/mainwindow.h
-  include/measure.h
-  include/networkadapter.h
-  include/serializable.h
-  include/sqlite.h
-  include/stringseries.h
-  include/value.h
-  include/visitor.h
-  include/timemanager.h
-  include/gui/startscreen.h
-  include/exporthandler.h
-  include/viewmanager.h
-  include/gui/recordselection.h
+  include/common/common.h
+  include/common/measure.h
+  include/common/metadata.h
+  include/common/plotsettings.h
+  include/common/serializable.h
+  include/common/value.h
+  include/common/visitor.h
+  include/datamodel/abstractdataseries.h
+  include/datamodel/databaseadapter.h
+  include/datamodel/dataprovider.h
+  include/datamodel/DBUtil.h
+  include/datamodel/doubleseries.h
+  include/datamodel/sqlite.h
+  include/datamodel/stringseries.h
+  include/dialogs/plotsettingsdialog.h
+  include/dialogs/sourcedialog.h
+  include/export/exporthandler.h
+  include/export/CSVExporter.h
+  include/export/exporter.h
+  include/export/exporterfactory.h
+  include/main/mainwindow.h
+  include/main/startscreen.h
+  include/main/viewmanager.h
+  include/mainview/cursor.h
+  include/mainview/presentationarea.h
+  include/mainview/recordselection.h
+  include/mainview/selection.h
+  include/mainview/timeline.h
+  include/mainview/timescrollbar.h
+  include/mainview/tracks/discretegraph.h
+  include/mainview/tracks/graph.h
+  include/mainview/tracks/interpolatinggraph.h
+  include/mainview/tracks/qcustomplot.h
+  include/mainview/tracks/track.h
+  include/network/networkadapter.h
+  include/record/recorder.h
+  include/time/timemanager.h
 )
 
 set(Octopus_FORMS
   ui/mainwindow.ui
   ui/plotsettingsdialog.ui
   ui/sourcedialog.ui
-  ui/track.ui
   ui/startscreen.ui
+  ui/track.ui
 )
 set(Octopus_RESOURCES
   rc/resources.qrc
@@ -134,7 +136,7 @@ qt4_add_resources(Octopus_RESOURCES_RCC ${Octopus_RESOURCES})
 include(${QT_USE_FILE})
 add_definitions(${QT_DEFINITIONS})
 
-add_executable(Octopus "src/main.cpp" ${Octopus_SOURCES} ${Octopus_HEADERS}
+add_executable(Octopus ${Octopus_SOURCES} ${Octopus_HEADERS}
     ${Octopus_HEADERS_MOC}
     ${Octopus_FORMS_HEADERS} 
     ${Octopus_RESOURCES_RCC})
