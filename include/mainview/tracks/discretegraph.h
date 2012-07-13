@@ -1,7 +1,3 @@
-/*
-  A discrete graph shows discrete events as impulses with a label describing the event.
-*/
-
 #ifndef DISCRETEGRAPH_H
 #define DISCRETEGRAPH_H
 
@@ -14,6 +10,9 @@ class QCPItemAnchor;
 class QCPItemText;
 class QCPItemTracer;
 
+/*
+  A discrete graph shows discrete events as impulses with a label describing the event.
+*/
 class DiscreteGraph : public Graph
 {
     Q_OBJECT

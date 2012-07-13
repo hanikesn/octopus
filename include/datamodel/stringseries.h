@@ -1,7 +1,3 @@
-/*
-  A string series contains data of type STRING.
-*/
-
 #ifndef STRINGSERIES_H
 #define STRINGSERIES_H
 
@@ -9,6 +5,9 @@
 
 #include <QObject>
 
+/*
+  A string series contains data of type STRING.
+*/
 class StringSeries : public AbstractDataSeries
 {
     Q_OBJECT

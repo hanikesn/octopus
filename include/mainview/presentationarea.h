@@ -1,7 +1,3 @@
-/*
-Contains the visible items of Octopus (Tracks, Cursors, Selections).
-Handles MouseInput on mentioned objects.
-*/
 #ifndef PRESENTATIONAREA_H
 #define PRESENTATIONAREA_H
 
@@ -33,6 +29,10 @@ public:
     virtual void wheelEvent(QWheelEvent* event) = 0;
 };
 
+/*
+Contains the visible items of Octopus (Tracks, Cursors, Selections).
+Handles MouseInput on mentioned objects.
+*/
 class PresentationArea : public QScrollArea, public Serializable
 {
     Q_OBJECT

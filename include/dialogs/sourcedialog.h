@@ -1,12 +1,3 @@
-/*
-  The source dialog shows all data series currently available from the data provider
-and allows the user to choose from them.
-  Optionally, the caller can pass it a list of data series to be preselected.
-  The dialog also offers a checkbox for choosing whether all selected data series should
-be shown in one track or each in their own track. Whether or not this choice is made
-available to the user depends on the parameters passed to the dialog by its caller.
-*/
-
 #ifndef SOURCEDIALOG_H
 #define SOURCEDIALOG_H
 
@@ -18,6 +9,14 @@ namespace Ui {
     class SourceDialog;
 }
 
+/*
+  The source dialog shows all data series currently available from the data provider
+and allows the user to choose from them.
+  Optionally, the caller can pass it a list of data series to be preselected.
+  The dialog also offers a checkbox for choosing whether all selected data series should
+be shown in one track or each in their own track. Whether or not this choice is made
+available to the user depends on the parameters passed to the dialog by its caller.
+*/
 class SourceDialog : public QDialog
 {
     Q_OBJECT

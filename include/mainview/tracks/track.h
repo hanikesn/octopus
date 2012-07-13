@@ -1,7 +1,3 @@
-/*
-  A track consists of a number of buttons and a plot, containing one graph per data series to be shown on that plot.
-*/
-
 #ifndef Track_H
 #define Track_H
 
@@ -19,6 +15,9 @@ namespace Ui {
     class Track;
 }
 
+/*
+  A track consists of a number of buttons and a plot, containing one graph per data series to be shown on that plot.
+*/
 class Track : public QWidget, public DataSeriesVisitor, public Serializable
 {
     Q_OBJECT

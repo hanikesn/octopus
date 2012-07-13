@@ -1,7 +1,3 @@
-/*
-  An interpolating graph shows its data as dots connected by a line.
-*/
-
 #ifndef INTERPOLATINGGRAPH_H
 #define INTERPOLATINGGRAPH_H
 
@@ -12,6 +8,9 @@ class DoubleSeries;
 class QCPGraph;
 class QCustomPlot;
 
+/*
+  An interpolating graph shows its data as dots connected by a line.
+*/
 class InterpolatingGraph : public Graph
 {
     Q_OBJECT

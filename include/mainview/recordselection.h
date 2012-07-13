@@ -1,7 +1,3 @@
-/*
-This selections marks the area which is currently being recorded.
-It disappears whenever the recording is discarded or saved.
-*/
 #ifndef RECORDSELECTION_H
 #define RECORDSELECTION_H
 
@@ -10,6 +6,10 @@ It disappears whenever the recording is discarded or saved.
 
 class TimeManager;
 
+/*
+This selection marks the area which is currently being recorded.
+It disappears whenever the recording is discarded or saved.
+*/
 class RecordSelection : public QWidget
 {
     Q_OBJECT

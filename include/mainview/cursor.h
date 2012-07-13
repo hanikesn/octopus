@@ -1,6 +1,3 @@
-/*
-A vertical line that moves and shows the current position in the tracks.
-*/
 #ifndef CURSOR_H
 #define CURSOR_H
 
@@ -10,6 +7,9 @@ A vertical line that moves and shows the current position in the tracks.
 class TimeManager;
 class PresentationItem;
 
+/*
+A vertical line that moves and shows the current position in the tracks.
+*/
 class Cursor : public QWidget
 {
     Q_OBJECT

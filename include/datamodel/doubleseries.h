@@ -1,7 +1,3 @@
-/*
-  A double series contains data of type DOUBLE.
-*/
-
 #ifndef DOUBLESERIES_H
 #define DOUBLESERIES_H
 
@@ -9,6 +5,9 @@
 
 #include <QObject>
 
+/*
+  A double series contains data of type DOUBLE.
+*/
 class DoubleSeries : public AbstractDataSeries
 {
     Q_OBJECT

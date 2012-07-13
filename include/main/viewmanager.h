@@ -1,7 +1,3 @@
-/*
-Contains all objects which are necessary to display data on the screen (PresentationArea and data
-model)
-*/
 #ifndef VIEWMANAGER_H
 #define VIEWMANAGER_H
 
@@ -18,6 +14,10 @@ class Recorder;
 class TimeScrollBar;
 class MainWindow;
 
+/*
+Contains all objects which are necessary to display data on the screen
+(PresentationArea and data model).
+*/
 class ViewManager : public QWidget, public Serializable
 {
     Q_OBJECT

@@ -1,7 +1,3 @@
-/*
-  A plot settings object can store settings for a plot, such as scaling mode and scale type, as well as individual settings for specific data series.
-*/
-
 #ifndef PLOTSETTINGS_H
 #define PLOTSETTINGS_H
 
@@ -11,6 +7,11 @@
 #include <QString>
 #include <QStringList>
 
+/*
+  A plot settings object can store settings for a plot, such as
+  scaling mode and scale type, as well as individual settings for
+  specific data series.
+*/
 class PlotSettings
 {
 public:

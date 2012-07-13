@@ -1,6 +1,3 @@
-/*
-Splash/Start-Screen at the begin.
-*/
 #ifndef STARTSCREEN_H
 #define STARTSCREEN_H
 
@@ -10,6 +7,9 @@ namespace Ui {
 
 #include <QDialog>
 
+/*
+Splash/Start-Screen at the beginning.
+*/
 class StartScreen : public QDialog
 {
     Q_OBJECT

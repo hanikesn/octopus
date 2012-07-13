@@ -1,8 +1,3 @@
-/*
-Global instance for time management. Holds the visible range and current time.
-Contains a timer which is used to move the cursors on every timeout (in case 'playing' or
-'following' is enabled)
-*/
 #ifndef TIMEMANAGER_H
 #define TIMEMANAGER_H
 
@@ -15,6 +10,11 @@ class TimeLine;
 class QScrollBar;
 class QTimer;
 
+/*
+Global instance for time management. Holds the visible range and current time.
+Contains a timer which is used to move the cursors on every timeout (in case 'playing' or
+'following' is enabled)
+*/
 class TimeManager : public QObject, public Serializable
 {
     Q_OBJECT

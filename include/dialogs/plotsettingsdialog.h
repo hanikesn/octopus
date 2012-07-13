@@ -1,8 +1,3 @@
-/*
-  The plot settings dialog shows the user the current settings for the plot and allows him to change them.
-  Which settings can be edited depends on the parameters passed to the dialog by the caller.
-*/
-
 #ifndef PLOTSETTINGSDIALOG_H
 #define PLOTSETTINGSDIALOG_H
 
@@ -15,6 +10,10 @@ namespace Ui {
 class PlotSettingsDialog;
 }
 
+/*
+  The plot settings dialog shows the user the current settings for the plot and allows him to change them.
+  Which settings can be edited depends on the parameters passed to the dialog by the caller.
+*/
 class PlotSettingsDialog : public QDialog
 {
     Q_OBJECT

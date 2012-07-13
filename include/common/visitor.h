@@ -1,13 +1,12 @@
-/*
-  Implementation of the visitor pattern.
-*/
-
 #ifndef VISITOR_H
 #define VISITOR_H
 
 class DoubleSeries;
 class StringSeries;
 
+/*
+  Implementation of the visitor pattern.
+*/
 class DataSeriesVisitor {
 public:
     virtual ~DataSeriesVisitor() {}

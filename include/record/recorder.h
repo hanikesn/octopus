@@ -1,7 +1,3 @@
-/*
-Saves start- and endtimestamps from the record and emits corresponding signals (to MainWindow and
-PresentationArea).
-*/
 #ifndef RECORDER_H
 #define RECORDER_H
 
@@ -11,6 +7,8 @@ class TimeManager;
 
 /**
  * @brief This class handles the separate recording
+    It saves the start and end timestamps of the recording and emits
+    the corresponding signals.
  */
 class Recorder : public QObject
 {
